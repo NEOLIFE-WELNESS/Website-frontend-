@@ -476,47 +476,89 @@ function showTab(tab, btn){
     `;
   }
 
-  if(tab === "address"){
-    content.innerHTML = `
-      <h1>My Address</h1>
 
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>Full Address</label>
-          <textarea id="address" placeholder="House no, street, area"></textarea>
-        </div>
+if(tab === "address"){
+  content.innerHTML = `
+    <h1>My Address</h1>
 
-        <div class="form-group">
-          <label>Pincode</label>
-          <input type="text" id="pincode" placeholder="Enter pincode">
-        </div>
+    <div class="form-grid">
 
-        <div class="form-group">
-          <label>City</label>
-          <input type="text" id="addressCity" placeholder="Enter city">
-        </div>
-
-        <div class="form-group">
-          <label>State</label>
-          <input type="text" id="state" placeholder="Enter state">
-        </div>
+      <div class="form-group">
+        <label>House No</label>
+        <input type="text" id="houseNo" placeholder="Enter house / flat number">
       </div>
 
-      <button class="save-btn" onclick="saveAddress()">Save Address</button>
-    `;
+      <div class="form-group">
+        <label>Street</label>
+        <input type="text" id="street" placeholder="Enter street">
+      </div>
 
-    document.getElementById("address").value = localStorage.getItem("address") || "";
-    document.getElementById("pincode").value = localStorage.getItem("pincode") || "";
-    document.getElementById("addressCity").value = localStorage.getItem("addressCity") || "";
-    document.getElementById("state").value = localStorage.getItem("state") || "";
-  }
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="addressCity" placeholder="Enter city">
+      </div>
+
+      <div class="form-group">
+        <label>State</label>
+        <input type="text" id="state" placeholder="Enter state">
+      </div>
+
+      <div class="form-group">
+        <label>Pincode</label>
+        <input type="text" id="pincode" placeholder="Enter pincode">
+      </div>
+
+      <div class="form-group">
+        <label>Landmark</label>
+        <input type="text" id="landmark" placeholder="Enter landmark">
+      </div>
+
+      <div class="form-group">
+        <label>Address Type</label>
+        <select id="addressType">
+          <option value="">Select Address Type</option>
+          <option value="HOME">Home</option>
+          <option value="WORK">Work</option>
+          <option value="OFFICE">Office</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default Address</label>
+        <select id="isDefault">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button class="save-btn" onclick="saveAddress()">Save Address</button>
+  `;
+
+  document.getElementById("houseNo").value = localStorage.getItem("houseNo") || "";
+  document.getElementById("street").value = localStorage.getItem("street") || "";
+  document.getElementById("addressCity").value = localStorage.getItem("addressCity") || "";
+  document.getElementById("state").value = localStorage.getItem("state") || "";
+  document.getElementById("pincode").value = localStorage.getItem("pincode") || "";
+  document.getElementById("landmark").value = localStorage.getItem("landmark") || "";
+  document.getElementById("addressType").value = localStorage.getItem("addressType") || "";
+  document.getElementById("isDefault").value = localStorage.getItem("isDefault") || "false";
 }
 
+
+ 
+}
 function saveAddress(){
-  localStorage.setItem("address", document.getElementById("address").value);
-  localStorage.setItem("pincode", document.getElementById("pincode").value);
+  localStorage.setItem("houseNo", document.getElementById("houseNo").value);
+  localStorage.setItem("street", document.getElementById("street").value);
   localStorage.setItem("addressCity", document.getElementById("addressCity").value);
   localStorage.setItem("state", document.getElementById("state").value);
+  localStorage.setItem("pincode", document.getElementById("pincode").value);
+  localStorage.setItem("landmark", document.getElementById("landmark").value);
+  localStorage.setItem("addressType", document.getElementById("addressType").value);
+  localStorage.setItem("isDefault", document.getElementById("isDefault").value);
 
   alert("Address saved successfully");
 }
