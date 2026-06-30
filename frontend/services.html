@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Services - Neolife Wellness Center</title>
+  <link rel="icon" type="image/jpeg" href="../assets/prod_logo.png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<header class="glass-header">
+
+  <div class="logo-container">
+    <img src="../assets/prod_logo.png" alt="Neolife Logo" class="logo-img">
+
+    <div class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Wellness Center</span>
+    </div>
+  </div>
+
+  <input type="checkbox" id="menu-toggle">
+
+  <label for="menu-toggle" class="hamburger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>
+
+  <nav class="side-menu">
+    <a href="homepage.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Therapies</a>
+    <a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a>
+    <a href="blog.html">Blogs</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+</header>
+
+<section class="services-hero">
+  <div>
+    <h1>Our Wellness Therapies</h1>
+    <p>Ayurveda • Panchakarma • Acupuncture • Yoga • Naturopathy</p>
+  </div>
+</section>
+
+<section class="services-page">
+  <h2 class="section-title">Healing Services We Offer</h2>
+
+  <div class="therapy-grid">
+
+    <div class="therapy-card">
+      <img src="../assets/ayurvedapancha.png" alt="Ayurveda & Panchakarma">
+      <div class="therapy-content">
+        <h3>🌿 Ayurveda & Panchakarma</h3>
+        <p>Traditional Ayurvedic consultation and Panchakarma therapies for detoxification, rejuvenation and holistic wellness.</p>
+        <ul>
+          <li>Ayurvedic Consultation</li>
+          <li>Panchakarma Therapies</li>
+          <li>Detoxification</li>
+          <li>Lifestyle Guidance</li>
+        </ul>
+        <p><strong>Duration:</strong> As per treatment plan</p>
+        <button class="btn" onclick="openTherapy('ayurveda')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/accupunture.png" alt="Acupuncture">
+      <div class="therapy-content">
+        <h3>📍 Acupuncture</h3>
+        <p>Supportive therapy for pain management, stress relief and restoring body balance.</p>
+        <ul>
+          <li>Pain relief support</li>
+          <li>Stress management</li>
+          <li>Body energy balance</li>
+        </ul>
+        <p><strong>Duration:</strong> 30–45 minutes</p>
+        <button class="btn" onclick="openTherapy('acupuncture')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/yoga.jpg" alt="Yoga">
+      <div class="therapy-content">
+        <h3>🧘 Yoga</h3>
+        <p>Yoga sessions for flexibility, strength, breathing, stress relief and mental peace.</p>
+        <ul>
+          <li>Improves flexibility</li>
+          <li>Supports mental calmness</li>
+          <li>Better breathing and balance</li>
+        </ul>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openTherapy('yoga')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/naturopathy.png" alt="Naturopathy">
+      <div class="therapy-content">
+        <h3>🌱 Naturopathy</h3>
+        <p>Natural healing through diet, lifestyle, hydrotherapy, yoga and drug-free wellness practices.</p>
+        <ul>
+          <li>Natural lifestyle care</li>
+          <li>Diet and wellness planning</li>
+          <li>Hydrotherapy and natural support</li>
+        </ul>
+        <p><strong>Duration:</strong> 30–45 minutes</p>
+        <button class="btn" onclick="openTherapy('naturopathy')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/beauty.png" alt="Beauty & Cosmetic Therapy">
+      <div class="therapy-content">
+        <h3>💄 Beauty & Cosmetic Therapy</h3>
+        <p>Beauty and cosmetic treatments for enhancing natural appearance and confidence.</p>
+        <ul>
+          <li>Eyebrow Microblading</li>
+          <li>Black Lip Treatment</li>
+          <li>Skin Care & Facial Therapy</li>
+          <li>Beauty Consultation</li>
+        </ul>
+        <p><strong>Duration:</strong> 30–60 minutes</p>
+        <button class="btn" onclick="openTherapy('beauty')">Learn More</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="therapyModal" class="modal">
+  <div class="modal-box">
+    <span class="close" onclick="closeTherapy()">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalText"></p>
+    <a href="consultation.html" class="btn">Book Consultation</a>
+  </div>
+</div>
+
+<a class="whatsapp" href="https://wa.me/919481489866" target="_blank">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<script>
+const therapyDetails = {
+  ayurveda: {
+title: "🌿 Ayurveda & Panchakarma",
+
+text: `Ayurveda is one of the world's oldest holistic systems of medicine, originating in India over 5,000 years ago. The word Ayurveda means "Science of Life." Rather than simply treating diseases, Ayurveda focuses on identifying and correcting the root cause of illness by maintaining harmony between the body, mind and spirit.
+
+According to Ayurveda, good health is achieved when the three doshas—Vata, Pitta and Kapha—are in perfect balance. Every individual has a unique body constitution, and treatments are personalized based on this constitution, lifestyle, diet and health condition.
+
+Panchakarma is the most powerful detoxification and rejuvenation therapy in Ayurveda. It consists of specialized cleansing procedures that eliminate accumulated toxins (Ama) from the body, purify the blood, improve metabolism and restore the body's natural healing capacity. Panchakarma not only helps in treating chronic diseases but also prevents future illnesses by strengthening immunity and rejuvenating every organ system.
+
+Our experienced Ayurvedic physicians carefully evaluate your health condition before preparing a customized treatment plan. Depending on your needs, therapies such as Abhyanga, Swedana, Vamana, Virechana, Basti, Nasya and other Panchakarma procedures may be recommended.
+
+Benefits of Ayurveda & Panchakarma:
+• Detoxifies the entire body naturally
+• Improves digestion and metabolism
+• Enhances immunity and vitality
+• Reduces stress, anxiety and mental fatigue
+• Improves sleep quality
+• Helps manage joint pain, arthritis and muscle stiffness
+• Supports weight management
+• Promotes healthy skin and hair
+• Improves hormonal balance
+• Increases overall energy and wellness
+
+Suitable For:
+✔ Lifestyle disorders
+✔ Chronic pain
+✔ Diabetes management
+✔ Digestive disorders
+✔ Arthritis and joint pain
+✔ Stress and anxiety
+✔ Skin disorders
+✔ Respiratory conditions
+✔ Preventive healthcare and rejuvenation
+
+Treatment Duration:
+The duration varies according to the individual's health condition and treatment plan. It may range from a few days to several weeks depending on the therapy prescribed.
+
+Experience authentic Ayurvedic healing under the guidance of our experienced doctors at Neolife Wellness Center and begin your journey toward natural, long-lasting wellness.`
+},
+  acupuncture: {
+title: "📍 Acupuncture",
+
+text: `Acupuncture is a safe and effective traditional healing therapy that originated in China over 2,500 years ago and is now widely practiced around the world. It involves the gentle insertion of very fine, sterile needles into specific points on the body known as acupuncture points. These points lie along energy pathways called meridians, which help regulate the body's natural functions.
+
+According to traditional medicine, illness and pain occur when the body's natural energy flow (Qi) becomes blocked or imbalanced. Acupuncture helps restore this balance, stimulates the body's natural healing mechanisms, improves blood circulation, relaxes muscles and promotes overall physical and mental well-being.
+
+Modern research suggests that acupuncture stimulates the nervous system, releases natural pain-relieving chemicals such as endorphins, reduces inflammation and enhances the body's ability to heal itself naturally without surgery or long-term medication.
+
+At Neolife Wellness Center, our qualified practitioners carefully assess each patient's health condition before designing a personalized acupuncture treatment plan. Every session is performed using sterile, disposable needles in a safe, hygienic and comfortable environment.
+
+Benefits of Acupuncture:
+• Relieves acute and chronic pain naturally
+• Reduces neck, back and joint pain
+• Helps manage arthritis and frozen shoulder
+• Relieves migraines and chronic headaches
+• Reduces stress, anxiety and depression
+• Improves sleep quality
+• Enhances blood circulation
+• Relaxes muscles and reduces stiffness
+• Supports faster recovery from injuries
+• Improves overall physical and mental well-being
+
+Suitable For:
+✔ Neck pain
+✔ Back pain
+✔ Knee pain
+✔ Arthritis
+✔ Sciatica
+✔ Frozen shoulder
+✔ Tennis elbow
+✔ Migraine and headaches
+✔ Stress and anxiety
+✔ Muscle stiffness
+✔ Sports injuries
+✔ Lifestyle disorders
+
+Treatment Procedure:
+During the session, the therapist gently inserts ultra-fine sterile needles into selected acupuncture points based on your health condition. The needles remain in place for approximately 20–30 minutes while you relax comfortably. The procedure is generally painless, and many patients experience a feeling of deep relaxation during the treatment.
+
+Treatment Duration:
+Each acupuncture session usually lasts between 30 and 45 minutes. The number of sessions required depends on the patient's condition, severity of symptoms and treatment goals as determined by the practitioner.
+
+Experience safe, natural and holistic healing through professional acupuncture therapy at Neolife Wellness Center and take a step toward a healthier, pain-free and balanced life.`
+},
+  yoga: {
+title: "🧘 Yoga Therapy",
+
+text: `Yoga is an ancient Indian science of holistic health that has been practiced for over 5,000 years. The word "Yoga" means "union"—the harmonious connection of the body, mind and spirit. It is much more than physical exercise; it is a complete lifestyle that promotes physical fitness, mental clarity, emotional balance and spiritual well-being.
+
+Yoga combines physical postures (Asanas), breathing techniques (Pranayama), meditation (Dhyana) and relaxation practices to improve overall health. Regular yoga practice enhances flexibility, strengthens muscles, improves posture, increases lung capacity and helps maintain a healthy body and peaceful mind.
+
+In today's fast-paced lifestyle, stress, anxiety, poor posture, obesity and lifestyle-related disorders have become increasingly common. Yoga provides a natural and holistic solution by improving the body's internal balance, boosting immunity and enhancing the body's natural healing ability.
+
+At Neolife Wellness Center, our certified Yoga therapists design personalized yoga sessions based on each individual's age, health condition, physical ability and wellness goals. Whether you are a beginner or an experienced practitioner, every session is carefully guided to ensure maximum benefit and safety.
+
+Benefits of Yoga:
+• Improves flexibility and body posture
+• Increases muscle strength and endurance
+• Enhances breathing capacity and lung function
+• Reduces stress, anxiety and depression
+• Improves concentration and mental clarity
+• Promotes better sleep quality
+• Supports weight management
+• Improves digestion and metabolism
+• Enhances blood circulation
+• Boosts immunity and overall vitality
+• Improves balance, coordination and mobility
+• Promotes inner peace and emotional well-being
+
+Suitable For:
+✔ Stress and anxiety management
+✔ Back pain and neck pain
+✔ Obesity and weight management
+✔ Diabetes management
+✔ Hypertension
+✔ Arthritis and joint stiffness
+✔ Respiratory disorders
+✔ Poor posture
+✔ Senior citizens
+✔ Office professionals
+✔ Children and students
+✔ General fitness and preventive healthcare
+
+Yoga Therapy Includes:
+• Yoga Asanas (Physical Postures)
+• Pranayama (Breathing Exercises)
+• Meditation
+• Relaxation Techniques
+• Stretching Exercises
+• Lifestyle and Wellness Guidance
+• Mindfulness Practices
+
+Treatment Duration:
+Each Yoga session generally lasts between 45 and 60 minutes. The frequency and duration of sessions are personalized according to the individual's health condition and wellness objectives.
+
+Experience the transformative power of Yoga at Neolife Wellness Center. Our guided yoga therapy helps you build a healthier body, a calmer mind and a balanced lifestyle through natural and holistic practices.`
+},
+  naturopathy: {
+title: "🌱 Naturopathy",
+
+text: `Naturopathy is a holistic system of natural healing that believes the human body has an inherent ability to heal itself when provided with the right environment and care. It emphasizes treating the root cause of illness rather than merely managing symptoms. By combining natural therapies, proper nutrition, healthy lifestyle practices and preventive care, Naturopathy helps restore balance between the body, mind and nature.
+
+The fundamental principle of Naturopathy is that nature itself is the greatest healer. Instead of relying primarily on medications, it uses natural methods such as hydrotherapy, mud therapy, diet therapy, massage therapy, yoga, fasting and lifestyle modifications to stimulate the body's own healing mechanisms.
+
+In today's world, unhealthy eating habits, stress, sedentary lifestyles and environmental factors contribute to many chronic diseases. Naturopathy aims to correct these underlying causes by improving digestion, detoxifying the body, enhancing circulation and strengthening immunity. It promotes long-term wellness through healthy living rather than temporary relief.
+
+At Neolife Wellness Center, our qualified Naturopathy practitioners carefully assess each individual's health condition, lifestyle and wellness goals before preparing a personalized treatment plan. Every therapy is designed to promote natural healing, prevent disease and improve overall quality of life.
+
+Benefits of Naturopathy:
+• Supports the body's natural healing process
+• Improves digestion and metabolism
+• Detoxifies the body naturally
+• Strengthens the immune system
+• Reduces stress, anxiety and mental fatigue
+• Improves blood circulation
+• Promotes healthy weight management
+• Enhances energy levels and vitality
+• Improves sleep quality
+• Relieves muscle and joint discomfort
+• Encourages healthy lifestyle habits
+• Promotes overall physical, mental and emotional well-being
+
+Suitable For:
+✔ Lifestyle disorders
+✔ Obesity and weight management
+✔ Diabetes management
+✔ Hypertension
+✔ Digestive disorders
+✔ Stress and anxiety
+✔ Chronic fatigue
+✔ Joint and muscle pain
+✔ Skin disorders
+✔ Respiratory problems
+✔ Preventive healthcare
+✔ General wellness and rejuvenation
+
+Naturopathy Therapies Include:
+• Diet Therapy
+• Hydrotherapy
+• Mud Therapy
+• Massage Therapy
+• Yoga and Breathing Exercises
+• Fasting Therapy (where appropriate)
+• Lifestyle Modification and Wellness Counselling
+
+Treatment Duration:
+Each naturopathy session generally lasts between 30 and 60 minutes. The number of sessions and treatment duration vary depending on the individual's health condition, therapeutic goals and personalized treatment plan recommended by the practitioner.
+
+Experience the healing power of nature at Neolife Wellness Center. Our personalized naturopathy therapies help restore balance, improve overall health and support long-term wellness through safe, natural and holistic methods.`
+},
+ beauty: {
+title: "💄 Beauty & Cosmetic Therapy",
+
+text: `Beauty & Cosmetic Therapy focuses on enhancing natural beauty, improving skin health and boosting self-confidence through safe, non-surgical and personalized treatments. Rather than simply improving appearance, these therapies help maintain healthy skin, restore facial features and promote overall well-being.
+
+At Neolife Wellness Center, we combine modern cosmetic techniques with holistic wellness principles to provide treatments that are safe, effective and tailored to each individual's skin type and aesthetic goals. Every treatment begins with a detailed consultation to understand your concerns and recommend the most suitable therapy.
+
+Our beauty treatments are performed by trained professionals using high-quality products and hygienic procedures, ensuring both safety and comfort throughout every session.
+
+Benefits of Beauty & Cosmetic Therapy:
+• Enhances natural facial features
+• Improves skin health and texture
+• Reduces pigmentation and uneven skin tone
+• Restores youthful appearance
+• Improves self-confidence and self-esteem
+• Provides healthy, glowing skin
+• Supports long-term skin maintenance
+• Safe, personalized and non-surgical treatments
+• Promotes healthy skin through professional care
+• Helps achieve a refreshed and rejuvenated appearance
+
+Suitable For:
+✔ Uneven skin tone
+✔ Dull and tired-looking skin
+✔ Dry or oily skin
+✔ Hyperpigmentation
+✔ Dark lips
+✔ Sparse or uneven eyebrows
+✔ Facial skin rejuvenation
+✔ General beauty enhancement
+✔ Bridal and special occasion preparation
+✔ Regular skin maintenance
+
+Beauty & Cosmetic Services Include:
+• Eyebrow Microblading
+• Black Lip Treatment
+• Skin Care Consultation
+• Facial Therapy
+• Skin Rejuvenation Treatments
+• Personalized Beauty Consultation
+
+Treatment Procedure:
+Every treatment begins with a professional skin and beauty assessment. Based on your skin condition and desired results, our specialists recommend the most appropriate therapy. Treatments are performed using hygienic techniques and quality products while ensuring maximum comfort and safety.
+
+Treatment Duration:
+The duration of each beauty therapy session typically ranges from 30 to 60 minutes, depending on the treatment selected and the individual's specific requirements.
+
+At Neolife Wellness Center, we believe true beauty comes from healthy skin and personalized care. Our Beauty & Cosmetic Therapy services are designed to help you look your best, feel confident and maintain naturally beautiful, healthy skin with safe and professional treatments.`
+}
+};
+
+function openTherapy(type) {
+  document.getElementById("modalTitle").innerText = therapyDetails[type].title;
+  document.getElementById("modalText").innerText = therapyDetails[type].text;
+  document.getElementById("therapyModal").style.display = "flex";
+}
+
+function closeTherapy() {
+  document.getElementById("therapyModal").style.display = "none";
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("therapyModal");
+  if (event.target === modal) {
+    closeTherapy();
+  }
+};
+</script>
+
+</body>
+</html>

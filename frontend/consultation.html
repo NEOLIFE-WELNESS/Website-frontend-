@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Consultation - Neolife Wellness Center</title>
+  <link rel="icon" type="image/jpeg" href="../assets/prod_logo.png">
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body{
+      padding-top:0;
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#6f876f;
+    }
+
+    .consultation-page{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:40px 20px;
+    }
+
+    .consult-box{
+      width:75%;
+      max-width:850px;
+      background:rgba(255,255,255,0.18);
+      border:1px solid rgba(255,255,255,0.35);
+      border-radius:28px;
+      padding:55px 35px;
+      text-align:center;
+      box-shadow:0 25px 60px rgba(0,0,0,0.18);
+      backdrop-filter:blur(12px);
+    }
+
+    .consult-box h1{
+      color:white;
+      font-size:42px;
+      margin-bottom:15px;
+      font-weight:800;
+    }
+
+    .consult-subtitle{
+      color:#ffd75a;
+      font-size:16px;
+      font-weight:700;
+      margin-bottom:30px;
+    }
+
+    .booking-choice{
+      display:flex;
+      justify-content:center;
+      gap:15px;
+      flex-wrap:wrap;
+    }
+
+    .choice-btn{
+      border:none;
+      padding:15px 32px;
+      border-radius:50px;
+      background:linear-gradient(135deg,#ffd76a,#d4a017);
+      color:#0f5c20;
+      font-weight:800;
+      cursor:pointer;
+      min-width:180px;
+      transition:0.3s ease;
+      font-size:14px;
+    }
+
+    .choice-btn.green{
+      background:linear-gradient(135deg,#1b5e20,#2e7d32);
+      color:white;
+    }
+
+    .choice-btn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 10px 25px rgba(0,0,0,0.25);
+    }
+
+    @media(max-width:768px){
+      .consult-box{
+        width:95%;
+        padding:40px 20px;
+      }
+
+      .consult-box h1{
+        font-size:32px;
+      }
+
+      .choice-btn{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="consultation-page">
+  <div class="consult-box">
+
+    <h1>Neolife Booking</h1>
+
+    <p class="consult-subtitle">
+      Choose Appointment or Online Consultation
+    </p>
+
+    <div class="booking-choice">
+
+      <button type="button" class="choice-btn" onclick="openAppointmentBooking()">
+        Book Appointment
+      </button>
+
+      <button type="button" class="choice-btn green" onclick="openOnlineConsultation()">
+        Online Consultation
+      </button>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function openAppointmentBooking(){
+    window.location.href = "https://cloud.pappyjoe.com/widget/index/UjhcZVAxCz0DYgNjAzUIYw%3D%3D";
+  }
+
+  function openOnlineConsultation(){
+    window.location.href = "https://cloud.pappyjoe.com/widget/index/UjhcZVAxCz0DYgNjAzUIYw%3D%3D";
+  }
+</script>
+
+</body>
+</html>

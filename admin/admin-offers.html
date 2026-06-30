@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Offers - Neolife Admin</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:white;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.back-btn{
+    background:white;
+    color:#1b5e20;
+    padding:10px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.container{
+    width:92%;
+    margin:30px auto;
+}
+
+.form-box{
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom:30px;
+}
+
+.form-box h2{
+    color:#1b5e20;
+    margin-bottom:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+label{
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+input,select,textarea{
+    padding:11px;
+    border:1px solid #ccc;
+    border-radius:7px;
+    font-size:15px;
+}
+
+textarea{
+    resize:none;
+    min-height:90px;
+}
+
+.save-btn{
+    margin-top:20px;
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:13px 25px;
+    border-radius:7px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.save-btn:hover{
+    background:#124116;
+}
+
+.preview-box{
+    margin-top:25px;
+    background:linear-gradient(135deg,#0b3d1d,#237a32);
+    color:white;
+    padding:28px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:25px;
+}
+
+.preview-box img{
+    width:260px;
+    height:130px;
+    object-fit:cover;
+    border-radius:12px;
+    display:none;
+}
+
+.offer-label{
+    background:#e4a900;
+    color:#10391e;
+    padding:8px 16px;
+    border-radius:25px;
+    font-weight:bold;
+    display:inline-block;
+    margin-bottom:12px;
+}
+
+.preview-box h2{
+    font-size:32px;
+    margin-bottom:10px;
+}
+
+.preview-code{
+    background:white;
+    color:#10391e;
+    padding:9px 14px;
+    border-radius:8px;
+    display:inline-block;
+    margin-top:12px;
+}
+
+.discount-circle{
+    background:white;
+    color:#10391e;
+    width:150px;
+    height:110px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    font-weight:bold;
+    text-align:center;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+th{
+    background:#2e7d32;
+    color:white;
+    padding:14px;
+}
+
+td{
+    padding:13px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+.banner-thumb{
+    width:100px;
+    height:55px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+.status{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.active{
+    background:#d4edda;
+    color:#155724;
+}
+
+.inactive{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.edit-btn,.delete-btn{
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+    margin:2px;
+}
+
+.edit-btn{
+    background:#1976d2;
+}
+
+.delete-btn{
+    background:#d32f2f;
+}
+
+@media(max-width:800px){
+    .preview-box{
+        flex-direction:column;
+        text-align:center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Manage Offers & Banners</h1>
+    <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+</header>
+
+<div class="container">
+
+<div class="form-box">
+    <h2>Add Homepage Offer Banner</h2>
+
+    <div class="form-grid">
+
+        <div class="form-group">
+            <label>Offer Label</label>
+            <input type="text" id="offerLabel" placeholder="Festival Offer">
+        </div>
+
+        <div class="form-group">
+            <label>Offer Title</label>
+            <input type="text" id="offerTitle" placeholder="Diwali Wellness Offer">
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea id="offerDescription" placeholder="Flat 30% OFF on selected Ayurvedic products."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Discount Text</label>
+            <input type="text" id="offerDiscount" placeholder="30% OFF">
+        </div>
+
+        <div class="form-group">
+            <label>Coupon Code</label>
+            <input type="text" id="offerCode" placeholder="DIWALI30">
+        </div>
+
+        <div class="form-group">
+            <label>Button Text</label>
+            <input type="text" id="buttonText" placeholder="Shop Now">
+        </div>
+
+        <div class="form-group">
+            <label>Button Link</label>
+            <input type="text" id="buttonLink" placeholder="products.html">
+        </div>
+
+        <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="startDate">
+        </div>
+
+        <div class="form-group">
+            <label>End Date</label>
+            <input type="date" id="endDate">
+        </div>
+
+        <div class="form-group">
+            <label>Priority</label>
+            <input type="number" id="priority" placeholder="1">
+        </div>
+
+        <div class="form-group">
+            <label>Status</label>
+            <select id="offerStatus">
+                <option>Active</option>
+                <option>Inactive</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Upload Banner Image</label>
+            <input type="file" id="bannerImage" accept="image/*" onchange="previewImage(event)">
+        </div>
+
+    </div>
+
+    <button class="save-btn" onclick="saveOffer()">Save Offer Banner</button>
+
+    <div class="preview-box">
+        <div>
+            <span class="offer-label" id="previewLabel">Festival Offer</span>
+            <h2 id="previewTitle">Diwali Wellness Offer</h2>
+            <p id="previewDescription">Flat 30% OFF on selected Ayurvedic products.</p>
+            <div class="preview-code">Use Code: <strong id="previewCode">DIWALI30</strong></div>
+        </div>
+
+        <img id="previewImg">
+
+        <div class="discount-circle" id="previewDiscount">30% OFF</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Banner</th>
+            <th>Title</th>
+            <th>Discount</th>
+            <th>Coupon</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody id="offerTable">
+        <tr>
+            <td><img src="../assets/offer-banner.jpg" class="banner-thumb" alt="Offer"></td>
+            <td>Diwali Wellness Offer</td>
+            <td>30% OFF</td>
+            <td>DIWALI30</td>
+            <td>01-11-2026</td>
+            <td>10-11-2026</td>
+            <td>1</td>
+            <td><span class="status active">Active</span></td>
+            <td>
+                <button class="edit-btn" onclick="editOffer(this)">Edit</button>
+                <button class="delete-btn" onclick="deleteOffer(this)">Delete</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+</div>
+
+<script>
+let uploadedImage = "";
+
+function previewImage(event){
+    const file = event.target.files[0];
+
+    if(file){
+        uploadedImage = URL.createObjectURL(file);
+
+        const img = document.getElementById("previewImg");
+        img.src = uploadedImage;
+        img.style.display = "block";
+    }
+}
+
+function saveOffer(){
+    const label = document.getElementById("offerLabel").value || "Festival Offer";
+    const title = document.getElementById("offerTitle").value || "Diwali Wellness Offer";
+    const desc = document.getElementById("offerDescription").value || "Flat 30% OFF on selected Ayurvedic products.";
+    const discount = document.getElementById("offerDiscount").value || "30% OFF";
+    const code = document.getElementById("offerCode").value || "DIWALI30";
+    const start = document.getElementById("startDate").value || "-";
+    const end = document.getElementById("endDate").value || "-";
+    const priority = document.getElementById("priority").value || "1";
+    const status = document.getElementById("offerStatus").value;
+
+    document.getElementById("previewLabel").innerText = label;
+    document.getElementById("previewTitle").innerText = title;
+    document.getElementById("previewDescription").innerText = desc;
+    document.getElementById("previewDiscount").innerText = discount;
+    document.getElementById("previewCode").innerText = code;
+
+    const imageSrc = uploadedImage || "../assets/offer-banner.jpg";
+
+    const row = `
+        <tr>
+            <td><img src="${imageSrc}" class="banner-thumb" alt="Offer"></td>
+            <td>${title}</td>
+            <td>${discount}</td>
+            <td>${code}</td>
+            <td>${start}</td>
+            <td>${end}</td>
+            <td>${priority}</td>
+            <td><span class="status ${status.toLowerCase()}">${status}</span></td>
+            <td>
+                <button class="edit-btn" onclick="editOffer(this)">Edit</button>
+                <button class="delete-btn" onclick="deleteOffer(this)">Delete</button>
+            </td>
+        </tr>
+    `;
+
+    document.getElementById("offerTable").innerHTML += row;
+
+    alert("Offer banner saved successfully.");
+}
+
+function editOffer(button){
+    const cells = button.closest("tr").querySelectorAll("td");
+
+    document.getElementById("offerTitle").value = cells[1].innerText;
+    document.getElementById("offerDiscount").value = cells[2].innerText;
+    document.getElementById("offerCode").value = cells[3].innerText;
+    document.getElementById("priority").value = cells[6].innerText;
+
+    alert("Offer loaded for editing.");
+}
+
+function deleteOffer(button){
+    if(confirm("Delete this offer banner?")){
+        button.closest("tr").remove();
+    }
+}
+</script>
+
+</body>
+</html>

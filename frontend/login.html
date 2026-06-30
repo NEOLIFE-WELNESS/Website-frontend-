@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Login - Neolife Wellness Center</title>
+  <link rel="icon" type="image/jpeg" href="../assets/prod_logo.png">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:"Segoe UI", Arial, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        linear-gradient(rgba(15,61,29,0.70), rgba(15,61,29,0.70)),
+        url("../assets/center1.jpg");
+      background-size:cover;
+      background-position:center;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .login-card{
+      width:100%;
+      max-width:460px;
+      background:rgba(255,255,255,0.16);
+      backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,0.28);
+      border-radius:32px;
+      padding:42px;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 20px 50px rgba(0,0,0,0.35);
+      animation:fadeUp 0.8s ease;
+    }
+
+    .login-card::before{
+      content:"";
+      position:absolute;
+      width:300px;
+      height:300px;
+      background:rgba(255,215,106,0.14);
+      border-radius:50%;
+      top:-130px;
+      right:-130px;
+    }
+
+    .login-card::after{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      background:rgba(255,255,255,0.08);
+      border-radius:50%;
+      bottom:-100px;
+      left:-100px;
+    }
+
+    .login-content{
+      position:relative;
+      z-index:2;
+    }
+
+    .auth-logo{
+      width:95px;
+      height:95px;
+      object-fit:cover;
+      border-radius:50%;
+      border:4px solid #ffd76a;
+      background:white;
+      display:block;
+      margin:0 auto 18px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.25);
+    }
+
+    .login-card h2{
+      color:white;
+      text-align:center;
+      font-size:34px;
+      margin-bottom:8px;
+      letter-spacing:0.5px;
+    }
+
+    .login-card p{
+      color:#f2f2f2;
+      text-align:center;
+      font-size:15px;
+      margin-bottom:24px;
+    }
+
+    .social-title{
+      color:#fff;
+      font-size:14px;
+      margin-bottom:12px;
+      font-weight:600;
+    }
+
+    .social-buttons{
+      display:flex;
+      gap:12px;
+      margin-bottom:22px;
+    }
+
+    .social-btn{
+      flex:1;
+      height:46px;
+      border:none;
+      border-radius:14px;
+      background:rgba(255,255,255,0.92);
+      cursor:pointer;
+      font-weight:700;
+      color:#333;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:0.3s;
+    }
+
+    .social-btn:hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 22px rgba(0,0,0,0.18);
+    }
+
+    .social-btn span{
+      font-size:19px;
+      font-weight:900;
+    }
+
+    .google span{
+      color:#db4437;
+    }
+
+    .facebook span{
+      color:#1877f2;
+    }
+
+    .divider{
+      text-align:center;
+      color:#f4f4f4;
+      font-size:13px;
+      margin:22px 0;
+      position:relative;
+    }
+
+    .divider::before,
+    .divider::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      width:42%;
+      height:1px;
+      background:rgba(255,255,255,0.35);
+    }
+
+    .divider::before{
+      left:0;
+    }
+
+    .divider::after{
+      right:0;
+    }
+
+    .tabs{
+      display:flex;
+      background:rgba(255,255,255,0.18);
+      border-radius:14px;
+      padding:5px;
+      margin-bottom:18px;
+    }
+
+    .tab-btn{
+      flex:1;
+      border:none;
+      padding:11px;
+      border-radius:11px;
+      background:transparent;
+      color:white;
+      font-weight:800;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .tab-btn.active{
+      background:linear-gradient(135deg,#ffd76a,#d4a017);
+      color:#1b5e20;
+      box-shadow:0 6px 16px rgba(212,160,23,0.35);
+    }
+
+    .form-group{
+      margin-bottom:15px;
+    }
+
+    .form-group input{
+      width:100%;
+      height:52px;
+      border:none;
+      border-radius:16px;
+      background:rgba(255,255,255,0.92);
+      padding:0 18px;
+      font-size:15px;
+      outline:none;
+      color:#1f2937;
+    }
+
+    .form-group input:focus{
+      box-shadow:0 0 0 3px rgba(255,215,106,0.38);
+      background:white;
+    }
+
+    .login-options{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:22px;
+      font-size:13px;
+      color:#f5f5f5;
+    }
+
+    .login-options a{
+      color:#ffd76a;
+      text-decoration:none;
+      font-weight:700;
+    }
+
+    .login-btn{
+      width:100%;
+      height:52px;
+      border:none;
+      border-radius:50px;
+      background:linear-gradient(135deg,#ffd76a,#d4a017);
+      color:#1b5e20;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      transition:0.3s;
+      box-shadow:0 8px 22px rgba(212,160,23,0.38);
+    }
+
+    .login-btn:hover{
+      transform:translateY(-4px);
+      box-shadow:0 15px 30px rgba(212,160,23,0.48);
+    }
+
+    .otp-btn{
+      background:linear-gradient(135deg,#1b5e20,#2e7d32);
+      color:white;
+      margin-top:10px;
+      box-shadow:0 8px 22px rgba(27,94,32,0.35);
+    }
+
+    .otp-btn:hover{
+      box-shadow:0 15px 30px rgba(27,94,32,0.45);
+    }
+
+    .signup{
+      text-align:center;
+      margin-top:22px;
+      font-size:14px;
+      color:white;
+    }
+
+    .signup a{
+      color:#ffd76a;
+      font-weight:800;
+      text-decoration:none;
+    }
+
+    .hide{
+      display:none;
+    }
+
+    @keyframes fadeUp{
+      from{
+        opacity:0;
+        transform:translateY(35px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    @media(max-width:480px){
+      .login-card{
+        padding:32px 24px;
+        border-radius:26px;
+      }
+
+      .login-card h2{
+        font-size:28px;
+      }
+
+      .social-buttons{
+        flex-direction:column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-card">
+  <div class="login-content">
+
+    <img src="../assets/prod_logo.png" class="auth-logo" alt="Neolife Logo">
+
+    <h2>Patient Login</h2>
+    <p>Welcome back! Login to book your consultation</p>
+
+    <div class="social-title">Continue with:</div>
+
+    <div class="social-buttons">
+      <button class="social-btn google" onclick="googleLogin()">
+        <span>G</span> Google
+      </button>
+
+      <button class="social-btn facebook" onclick="facebookLogin()">
+        <span>f</span> Facebook
+      </button>
+    </div>
+
+    <div class="divider">or</div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="emailTab" onclick="showEmailLogin()">
+        Email Login
+      </button>
+
+      <button class="tab-btn" id="phoneTab" onclick="showPhoneLogin()">
+        Phone OTP
+      </button>
+    </div>
+
+    <form id="emailLoginForm" onsubmit="return emailLogin()">
+
+      <div class="form-group">
+        <input type="email" id="email" placeholder="Email Address">
+      </div>
+
+      <div class="form-group">
+        <input type="password" id="password" placeholder="Password">
+      </div>
+
+      <div class="login-options">
+        <label>
+          <input type="checkbox"> Remember
+        </label>
+
+        <a href="forgot-password.html">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="login-btn">
+        Login
+      </button>
+
+    </form>
+
+    <form id="phoneLoginForm" class="hide" onsubmit="return verifyOTP()">
+
+      <div class="form-group">
+        <input 
+          type="tel" 
+          id="phone" 
+          placeholder="Enter Phone Number"
+          maxlength="10"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      </div>
+
+      <button type="button" class="login-btn otp-btn" onclick="sendOTP()">
+        Send OTP
+      </button>
+
+      <div class="form-group" style="margin-top:15px;">
+        <input 
+          type="text" 
+          id="otp" 
+          placeholder="Enter OTP"
+          maxlength="6"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      </div>
+
+      <button type="submit" class="login-btn">
+        Verify OTP & Login
+      </button>
+
+    </form>
+
+    <div class="signup">
+      New patient? <a href="register.html">Create account</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showEmailLogin(){
+  document.getElementById("emailLoginForm").classList.remove("hide");
+  document.getElementById("phoneLoginForm").classList.add("hide");
+
+  document.getElementById("emailTab").classList.add("active");
+  document.getElementById("phoneTab").classList.remove("active");
+}
+
+function showPhoneLogin(){
+  document.getElementById("phoneLoginForm").classList.remove("hide");
+  document.getElementById("emailLoginForm").classList.add("hide");
+
+  document.getElementById("phoneTab").classList.add("active");
+  document.getElementById("emailTab").classList.remove("active");
+}
+
+async function emailLogin() {
+    event.preventDefault();
+
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    // Admin Login
+    if (email === "admin@neolife.com" && password === "admin123") {
+
+        localStorage.setItem("role", "ADMIN");
+        localStorage.setItem("isLoggedIn", "true");
+
+        window.location.href = "../admin/admin-dashboard.html";
+        return false;
+    }
+ if (email === "nisha@neolife.com" && password === "nisha123") {
+
+        localStorage.setItem("role", "USER");
+        localStorage.setItem("isLoggedIn", "true");
+
+        window.location.href = "homepage.html";
+        return false;
+    }
+    // User Login
+    // try {
+
+    //     const response = await fetch("http://localhost:8085/api/auth/login", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json"
+    //         },
+    //         body: JSON.stringify({
+    //             email: email,
+    //             password: password
+    //         })
+    //     });
+
+    //     const data = await response.json();
+
+    //     if (response.ok) {
+
+    //         localStorage.setItem("role", "USER");
+    //         localStorage.setItem("isLoggedIn", "true");
+
+    //         window.location.href = "profile.html";
+    //     }
+    //     else {
+    //         alert(data.message || "Invalid Credentials");
+    //     }
+
+    // }
+    // catch (error) {
+    //     alert("Unable to connect to server");
+    // }
+
+    return false;
+}
+
+async function sendOTP(){
+  const phone = document.getElementById("phone").value.trim();
+
+  if(phone.length !== 10){
+    alert("Please enter valid 10 digit phone number");
+    return;
+  }
+
+  try{
+    const response = await fetch("http://localhost:8085/api/auth/send-otp", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        phone:phone
+      })
+    });
+
+    const data = await response.json();
+
+    if(response.ok){
+      alert("OTP sent successfully");
+    }else{
+      alert(data.message || "Failed to send OTP");
+    }
+
+  }catch(error){
+    alert("Unable to connect to server");
+  }
+}
+
+async function verifyOTP(){
+  const phone = document.getElementById("phone").value.trim();
+  const otp = document.getElementById("otp").value.trim();
+
+  if(phone.length !== 10){
+    alert("Please enter valid phone number");
+    return false;
+  }
+
+  if(otp.length !== 6){
+    alert("Please enter valid 6 digit OTP");
+    return false;
+  }
+
+  try{
+    const response = await fetch("http://localhost:8085/api/auth/verify-otp", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        phone:phone,
+        otp:otp
+      })
+    });
+
+    const data = await response.json();
+
+    if(response.ok){
+      alert("OTP verified successfully");
+      window.location.href = "consultation.html";
+    }else{
+      alert(data.message || "Invalid OTP");
+    }
+
+  }catch(error){
+    alert("Unable to connect to server");
+  }
+
+  return false;
+}
+
+function googleLogin(){
+  alert("Google Login will be connected using Google OAuth later");
+}
+
+function facebookLogin(){
+  alert("Facebook Login can be connected later if required");
+}
+// testing login with local storage
+function loginUser(){
+
+let user = JSON.parse(localStorage.getItem("user"));
+
+let email = document.getElementById("email").value;
+let password = document.getElementById("password").value;
+
+if(user && user.email===email && user.password===password){
+
+alert("Login Successful");
+
+window.location.href="profile.html";
+
+}
+else{
+alert("Invalid Email or Password");
+}
+
+return false;
+}
+</script>
+
+</body>
+</html>

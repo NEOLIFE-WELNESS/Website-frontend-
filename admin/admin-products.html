@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Products - Neolife Admin</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:white;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    font-size:24px;
+}
+
+.back-btn{
+    text-decoration:none;
+    color:#1b5e20;
+    background:white;
+    padding:10px 15px;
+    border-radius:6px;
+    font-weight:bold;
+}
+
+.container{
+    width:95%;
+    margin:30px auto;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.add-btn{
+    background:#1b5e20;
+    color:white;
+    padding:12px 18px;
+    text-decoration:none;
+    border-radius:6px;
+}
+
+.add-btn:hover{
+    background:#2e7d32;
+}
+
+.product-tools{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    display:flex;
+    gap:15px;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.search-box{
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px 15px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.view-all-btn{
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.view-all-btn:hover{
+    background:#2e7d32;
+}
+
+.product-count{
+    color:#1b5e20;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    min-width:1200px;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+table th{
+    background:#2e7d32;
+    color:white;
+    padding:14px;
+    font-size:14px;
+}
+
+table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+    font-size:14px;
+}
+
+.product-img{
+    width:60px;
+    height:60px;
+    object-fit:cover;
+    border-radius:6px;
+}
+
+.edit-btn{
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+    margin-right:5px;
+}
+
+.delete-btn{
+    background:#d32f2f;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.edit-btn:hover{
+    background:#1565c0;
+}
+
+.delete-btn:hover{
+    background:#c62828;
+}
+
+.no-result{
+    display:none;
+    text-align:center;
+    color:#d32f2f;
+    font-weight:bold;
+    margin-top:18px;
+}
+
+@media(max-width:768px){
+    header{
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .top-bar{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    .product-tools{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .product-count{
+        text-align:center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Manage Products</h1>
+    <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+</header>
+
+<div class="container">
+
+    <div class="top-bar">
+        <h2>Product List</h2>
+
+        <a href="add-product.html" class="add-btn">
+            + Add Product
+        </a>
+    </div>
+
+    <div class="product-tools">
+
+        <div class="search-box">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by product no, name, stock, manufacturer, indication..."
+                onkeyup="searchProducts()">
+        </div>
+
+        <button class="view-all-btn" onclick="viewAllProducts()">
+            View All Products
+        </button>
+
+        <div class="product-count">
+            Total Products : <span id="productCount">2</span>
+        </div>
+
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product No</th>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Net Qty</th>
+                    <th>Total Stock</th>
+                    <th>Manufacturer</th>
+                    <th>Indication</th>
+                    <th>Expiry Date</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="productTable">
+
+                <tr>
+                    <td>1</td>
+                    <td>PROD001</td>
+                    <td>
+                        <img src="../assets/products/hair-oil.jpg" class="product-img" alt="Hair Oil">
+                    </td>
+                    <td>Neolife Special Hair Oil</td>
+                    <td>200 ml</td>
+                    <td>100</td>
+                    <td>Neolife Wellness Center</td>
+                    <td>Hair Growth & Hair Fall</td>
+                    <td>12/2028</td>
+                    <td>₹299</td>
+                    <td>
+                        <a href="edit-product.html?id=1">
+                            <button class="edit-btn">Edit</button>
+                        </a>
+                        <button class="delete-btn">Delete</button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>2</td>
+                    <td>PROD002</td>
+                    <td>
+                        <img src="../assets/products/joints-care.jpg" class="product-img" alt="Joints Care">
+                    </td>
+                    <td>Neolife Joints Care Choorna</td>
+                    <td>100 gm</td>
+                    <td>75</td>
+                    <td>Neolife Wellness Center</td>
+                    <td>Joint Pain Support</td>
+                    <td>10/2028</td>
+                    <td>₹250</td>
+                    <td>
+                        <a href="edit-product.html?id=2">
+                            <button class="edit-btn">Edit</button>
+                        </a>
+                        <button class="delete-btn">Delete</button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+    </div>
+
+    <p class="no-result" id="noResult">
+        No products found.
+    </p>
+
+</div>
+
+<script>
+function searchProducts(){
+    let searchValue = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#productTable tr");
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        let rowText = row.innerText.toLowerCase();
+
+        if(rowText.includes(searchValue)){
+            row.style.display = "";
+            visibleCount++;
+        }else{
+            row.style.display = "none";
+        }
+    });
+
+    document.getElementById("productCount").innerText = visibleCount;
+
+    if(visibleCount === 0){
+        document.getElementById("noResult").style.display = "block";
+    }else{
+        document.getElementById("noResult").style.display = "none";
+    }
+}
+
+function viewAllProducts(){
+    document.getElementById("searchInput").value = "";
+
+    let rows = document.querySelectorAll("#productTable tr");
+
+    rows.forEach(row => {
+        row.style.display = "";
+    });
+
+    document.getElementById("productCount").innerText = rows.length;
+    document.getElementById("noResult").style.display = "none";
+}
+</script>
+
+</body>
+</html>

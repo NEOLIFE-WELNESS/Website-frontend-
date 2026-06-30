@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Manage Appointments - Neolife Admin</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:#fff;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.back-btn{
+    text-decoration:none;
+    background:#fff;
+    color:#1b5e20;
+    padding:10px 18px;
+    border-radius:6px;
+    font-weight:bold;
+}
+
+.container{
+    width:95%;
+    margin:30px auto;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:#fff;
+    padding:22px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.card h3{
+    color:#1b5e20;
+}
+
+.card p{
+    font-size:28px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.filter-box{
+    background:#fff;
+    padding:18px;
+    border-radius:12px;
+    margin-bottom:25px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.filter-box button{
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin:5px;
+    background:#e8f5e9;
+    color:#1b5e20;
+    font-weight:bold;
+}
+
+.filter-box button:hover{
+    background:#1b5e20;
+    color:#fff;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+th{
+    background:#2e7d32;
+    color:#fff;
+    padding:14px;
+}
+
+td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+.status{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.confirmed{
+    background:#d4edda;
+    color:#155724;
+}
+
+.visited{
+    background:#d1ecf1;
+    color:#0c5460;
+}
+
+.completed{
+    background:#e2e3ff;
+    color:#303f9f;
+}
+
+select{
+    padding:8px;
+    border-radius:6px;
+}
+
+.view-btn{
+    background:#1976d2;
+    color:#fff;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.view-btn:hover{
+    background:#125ea8;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h1>Manage Appointments</h1>
+
+<a href="admin-dashboard.html" class="back-btn">
+Dashboard
+</a>
+
+</header>
+
+<div class="container">
+
+<div class="cards">
+
+<div class="card">
+<h3>Total Appointments</h3>
+<p>4</p>
+</div>
+
+<div class="card">
+<h3>Pending</h3>
+<p>2</p>
+</div>
+
+<div class="card">
+<h3>Completed</h3>
+<p>1</p>
+</div>
+
+<div class="card">
+<h3>Visited</h3>
+<p>1</p>
+</div>
+
+</div>
+
+<div class="filter-box">
+
+<button onclick="filterAppointments('All')">All</button>
+
+<button onclick="filterAppointments('Pending')">Pending</button>
+
+<button onclick="filterAppointments('Confirmed')">Confirmed</button>
+
+<button onclick="filterAppointments('Visited')">Visited</button>
+
+<button onclick="filterAppointments('Completed')">Completed</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Patient</th>
+<th>Phone</th>
+<th>Age</th>
+<th>Appointment For</th>
+<th>Date</th>
+<th>Time</th>
+<th>Status</th>
+<th>Change Status</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="appointmentTable">
+
+<tr data-status="Pending">
+
+<td>A001</td>
+<td>Ramesh</td>
+<td>9876543210</td>
+<td>45</td>
+<td>Ayurveda Consultation</td>
+<td>25-06-2026</td>
+<td>10:00 AM</td>
+
+<td><span class="status pending">Pending</span></td>
+
+<td>
+
+<select onchange="changeStatus(this)">
+<option selected>Pending</option>
+<option>Confirmed</option>
+<option>Visited</option>
+<option>Completed</option>
+</select>
+
+</td>
+
+<td>
+<button class="view-btn" onclick="viewAppointment(this)">
+View
+</button>
+</td>
+
+</tr>
+
+<tr data-status="Confirmed">
+
+<td>A002</td>
+<td>Priya</td>
+<td>9123456789</td>
+<td>31</td>
+<td>Acupuncture</td>
+<td>25-06-2026</td>
+<td>11:00 AM</td>
+
+<td><span class="status confirmed">Confirmed</span></td>
+
+<td>
+
+<select onchange="changeStatus(this)">
+<option>Pending</option>
+<option selected>Confirmed</option>
+<option>Visited</option>
+<option>Completed</option>
+</select>
+
+</td>
+
+<td>
+<button class="view-btn" onclick="viewAppointment(this)">
+View
+</button>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+function changeStatus(select){
+
+let row=select.closest("tr");
+
+let status=row.querySelector(".status");
+
+status.innerText=select.value;
+
+row.dataset.status=select.value;
+
+status.className="status "+select.value.toLowerCase();
+
+}
+
+function filterAppointments(status){
+
+document.querySelectorAll("#appointmentTable tr").forEach(row=>{
+
+if(status==="All" || row.dataset.status===status){
+
+row.style.display="";
+
+}else{
+
+row.style.display="none";
+
+}
+
+});
+
+}
+
+function viewAppointment(btn){
+
+let td=btn.closest("tr").querySelectorAll("td");
+
+alert(
+
+"Appointment Details\n\n"+
+
+"ID : "+td[0].innerText+"\n"+
+
+"Patient : "+td[1].innerText+"\n"+
+
+"Phone : "+td[2].innerText+"\n"+
+
+"Age : "+td[3].innerText+"\n"+
+
+"Appointment : "+td[4].innerText+"\n"+
+
+"Date : "+td[5].innerText+"\n"+
+
+"Time : "+td[6].innerText+"\n"+
+
+"Status : "+td[7].innerText
+
+);
+
+}
+
+</script>
+
+</body>
+</html>

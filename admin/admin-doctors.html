@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Doctors - Neolife Admin</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:white;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.back-btn{
+    background:white;
+    color:#1b5e20;
+    text-decoration:none;
+    padding:10px 15px;
+    border-radius:6px;
+    font-weight:bold;
+}
+
+.container{
+    width:90%;
+    margin:30px auto;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.add-btn{
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+th{
+    background:#2e7d32;
+    color:white;
+    padding:14px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+.doctor-img{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.edit-btn{
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.delete-btn{
+    background:#d32f2f;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+}
+
+.modal-content{
+    background:white;
+    width:500px;
+    max-width:90%;
+    margin:50px auto;
+    padding:25px;
+    border-radius:12px;
+}
+
+.modal-content h2{
+    margin-bottom:20px;
+    color:#1b5e20;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.save-btn{
+    width:100%;
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.close-btn{
+    float:right;
+    font-size:25px;
+    cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Manage Doctors</h1>
+    <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+</header>
+
+<div class="container">
+
+    <div class="top-bar">
+        <h2>Doctor Profiles</h2>
+
+        <button class="add-btn" onclick="openModal()">
+            + Add Doctor
+        </button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Qualification</th>
+                <th>Specialization</th>
+                <th>Experience</th>
+                <th>Fee</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="doctorTable">
+
+            <tr>
+                <td>
+                    <img src="https://via.placeholder.com/60"
+                    class="doctor-img">
+                </td>
+                <td>Dr. N. G. Muraleedhara</td>
+                <td>BAMS</td>
+                <td>Panchakarma Specialist</td>
+                <td>10 Years</td>
+                <td>₹200</td>
+                <td>
+                    <button class="edit-btn"
+onclick="editDoctor(this)">
+Edit
+</button>
+                    <button class="delete-btn">Delete</button>
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- Add Doctor Modal -->
+
+<div class="modal" id="doctorModal">
+
+    <div class="modal-content">
+
+        <span class="close-btn"
+        onclick="closeModal()">&times;</span>
+
+        <h2>Add Doctor</h2>
+
+        <div class="form-group">
+            <label>Doctor Name</label>
+            <input type="text" id="doctorName">
+        </div>
+
+        <div class="form-group">
+            <label>Qualification</label>
+            <input type="text" id="qualification">
+        </div>
+
+        <div class="form-group">
+            <label>Specialization</label>
+            <input type="text" id="specialization">
+        </div>
+
+        <div class="form-group">
+            <label>Experience</label>
+            <input type="text" id="experience">
+        </div>
+
+        <div class="form-group">
+            <label>Consultation Fee</label>
+            <input type="text" id="fee">
+        </div>
+
+        <div class="form-group">
+            <label>Doctor Photo</label>
+            <input type="file">
+        </div>
+
+        <button class="save-btn" onclick="saveDoctor()">
+            Save Doctor
+        </button>
+
+    </div>
+
+</div>
+<div class="modal" id="editDoctorModal">
+
+    <div class="modal-content">
+
+        <span class="close-btn"
+        onclick="closeEditModal()">&times;</span>
+
+        <h2>Edit Doctor</h2>
+
+        <input type="hidden" id="editRow">
+
+        <div class="form-group">
+            <label>Doctor Name</label>
+            <input type="text" id="editName">
+        </div>
+
+        <div class="form-group">
+            <label>Qualification</label>
+            <input type="text" id="editQualification">
+        </div>
+
+        <div class="form-group">
+            <label>Specialization</label>
+            <input type="text" id="editSpecialization">
+        </div>
+
+        <div class="form-group">
+            <label>Experience</label>
+            <input type="text" id="editExperience">
+        </div>
+
+        <div class="form-group">
+            <label>Fee</label>
+            <input type="text" id="editFee">
+        </div>
+
+        <button class="save-btn"
+        onclick="updateDoctor()">
+        Update Doctor
+        </button>
+
+    </div>
+
+</div>
+<script>
+
+function openModal(){
+    document.getElementById("doctorModal").style.display="block";
+}
+
+function closeModal(){
+    document.getElementById("doctorModal").style.display="none";
+}
+
+function saveDoctor(){
+
+    alert("Doctor profile saved successfully!");
+
+    closeModal();
+}
+let currentRow = null;
+
+function editDoctor(button){
+
+    currentRow = button.closest("tr");
+
+    document.getElementById("editName").value =
+    currentRow.cells[1].innerText;
+
+    document.getElementById("editQualification").value =
+    currentRow.cells[2].innerText;
+
+    document.getElementById("editSpecialization").value =
+    currentRow.cells[3].innerText;
+
+    document.getElementById("editExperience").value =
+    currentRow.cells[4].innerText;
+
+    document.getElementById("editFee").value =
+    currentRow.cells[5].innerText;
+
+    document.getElementById("editDoctorModal").style.display="block";
+}
+
+function closeEditModal(){
+    document.getElementById("editDoctorModal").style.display="none";
+}
+
+function updateDoctor(){
+
+    currentRow.cells[1].innerText =
+    document.getElementById("editName").value;
+
+    currentRow.cells[2].innerText =
+    document.getElementById("editQualification").value;
+
+    currentRow.cells[3].innerText =
+    document.getElementById("editSpecialization").value;
+
+    currentRow.cells[4].innerText =
+    document.getElementById("editExperience").value;
+
+    currentRow.cells[5].innerText =
+    document.getElementById("editFee").value;
+
+    closeEditModal();
+
+    alert("Doctor updated successfully");
+}
+</script>
+
+</body>
+</html>

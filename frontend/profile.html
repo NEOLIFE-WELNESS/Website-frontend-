@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Profile - Neolife Wellness Center</title>
+<link rel="icon" type="image/jpeg" href="../assets/prod_logo.png">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+body{
+  background:#fffaf0;
+  color:#2b2b2b;
+}
+
+header{
+  background:linear-gradient(135deg,#123524,#2f6b3f);
+  padding:14px 7%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  position:sticky;
+  top:0;
+  z-index:1000;
+  box-shadow:0 6px 20px rgba(0,0,0,0.25);
+}
+
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo-img{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:3px solid #f8f5ec;
+  object-fit:cover;
+}
+
+.logo-details{
+  display:flex;
+  flex-direction:column;
+}
+
+.logo-text{
+  color:#fff;
+  font-size:23px;
+  font-weight:800;
+}
+
+.logo-subtitle{
+  color:#f6d76b;
+  font-size:14px;
+}
+
+.navbar a{
+  color:white;
+  text-decoration:none;
+  margin-left:22px;
+  font-weight:600;
+}
+
+.navbar a:hover{
+  color:#f6d76b;
+}
+
+.profile-section{
+  padding:70px 8%;
+}
+
+.profile-container{
+  max-width:1100px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:30px;
+}
+
+.profile-card{
+  background:white;
+  border-radius:25px;
+  padding:30px;
+  text-align:center;
+  border:1px solid rgba(212,175,55,0.5);
+  box-shadow:0 15px 35px rgba(0,0,0,0.1);
+}
+
+.profile-avatar{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#123524,#2f6b3f);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:48px;
+  font-weight:800;
+  margin:0 auto 18px;
+  border:4px solid #d4af37;
+}
+
+.profile-card h2{
+  color:#123524;
+  margin-bottom:6px;
+}
+
+.profile-card p{
+  color:#666;
+  margin-bottom:18px;
+}
+
+.profile-menu{
+  margin-top:25px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.profile-menu button{
+  padding:13px;
+  border:none;
+  border-radius:25px;
+  background:#fff7df;
+  color:#123524;
+  font-weight:800;
+  cursor:pointer;
+  border:1px solid #e0c56e;
+}
+
+.profile-menu button.active,
+.profile-menu button:hover{
+  background:linear-gradient(135deg,#123524,#2f6b3f);
+  color:white;
+}
+
+.profile-content{
+  background:rgb(255, 255, 255);
+  border-radius:25px;
+  padding:35px;
+  border:1px solid rgba(212,175,55,0.5);
+  box-shadow:0 15px 35px rgba(0,0,0,0.1);
+}
+
+.profile-content h1{
+  color:#123524;
+  margin-bottom:25px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+.form-group label{
+  color:#123524;
+  font-weight:700;
+  margin-bottom:7px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #d8c275;
+  outline:none;
+  font-size:15px;
+}
+
+.form-group textarea{
+  resize:vertical;
+  min-height:90px;
+}
+
+.full{
+  grid-column:1 / -1;
+}
+
+.save-btn{
+  margin-top:25px;
+  padding:14px 35px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(135deg,#d4af37,#b8860b);
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+  font-size:15px;
+}
+
+.logout-btn{
+  margin-top:15px;
+  padding:13px 30px;
+  border:none;
+  border-radius:30px;
+  background:#b00020;
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.info-box{
+  background:#fff7df;
+  border:1px solid #e0c56e;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.info-box h3{
+  color:#123524;
+  margin-bottom:8px;
+}
+
+.info-box p{
+  color:#555;
+  line-height:1.7;
+}
+
+.footer{
+  background:linear-gradient(135deg,#123524,#1d4f32);
+  color:#f7e7a0;
+  text-align:center;
+  padding:25px;
+  border-top:4px solid #d4af37;
+}
+
+@media(max-width:850px){
+  .profile-container{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  header{
+    flex-direction:column;
+    gap:15px;
+  }
+
+  .navbar{
+    text-align:center;
+  }
+
+  .navbar a{
+    display:inline-block;
+    margin:8px 10px;
+  }
+}
+.profile-icon{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#123524,#2f6b3f);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border:2px solid #d4af37;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.profile-icon:hover{
+    transform:scale(1.1);
+}
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:25px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo-container">
+    <img src="../assets/prod_logo.png" alt="Neolife Logo" class="logo-img">
+
+    <div class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Wellness Center</span>
+    </div>
+  </div>
+<div class="nav-right">
+  <nav class="navbar">
+    <a href="homepage.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Therapies</a>
+    <a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a>
+    <a href="contact.html">Contact</a>
+   
+   
+    <!-- // this will Show First Letter of Customer Name (Like Amazon) -->
+    <!-- <a href="profile.html" class="profile-circle" id="profileCircle">
+    N
+</a> -->
+  </nav>
+  <a href="profile.html" class="profile-icon">
+    <i class="fa-solid fa-user"></i>
+</a>
+</div>
+</header>
+
+<section class="profile-section">
+  <div class="profile-container">
+
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileAvatar">N</div>
+      <h2 id="profileName">Neolife User</h2>
+      <p id="profileEmail">user@email.com</p>
+
+      <div class="profile-menu">
+        <button class="active" onclick="showTab('profile', this)">My Profile</button>
+        <button onclick="showTab('orders', this)">My Orders</button>
+        <!-- <button onclick="showTab('consultations', this)">Consultations</button> -->
+        <button onclick="showTab('address', this)">Address</button>
+      </div>
+
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="profile-content" id="contentArea">
+
+      <h1>My Profile</h1>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="Enter full name">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="Enter email">
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" id="phone" placeholder="Enter phone number">
+        </div>
+
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" id="age" placeholder="Enter age">
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="gender">
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="city" placeholder="Enter city">
+        </div>
+
+        <div class="form-group full">
+          <label>Health Concern</label>
+          <textarea id="healthConcern" placeholder="Example: knee pain, diabetes, hair fall, digestion issue"></textarea>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="saveProfile()">Save Profile</button>
+
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
+</footer>
+
+<script>
+// this will Show First Letter of Customer Name (Like Amazon)
+// if(localStorage.getItem("isLoggedIn") !== "true"){
+//   alert("Please login first");
+//   window.location.href = "login.html";
+// }
+//when backend is connected uncomment the above 3 lines and remove the below 3 lines
+localStorage.setItem("isLoggedIn", "true");
+localStorage.setItem("userName", "Neolife User");
+localStorage.setItem("userEmail", "customer@example.com");
+function loadProfile(){
+  let name = localStorage.getItem("userName") || "Neolife User";
+  let email = localStorage.getItem("userEmail") || "user@email.com";
+
+  document.getElementById("profileName").innerText = name;
+  document.getElementById("profileEmail").innerText = email;
+  document.getElementById("profileAvatar").innerText = name.charAt(0).toUpperCase();
+
+  document.getElementById("fullName").value = localStorage.getItem("profileFullName") || name;
+  document.getElementById("email").value = localStorage.getItem("profileEmail") || email;
+  document.getElementById("phone").value = localStorage.getItem("profilePhone") || "";
+  document.getElementById("age").value = localStorage.getItem("profileAge") || "";
+  document.getElementById("gender").value = localStorage.getItem("profileGender") || "";
+  document.getElementById("city").value = localStorage.getItem("profileCity") || "";
+  document.getElementById("healthConcern").value = localStorage.getItem("profileHealthConcern") || "";
+}
+
+function saveProfile(){
+  let fullName = document.getElementById("fullName").value;
+  let email = document.getElementById("email").value;
+
+  localStorage.setItem("profileFullName", fullName);
+  localStorage.setItem("profileEmail", email);
+  localStorage.setItem("profilePhone", document.getElementById("phone").value);
+  localStorage.setItem("profileAge", document.getElementById("age").value);
+  localStorage.setItem("profileGender", document.getElementById("gender").value);
+  localStorage.setItem("profileCity", document.getElementById("city").value);
+  localStorage.setItem("profileHealthConcern", document.getElementById("healthConcern").value);
+
+  localStorage.setItem("userName", fullName);
+  localStorage.setItem("userEmail", email);
+
+  alert("Profile updated successfully");
+  loadProfile();
+}
+
+function showTab(tab, btn){
+  document.querySelectorAll(".profile-menu button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  let content = document.getElementById("contentArea");
+
+  if(tab === "profile"){
+    location.reload();
+  }
+
+  if(tab === "orders"){
+    content.innerHTML = `
+      <h1>My Orders</h1>
+
+      <div class="info-box">
+        <h3>No Orders Yet</h3>
+        <p>Your product orders will appear here after you place an order.</p>
+      </div>
+    `;
+  }
+
+  if(tab === "consultations"){
+    content.innerHTML = `
+      <h1>My Consultations</h1>
+
+      <div class="info-box">
+        <h3>No Consultations Yet</h3>
+        <p>Your appointment and online consultation history will appear here.</p>
+      </div>
+    `;
+  }
+
+  if(tab === "address"){
+    content.innerHTML = `
+      <h1>My Address</h1>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Full Address</label>
+          <textarea id="address" placeholder="House no, street, area"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Pincode</label>
+          <input type="text" id="pincode" placeholder="Enter pincode">
+        </div>
+
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="addressCity" placeholder="Enter city">
+        </div>
+
+        <div class="form-group">
+          <label>State</label>
+          <input type="text" id="state" placeholder="Enter state">
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="saveAddress()">Save Address</button>
+    `;
+
+    document.getElementById("address").value = localStorage.getItem("address") || "";
+    document.getElementById("pincode").value = localStorage.getItem("pincode") || "";
+    document.getElementById("addressCity").value = localStorage.getItem("addressCity") || "";
+    document.getElementById("state").value = localStorage.getItem("state") || "";
+  }
+}
+
+function saveAddress(){
+  localStorage.setItem("address", document.getElementById("address").value);
+  localStorage.setItem("pincode", document.getElementById("pincode").value);
+  localStorage.setItem("addressCity", document.getElementById("addressCity").value);
+  localStorage.setItem("state", document.getElementById("state").value);
+
+  alert("Address saved successfully");
+}
+
+function logout(){
+  localStorage.setItem("isLoggedIn", "false");
+  alert("Logged out successfully");
+  window.location.href = "login.html";
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Inventory Management - Neolife Admin</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:white;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.back-btn{
+    background:white;
+    color:#1b5e20;
+    padding:10px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.container{
+    width:95%;
+    margin:30px auto;
+}
+
+.top-box{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom:25px;
+}
+
+.top-box h2{
+    color:#1b5e20;
+    margin-bottom:8px;
+}
+
+.inventory-tools{
+    display:flex;
+    gap:15px;
+    margin-bottom:20px;
+    background:white;
+    padding:18px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.inventory-tools input{
+    flex:1;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.inventory-tools button{
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    min-width:1100px;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+th{
+    background:#2e7d32;
+    color:white;
+    padding:14px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+.stock-input{
+    width:80px;
+    padding:8px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    text-align:center;
+}
+
+.add-stock-btn{
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:8px 10px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.reduce-stock-btn{
+    background:#f57c00;
+    color:white;
+    border:none;
+    padding:8px 10px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.save-btn{
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.status{
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.in-stock{
+    background:#d4edda;
+    color:#155724;
+}
+
+.low-stock{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.out-stock{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.no-result{
+    display:none;
+    text-align:center;
+    color:#d32f2f;
+    margin-top:20px;
+    font-weight:bold;
+}
+
+@media(max-width:768px){
+    header{
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .inventory-tools{
+        flex-direction:column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Inventory Management</h1>
+    <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+</header>
+
+<div class="container">
+
+    <div class="top-box">
+        <h2>Manage Product Stock</h2>
+        <p>Update stock quantity, set low stock limit and monitor inventory status.</p>
+    </div>
+
+    <div class="inventory-tools">
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search by product no, product name or manufacturer..."
+            onkeyup="searchInventory()">
+
+        <button onclick="viewAllInventory()">View All Inventory</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product No</th>
+                    <th>Product Name</th>
+                    <th>Manufacturer</th>
+                    <th>Current Stock</th>
+                    <th>Add Stock</th>
+                    <th>Reduce Stock</th>
+                    <th>Low Stock Limit</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="inventoryTable">
+
+                <tr>
+                    <td>PROD001</td>
+                    <td>Neolife Special Hair Oil</td>
+                    <td>Neolife Wellness Center</td>
+                    <td class="current-stock">100</td>
+                    <td>
+                        <input type="number" class="stock-input add-value" min="0" placeholder="Qty">
+                        <button class="add-stock-btn" onclick="addStock(this)">Add</button>
+                    </td>
+                    <td>
+                        <input type="number" class="stock-input reduce-value" min="0" placeholder="Qty">
+                        <button class="reduce-stock-btn" onclick="reduceStock(this)">Reduce</button>
+                    </td>
+                    <td>
+                        <input type="number" class="stock-input low-limit" value="10" min="0" onchange="updateStatus(this)">
+                    </td>
+                    <td>
+                        <span class="status in-stock">In Stock</span>
+                    </td>
+                    <td class="last-updated">24-06-2026</td>
+                    <td>
+                        <button class="save-btn" onclick="saveInventory(this)">Save</button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>PROD002</td>
+                    <td>Neolife Joints Care Choorna</td>
+                    <td>Neolife Wellness Center</td>
+                    <td class="current-stock">8</td>
+                    <td>
+                        <input type="number" class="stock-input add-value" min="0" placeholder="Qty">
+                        <button class="add-stock-btn" onclick="addStock(this)">Add</button>
+                    </td>
+                    <td>
+                        <input type="number" class="stock-input reduce-value" min="0" placeholder="Qty">
+                        <button class="reduce-stock-btn" onclick="reduceStock(this)">Reduce</button>
+                    </td>
+                    <td>
+                        <input type="number" class="stock-input low-limit" value="10" min="0" onchange="updateStatus(this)">
+                    </td>
+                    <td>
+                        <span class="status low-stock">Low Stock</span>
+                    </td>
+                    <td class="last-updated">24-06-2026</td>
+                    <td>
+                        <button class="save-btn" onclick="saveInventory(this)">Save</button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>PROD003</td>
+                    <td>Neodia Kashayam</td>
+                    <td>Neolife Wellness Center</td>
+                    <td class="current-stock">0</td>
+                    <td>
+                        <input type="number" class="stock-input add-value" min="0" placeholder="Qty">
+                        <button class="add-stock-btn" onclick="addStock(this)">Add</button>
+                    </td>
+                    <td>
+                        <input type="number" class="stock-input reduce-value" min="0" placeholder="Qty">
+                        <button class="reduce-stock-btn" onclick="reduceStock(this)">Reduce</button>
+                    </td>
+                    <td>
+                        <input type="number" class="stock-input low-limit" value="10" min="0" onchange="updateStatus(this)">
+                    </td>
+                    <td>
+                        <span class="status out-stock">Out of Stock</span>
+                    </td>
+                    <td class="last-updated">24-06-2026</td>
+                    <td>
+                        <button class="save-btn" onclick="saveInventory(this)">Save</button>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <p class="no-result" id="noResult">No inventory found.</p>
+
+</div>
+
+<script>
+function getTodayDate(){
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2,"0");
+    const month = String(today.getMonth() + 1).padStart(2,"0");
+    const year = today.getFullYear();
+
+    return day + "-" + month + "-" + year;
+}
+
+function updateStockStatus(row){
+    const stock = parseInt(row.querySelector(".current-stock").innerText);
+    const lowLimit = parseInt(row.querySelector(".low-limit").value);
+    const status = row.querySelector(".status");
+
+    if(stock <= 0){
+        status.innerText = "Out of Stock";
+        status.className = "status out-stock";
+    }
+    else if(stock <= lowLimit){
+        status.innerText = "Low Stock";
+        status.className = "status low-stock";
+    }
+    else{
+        status.innerText = "In Stock";
+        status.className = "status in-stock";
+    }
+
+    row.querySelector(".last-updated").innerText = getTodayDate();
+}
+
+function addStock(button){
+    const row = button.closest("tr");
+    const addInput = row.querySelector(".add-value");
+    const currentStockCell = row.querySelector(".current-stock");
+
+    const addQty = parseInt(addInput.value);
+
+    if(isNaN(addQty) || addQty <= 0){
+        alert("Enter valid stock quantity to add.");
+        return;
+    }
+
+    currentStockCell.innerText = parseInt(currentStockCell.innerText) + addQty;
+    addInput.value = "";
+
+    updateStockStatus(row);
+}
+
+function reduceStock(button){
+    const row = button.closest("tr");
+    const reduceInput = row.querySelector(".reduce-value");
+    const currentStockCell = row.querySelector(".current-stock");
+
+    const reduceQty = parseInt(reduceInput.value);
+    const currentStock = parseInt(currentStockCell.innerText);
+
+    if(isNaN(reduceQty) || reduceQty <= 0){
+        alert("Enter valid stock quantity to reduce.");
+        return;
+    }
+
+    if(reduceQty > currentStock){
+        alert("Reduce quantity cannot be greater than current stock.");
+        return;
+    }
+
+    currentStockCell.innerText = currentStock - reduceQty;
+    reduceInput.value = "";
+
+    updateStockStatus(row);
+}
+
+function updateStatus(input){
+    const row = input.closest("tr");
+    updateStockStatus(row);
+}
+
+function saveInventory(button){
+    const row = button.closest("tr");
+
+    const inventory = {
+        productNo: row.children[0].innerText,
+        productName: row.children[1].innerText,
+        manufacturer: row.children[2].innerText,
+        currentStock: row.querySelector(".current-stock").innerText,
+        lowStockLimit: row.querySelector(".low-limit").value,
+        status: row.querySelector(".status").innerText,
+        lastUpdated: row.querySelector(".last-updated").innerText
+    };
+
+    console.log(inventory);
+
+    alert("Inventory saved successfully!");
+}
+
+function searchInventory(){
+    const searchValue = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#inventoryTable tr");
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const rowText = row.innerText.toLowerCase();
+
+        if(rowText.includes(searchValue)){
+            row.style.display = "";
+            visibleCount++;
+        }else{
+            row.style.display = "none";
+        }
+    });
+
+    document.getElementById("noResult").style.display =
+        visibleCount === 0 ? "block" : "none";
+}
+
+function viewAllInventory(){
+    document.getElementById("searchInput").value = "";
+
+    const rows = document.querySelectorAll("#inventoryTable tr");
+
+    rows.forEach(row => {
+        row.style.display = "";
+    });
+
+    document.getElementById("noResult").style.display = "none";
+}
+</script>
+
+</body>
+</html>

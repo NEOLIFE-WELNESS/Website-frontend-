@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Edit Product - Neolife Admin</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:white;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    font-size:24px;
+}
+
+.back-btn{
+    background:white;
+    color:#1b5e20;
+    padding:10px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.container{
+    width:90%;
+    max-width:900px;
+    margin:35px auto;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.1);
+}
+
+.container h2{
+    color:#1b5e20;
+    margin-bottom:25px;
+    text-align:center;
+}
+
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+    color:#333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:7px;
+    font-size:15px;
+}
+
+.form-group textarea{
+    height:100px;
+    resize:none;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.current-img{
+    width:180px;
+    height:180px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid #ddd;
+    display:block;
+    margin-top:10px;
+}
+
+.update-btn{
+    width:100%;
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:14px;
+    border-radius:7px;
+    font-size:17px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.update-btn:hover{
+    background:#2e7d32;
+}
+
+.message{
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+@media(max-width:768px){
+    .form-row{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Edit Product</h1>
+    <a href="admin-products.html" class="back-btn">Back</a>
+</header>
+
+<div class="container">
+
+    <h2>Update Product Details</h2>
+
+    <form id="editProductForm">
+
+        <input type="hidden" id="productId">
+
+        <div class="form-group">
+            <label>Product Code</label>
+            <input type="text" id="productNo" placeholder="Example: PROD001" required>
+        </div>
+
+        <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Product Description</label>
+            <textarea id="description" required></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Price ₹</label>
+                <input type="number" id="price" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label>Total Stock</label>
+                <input type="number" id="stock" min="0" placeholder="Example: 100" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Net Quantity</label>
+                <input type="text" id="netQty" placeholder="Example: 200 ml / 100 gm" required>
+            </div>
+
+            <div class="form-group">
+                <label>Expiry Date</label>
+                <input type="month" id="expiryDate" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Indication</label>
+            <input type="text" id="indication" placeholder="Example: Hair fall, Joint pain" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Product Category</label>
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Hair Care">Hair Care</option>
+                    <option value="Joint Care">Joint Care</option>
+                    <option value="Diabetes Care">Diabetes Care</option>
+                    <option value="Liver Care">Liver Care</option>
+                    <option value="Pain Relief">Pain Relief</option>
+                    <option value="Kashayam">Kashayam</option>
+                    <option value="Kidney Care">Kidney Care</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Manufacturer</label>
+                <select id="manufacturer" required>
+                    <option value="">Select Manufacturer</option>
+                    <option value="Neolife Wellness Center">Neolife Wellness Center</option>
+                    <option value="Neolives">Neolives</option>
+                    <option value="Arya Vaidya Pharmacy">Arya Vaidya Pharmacy</option>
+                    <option value="Kottakkal Ayurveda">Kottakkal Ayurveda</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Current Product Image</label>
+            <img src="../assets/products/hair-oil.jpg" id="currentImage" class="current-img" alt="Product Image">
+        </div>
+
+        <div class="form-group">
+            <label>Change Product Image</label>
+            <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)">
+        </div>
+
+        <button type="submit" class="update-btn">Update Product</button>
+
+        <p class="message" id="message"></p>
+
+    </form>
+
+</div>
+
+<script>
+window.onload = function(){
+
+    const product = {
+        id: 1,
+        productNo: "PROD001",
+        name: "Neolife Special Hair Oil",
+        description: "Ayurvedic hair oil for hair growth and hair fall support.",
+        price: 299,
+        stock: 100,
+        netQty: "200 ml",
+        expiryDate: "2028-12",
+        indication: "Hair fall, Hair growth",
+        category: "Hair Care",
+        manufacturer: "Neolife Wellness Center",
+        image: "../assets/products/hair-oil.jpg"
+    };
+
+    document.getElementById("productId").value = product.id;
+    document.getElementById("productNo").value = product.productNo;
+    document.getElementById("name").value = product.name;
+    document.getElementById("description").value = product.description;
+    document.getElementById("price").value = product.price;
+    document.getElementById("stock").value = product.stock;
+    document.getElementById("netQty").value = product.netQty;
+    document.getElementById("expiryDate").value = product.expiryDate;
+    document.getElementById("indication").value = product.indication;
+    document.getElementById("category").value = product.category;
+    document.getElementById("manufacturer").value = product.manufacturer;
+    document.getElementById("currentImage").src = product.image;
+};
+
+function previewImage(event){
+    const image = document.getElementById("currentImage");
+    const file = event.target.files[0];
+
+    if(file){
+        image.src = URL.createObjectURL(file);
+    }
+}
+
+document.getElementById("editProductForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const imageFile = document.getElementById("productImage").files[0];
+
+    const updatedProduct = {
+        id: document.getElementById("productId").value,
+        productNo: document.getElementById("productNo").value,
+        name: document.getElementById("name").value,
+        description: document.getElementById("description").value,
+        price: document.getElementById("price").value,
+        stock: document.getElementById("stock").value,
+        netQty: document.getElementById("netQty").value,
+        expiryDate: document.getElementById("expiryDate").value,
+        indication: document.getElementById("indication").value,
+        category: document.getElementById("category").value,
+        manufacturer: document.getElementById("manufacturer").value,
+        imageName: imageFile ? imageFile.name : "existing image"
+    };
+
+    console.log(updatedProduct);
+
+    document.getElementById("message").style.color = "green";
+    document.getElementById("message").innerText = "Product updated successfully!";
+});
+</script>
+
+</body>
+</html>

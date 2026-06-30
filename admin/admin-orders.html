@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Orders - Neolife Admin</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f8f4;
+}
+
+header{
+    background:#1b5e20;
+    color:white;
+    padding:18px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.back-btn{
+    background:white;
+    color:#1b5e20;
+    padding:10px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.container{
+    width:95%;
+    margin:30px auto;
+}
+
+.top-box{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom:25px;
+}
+
+.top-box h2{
+    color:#1b5e20;
+    margin-bottom:8px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+th{
+    background:#2e7d32;
+    color:white;
+    padding:14px;
+}
+
+td{
+    padding:13px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+.status{
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.confirmed{
+    background:#d4edda;
+    color:#155724;
+}
+
+.shipped{
+    background:#cce5ff;
+    color:#004085;
+}
+
+.delivered{
+    background:#d1ecf1;
+    color:#0c5460;
+}
+
+.cancelled{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+select{
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+.view-btn{
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.view-btn:hover{
+    background:#1565c0;
+}
+
+@media(max-width:900px){
+    table{
+        font-size:13px;
+    }
+
+    th,td{
+        padding:8px;
+    }
+}
+.modal{
+    display:none;
+    position:fixed;
+    z-index:999;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.45);
+}
+
+.modal-content{
+    background:white;
+    width:420px;
+    margin:120px auto;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.25);
+}
+
+.modal-content h2{
+    color:#1b5e20;
+    margin-bottom:18px;
+    text-align:center;
+}
+
+.modal-content p{
+    margin:10px 0;
+    font-size:15px;
+}
+
+.close-btn{
+    float:right;
+    font-size:26px;
+    cursor:pointer;
+    color:#d32f2f;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Manage Orders</h1>
+    <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+</header>
+
+<div class="container">
+
+    <div class="top-box">
+        <h2>Customer Orders</h2>
+        <p>View customer product orders and update order status.</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Change Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="ordersTable">
+
+            <tr>
+                <td>#ORD001</td>
+                <td>Ramesh</td>
+                <td>9876543210</td>
+                <td>Neolife Hair Oil</td>
+                <td>1</td>
+                <td>₹299</td>
+                <td>COD</td>
+                <td><span class="status pending">Pending</span></td>
+                <td>
+                    <select onchange="changeStatus(this)">
+                        <option>Pending</option>
+                        <option>Confirmed</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="view-btn" onclick="viewOrder('ORD001')">View</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>#ORD002</td>
+                <td>Suresh</td>
+                <td>9123456780</td>
+                <td>Joint Care Choorna</td>
+                <td>2</td>
+                <td>₹500</td>
+                <td>Online</td>
+                <td><span class="status confirmed">Confirmed</span></td>
+                <td>
+                    <select onchange="changeStatus(this)">
+                        <option>Pending</option>
+                        <option selected>Confirmed</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="view-btn" onclick="viewOrder('ORD002')">View</button>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+</div>
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+
+        <h2>Order Details</h2>
+
+        <p><b>Order ID:</b> <span id="mOrderId"></span></p>
+        <p><b>Customer:</b> <span id="mCustomer"></span></p>
+        <p><b>Phone:</b> <span id="mPhone"></span></p>
+        <p><b>Product:</b> <span id="mProduct"></span></p>
+        <p><b>Quantity:</b> <span id="mQty"></span></p>
+        <p><b>Amount:</b> <span id="mTotal"></span></p>
+        <p><b>Payment:</b> <span id="mPayment"></span></p>
+        <p><b>Status:</b> <span id="mStatus"></span></p>
+        <p><b>Address:</b> Udupi, Karnataka</p>
+    </div>
+</div>
+<script>
+function changeStatus(selectElement){
+    const selectedStatus = selectElement.value;
+    const row = selectElement.closest("tr");
+    const statusSpan = row.querySelector(".status");
+
+    statusSpan.innerText = selectedStatus;
+
+    statusSpan.className = "status " + selectedStatus.toLowerCase();
+
+    alert("Order status changed to " + selectedStatus);
+}
+
+function viewOrder(orderId){
+    const rows = document.querySelectorAll("#ordersTable tr");
+
+    rows.forEach(row => {
+        if(row.children[0].innerText === "#" + orderId){
+
+            document.getElementById("mOrderId").innerText = row.children[0].innerText;
+            document.getElementById("mCustomer").innerText = row.children[1].innerText;
+            document.getElementById("mPhone").innerText = row.children[2].innerText;
+            document.getElementById("mProduct").innerText = row.children[3].innerText;
+            document.getElementById("mQty").innerText = row.children[4].innerText;
+            document.getElementById("mTotal").innerText = row.children[5].innerText;
+            document.getElementById("mPayment").innerText = row.children[6].innerText;
+            document.getElementById("mStatus").innerText = row.children[7].innerText;
+
+            document.getElementById("orderModal").style.display = "block";
+        }
+    });
+}
+
+function closeModal(){
+    document.getElementById("orderModal").style.display = "none";
+}
+</script>
+
+</body>
+</html>
