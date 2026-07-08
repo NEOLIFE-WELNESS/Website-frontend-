@@ -46,79 +46,79 @@
   <p>Expert Ayurveda, Panchakarma, Yoga and wellness guidance from our doctors.</p>
 </section>
 
-<section class="blog-page">
-
-  <div class="blog-grid">
-
-    <div class="blog-card">
-      <img src="../assets/ayurvedapancha.png" alt="Panchakarma Blog">
-
-      <div class="blog-content">
-        <span class="blog-category">Ayurveda</span>
-        <h3>Benefits of Panchakarma Therapy</h3>
-
-        <p class="blog-meta">
-          Written by Dr. N. G. Muraleedhara, BAMS
-        </p>
-
-        <p>
-          Panchakarma is a traditional Ayurvedic detox therapy that supports body cleansing,
-          rejuvenation and long-term wellness.
-        </p>
-
-        <a href="blog-details.html?id=1" class="blog-btn">Read More</a>
-      </div>
-    </div>
-
-    <div class="blog-card">
-      <img src="../assets/yoga.jpg" alt="Yoga Blog">
-
-      <div class="blog-content">
-        <span class="blog-category">Yoga</span>
-        <h3>Yoga for Stress Relief</h3>
-
-        <p class="blog-meta">
-          Written by Dr. Aditi, BNYS
-        </p>
-
-        <p>
-          Regular yoga practice helps improve breathing, flexibility, mental calmness and
-          emotional balance.
-        </p>
-
-        <a href="blog-details.html?id=2" class="blog-btn">Read More</a>
-      </div>
-    </div>
-
-    <div class="blog-card">
-      <img src="../assets/neodia-kashayam.jpg" alt="Diabetes Blog">
-
-      <div class="blog-content">
-        <span class="blog-category">Lifestyle</span>
-        <h3>Ayurvedic Lifestyle Tips for Diabetes Care</h3>
-
-        <p class="blog-meta">
-          Written by Neolife Wellness Team
-        </p>
-
-        <p>
-          Simple lifestyle habits, diet control and Ayurvedic guidance may help support
-          healthy blood sugar management.
-        </p>
-
-        <a href="blog-details.html?id=3" class="blog-btn">Read More</a>
-      </div>
-    </div>
-
-  </div>
-
-</section>
+<div class="blog-grid" id="blogGrid"></div>
 
 <footer class="footer">
   <div class="footer-bottom">
     <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
   </div>
 </footer>
+<script>
+const API_BASE_URL = "http://localhost:8085";
+function getImageUrl(imageUrl){
+  if(!imageUrl || imageUrl.trim() === ""){
+    return "";
+  }
 
+  if(imageUrl.startsWith("http")){
+    return imageUrl;
+  }
+
+  if(imageUrl.startsWith("/")){
+    return API_BASE_URL + imageUrl;
+  }
+
+  return API_BASE_URL + "/" + imageUrl;
+}
+window.onload = loadBlogs;
+
+async function loadBlogs(){
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/api/blogs/getAll`, {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+  const grid = document.getElementById("blogGrid");
+  grid.innerHTML = "";
+
+  if(!result.success || !result.data || result.data.length === 0){
+    grid.innerHTML = "<p>No blogs found.</p>";
+    return;
+  }
+
+  result.data
+    .filter(blog => blog.published === true)
+    .forEach(blog => {
+      const image = getImageUrl(blog.imageUrl);
+
+const imageHtml = image
+  ? `<img src="${image}" alt="${blog.title}">`
+  : "";
+      grid.innerHTML += `
+        <div class="blog-card">
+          ${imageHtml}
+          <div class="blog-content">
+            <span class="blog-category">${blog.category || "Wellness"}</span>
+            <h3>${blog.title}</h3>
+
+            <p class="blog-meta">
+              Written by ${blog.authorName || "Neolife Wellness Team"}
+            </p>
+
+            <p>
+              ${blog.shortDescription || blog.content.substring(0, 130) + "..."}
+            </p>
+
+            <a href="blog-details.html?id=${blog.id}" class="blog-btn">Read More</a>
+          </div>
+        </div>
+      `;
+    });
+}
+</script>
 </body>
 </html>

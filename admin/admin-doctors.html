@@ -179,43 +179,21 @@ td{
         </button>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Photo</th>
-                <th>Name</th>
-                <th>Qualification</th>
-                <th>Specialization</th>
-                <th>Experience</th>
-                <th>Fee</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+   <table>
+  <thead>
+    <tr>
+      <th>Photo</th>
+      <th>Name</th>
+      <th>Qualification</th>
+      <th>Specialization</th>
+      <th>Experience</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
 
-        <tbody id="doctorTable">
-
-            <tr>
-                <td>
-                    <img src="https://via.placeholder.com/60"
-                    class="doctor-img">
-                </td>
-                <td>Dr. N. G. Muraleedhara</td>
-                <td>BAMS</td>
-                <td>Panchakarma Specialist</td>
-                <td>10 Years</td>
-                <td>₹200</td>
-                <td>
-                    <button class="edit-btn"
-onclick="editDoctor(this)">
-Edit
-</button>
-                    <button class="delete-btn">Delete</button>
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
+  <tbody id="doctorTable"></tbody>
+</table>
 
 </div>
 
@@ -250,7 +228,7 @@ Edit
             <input type="text" id="experience">
         </div>
 
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label>Consultation Fee</label>
             <input type="text" id="fee">
         </div>
@@ -258,7 +236,28 @@ Edit
         <div class="form-group">
             <label>Doctor Photo</label>
             <input type="file">
-        </div>
+        </div> -->
+        <div class="form-group">
+    <label>About</label>
+    <textarea id="about"></textarea>
+</div>
+
+<div class="form-group">
+    <label>Phone Number</label>
+    <input type="text" id="phoneNumber">
+</div>
+
+<div class="form-group">
+    <label>Email</label>
+    <input type="email" id="doctorEmail">
+</div>
+
+<div class="form-group">
+    <label>Image URL</label>
+    <input type="text"
+           id="imageUrl"
+           placeholder="https://example.com/doctor.jpg">
+</div>
 
         <button class="save-btn" onclick="saveDoctor()">
             Save Doctor
@@ -297,11 +296,15 @@ Edit
             <label>Experience</label>
             <input type="text" id="editExperience">
         </div>
-
         <div class="form-group">
+    <label>About</label>
+    <textarea id="editAbout"></textarea>
+</div>
+
+        <!-- <div class="form-group">
             <label>Fee</label>
             <input type="text" id="editFee">
-        </div>
+        </div> -->
 
         <button class="save-btn"
         onclick="updateDoctor()">
@@ -321,60 +324,304 @@ function closeModal(){
     document.getElementById("doctorModal").style.display="none";
 }
 
-function saveDoctor(){
+const API_BASE_URL = "http://localhost:8085";
+window.onload = function(){
+    loadDoctors();
+};
 
-    alert("Doctor profile saved successfully!");
+async function loadDoctors(){
+    const token = localStorage.getItem("token");
 
-    closeModal();
+    if(!token){
+        alert("Please login as Admin.");
+        window.location.href = "../frontend/login.html";
+        return;
+    }
+
+    try{
+        const response = await fetch(`${API_BASE_URL}/api/doctors/getAll`, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if(!response.ok){
+            alert("Access denied. Please login again as admin.");
+            return;
+        }
+
+        const result = await response.json();
+
+        if(result.success){
+            displayDoctors(result.data);
+        }else{
+            alert(result.message || "Failed to load doctors");
+        }
+
+    }catch(error){
+        console.error(error);
+        alert(error.message);
+    }
+}
+
+function displayDoctors(doctors){
+    const table = document.getElementById("doctorTable");
+    table.innerHTML = "";
+
+    doctors.forEach(doctor => {
+        table.innerHTML += `
+            <tr>
+                <td>
+                    <img src="${doctor.imageUrl || 'https://via.placeholder.com/60'}" class="doctor-img">
+                </td>
+                <td>${doctor.name || "-"}</td>
+                <td>${doctor.qualification || "-"}</td>
+                <td>${doctor.specialization || "-"}</td>
+                <td>${doctor.experience || "-"}</td>
+                <td>${doctor.active ? "Active" : "Inactive"}</td>
+               <td>
+    <button class="edit-btn" onclick="editDoctor(${doctor.id})">
+        Edit
+    </button>
+
+    <button class="delete-btn" onclick="deleteDoctor(${doctor.id})">
+    Delete
+</button>
+</td>
+            </tr>
+        `;
+    });
+}
+async function saveDoctor(){
+
+    const token = localStorage.getItem("token");
+
+    if(!token){
+        alert("Please login as Admin.");
+        return;
+    }
+
+    const doctor = {
+        name: document.getElementById("doctorName").value.trim(),
+        qualification: document.getElementById("qualification").value.trim(),
+        specialization: document.getElementById("specialization").value.trim(),
+        experience: document.getElementById("experience").value.trim(),
+        about: document.getElementById("about").value.trim(),
+        phoneNumber: document.getElementById("phoneNumber").value.trim(),
+        email: document.getElementById("doctorEmail").value.trim(),
+        imageUrl: document.getElementById("imageUrl").value.trim()
+    };
+
+    try{
+
+        const response = await fetch(`${API_BASE_URL}/api/doctors/add`,{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":"Bearer " + token
+            },
+
+            body:JSON.stringify(doctor)
+
+        });
+
+        const result = await response.json();
+
+        if(result.success){
+
+            alert(result.message);
+
+            closeModal();
+
+            document.getElementById("doctorModal").style.display = "none";
+document.getElementById("doctorModal").querySelector("form")?.reset();
+loadDoctors();
+
+        }else{
+
+            alert(result.message);
+
+        }
+
+    }catch(error){
+  console.error(error);
+  alert(error.message);
+}
+
 }
 let currentRow = null;
 
-function editDoctor(button){
+async function editDoctor(id){
 
-    currentRow = button.closest("tr");
+    const token = localStorage.getItem("token");
 
-    document.getElementById("editName").value =
-    currentRow.cells[1].innerText;
+    try{
 
-    document.getElementById("editQualification").value =
-    currentRow.cells[2].innerText;
+        const response = await fetch(`${API_BASE_URL}/api/doctors/${id}/get`,{
 
-    document.getElementById("editSpecialization").value =
-    currentRow.cells[3].innerText;
+            headers:{
+                "Authorization":"Bearer " + token
+            }
 
-    document.getElementById("editExperience").value =
-    currentRow.cells[4].innerText;
+        });
 
-    document.getElementById("editFee").value =
-    currentRow.cells[5].innerText;
+        const result = await response.json();
 
-    document.getElementById("editDoctorModal").style.display="block";
+        if(result.success){
+
+            const doctor = result.data;
+
+            document.getElementById("editDoctorModal").style.display="block";
+
+            currentRow = {
+                dataset:{
+                    id:id
+                }
+            };
+
+            document.getElementById("editName").value = doctor.name;
+            document.getElementById("editQualification").value = doctor.qualification;
+            document.getElementById("editSpecialization").value = doctor.specialization;
+            document.getElementById("editExperience").value = doctor.experience;
+
+            // Add this textarea to your modal
+            document.getElementById("editAbout").value = doctor.about;
+
+        }else{
+
+            alert(result.message);
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
 }
 
 function closeEditModal(){
     document.getElementById("editDoctorModal").style.display="none";
 }
 
-function updateDoctor(){
+async function updateDoctor(){
 
-    currentRow.cells[1].innerText =
-    document.getElementById("editName").value;
+    const token = localStorage.getItem("token");
 
-    currentRow.cells[2].innerText =
-    document.getElementById("editQualification").value;
+    if(!token){
+        alert("Please login as Admin.");
+        return;
+    }
 
-    currentRow.cells[3].innerText =
-    document.getElementById("editSpecialization").value;
+    const id = currentRow.dataset.id;
 
-    currentRow.cells[4].innerText =
-    document.getElementById("editExperience").value;
+    const doctor = {
 
-    currentRow.cells[5].innerText =
-    document.getElementById("editFee").value;
+        experience: document.getElementById("editExperience").value.trim(),
 
-    closeEditModal();
+        about: document.getElementById("editAbout").value.trim()
 
-    alert("Doctor updated successfully");
+    };
+
+    try{
+
+        const response = await fetch(`${API_BASE_URL}/api/doctors/update/${id}`,{
+
+            method:"PUT",
+
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":"Bearer " + token
+            },
+
+            body: JSON.stringify(doctor)
+
+        });
+
+        if(!response.ok){
+            alert("Failed to update doctor.");
+            return;
+        }
+
+        const result = await response.json();
+
+        if(result.success){
+
+            alert(result.message);
+
+            closeEditModal();
+
+            loadDoctors();
+
+        }else{
+
+            alert(result.message);
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+        alert(error.message);
+
+    }
+}
+async function deleteDoctor(id){
+
+    const token = localStorage.getItem("token");
+
+    if(!token){
+        alert("Please login as Admin.");
+        return;
+    }
+
+    const confirmDelete = confirm("Are you sure you want to delete this doctor?");
+
+    if(!confirmDelete){
+        return;
+    }
+
+    try{
+
+        const response = await fetch(`${API_BASE_URL}/api/doctors/remove/${id}`,{
+
+            method:"DELETE",
+
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+
+        });
+
+        if(!response.ok){
+            alert("Failed to delete doctor.");
+            return;
+        }
+
+        const result = await response.json();
+
+        if(result.success){
+
+            alert(result.message);
+
+            loadDoctors();
+
+        }else{
+
+            alert(result.message);
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+        alert(error.message);
+
+    }
 }
 </script>
 

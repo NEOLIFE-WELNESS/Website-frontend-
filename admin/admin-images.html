@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Images - Neolife Admin</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f8f4}
+header{
+  background:#1b5e20;color:white;padding:18px 8%;
+  display:flex;justify-content:space-between;align-items:center
+}
+.back-btn{
+  background:white;color:#1b5e20;padding:10px 16px;
+  border-radius:6px;text-decoration:none;font-weight:bold
+}
+.container{
+  width:90%;max-width:1000px;margin:35px auto;background:white;
+  padding:30px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.1)
+}
+h2{color:#1b5e20;margin-bottom:20px}
+.form-box{margin-bottom:30px}
+input,select{
+  width:100%;padding:12px;margin:8px 0 15px;
+  border:1px solid #ccc;border-radius:7px
+}
+button{
+  background:#1b5e20;color:white;border:none;padding:10px 16px;
+  border-radius:6px;cursor:pointer;font-weight:bold
+}
+.delete-btn{background:#d32f2f}
+.update-btn{background:#1976d2}
+.preview-img,.table-img{
+  width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #ddd
+}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#2e7d32;color:white;padding:12px}
+td{text-align:center;padding:12px;border-bottom:1px solid #ddd}
+.message{font-weight:bold;margin-top:10px}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Manage Images</h1>
+  <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+</header>
+
+<div class="container">
+
+  <h2>Upload Image</h2>
+
+  <div class="form-box">
+    <label>Select Module</label>
+    <select id="module">
+      <option value="PRODUCT">PRODUCT</option>
+      <option value="BANNER">BANNER</option>
+      <option value="BLOG">BLOG</option>
+      <option value="REVIEW">REVIEW</option>
+    </select>
+
+    <label>Select Image</label>
+    <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+
+    <img id="preview" class="preview-img" style="display:none;">
+
+    <br><br>
+    <button onclick="uploadImage()">Upload Image</button>
+
+    <p class="message" id="message"></p>
+  </div>
+
+  <h2>Uploaded Images</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Image</th>
+        <th>File Name</th>
+        <th>Module</th>
+        <th>URL</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="imageTable"></tbody>
+  </table>
+
+</div>
+
+<script>
+const API_BASE_URL = "http://localhost:8085";
+
+window.onload = function(){
+  loadImages();
+};
+
+function getToken(){
+  return localStorage.getItem("token");
+}
+
+function previewImage(event){
+  const file = event.target.files[0];
+  const preview = document.getElementById("preview");
+
+  if(file){
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+  }
+}
+
+async function uploadImage(){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const file = document.getElementById("imageFile").files[0];
+  const module = document.getElementById("module").value;
+
+  if(!file){
+    alert("Please select an image");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("module", module);
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/images/upload`, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token
+      },
+      body: formData
+    });
+
+    const text = await response.text();
+
+    if(!response.ok){
+      throw new Error(text || "Upload failed");
+    }
+
+    const result = JSON.parse(text);
+
+    if(result.success){
+      document.getElementById("message").style.color = "green";
+      document.getElementById("message").innerText = result.message;
+
+      document.getElementById("imageFile").value = "";
+      document.getElementById("preview").style.display = "none";
+
+      loadImages();
+    }
+
+  }catch(error){
+    console.log(error);
+    document.getElementById("message").style.color = "red";
+    document.getElementById("message").innerText = error.message;
+  }
+}
+
+async function loadImages(){
+  const token = getToken();
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/images/getAll`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    const table = document.getElementById("imageTable");
+    table.innerHTML = "";
+
+    if(!result.success || !result.data || result.data.length === 0){
+      table.innerHTML = `
+        <tr>
+          <td colspan="6">No images found</td>
+        </tr>
+      `;
+      return;
+    }
+
+    result.data.forEach(image => {
+      const fullUrl = API_BASE_URL + image.fileUrl;
+
+      table.innerHTML += `
+        <tr>
+          <td>${image.id}</td>
+          <td><img src="${fullUrl}" class="table-img"></td>
+          <td>${image.fileName}</td>
+          <td>${image.module}</td>
+          <td>${image.fileUrl}</td>
+          <td>
+            <input type="file" id="updateFile${image.id}" accept="image/*">
+            <button class="update-btn" onclick="updateImage(${image.id})">Update</button>
+            <button class="delete-btn" onclick="deleteImage(${image.id})">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+
+  }catch(error){
+    console.log(error);
+  }
+}
+
+async function updateImage(id){
+  const token = getToken();
+  const file = document.getElementById(`updateFile${id}`).files[0];
+
+  if(!file){
+    alert("Please select new image");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE_URL}/api/images/update/${id}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": "Bearer " + token
+    },
+    body: formData
+  });
+
+  const result = await response.json();
+  alert(result.message || "Image updated");
+  loadImages();
+}
+
+async function deleteImage(id){
+  const token = getToken();
+
+  if(!confirm("Delete this image?")){
+    return;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/images/delete/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+  alert(result.message || "Image deleted");
+  loadImages();
+}
+</script>
+
+</body>
+</html>

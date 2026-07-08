@@ -336,6 +336,7 @@ header{
         <button onclick="showTab('orders', this)">My Orders</button>
         <!-- <button onclick="showTab('consultations', this)">Consultations</button> -->
         <button onclick="showTab('address', this)">Address</button>
+        <button onclick="showTab('clinicReviews', this)">Clinic Reviews</button>
       </div>
 
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -369,11 +370,11 @@ header{
         <div class="form-group">
           <label>Gender</label>
           <select id="gender">
-            <option value="">Select Gender</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
+  <option value="">Select Gender</option>
+  <option value="MALE">Male</option>
+  <option value="FEMALE">Female</option>
+  <option value="OTHER">Other</option>
+</select>
         </div>
 
         <div class="form-group">
@@ -381,10 +382,7 @@ header{
           <input type="text" id="city" placeholder="Enter city">
         </div>
 
-        <div class="form-group full">
-          <label>Health Concern</label>
-          <textarea id="healthConcern" placeholder="Example: knee pain, diabetes, hair fall, digestion issue"></textarea>
-        </div>
+        
       </div>
 
       <button class="save-btn" onclick="saveProfile()">Save Profile</button>
@@ -399,49 +397,57 @@ header{
 </footer>
 
 <script>
-// this will Show First Letter of Customer Name (Like Amazon)
-// if(localStorage.getItem("isLoggedIn") !== "true"){
-//   alert("Please login first");
-//   window.location.href = "login.html";
-// }
-//when backend is connected uncomment the above 3 lines and remove the below 3 lines
-localStorage.setItem("isLoggedIn", "true");
-localStorage.setItem("userName", "Neolife User");
-localStorage.setItem("userEmail", "customer@example.com");
-function loadProfile(){
-  let name = localStorage.getItem("userName") || "Neolife User";
-  let email = localStorage.getItem("userEmail") || "user@email.com";
+const API_BASE_URL = "http://localhost:8085";
 
-  document.getElementById("profileName").innerText = name;
-  document.getElementById("profileEmail").innerText = email;
-  document.getElementById("profileAvatar").innerText = name.charAt(0).toUpperCase();
+async function loadProfile(){
+  const token = localStorage.getItem("token");
 
-  document.getElementById("fullName").value = localStorage.getItem("profileFullName") || name;
-  document.getElementById("email").value = localStorage.getItem("profileEmail") || email;
-  document.getElementById("phone").value = localStorage.getItem("profilePhone") || "";
-  document.getElementById("age").value = localStorage.getItem("profileAge") || "";
-  document.getElementById("gender").value = localStorage.getItem("profileGender") || "";
-  document.getElementById("city").value = localStorage.getItem("profileCity") || "";
-  document.getElementById("healthConcern").value = localStorage.getItem("profileHealthConcern") || "";
+  if(!token){
+    alert("Please login first");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/users/getProfile`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    if(result.success === true){
+      const user = result.data;
+
+      document.getElementById("profileName").innerText = user.name;
+      document.getElementById("profileEmail").innerText = user.email;
+      document.getElementById("profileAvatar").innerText = user.name.charAt(0).toUpperCase();
+
+      document.getElementById("fullName").value = user.name || "";
+      document.getElementById("email").value = user.email || "";
+      document.getElementById("phone").value = user.phoneNumber || "";
+      document.getElementById("age").value = user.age || "";
+      document.getElementById("gender").value = user.gender || "";
+
+      if(user.addresses && user.addresses.length > 0){
+        localStorage.setItem("addresses", JSON.stringify(user.addresses));
+      }
+
+    } else {
+      alert(result.message || "Unable to load profile");
+      window.location.href = "login.html";
+    }
+
+  } catch(error){
+    alert("Backend not connected or token expired");
+    console.log(error);
+  }
 }
 
 function saveProfile(){
-  let fullName = document.getElementById("fullName").value;
-  let email = document.getElementById("email").value;
-
-  localStorage.setItem("profileFullName", fullName);
-  localStorage.setItem("profileEmail", email);
-  localStorage.setItem("profilePhone", document.getElementById("phone").value);
-  localStorage.setItem("profileAge", document.getElementById("age").value);
-  localStorage.setItem("profileGender", document.getElementById("gender").value);
-  localStorage.setItem("profileCity", document.getElementById("city").value);
-  localStorage.setItem("profileHealthConcern", document.getElementById("healthConcern").value);
-
-  localStorage.setItem("userName", fullName);
-  localStorage.setItem("userEmail", email);
-
-  alert("Profile updated successfully");
-  loadProfile();
+  alert("Update Profile API should be connected next.");
 }
 
 function showTab(tab, btn){
@@ -457,13 +463,13 @@ function showTab(tab, btn){
   if(tab === "orders"){
     content.innerHTML = `
       <h1>My Orders</h1>
-
       <div class="info-box">
         <h3>No Orders Yet</h3>
         <p>Your product orders will appear here after you place an order.</p>
       </div>
     `;
   }
+
 
   if(tab === "consultations"){
     content.innerHTML = `
@@ -476,100 +482,328 @@ function showTab(tab, btn){
     `;
   }
 
-
 if(tab === "address"){
   content.innerHTML = `
     <h1>My Address</h1>
 
-    <div class="form-grid">
+    <div class="info-box">
+      <h3 id="addressFormTitle">Add New Address</h3>
 
-      <div class="form-group">
-        <label>House No</label>
-        <input type="text" id="houseNo" placeholder="Enter house / flat number">
+      <input type="hidden" id="addressId">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>House No</label>
+          <input type="text" id="houseNo" placeholder="Enter house / flat number">
+        </div>
+
+        <div class="form-group">
+          <label>Street</label>
+          <input type="text" id="street" placeholder="Enter street">
+        </div>
+
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="addressCity" placeholder="Enter city">
+        </div>
+
+        <div class="form-group">
+          <label>State</label>
+          <input type="text" id="state" placeholder="Enter state">
+        </div>
+
+        <div class="form-group">
+          <label>Pincode</label>
+          <input type="text" id="pincode" placeholder="Enter pincode">
+        </div>
+
+        <div class="form-group">
+          <label>Landmark</label>
+          <input type="text" id="landmark" placeholder="Enter landmark">
+        </div>
+
+        <div class="form-group">
+          <label>Address Type</label>
+          <select id="addressType">
+            <option value="Home">Home</option>
+            <option value="Work">Work</option>
+            <option value="Office">Office</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Default Address</label>
+          <select id="isDefault">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>Street</label>
-        <input type="text" id="street" placeholder="Enter street">
-      </div>
-
-      <div class="form-group">
-        <label>City</label>
-        <input type="text" id="addressCity" placeholder="Enter city">
-      </div>
-
-      <div class="form-group">
-        <label>State</label>
-        <input type="text" id="state" placeholder="Enter state">
-      </div>
-
-      <div class="form-group">
-        <label>Pincode</label>
-        <input type="text" id="pincode" placeholder="Enter pincode">
-      </div>
-
-      <div class="form-group">
-        <label>Landmark</label>
-        <input type="text" id="landmark" placeholder="Enter landmark">
-      </div>
-
-      <div class="form-group">
-        <label>Address Type</label>
-        <select id="addressType">
-          <option value="">Select Address Type</option>
-          <option value="HOME">Home</option>
-          <option value="WORK">Work</option>
-          <option value="OFFICE">Office</option>
-          <option value="OTHER">Other</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Default Address</label>
-        <select id="isDefault">
-          <option value="false">No</option>
-          <option value="true">Yes</option>
-        </select>
-      </div>
-
+      <button class="save-btn" onclick="saveAddress()">Save Address</button>
+      <button class="logout-btn" onclick="clearAddressForm()">Cancel</button>
     </div>
 
-    <button class="save-btn" onclick="saveAddress()">Save Address</button>
+    <div id="addressList"></div>
   `;
 
-  document.getElementById("houseNo").value = localStorage.getItem("houseNo") || "";
-  document.getElementById("street").value = localStorage.getItem("street") || "";
-  document.getElementById("addressCity").value = localStorage.getItem("addressCity") || "";
-  document.getElementById("state").value = localStorage.getItem("state") || "";
-  document.getElementById("pincode").value = localStorage.getItem("pincode") || "";
-  document.getElementById("landmark").value = localStorage.getItem("landmark") || "";
-  document.getElementById("addressType").value = localStorage.getItem("addressType") || "";
-  document.getElementById("isDefault").value = localStorage.getItem("isDefault") || "false";
+  setTimeout(loadAddresses, 100);
+}
+
+if(tab === "clinicReviews"){
+    content.innerHTML = `
+        <h1>Clinic Reviews</h1>
+
+        <div class="info-box">
+            <h3>Write a Clinic Review</h3>
+            <p>Share your experience about doctor consultation, therapy or treatment.</p>
+
+            <button class="save-btn"
+                onclick="window.location.href='write-review.html'">
+                Write Review
+            </button>
+        </div>
+
+        <div id="myReviews"></div>
+    `;
+    setTimeout(loadMyReviews, 100);
+}
+  
+
 }
 
 
  
-}
-function saveAddress(){
-  localStorage.setItem("houseNo", document.getElementById("houseNo").value);
-  localStorage.setItem("street", document.getElementById("street").value);
-  localStorage.setItem("addressCity", document.getElementById("addressCity").value);
-  localStorage.setItem("state", document.getElementById("state").value);
-  localStorage.setItem("pincode", document.getElementById("pincode").value);
-  localStorage.setItem("landmark", document.getElementById("landmark").value);
-  localStorage.setItem("addressType", document.getElementById("addressType").value);
-  localStorage.setItem("isDefault", document.getElementById("isDefault").value);
 
-  alert("Address saved successfully");
+async function loadAddresses(){
+  const token = localStorage.getItem("token");
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/address/get`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    const addressList = document.getElementById("addressList");
+
+    if(!result.success || !result.data || result.data.length === 0){
+      addressList.innerHTML = `
+        <div class="info-box">
+          <h3>No Address Found</h3>
+          <p>Your saved address will appear here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = `<h2 style="margin:25px 0;color:#123524;">Saved Addresses</h2>`;
+
+    result.data.forEach(address => {
+      html += `
+        <div class="info-box">
+          <h3>
+            ${address.addressType || "Address"}
+            ${address.isDefault ? " ✅ Default" : ""}
+          </h3>
+
+          <p>
+            <b>${address.fullName || ""}</b><br>
+            Phone: ${address.phone || "-"}<br>
+            ${address.houseNo || ""}, ${address.street || ""}<br>
+            ${address.city || ""}, ${address.state || ""} - ${address.pincode || ""}<br>
+            Landmark: ${address.landmark || "N/A"}
+          </p>
+
+          <button class="save-btn" onclick='editAddress(${JSON.stringify(address)})'>
+            Edit
+          </button>
+
+          <button class="logout-btn" onclick="deleteAddress(${address.id})">
+            Delete
+          </button>
+
+          ${!address.isDefault ? `
+            <button class="save-btn" onclick="setDefaultAddress(${address.id})">
+              Make Default
+            </button>
+          ` : ""}
+        </div>
+      `;
+    });
+
+    addressList.innerHTML = html;
+
+  }catch(error){
+    console.log(error);
+    alert("Address loading failed");
+  }
+}
+
+async function saveAddress(){
+  const token = localStorage.getItem("token");
+  const addressId = document.getElementById("addressId").value;
+
+  const addressData = {
+    houseNo: document.getElementById("houseNo").value,
+    street: document.getElementById("street").value,
+    city: document.getElementById("addressCity").value,
+    state: document.getElementById("state").value,
+    pincode: document.getElementById("pincode").value,
+    landmark: document.getElementById("landmark").value,
+    addressType: document.getElementById("addressType").value,
+    isDefault: document.getElementById("isDefault").value === "true"
+  };
+
+  const url = addressId
+    ? `${API_BASE_URL}/api/address/update/${addressId}`
+    : `${API_BASE_URL}/api/address/add`;
+
+  const method = addressId ? "PUT" : "POST";
+
+  try{
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(addressData)
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message || "Address saved successfully");
+      clearAddressForm();
+      loadAddresses();
+    }else{
+      alert(result.message || "Address save failed");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Address save failed");
+  }
+}
+
+function editAddress(address){
+  document.getElementById("addressFormTitle").innerText = "Edit Address";
+  document.getElementById("addressId").value = address.id;
+  document.getElementById("houseNo").value = address.houseNo || "";
+  document.getElementById("street").value = address.street || "";
+  document.getElementById("addressCity").value = address.city || "";
+  document.getElementById("state").value = address.state || "";
+  document.getElementById("pincode").value = address.pincode || "";
+  document.getElementById("landmark").value = address.landmark || "";
+  document.getElementById("addressType").value = address.addressType || "Home";
+  document.getElementById("isDefault").value = String(address.isDefault || false);
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function deleteAddress(id){
+  const token = localStorage.getItem("token");
+
+  if(!confirm("Are you sure you want to delete this address?")){
+    return;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/address/delete/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+
+  alert(result.message || "Address deleted");
+  loadAddresses();
+}
+
+async function setDefaultAddress(id){
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/api/address/${id}/default`, {
+    method: "PUT",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+
+  alert(result.message || "Default address updated");
+  loadAddresses();
+}
+
+function clearAddressForm(){
+  document.getElementById("addressFormTitle").innerText = "Add New Address";
+  document.getElementById("addressId").value = "";
+  document.getElementById("houseNo").value = "";
+  document.getElementById("street").value = "";
+  document.getElementById("addressCity").value = "";
+  document.getElementById("state").value = "";
+  document.getElementById("pincode").value = "";
+  document.getElementById("landmark").value = "";
+  document.getElementById("addressType").value = "Home";
+  document.getElementById("isDefault").value = "false";
 }
 
 function logout(){
-  localStorage.setItem("isLoggedIn", "false");
+  localStorage.clear();
   alert("Logged out successfully");
   window.location.href = "login.html";
 }
+async function loadMyReviews() {
+
+    const token = localStorage.getItem("token");
+
+const response = await fetch(
+    "http://localhost:8085/api/clinic-reviews/my-reviews",
+    {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    }
+);
+
+    const result = await response.json();
+
+    if (!result.success) return;
+
+    let html = "";
+
+    result.data.forEach(review => {
+
+            html += `
+            <div class="info-box">
+                <h3>${review.doctor}</h3>
+
+                <p>
+    <b>Therapy:</b> ${review.therapyService}<br>
+    <b>Rating:</b> ${"⭐".repeat(review.rating)}<br>
+    <b>Status:</b> ${review.status}<br><br>
+
+    ${review.message}
+</p>
+            </div>
+            `;
+
+        });
+
+    document.getElementById("myReviews").innerHTML =
+        html || "<p>No approved reviews.</p>";
+}
 
 loadProfile();
+
 </script>
 
 </body>

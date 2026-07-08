@@ -76,8 +76,15 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
   </nav>
 
   <div class="home-auth-buttons">
-    <a href="login.html" class="home-login-btn">Login</a>
-    <a href="register.html" class="home-register-btn">Register</a>
+    <span id="authLinks">
+  <a href="login.html" class="home-login-btn">Login</a>
+<a href="register.html" class="home-register-btn">Register</a>
+
+</span>
+
+<span id="logoutBox" style="display:none;">
+  <button onclick="logoutUser()" class="logout-btn">Logout</button>
+</span>
     <a href="profile.html" class="home-profile-btn">
       <i class="fa-solid fa-user"></i>
     </a>
@@ -85,23 +92,21 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
 </header>
   
-<section class="offer-banner-section" id="offerBannerSection">
+<section class="offer-banner-section" id="offerBannerSection" style="display:none;">
   <div class="offer-banner" id="offerBanner">
     <div class="offer-content">
-      <span class="offer-label" id="offerLabel">Festival Offer</span>
-      <h2 id="offerTitle">Diwali Wellness Offer</h2>
-      <p id="offerDescription">Flat 30% OFF on selected Ayurvedic products.</p>
+      <span class="offer-label" id="offerLabel"></span>
+      <h2 id="offerTitle"></h2>
+      <p id="offerDescription"></p>
 
-      <div class="offer-code-box">
-        Use Code: <strong id="offerCode">DIWALI30</strong>
+      <div class="offer-code-box" id="offerCodeBox">
+        Use Code: <strong id="offerCode"></strong>
       </div>
 
-      <a href="products.html" class="offer-btn">Shop Now</a>
+      <a href="products.html" class="offer-btn" id="offerButton">Shop Now</a>
     </div>
 
-    <div class="offer-discount" id="offerDiscount">
-      30% OFF
-    </div>
+    <div class="offer-discount" id="offerDiscount"></div>
   </div>
 </section>
  <section class="hero-slider" id="home">
@@ -252,10 +257,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
     <div class="product-buttons">
 
-      <a href="products.html" class="btn">
-        Order Now
-      </a>
-
+     <button class="btn order-btn" onclick="goToProductPage()">Order Now</button>
       
 
     </div>
@@ -472,7 +474,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
   
 
-  <section id="consultation">
+  <!-- <section id="consultation">
     <h2 class="section-title">How Online Consultation Works</h2>
 
     <div class="steps">
@@ -487,7 +489,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     <div style="text-align:center; margin-top:25px;">
       <a href="consultation.html" class="btn">Book Consultation Now</a>
     </div>
-  </section>
+  </section> -->
 
   <section>
     <div class="about">
@@ -500,26 +502,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     </div>
   </section>
 
-  <section class="reviews">
-    <h2 class="section-title">Customer Reviews</h2>
+ <section class="reviews" id="clinicReviewsSection">
+  <h2 class="section-title">Customer Reviews</h2>
 
-    <div class="cards">
-      <div class="card">
-        <h3>⭐⭐⭐⭐⭐</h3>
-        <p>"Excellent service and very helpful consultation."</p>
-      </div>
-
-      <div class="card">
-        <h3>⭐⭐⭐⭐⭐</h3>
-        <p>"Good quality Ayurvedic products and fast delivery."</p>
-      </div>
-
-      <div class="card">
-        <h3>⭐⭐⭐⭐⭐</h3>
-        <p>"Easy online booking and professional health advice."</p>
-      </div>
-    </div>
-  </section>
+  <div class="review-slider">
+    <div class="review-list" id="clinicReviewsContainer"></div>
+  </div>
+</section>
 
   <section class="contact" id="contact">
     <h2 class="section-title">Contact Us</h2>
@@ -647,29 +636,73 @@ function scrollDoctors(distance){
         behavior: "smooth"
     });
 }
+let offers = [];
+let currentOfferIndex = 0;
+let offerInterval;
 
 async function loadActiveOffer(){
-    try{
-        const response = await fetch("http://localhost:8085/api/offers/active");
+  try{
+    const response = await fetch("http://localhost:8085/api/offers/active/get");
+    const result = await response.json();
 
-        if(!response.ok){
-            throw new Error("No active offer");
-        }
-
-        const offer = await response.json();
-
-        document.getElementById("offerTitle").innerText = offer.title;
-        document.getElementById("offerDescription").innerText = offer.description;
-        document.getElementById("offerCode").innerText = offer.couponCode;
-        document.getElementById("offerDiscount").innerText = offer.discountText;
-        document.getElementById("offerLabel").innerText = offer.offerLabel || "Special Offer";
-
-        document.getElementById("offerBannerSection").style.display = "block";
-
-    }catch(error){
-        // Until backend is ready, default offer will show.
-        console.log("Using default offer banner");
+    if(!result.success || !result.data || result.data.length === 0){
+      document.getElementById("offerBannerSection").style.display = "none";
+      return;
     }
+
+    offers = result.data;
+    currentOfferIndex = 0;
+
+    showOffer(currentOfferIndex);
+
+    if(offerInterval){
+      clearInterval(offerInterval);
+    }
+
+    if(offers.length > 1){
+      offerInterval = setInterval(() => {
+        currentOfferIndex = (currentOfferIndex + 1) % offers.length;
+        showOffer(currentOfferIndex);
+      }, 4000);
+    }
+
+  }catch(error){
+    console.log("Offer loading failed", error);
+    document.getElementById("offerBannerSection").style.display = "none";
+  }
+}
+
+function showOffer(index){
+  const offer = offers[index];
+
+  document.getElementById("offerLabel").innerText = offer.offerLabel || "Special Offer";
+  document.getElementById("offerTitle").innerText = offer.offerTitle || "";
+  document.getElementById("offerDescription").innerText = offer.description || "";
+  document.getElementById("offerCode").innerText = offer.couponCode || "";
+  document.getElementById("offerDiscount").innerText = offer.discountText || "";
+
+  const offerButton = document.getElementById("offerButton");
+  offerButton.innerText = offer.buttonText || "Shop Now";
+  offerButton.href = offer.buttonLink || "products.html";
+
+  document.getElementById("offerCodeBox").style.display = "block";
+
+  if(!offer.couponCode){
+    document.getElementById("offerCodeBox").style.display = "none";
+  }
+
+  const offerBanner = document.getElementById("offerBanner");
+
+  if(offer.bannerImageUrl){
+    offerBanner.style.backgroundImage =
+      `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('${offer.bannerImageUrl}')`;
+    offerBanner.style.backgroundSize = "cover";
+    offerBanner.style.backgroundPosition = "center";
+  }else{
+    offerBanner.style.backgroundImage = "";
+  }
+
+  document.getElementById("offerBannerSection").style.display = "block";
 }
 function toggleCategory() {
   const menu = document.getElementById("categoryDropdown");
@@ -691,6 +724,107 @@ document.addEventListener("click", function(e){
 
 
 loadActiveOffer();
+
+function checkLoginStatus(){
+  const token = localStorage.getItem("token");
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  if(token && isLoggedIn === "true"){
+    document.getElementById("authLinks").style.display = "none";
+    document.getElementById("logoutBox").style.display = "inline-block";
+  }else{
+    document.getElementById("authLinks").style.display = "inline-block";
+    document.getElementById("logoutBox").style.display = "none";
+  }
+}
+let allApprovedReviews = [];
+let currentReviewIndex = 0;
+let reviewInterval;
+
+async function loadApprovedClinicReviews(){
+  try{
+    const response = await fetch("http://localhost:8085/api/clinic-reviews/getAll");
+    const result = await response.json();
+
+    if(!result.success || !result.data){
+      document.getElementById("clinicReviewsSection").style.display = "none";
+      return;
+    }
+
+    allApprovedReviews = result.data.filter(review => review.status === "APPROVED");
+
+    if(allApprovedReviews.length === 0){
+      document.getElementById("clinicReviewsSection").style.display = "none";
+      return;
+    }
+
+    showReview(currentReviewIndex);
+
+    if(reviewInterval){
+      clearInterval(reviewInterval);
+    }
+
+    if(allApprovedReviews.length > 1){
+      reviewInterval = setInterval(() => {
+        currentReviewIndex = (currentReviewIndex + 1) % allApprovedReviews.length;
+        showReview(currentReviewIndex);
+      }, 4000);
+    }
+
+  }catch(error){
+    console.log("Clinic reviews loading failed", error);
+  }
+}
+
+function showReview(index){
+  const review = allApprovedReviews[index];
+  const container = document.getElementById("clinicReviewsContainer");
+
+  container.innerHTML = `
+    <div class="review-item">
+      <div class="review-top">
+        <div class="review-name">${review.patientName || "Patient"}</div>
+        <div class="review-rating">${"★".repeat(review.rating || 5)}</div>
+      </div>
+
+      <div class="review-service">
+        ${review.therapyService || ""}
+      </div>
+
+      <div class="review-text">
+        ${review.message || ""}
+      </div>
+    </div>
+  `;
+
+  document.getElementById("clinicReviewsSection").style.display = "block";
+}
+
+loadApprovedClinicReviews();
+
+
+
+function goToProductPage(){
+  const token = localStorage.getItem("token");
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  if(token && isLoggedIn === "true"){
+    window.location.href = "products.html";
+  }else{
+    alert("Please login first to order products.");
+    window.location.href = "login.html";
+  }
+}
+
+function logoutUser(){
+  localStorage.clear();
+  alert("Logged out successfully");
+  window.location.href = "homepage.html";
+}
+
+
+
+checkLoginStatus();
 </script>
 </body>
 </html>

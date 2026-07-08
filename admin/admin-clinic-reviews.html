@@ -18,7 +18,8 @@ header{background:#1b5e20;color:white;padding:18px 8%;display:flex;justify-conte
 .filter-box{background:white;padding:18px;border-radius:12px;margin-bottom:25px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
 .filter-box button{padding:10px 15px;margin:5px;border:none;border-radius:6px;cursor:pointer;background:#e8f5e9;color:#1b5e20;font-weight:bold}
 .filter-box button:hover{background:#1b5e20;color:white}
-table{width:100%;border-collapse:collapse;background:white;box-shadow:0 5px 15px rgba(0,0,0,.08)}
+.table-wrap{overflow-x:auto}
+table{width:100%;min-width:1200px;border-collapse:collapse;background:white;box-shadow:0 5px 15px rgba(0,0,0,.08)}
 th{background:#2e7d32;color:white;padding:14px}
 td{padding:13px;border-bottom:1px solid #ddd;text-align:center}
 .review-text{max-width:280px;text-align:left}
@@ -31,8 +32,7 @@ select{padding:8px;border-radius:6px;border:1px solid #ccc}
 .view-btn,.delete-btn{color:white;border:none;padding:8px 12px;border-radius:5px;cursor:pointer;margin:2px}
 .view-btn{background:#1976d2}
 .delete-btn{background:#d32f2f}
-.view-btn:hover{background:#1565c0}
-.delete-btn:hover{background:#b71c1c}
+.no-result{text-align:center;color:#d32f2f;font-weight:bold;margin-top:20px;display:none}
 </style>
 </head>
 
@@ -46,139 +46,283 @@ select{padding:8px;border-radius:6px;border:1px solid #ccc}
 <div class="container">
 
   <div class="cards">
-    <div class="card"><h3>Total Clinic Reviews</h3><p>4</p></div>
-    <div class="card"><h3>Approved</h3><p>2</p></div>
-    <div class="card"><h3>Pending</h3><p>1</p></div>
-    <div class="card"><h3>Rejected</h3><p>1</p></div>
+    <div class="card"><h3>Total Clinic Reviews</h3><p id="totalCount">0</p></div>
+    <div class="card"><h3>Approved</h3><p id="approvedCount">0</p></div>
+    <div class="card"><h3>Pending</h3><p id="pendingCount">0</p></div>
+    <div class="card"><h3>Rejected</h3><p id="rejectedCount">0</p></div>
   </div>
 
   <div class="filter-box">
-    <button onclick="filterReviews('All')">All</button>
-    <button onclick="filterReviews('Pending')">Pending</button>
-    <button onclick="filterReviews('Approved')">Approved</button>
-    <button onclick="filterReviews('Rejected')">Rejected</button>
+    <button onclick="filterReviews('ALL')">All</button>
+    <button onclick="filterReviews('PENDING')">Pending</button>
+    <button onclick="filterReviews('APPROVED')">Approved</button>
+    <button onclick="filterReviews('REJECTED')">Rejected</button>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Review ID</th>
-        <th>Patient</th>
-        <th>Doctor</th>
-        <th>Therapy / Service</th>
-        <th>Rating</th>
-        <th>Review</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>Change Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Review ID</th>
+          <th>Patient</th>
+          <th>Doctor</th>
+          <th>Therapy / Service</th>
+          <th>Rating</th>
+          <th>Review</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Change Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
 
-    <tbody id="reviewTable">
-      <tr data-status="Approved">
-        <td>CR001</td>
-        <td>Sandhya Bhat</td>
-        <td>Dr. N. G. Muraleedhara</td>
-        <td>Ayurveda Consultation</td>
-        <td class="rating">★★★★★</td>
-        <td class="review-text">Very experienced doctor and good explanation about treatment.</td>
-        <td>24-06-2026</td>
-        <td><span class="status approved">Approved</span></td>
-        <td>
-          <select onchange="changeStatus(this)">
-            <option>Pending</option>
-            <option selected>Approved</option>
-            <option>Rejected</option>
-          </select>
-        </td>
-        <td>
-          <button class="view-btn" onclick="viewReview(this)">View</button>
-          <button class="delete-btn" onclick="deleteReview(this)">Delete</button>
-        </td>
-      </tr>
+      <tbody id="reviewTable"></tbody>
+    </table>
+  </div>
 
-      <tr data-status="Pending">
-        <td>CR002</td>
-        <td>Keerthana</td>
-        <td>Dr. Aditi</td>
-        <td>Yoga Therapy</td>
-        <td class="rating">★★★★★</td>
-        <td class="review-text">Homely center and peaceful environment.</td>
-        <td>23-06-2026</td>
-        <td><span class="status pending">Pending</span></td>
-        <td>
-          <select onchange="changeStatus(this)">
-            <option selected>Pending</option>
-            <option>Approved</option>
-            <option>Rejected</option>
-          </select>
-        </td>
-        <td>
-          <button class="view-btn" onclick="viewReview(this)">View</button>
-          <button class="delete-btn" onclick="deleteReview(this)">Delete</button>
-        </td>
-      </tr>
+  <p id="noResult" class="no-result">No reviews found.</p>
 
-      <tr data-status="Rejected">
-        <td>CR003</td>
-        <td>Suresh</td>
-        <td>Dr. Sibagath</td>
-        <td>Panchakarma Therapy</td>
-        <td class="rating">★★★☆☆</td>
-        <td class="review-text">Good service but waiting time was more.</td>
-        <td>22-06-2026</td>
-        <td><span class="status rejected">Rejected</span></td>
-        <td>
-          <select onchange="changeStatus(this)">
-            <option>Pending</option>
-            <option>Approved</option>
-            <option selected>Rejected</option>
-          </select>
-        </td>
-        <td>
-          <button class="view-btn" onclick="viewReview(this)">View</button>
-          <button class="delete-btn" onclick="deleteReview(this)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
 </div>
 
 <script>
-function changeStatus(select){
-  const row = select.closest("tr");
-  const statusSpan = row.querySelector(".status");
-  statusSpan.innerText = select.value;
-  row.dataset.status = select.value;
-  statusSpan.className = "status " + select.value.toLowerCase();
+const API_BASE_URL = "http://localhost:8085";
+let allReviews = [];
+
+window.onload = function(){
+  loadReviews();
+};
+
+function getToken(){
+  return localStorage.getItem("token");
 }
 
-function filterReviews(status){
-  document.querySelectorAll("#reviewTable tr").forEach(row=>{
-    row.style.display = status === "All" || row.dataset.status === status ? "" : "none";
+async function loadReviews(){
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/getAll`);
+
+    if(!response.ok){
+      alert("Failed to load clinic reviews");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      allReviews = result.data || [];
+      displayReviews(allReviews);
+      updateCards(allReviews);
+    }else{
+      alert(result.message || "Failed to load reviews");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+function displayReviews(reviews){
+  const table = document.getElementById("reviewTable");
+  table.innerHTML = "";
+
+  if(!reviews || reviews.length === 0){
+    document.getElementById("noResult").style.display = "block";
+    return;
+  }
+
+  document.getElementById("noResult").style.display = "none";
+
+  reviews.forEach(review => {
+    const status = review.status || "PENDING";
+
+    table.innerHTML += `
+      <tr data-status="${status}">
+        <td>${review.id}</td>
+        <td>${review.patientName || "-"}</td>
+        <td>${review.doctor || "-"}</td>
+        <td>${review.therapyService || "-"}</td>
+        <td class="rating">${getStars(review.rating)}</td>
+        <td class="review-text">${review.message || "-"}</td>
+        <td>${formatDate(review.createdAt)}</td>
+        <td>
+          <span class="status ${status.toLowerCase()}">${status}</span>
+        </td>
+        <td>
+          <select onchange="updateReviewStatus(${review.id}, this.value)">
+            <option value="PENDING" ${status === "PENDING" ? "selected" : ""}>Pending</option>
+            <option value="APPROVED" ${status === "APPROVED" ? "selected" : ""}>Approved</option>
+            <option value="REJECTED" ${status === "REJECTED" ? "selected" : ""}>Rejected</option>
+          </select>
+        </td>
+        <td>
+          <button class="view-btn" onclick="viewReview(${review.id})">View</button>
+          <button class="delete-btn" onclick="deleteReview(${review.id})">Delete</button>
+        </td>
+      </tr>
+    `;
   });
 }
 
-function viewReview(btn){
-  const td = btn.closest("tr").querySelectorAll("td");
-  alert(
-    "Clinic Review Details\n\n"+
-    "Review ID: "+td[0].innerText+"\n"+
-    "Patient: "+td[1].innerText+"\n"+
-    "Doctor: "+td[2].innerText+"\n"+
-    "Therapy / Service: "+td[3].innerText+"\n"+
-    "Rating: "+td[4].innerText+"\n"+
-    "Review: "+td[5].innerText+"\n"+
-    "Date: "+td[6].innerText+"\n"+
-    "Status: "+td[7].innerText
-  );
+function updateCards(reviews){
+  document.getElementById("totalCount").innerText = reviews.length;
+  document.getElementById("approvedCount").innerText =
+    reviews.filter(r => r.status === "APPROVED").length;
+  document.getElementById("pendingCount").innerText =
+    reviews.filter(r => r.status === "PENDING").length;
+  document.getElementById("rejectedCount").innerText =
+    reviews.filter(r => r.status === "REJECTED").length;
 }
 
-function deleteReview(btn){
-  if(confirm("Delete this clinic review?")){
-    btn.closest("tr").remove();
+function filterReviews(status){
+  if(status === "ALL"){
+    displayReviews(allReviews);
+    return;
   }
+
+  const filtered = allReviews.filter(r => r.status === status);
+  displayReviews(filtered);
+}
+
+async function viewReview(id){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/getById/${id}`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if(!response.ok){
+      alert("Failed to fetch review details");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      const r = result.data;
+
+      alert(
+        "Clinic Review Details\n\n" +
+        "Review ID: " + r.id + "\n" +
+        "Patient: " + (r.patientName || "-") + "\n" +
+        "Doctor: " + (r.doctor || "-") + "\n" +
+        "Therapy / Service: " + (r.therapyService || "-") + "\n" +
+        "Rating: " + r.rating + "\n" +
+        "Review: " + (r.message || "-") + "\n" +
+        "Status: " + (r.status || "-") + "\n" +
+        "Date: " + formatDate(r.createdAt)
+      );
+
+    }else{
+      alert(result.message || "Review not found");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function updateReviewStatus(id, status){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/update-status/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ status: status })
+    });
+
+    if(!response.ok){
+      alert("Failed to update status");
+      loadReviews();
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message);
+      loadReviews();
+    }else{
+      alert(result.message || "Failed to update status");
+      loadReviews();
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+    loadReviews();
+  }
+}
+
+async function deleteReview(id){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    return;
+  }
+
+  if(!confirm("Delete this clinic review?")){
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if(!response.ok){
+      alert("Failed to delete review");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message);
+      loadReviews();
+    }else{
+      alert(result.message || "Delete failed");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+function getStars(rating){
+  let stars = "";
+  for(let i = 1; i <= 5; i++){
+    stars += i <= rating ? "★" : "☆";
+  }
+  return stars;
+}
+
+function formatDate(date){
+  if(!date) return "-";
+  return date.substring(0, 10);
 }
 </script>
 

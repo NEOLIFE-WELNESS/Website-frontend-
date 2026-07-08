@@ -797,7 +797,81 @@ body{
 body{
   padding-top:140px;
 }
+.checkout-box{
+  max-width:760px;
+  margin:70px auto;
+  background:white;
+  padding:30px;
+  border-radius:24px;
+  box-shadow:0 18px 45px rgba(0,0,0,0.18);
+}
 
+.checkout-title{
+  color:#123524;
+  margin-bottom:20px;
+  text-align:center;
+}
+
+.checkout-step{
+  margin-bottom:22px;
+}
+
+.checkout-step h3{
+  color:#123524;
+  margin-bottom:12px;
+}
+
+.address-card{
+  display:block;
+  padding:15px;
+  border:1px solid #ddd;
+  border-radius:14px;
+  margin-bottom:12px;
+  cursor:pointer;
+  background:#fffaf0;
+}
+
+.address-card:hover{
+  border-color:#d4af37;
+}
+
+.summary-item{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid #eee;
+  padding:12px 0;
+}
+
+.checkout-total{
+  font-size:22px;
+  font-weight:800;
+  color:#b8860b;
+  text-align:right;
+  margin-top:18px;
+}
+
+.checkout-actions{
+  display:flex;
+  gap:12px;
+  margin-top:24px;
+}
+
+.checkout-actions button{
+  flex:1;
+  padding:14px;
+  border-radius:30px;
+  font-weight:800;
+}
+
+.back-checkout-btn{
+  background:#ddd;
+  color:#123524;
+}
+
+.continue-checkout-btn{
+  background:#123524;
+  color:white;
+}
 </style>
 </head>
 
@@ -838,87 +912,8 @@ body{
   <h2 class="section-title">Neolife Wellness Products</h2>
   <p class="section-desc">Pure, natural and trusted Ayurvedic products for daily wellness.</p>
 
-  <div class="products-grid">
-
-    <div class="product-card">
-      <img src="../assets/neo-liv.jpg" alt="Neolife Special Hair Oil">
-      <div class="product-content">
-        <h3>Neolife Special Hair Oil</h3>
-        <p>Traditional Ayurvedic hair oil that helps nourish and strengthen hair naturally.</p>
-        <div class="price">₹299</div>
-        <div class="btn-group">
-          <button class="details-btn" onclick="viewDetails('Neolife Special Hair Oil','../assets/neo-liv.jpg',299,'Traditional Ayurvedic hair oil prepared with natural herbs to support healthy, strong and shiny hair.','../assets/neo-painil.jpg','../assets/neo-liv.jpg')">View Details</button>
-          <button class="cart-btn" onclick="addToCart('Neolife Special Hair Oil',299,'../assets/hair-oil.jpg')">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../assets/joints-care.jpg" alt="Neolife Joints Care Choorna">
-      <div class="product-content">
-        <h3>Neolife Joints Care Choorna</h3>
-        <p>Ayurvedic support for joint comfort, flexibility and daily mobility.</p>
-        <div class="price">₹249</div>
-        <div class="btn-group">
-          <button class="details-btn" onclick="viewDetails('Neolife Joints Care Choorna','../assets/joints-care.jpg',249,'Ayurvedic herbal choorna that supports joint comfort, movement, flexibility and daily wellness.','../assets/joints-care-2.jpg','../assets/joints-care-3.jpg')">View Details</button>
-          <button class="cart-btn" onclick="addToCart('Neolife Joints Care Choorna',249,'../assets/joints-care.jpg')">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../assets/neodia.jpg" alt="Neodia Kashayam">
-      <div class="product-content">
-        <h3>Neodia Kashayam</h3>
-        <p>Traditional herbal formulation prepared for daily wellness and balance.</p>
-        <div class="price">₹350</div>
-        <div class="btn-group">
-          <button class="details-btn" onclick="viewDetails('Neodia Kashayam','../assets/neodia.jpg',350,'Neodia Kashayam is a natural Ayurvedic formulation that supports daily wellness and metabolic balance.','../assets/neodia-2.jpg','../assets/neodia-3.jpg')">View Details</button>
-          <button class="cart-btn" onclick="addToCart('Neodia Kashayam',350,'../assets/neodia.jpg')">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../assets/neopainil.jpg" alt="NeoPainil Capsules">
-      <div class="product-content">
-        <h3>NeoPainil Capsules</h3>
-        <p>Ayurvedic formulation that supports comfort, movement and body balance.</p>
-        <div class="price">₹199</div>
-        <div class="btn-group">
-          <button class="details-btn" onclick="viewDetails('NeoPainil Capsules','../assets/neopainil.jpg',199,'Ayurvedic capsules prepared to support body comfort, movement and daily activity.','../assets/neopainil-2.jpg','../assets/neopainil-3.jpg')">View Details</button>
-          <button class="cart-btn" onclick="addToCart('NeoPainil Capsules',199,'../assets/neopainil.jpg')">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../assets/liver-syrup.jpg" alt="Neoliv Liver Syrup">
-      <div class="product-content">
-        <h3>Neoliv Liver Syrup</h3>
-        <p>Ayurvedic liver care syrup that supports digestion and liver wellness.</p>
-        <div class="price">₹280</div>
-        <div class="btn-group">
-          <button class="details-btn" onclick="viewDetails('Neoliv Liver Syrup','../assets/liver-syrup.jpg',280,'Ayurvedic liver care syrup prepared to support digestion, appetite and liver wellness.','../assets/liver-syrup-2.jpg','../assets/liver-syrup-3.jpg')">View Details</button>
-          <button class="cart-btn" onclick="addToCart('Neoliv Liver Syrup',280,'../assets/liver-syrup.jpg')">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../assets/neolife-syrup.jfif" alt="Nirgundi Taila">
-      <div class="product-content">
-        <h3>Nirgundi Taila</h3>
-        <p>Traditional Ayurvedic oil commonly used for body massage and wellness care.</p>
-        <div class="price">₹220</div>
-        <div class="btn-group">
-          <button class="details-btn" onclick="viewDetails('Nirgundi Taila','../assets/neolife-syrup.jfif',220,'Traditional Ayurvedic massage oil commonly used for body comfort and wellness care.','../assets/nirgundi-2.jpg','../assets/nirgundi-3.jpg')">View Details</button>
-          <button class="cart-btn" onclick="addToCart('Nirgundi Taila',220,'../assets/neolife-syrup.jfif')">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  <div class="products-grid" id="productsGrid">
+</div>
 </section>
 
 <!-- View Details -->
@@ -984,7 +979,91 @@ body{
   🛒
   <span id="cartCount">0</span>
 </div>
+<div id="checkoutModal" class="modal">
+  <div class="checkout-box">
 
+    <span class="details-close" onclick="closeCheckoutModal()">×</span>
+
+    <h2 class="checkout-title">Checkout</h2>
+
+    <div id="addressStep" class="checkout-step">
+      <h3>1. Select Delivery Address</h3>
+      <div id="addressList"></div>
+
+      <div class="checkout-actions">
+        <button class="back-checkout-btn" onclick="closeCheckoutModal()">Cancel</button>
+        <button class="continue-checkout-btn" onclick="continueToSummary()">Continue</button>
+      </div>
+    </div>
+
+    <div id="summaryStep" class="checkout-step" style="display:none;">
+      <h3>Selected Address</h3>
+      <div id="checkoutAddress" class="address-card"></div>
+
+      <h3>2. Order Summary</h3>
+      <div id="checkoutItems"></div>
+
+      <h3>3. Delivery Option</h3>
+      <label class="address-card">
+        <input type="radio" checked>
+        Standard Delivery - 3 to 5 days - ₹50
+      </label>
+
+      <h3>4. Payment Method</h3>
+      <label class="address-card">
+        <input type="radio" name="paymentMethod" value="COD" checked>
+        Cash on Delivery
+      </label>
+      <label class="address-card">
+        <input type="radio" name="paymentMethod" value="COD" checked>
+        Online Payment
+      </label>
+
+      <div class="checkout-total">
+        Total: ₹<span id="checkoutTotal">0</span>
+      </div>
+
+      <div class="checkout-actions">
+        <button class="back-checkout-btn" onclick="backToAddress()">Back</button>
+        <button class="continue-checkout-btn" onclick="confirmPlaceOrder()">Confirm Order</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+    <div id="summaryStep" class="checkout-step" style="display:none;">
+  <h3>Selected Address</h3>
+  <div id="checkoutAddress" class="address-card"></div>
+
+  <h3>2. Order Summary</h3>
+  <div id="checkoutItems"></div>
+
+  <h3>3. Delivery Option</h3>
+  <label class="address-card">
+    <input type="radio" checked>
+    Standard Delivery - 3 to 5 days - ₹50
+  </label>
+
+  <h3>4. Payment Method</h3>
+  <label class="address-card">
+    <input type="radio" name="paymentMethod" value="COD" checked>
+    Cash on Delivery
+  </label>
+
+  <div class="checkout-total">
+    Total: ₹<span id="checkoutTotal">0</span>
+  </div>
+
+  <div class="checkout-actions">
+    <button class="back-checkout-btn" onclick="backToAddress()">Back</button>
+    <button class="continue-checkout-btn" onclick="confirmPlaceOrder()">Confirm Order</button>
+  </div>
+</div>
+
+  </div>
+</div>
+</div>
 <footer class="footer">
   <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
 </footer>
@@ -993,26 +1072,281 @@ body{
   <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
 </a>
 
+
 <script>
+const API_BASE_URL = "http://localhost:8085";
+
 let cart = [];
 let selectedProduct = {};
 let productImages = [];
 let currentImageIndex = 0;
 let modalQty = 1;
 
-function viewDetails(name,img,price,desc,img2,img3){
-  selectedProduct = {name,img,price,desc};
+window.onload = loadProducts;
 
-  productImages = [img];
-  if(img2) productImages.push(img2);
-  if(img3) productImages.push(img3);
+async function loadProducts(){
+  const response = await fetch(`${API_BASE_URL}/api/products/getAll`);
+  const result = await response.json();
+  console.log("Products from API:", result.data);
+  
 
+  if(result.success){
+    displayProducts(result.data || []);
+  }
+}
+
+function getImages(product){
+  let urls = product.imageUrls || [];
+
+  if(typeof urls === "string"){
+    urls = urls
+      .split(",")
+      .map(url => url.trim())
+      .filter(url => url !== "");
+  }
+
+  if(!Array.isArray(urls) || urls.length === 0){
+    return ["../assets/prod_logo.png"];
+  }
+
+  return urls.map(url => {
+    if(url.startsWith("http")){
+      return url;
+    }
+
+    if(url.startsWith("/")){
+      return API_BASE_URL + url;
+    }
+
+    return API_BASE_URL + "/" + url;
+  });
+}
+function backToAddress(){
+  document.getElementById("summaryStep").style.display = "none";
+  document.getElementById("addressStep").style.display = "block";
+}
+function displayProducts(products){
+  const grid = document.getElementById("productsGrid");
+  grid.innerHTML = "";
+
+  products.forEach((product, index) => {
+    const productName = product.name || product.productName || "No Name";
+    const description = product.description || "";
+    const price = product.price || 0;
+    const images = getImages(product);
+    const mainImage = images[0];
+
+    grid.innerHTML += `
+      <div class="product-card">
+        <img src="${mainImage}" alt="${productName}">
+
+        <div class="product-content">
+          <h3>${productName}</h3>
+          <p>${description}</p>
+          <div class="price">₹${price}</div>
+
+          <div class="btn-group">
+            <button class="details-btn" onclick="viewDetails(${index})">
+              View Details
+            </button>
+
+            <button class="cart-btn" onclick="addToCart('${productName}', ${price}, '${mainImage}', ${product.id})">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    product._images = images;
+  });
+
+  window.loadedProducts = products;
+}
+// async function placeOrder(){
+//   const token = localStorage.getItem("token");
+
+//   if(!token){
+//     alert("Please login first to place order.");
+//     window.location.href = "login.html";
+//     return;
+//   }
+
+//   if(cart.length === 0){
+//     alert("Your cart is empty.");
+//     return;
+//   }
+
+//   await openAddressModal();
+
+// const selected = document.querySelector('input[name="address"]:checked');
+
+// if(!selected){
+//   alert("Please select address.");
+//   return;
+// }
+
+// const addressId = selected.value;
+
+//   const orderRequest = {
+//     addressId: Number(addressId),
+//     items: cart.map(item => ({
+//       productId: item.productId,
+//       quantity: item.qty
+//     }))
+//   };
+
+//   try{
+//     const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         "Authorization": "Bearer " + token
+//       },
+//       body: JSON.stringify(orderRequest)
+//     });
+
+//     const result = await response.json();
+
+//     if(result.success){
+//       alert("Order placed successfully! Order No: " + result.data.orderNumber);
+//       cart = [];
+//       updateCart();
+//       closeCart();
+//       window.location.href = "my-orders.html";
+//     }else{
+//       alert(result.message || "Failed to place order");
+//     }
+
+//   }catch(error){
+//     console.log(error);
+//     alert("Unable to place order. Check backend.");
+//   }
+// }
+let checkoutAddressId = null;
+
+async function placeOrder(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login first.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  if(cart.length === 0){
+    alert("Your cart is empty.");
+    return;
+  }
+
+  document.getElementById("summaryStep").style.display = "none";
+  document.getElementById("addressStep").style.display = "block";
+
+  await loadUserAddresses();
+
+  closeCart();
+  document.getElementById("checkoutModal").style.display = "block";
+}
+function closeCheckoutModal(){
+  document.getElementById("checkoutModal").style.display = "none";
+}
+function continueToSummary(){
+  const selected = document.querySelector('input[name="address"]:checked');
+
+  if(!selected){
+    alert("Please select address.");
+    return;
+  }
+
+  checkoutAddressId = Number(selected.value);
+  document.getElementById("checkoutAddress").innerText =
+    selected.closest("label").innerText;
+
+  let total = 0;
+  let html = "";
+
+  cart.forEach(item => {
+    const subtotal = item.price * item.qty;
+    total += subtotal;
+
+    html += `
+      <div class="summary-item">
+        <div><b>${item.name}</b><br>Qty: ${item.qty}</div>
+        <div>₹${subtotal}</div>
+      </div>
+    `;
+  });
+
+  total += 50;
+
+  html += `
+    <div class="summary-item">
+      <div>Delivery Charge</div>
+      <div>₹50</div>
+    </div>
+  `;
+
+  document.getElementById("checkoutItems").innerHTML = html;
+  document.getElementById("checkoutTotal").innerText = total;
+
+  document.getElementById("addressStep").style.display = "none";
+  document.getElementById("summaryStep").style.display = "block";
+}
+
+async function confirmPlaceOrder(){
+  const token = localStorage.getItem("token");
+
+  const orderRequest = {
+    addressId: Number(checkoutAddressId),
+    items: cart.map(item => ({
+      productId: item.productId,
+      quantity: item.qty
+    }))
+  };
+
+  const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(orderRequest)
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    alert("Order placed successfully! Order No: " + result.data.orderNumber);
+    cart = [];
+    updateCart();
+    closeCheckoutModal();
+    window.location.href = "my-orders.html";
+  }else{
+    alert(result.message || "Failed to place order");
+  }
+}
+function viewDetails(index){
+  const product = window.loadedProducts[index];
+
+  const productName = product.name || product.productName || "No Name";
+  const description = product.description || "";
+  const price = product.price || 0;
+
+  selectedProduct = {
+  id: product.id,
+  name: productName,
+  img: product._images[0],
+  price,
+  desc: description
+};
+
+  productImages = product._images;
   currentImageIndex = 0;
   modalQty = 1;
 
-  document.getElementById("modalName").innerText = name;
+  document.getElementById("modalName").innerText = productName;
   document.getElementById("modalPrice").innerText = "₹" + price;
-  document.getElementById("modalDesc").innerText = desc;
+  document.getElementById("modalDesc").innerText = description;
   document.getElementById("modalQty").innerText = modalQty;
 
   loadThumbnails();
@@ -1022,7 +1356,7 @@ function viewDetails(name,img,price,desc,img2,img3){
 }
 
 function loadThumbnails(){
-  let thumbBox = document.getElementById("thumbImages");
+  const thumbBox = document.getElementById("thumbImages");
   thumbBox.innerHTML = "";
 
   productImages.forEach((image,index)=>{
@@ -1034,13 +1368,17 @@ function showProductImage(){
   document.getElementById("mainProductImg").src = productImages[currentImageIndex];
 
   document.querySelectorAll(".details-thumbs img").forEach((img,index)=>{
-    img.classList.toggle("active",index === currentImageIndex);
+    img.classList.toggle("active", index === currentImageIndex);
   });
 }
 
 function selectProductImage(index){
   currentImageIndex = index;
   showProductImage();
+}
+
+function closeModal(){
+  document.getElementById("detailsModal").style.display = "none";
 }
 
 function modalIncreaseQty(){
@@ -1055,16 +1393,25 @@ function modalDecreaseQty(){
   }
 }
 
-function closeModal(){
-  document.getElementById("detailsModal").style.display = "none";
-}
+function addToCart(name, price, img, productId, shouldOpenCart = true){
+  let existing = cart.find(item => item.name === name);
 
-function addModalProduct(){
-  for(let i=0;i<modalQty;i++){
-    addToCart(selectedProduct.name,selectedProduct.price,selectedProduct.img,false);
+  if(existing){
+    existing.qty++;
+  }else{
+    cart.push({name, price, img, productId, qty:1});
   }
 
   updateCart();
+
+  if(shouldOpenCart) openCart();
+}
+
+function addModalProduct(){
+  for(let i = 0; i < modalQty; i++){
+    addToCart(selectedProduct.name, selectedProduct.price, selectedProduct.img, selectedProduct.id, false);
+  }
+
   closeModal();
   openCart();
 }
@@ -1073,31 +1420,15 @@ function buyNow(){
   addModalProduct();
 }
 
-function addToCart(name,price,img,shouldOpenCart=true){
-  let existingProduct = cart.find(item => item.name === name);
-
-  if(existingProduct){
-    existingProduct.qty++;
-  }else{
-    cart.push({name,price,img,qty:1});
-  }
-
-  updateCart();
-
-  if(shouldOpenCart){
-    openCart();
-  }
-}
-
 function updateCart(){
-  let cartItems = document.getElementById("cartItems");
-  let cartTotal = document.getElementById("cartTotal");
-  let cartCount = document.getElementById("cartCount");
+  const cartItems = document.getElementById("cartItems");
+  const cartTotal = document.getElementById("cartTotal");
+  const cartCount = document.getElementById("cartCount");
 
   cartItems.innerHTML = "";
 
   let total = 0;
-  let totalItems = 0;
+  let count = 0;
 
   if(cart.length === 0){
     cartItems.innerHTML = `<p class="cart-empty">Your cart is empty</p>`;
@@ -1108,21 +1439,14 @@ function updateCart(){
 
   cart.forEach((item,index)=>{
     total += item.price * item.qty;
-    totalItems += item.qty;
+    count += item.qty;
 
     cartItems.innerHTML += `
       <div class="cart-item">
-        <img src="${item.img}" alt="${item.name}">
+        <img src="${item.img}">
         <div class="cart-info">
           <h4>${item.name}</h4>
-          <p>₹${item.price} × ${item.qty} = ₹${item.price * item.qty}</p>
-
-          <div class="qty-box">
-            <button onclick="decreaseQty(${index})">−</button>
-            <span>${item.qty}</span>
-            <button onclick="increaseQty(${index})">+</button>
-          </div>
-
+          <p>₹${item.price} × ${item.qty}</p>
           <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
         </div>
       </div>
@@ -1130,21 +1454,7 @@ function updateCart(){
   });
 
   cartTotal.innerText = total;
-  cartCount.innerText = totalItems;
-}
-
-function increaseQty(index){
-  cart[index].qty++;
-  updateCart();
-}
-
-function decreaseQty(index){
-  if(cart[index].qty > 1){
-    cart[index].qty--;
-  }else{
-    cart.splice(index,1);
-  }
-  updateCart();
+  cartCount.innerText = count;
 }
 
 function removeItem(index){
@@ -1159,53 +1469,77 @@ function openCart(){
 function closeCart(){
   document.getElementById("cartSidebar").classList.remove("active");
 }
+let selectedAddressId = null;
 
-function placeOrder(){
-  if(cart.length === 0){
-    alert("Your cart is empty.");
-    return;
-  }
+async function loadUserAddresses() {
 
-  let message = "Hello Neolife Wellness Center,%0A%0AI want to place an order:%0A";
-  let total = 0;
+    const token = localStorage.getItem("token");
 
-  cart.forEach((item,index)=>{
-    let itemTotal = item.price * item.qty;
-    total += itemTotal;
-    message += `${index + 1}. ${item.name} - ₹${item.price} x ${item.qty} = ₹${itemTotal}%0A`;
-  });
+    try {
 
-  message += `%0ATotal Amount: ₹${total}%0A%0APlease confirm my order.`;
+        const response = await fetch(`${API_BASE_URL}/api/address/get`, {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
 
-  window.open("https://wa.me/918660401903?text=" + message, "_blank");
-}
+        const result = await response.json();
 
-function shareProduct() {
+        const list = document.getElementById("addressList");
+        list.innerHTML = "";
 
-    const productName = "Neolife Special Hair Oil";
-    const text = "Check out this product from Neolife Wellness Center";
-    const url = window.location.href;
+        if (!result.success || !result.data || result.data.length === 0) {
 
-    if (navigator.share) {
+            alert("No delivery address found. Please add an address first.");
 
-        navigator.share({
-            title: productName,
-            text: text,
-            url: url
-        })
-        .then(() => console.log("Shared successfully"))
-        .catch((error) => console.log(error));
+            closeCheckoutModal();
 
-    } else {
+            window.location.href = "profile.html#address";
 
-        // Fallback for browsers without Web Share API
-        const whatsappUrl =
-            `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
+            return;
+        }
 
-        window.open(whatsappUrl, "_blank");
+        result.data.forEach(address => {
+
+            list.innerHTML += `
+                <label class="address-card">
+                    <input
+                        type="radio"
+                        name="address"
+                        value="${address.id}"
+                        ${address.isDefault ? "checked" : ""}
+                    >
+
+                    <b>${address.fullName}</b><br>
+                    ${address.phone}<br>
+                    ${address.houseNo},
+                    ${address.street},
+                    ${address.city},
+                    ${address.state} - ${address.pincode}
+                </label>
+            `;
+        });
+
+        const defaultAddress =
+            result.data.find(a => a.isDefault) || result.data[0];
+
+        selectedAddressId = defaultAddress.id;
+
+    } catch (e) {
+
+        alert("Unable to load addresses.");
+
     }
 }
-</script>
 
+async function openAddressModal(){
+  await loadUserAddresses();
+  document.getElementById("addressModal").style.display = "block";
+}
+
+function closeAddressModal(){
+  document.getElementById("addressModal").style.display = "none";
+}
+</script>
 </body>
 </html>

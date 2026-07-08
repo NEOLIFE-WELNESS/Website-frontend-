@@ -113,30 +113,104 @@
       </div>
     </div>
 
+    
+
+  </div>
+</section>
+<section class="services-page">
+  <h2 class="section-title">Beauty & Cosmetic Treatments</h2>
+
+  <div class="therapy-grid">
+
     <div class="therapy-card">
-      <img src="../assets/beauty.png" alt="Beauty & Cosmetic Therapy">
+      <img src="../assets/facial.png" alt="Facial Treatment">
       <div class="therapy-content">
-        <h3>💄 Beauty & Cosmetic Therapy</h3>
-        <p>Beauty and cosmetic treatments for enhancing natural appearance and confidence.</p>
+        <h3>💆 Facial Treatment</h3>
+        <p>Professional facials for glowing, healthy and rejuvenated skin.</p>
         <ul>
-          <li>Eyebrow Microblading</li>
-          <li>Black Lip Treatment</li>
-          <li>Skin Care & Facial Therapy</li>
-          <li>Beauty Consultation</li>
+          <li>Glow Facial</li>
+          <li>Anti-Aging Facial</li>
+          <li>Acne Facial</li>
+          <li>Skin Rejuvenation</li>
         </ul>
-        <p><strong>Duration:</strong> 30–60 minutes</p>
-        <button class="btn" onclick="openTherapy('beauty')">Learn More</button>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openBeauty('facial')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/hair-treatment.png" alt="Hair Treatment">
+      <div class="therapy-content">
+        <h3>💇 Hair Treatment</h3>
+        <p>Natural hair care therapies for hair growth, hair fall control and scalp nourishment.</p>
+        <ul>
+          <li>Hair Growth Therapy</li>
+          <li>Hair Fall Control</li>
+          <li>Scalp Detox</li>
+          <li>Hair Nourishment</li>
+        </ul>
+        <p><strong>Duration:</strong> 60–90 minutes</p>
+        <button class="btn" onclick="openBeauty('hair')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/lip.png" alt="Lip Correction">
+      <div class="therapy-content">
+        <h3>💋 Lip Correction</h3>
+        <p>Treatment for dark lips, pigmentation and natural lip brightening.</p>
+        <ul>
+          <li>Dark Lip Correction</li>
+          <li>Lip Pigmentation Care</li>
+          <li>Lip Hydration</li>
+          <li>Natural Lip Brightening</li>
+        </ul>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openBeauty('lip')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/eyebrow.png" alt="Eyebrow Correction">
+      <div class="therapy-content">
+        <h3>👁️ Eyebrow Correction</h3>
+        <p>Eyebrow enhancement for fuller, shaped and natural-looking brows.</p>
+        <ul>
+          <li>Microblading</li>
+          <li>Ombre Brows</li>
+          <li>Combination Brows</li>
+          <li>Eyebrow Reconstruction</li>
+        </ul>
+        <p><strong>Duration:</strong> 90–120 minutes</p>
+        <button class="btn" onclick="openBeauty('eyebrow')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/pedicure.png" alt="Pedicure">
+      <div class="therapy-content">
+        <h3>🦶 Pedicure</h3>
+        <p>Complete foot care with cleansing, nail care, exfoliation and massage.</p>
+        <ul>
+          <li>Foot Cleansing</li>
+          <li>Nail Trimming</li>
+          <li>Exfoliation</li>
+          <li>Foot Massage</li>
+        </ul>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openBeauty('pedicure')">Learn More</button>
       </div>
     </div>
 
   </div>
 </section>
-
 <div id="therapyModal" class="modal">
   <div class="modal-box">
     <span class="close" onclick="closeTherapy()">&times;</span>
+
     <h2 id="modalTitle"></h2>
     <p id="modalText"></p>
+
     <a href="consultation.html" class="btn">Book Consultation</a>
   </div>
 </div>
@@ -387,7 +461,92 @@ The duration of each beauty therapy session typically ranges from 30 to 60 minut
 At Neolife Wellness Center, we believe true beauty comes from healthy skin and personalized care. Our Beauty & Cosmetic Therapy services are designed to help you look your best, feel confident and maintain naturally beautiful, healthy skin with safe and professional treatments.`
 }
 };
+const beautyDetails = {
+  facial: {
+    title: "💆 Facial Treatment",
+    text: `Facial treatments help cleanse, nourish and rejuvenate the skin.
 
+Benefits:
+• Deep skin cleansing
+• Improves skin glow
+• Reduces dullness
+• Supports acne care
+• Helps skin hydration
+• Refreshes and relaxes the face
+
+Duration: 45–60 minutes`
+  },
+
+  hair: {
+    title: "💇 Hair Treatment",
+    text: `Hair treatment helps improve scalp health, reduce hair fall and support natural hair growth.
+
+Benefits:
+• Promotes healthy hair growth
+• Reduces hair fall
+• Strengthens hair roots
+• Nourishes scalp
+• Improves hair texture
+• Supports dandruff control
+
+Procedure:
+• Herbal oil application
+• Scalp massage
+• Steam therapy
+• Hair pack
+• Hair wash
+• Kesh dhoopana / hair dhuni
+
+Duration: 60–90 minutes`
+  },
+
+  lip: {
+    title: "💋 Lip Correction",
+    text: `Lip correction treatment helps reduce dark lip pigmentation and supports smoother, healthier lips.
+
+Benefits:
+• Reduces dark lips
+• Improves lip texture
+• Supports natural lip brightness
+• Hydrates dry lips
+• Enhances appearance
+
+Duration: 45–60 minutes`
+  },
+
+  eyebrow: {
+    title: "👁️ Eyebrow Correction",
+    text: `Eyebrow correction helps improve eyebrow shape, fullness and natural appearance.
+
+Services:
+• Microblading
+• Ombre brows
+• Combination brows
+• Eyebrow reconstruction
+
+Duration: 90–120 minutes`
+  },
+
+  pedicure: {
+    title: "🦶 Pedicure",
+    text: `Pedicure is a complete foot care treatment for clean, healthy and relaxed feet.
+
+Procedure:
+• Foot cleansing
+• Nail trimming
+• Exfoliation
+• Massage
+• Moisturizing
+
+Duration: 45–60 minutes`
+  }
+};
+
+function openBeauty(type) {
+  document.getElementById("modalTitle").innerText = beautyDetails[type].title;
+  document.getElementById("modalText").innerText = beautyDetails[type].text;
+  document.getElementById("therapyModal").style.display = "flex";
+}
 function openTherapy(type) {
   document.getElementById("modalTitle").innerText = therapyDetails[type].title;
   document.getElementById("modalText").innerText = therapyDetails[type].text;

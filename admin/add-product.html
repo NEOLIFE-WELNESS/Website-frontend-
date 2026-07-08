@@ -124,6 +124,44 @@ header h1{
         grid-template-columns:1fr;
     }
 }
+#imagePreviewBox{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.preview-img{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+#uploadedImagesBox{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:15px;
+}
+
+.image-select-card{
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+  background:white;
+}
+
+.image-select-card img{
+  width:100%;
+  height:90px;
+  object-fit:cover;
+  border-radius:8px;
+}
+
+.image-select-card input{
+  margin-top:8px;
+}
 </style>
 </head>
 
@@ -151,7 +189,7 @@ header h1{
 
         <div class="form-group">
             <label>Product Name</label>
-            <input type="text" id="name" required>
+            <input type="text" id="productName" required>
         </div>
 
         <div class="form-group">
@@ -219,28 +257,18 @@ header h1{
             <div class="form-group">
                 <label>Manufacturer</label>
                 <select id="manufacturer" required>
-                    <option value="">Select Manufacturer</option>
-                    <option value="Neolife Wellness Center">Neolife Wellness Center</option>
-                    <option value="Neolives">Neolives</option>
-                    <option value="Arya Vaidya Pharmacy">Arya Vaidya Pharmacy</option>
-                    <option value="Kottakkal Ayurveda">Kottakkal Ayurveda</option>
-                    <option value="Other">Other</option>
-                </select>
+  <option value="">Select Manufacturer</option>
+</select>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Upload Product Image</label>
-            <input
-                type="file"
-                id="productImage"
-                accept="image/*"
-                onchange="previewImage(event)"
-                required>
-        </div>
+  <label>Select Product Images</label>
+  <div id="uploadedImagesBox"></div>
+</div>
 
         <div class="form-group">
-            <img id="imagePreview" alt="Product Preview">
+           <div id="imagePreviewBox"></div>
         </div>
 
         <button type="submit" class="save-btn">
@@ -254,46 +282,150 @@ header h1{
 </div>
 
 <script>
-document.getElementById("productForm").addEventListener("submit", function(e){
-    e.preventDefault();
+const API_BASE_URL = "http://localhost:8085";
+let selectedImageUrls = [];
 
-    const imageFile = document.getElementById("productImage").files[0];
+window.onload = function(){
+  loadManufacturers();
+  loadProductImages();
+};
 
-    const product = {
-        productNo: document.getElementById("productNo").value,
-        name: document.getElementById("name").value,
-        description: document.getElementById("description").value,
-        price: document.getElementById("price").value,
-        stock: document.getElementById("stock").value,
-        netQty: document.getElementById("netQty").value,
-        expiryDate: document.getElementById("expiryDate").value,
-        indication: document.getElementById("indication").value,
-        category: document.getElementById("category").value,
-        manufacturer: document.getElementById("manufacturer").value,
-        imageName: imageFile ? imageFile.name : ""
-    };
+async function loadProductImages(){
+  const token = localStorage.getItem("token");
+  const box = document.getElementById("uploadedImagesBox");
 
-    console.log(product);
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/images/module/PRODUCT`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
 
-    document.getElementById("message").style.color = "green";
-    document.getElementById("message").innerText = "Product saved successfully!";
+    const text = await response.text();
 
-    document.getElementById("productForm").reset();
+    if(!response.ok){
+      box.innerHTML = `<p style="color:red;">Unable to load product images. Status: ${response.status}</p>`;
+      console.log(text);
+      return;
+    }
 
-    document.getElementById("imagePreview").style.display = "none";
-    document.getElementById("imagePreview").src = "";
+    const result = JSON.parse(text);
+
+    box.innerHTML = "";
+
+    if(!result.success || !result.data || result.data.length === 0){
+      box.innerHTML = "<p>No product images uploaded.</p>";
+      return;
+    }
+
+    result.data.forEach(img => {
+      const fullUrl = API_BASE_URL + img.fileUrl;
+
+      box.innerHTML += `
+        <label class="image-select-card">
+          <img src="${fullUrl}">
+          <input type="checkbox" value="${img.fileUrl}" onchange="toggleImageSelection(this)">
+        </label>
+      `;
+    });
+
+  }catch(error){
+    console.log(error);
+    box.innerHTML = `<p style="color:red;">Error loading images</p>`;
+  }
+}
+
+function toggleImageSelection(checkbox){
+  if(checkbox.checked){
+    selectedImageUrls.push(checkbox.value);
+  }else{
+    selectedImageUrls = selectedImageUrls.filter(url => url !== checkbox.value);
+  }
+}
+
+document.getElementById("productForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../pages/login.html";
+    return;
+  }
+
+  if(selectedImageUrls.length === 0){
+    alert("Please select at least one product image");
+    return;
+  }
+
+  const product = {
+    productName: document.getElementById("productName").value.trim(),
+    category: document.getElementById("category").value,
+    productCode: document.getElementById("productNo").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    price: Number(document.getElementById("price").value),
+    stock: Number(document.getElementById("stock").value),
+    netQty: document.getElementById("netQty").value.trim(),
+    indication: document.getElementById("indication").value.trim(),
+    manufacturerName: document.getElementById("manufacturer").value,
+    manufacturingDate: new Date().toISOString().split("T")[0],
+    expiryDate: document.getElementById("expiryDate").value + "-01",
+    imageUrls: selectedImageUrls.join(",")
+  };
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/products/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(product)
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      alert("Product created successfully");
+      window.location.href = "admin-products.html";
+    }else{
+      alert(result.message || "Failed to add product");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected or admin token invalid");
+  }
 });
 
-function previewImage(event){
-    const preview = document.getElementById("imagePreview");
-    const file = event.target.files[0];
+async function loadManufacturers(){
+  const token = localStorage.getItem("token");
 
-    if(file){
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = "block";
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/manufacturers/getAll`, {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      const manufacturerSelect = document.getElementById("manufacturer");
+      manufacturerSelect.innerHTML = `<option value="">Select Manufacturer</option>`;
+
+      result.data.forEach(item => {
+        manufacturerSelect.innerHTML += `
+          <option value="${item.name}">${item.name}</option>
+        `;
+      });
     }
+  }catch(error){
+    console.log(error);
+  }
 }
 </script>
-
 </body>
 </html>

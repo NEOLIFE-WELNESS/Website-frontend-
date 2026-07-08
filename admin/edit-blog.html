@@ -18,36 +18,25 @@
 
 <h1>Edit Blog</h1>
 
-<form>
+<form id="editBlogForm">
 
 <label>Blog Title</label>
-<input type="text" value="Benefits of Panchakarma Therapy">
-
-<label>Category</label>
-<select>
-<option selected>Ayurveda</option>
-<option>Yoga</option>
-<option>Panchakarma</option>
-<option>Naturopathy</option>
-<option>Lifestyle</option>
-</select>
+<input type="text" id="title" required>
 
 <label>Author Name</label>
-<input type="text" value="Dr. N. G. Muraleedhara">
+<input type="text" id="authorName" placeholder="Doctor Name">
 
 <label>Current Image</label>
-<img src="../assets/ayurvedapancha.png" class="edit-blog-img">
+<img id="currentImage" src="../assets/main_logo.jpeg" class="edit-blog-img">
 
-<label>Change Image</label>
-<input type="file">
+<label>Image URL</label>
+<input type="text" id="imageUrl" placeholder="https://example.com/blog.jpg">
 
-<label>Short Description</label>
-<textarea rows="4">Panchakarma is a traditional Ayurvedic detox therapy that supports body cleansing, rejuvenation and long-term wellness.</textarea>
 
 <label>Full Blog Content</label>
-<textarea rows="10">Panchakarma is one of the most important detoxification and rejuvenation therapies in Ayurveda. It helps cleanse the body, balance doshas and support natural healing.</textarea>
+<textarea id="content" rows="10" required></textarea>
 
-<button type="submit" class="save-btn">
+<button type="button" class="save-btn" onclick="updateBlog()">
 Update Blog
 </button>
 
@@ -60,6 +49,124 @@ Back to Blog List
 </div>
 
 </section>
+
+<script>
+const API_BASE_URL = "http://localhost:8085";
+
+const params = new URLSearchParams(window.location.search);
+const blogId = params.get("id");
+
+window.onload = function(){
+  loadBlog();
+};
+
+async function loadBlog(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login as Admin.");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  if(!blogId){
+    alert("Blog ID missing.");
+    window.location.href = "admin-blogs.html";
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/blogs/${blogId}/get`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if(!response.ok){
+      alert("Failed to load blog. Please login again as Admin.");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      const blog = result.data;
+
+      document.getElementById("title").value = blog.title || "";
+      document.getElementById("authorName").value = blog.authorName || "";
+      document.getElementById("imageUrl").value = blog.imageUrl || "";
+      
+      document.getElementById("content").value = blog.content || "";
+
+      document.getElementById("currentImage").src =
+        blog.imageUrl || "../assets/main_logo.jpeg";
+
+    }else{
+      alert(result.message || "Failed to load blog");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function updateBlog(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login as Admin.");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  if(!blogId){
+    alert("Blog ID missing.");
+    return;
+  }
+
+  const blog = {
+    title: document.getElementById("title").value.trim(),
+    authorName: document.getElementById("authorName").value.trim(),
+    imageUrl: document.getElementById("imageUrl").value.trim(),
+    content: document.getElementById("content").value.trim()
+  };
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/blogs/update/${blogId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(blog)
+    });
+
+    const text = await response.text();
+    console.log("STATUS:", response.status);
+    console.log("RESPONSE:", text);
+
+    if(!response.ok){
+      alert(text || "Failed to update blog");
+      return;
+    }
+
+    const result = text ? JSON.parse(text) : null;
+
+    if(result && result.success){
+      alert(result.message || "Blog updated successfully");
+      window.location.href = "admin-blogs.html";
+    }else{
+      alert(result?.message || "Update failed");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+</script>
 
 </body>
 </html>

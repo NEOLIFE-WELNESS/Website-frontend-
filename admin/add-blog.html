@@ -16,42 +16,32 @@
 
 <h1>Add New Blog</h1>
 
-<form>
-
+<!-- <form id="blogForm" onsubmit="saveBlog(event)">
+     -->
+<form id="blogForm">
 <label>Blog Title</label>
-<input type="text" placeholder="Enter title">
-
-<label>Category</label>
-
-<select>
-<option>Ayurveda</option>
-<option>Yoga</option>
-<option>Panchakarma</option>
-<option>Naturopathy</option>
-<option>Lifestyle</option>
-</select>
+<input type="text" id="title" placeholder="Enter title" required>
 
 <label>Author Name</label>
-<input type="text" placeholder="Doctor Name">
+<input type="text" id="author" placeholder="Doctor Name" required>
 
-<label>Upload Image</label>
-<input type="file">
-
-<label>Short Description</label>
-
-<textarea rows="4"></textarea>
+<label>Select Blog Image</label>
+<div id="uploadedBlogImagesBox"></div>
 
 <label>Full Blog Content</label>
-
-<textarea rows="10"></textarea>
+<textarea id="content" rows="10" required></textarea>
 
 <div class="blog-buttons">
 
-    <button type="button" class="draft-btn">
+    <button type="button"
+            class="draft-btn"
+            onclick="saveDraft()">
         Save as Draft
     </button>
 
-    <button type="submit" class="publish-btn">
+    <button type="button"
+            class="publish-btn"
+            onclick="publishBlog()">
         Publish Blog
     </button>
 
@@ -62,6 +52,140 @@
 </div>
 
 </section>
+<script>
+const API_BASE_URL = "http://localhost:8085";
+let selectedBlogImageUrl = "";
 
+window.onload = function(){
+  loadBlogImages();
+};
+
+async function loadBlogImages(){
+  const token = localStorage.getItem("token");
+  const box = document.getElementById("uploadedBlogImagesBox");
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/images/module/BLOG`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const text = await response.text();
+
+    if(!response.ok){
+      box.innerHTML = `<p style="color:red;">Unable to load blog images. Status: ${response.status}</p>`;
+      return;
+    }
+
+    const result = JSON.parse(text);
+    box.innerHTML = "";
+
+    if(!result.success || !result.data || result.data.length === 0){
+      box.innerHTML = "<p>No blog images uploaded.</p>";
+      return;
+    }
+
+    result.data.forEach(img => {
+      const fullUrl = API_BASE_URL + img.fileUrl;
+
+      box.innerHTML += `
+        <label class="image-select-card">
+          <img src="${fullUrl}">
+          <input type="radio" name="blogImage" value="${img.fileUrl}" onchange="selectBlogImage(this)">
+        </label>
+      `;
+    });
+
+  }catch(error){
+    console.log(error);
+    box.innerHTML = `<p style="color:red;">Error loading blog images</p>`;
+  }
+}
+
+function selectBlogImage(radio){
+  selectedBlogImageUrl = radio.value;
+}
+
+async function saveDraft(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  if(!selectedBlogImageUrl){
+    alert("Please select one blog image");
+    return;
+  }
+
+  const blog = {
+    title: document.getElementById("title").value.trim(),
+    content: document.getElementById("content").value.trim(),
+    authorName: document.getElementById("author").value.trim(),
+    imageUrl: selectedBlogImageUrl
+  };
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/blogs/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(blog)
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      localStorage.setItem("blogId", result.data.id);
+      alert(result.message || "Blog saved as draft");
+    }else{
+      alert(result.message || "Failed to save blog");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function publishBlog(){
+  const token = localStorage.getItem("token");
+  const blogId = localStorage.getItem("blogId");
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  if(!blogId){
+    alert("Please save the blog as draft first.");
+    return;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/blogs/${blogId}/publish`, {
+    method: "PUT",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    alert(result.message || "Blog published successfully");
+    localStorage.removeItem("blogId");
+    window.location.href = "admin-blogs.html";
+  }else{
+    alert(result.message || "Failed to publish blog");
+  }
+}
+</script>
 </body>
 </html>

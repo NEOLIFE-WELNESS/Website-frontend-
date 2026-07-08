@@ -7,218 +7,259 @@
 
 <style>
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
 }
 
 body{
-    background:#f4f8f4;
+  background:#f4f8f4;
 }
 
 header{
-    background:#1b5e20;
-    color:white;
-    padding:18px 8%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+  background:#1b5e20;
+  color:white;
+  padding:18px 8%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 .back-btn{
-    background:white;
-    color:#1b5e20;
-    padding:10px 16px;
-    border-radius:6px;
-    text-decoration:none;
-    font-weight:bold;
+  background:white;
+  color:#1b5e20;
+  padding:10px 16px;
+  border-radius:6px;
+  text-decoration:none;
+  font-weight:bold;
 }
 
 .container{
-    width:92%;
-    margin:30px auto;
+  width:95%;
+  margin:30px auto;
 }
 
-.form-box{
-    background:white;
-    padding:25px;
-    border-radius:14px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
-    margin-bottom:30px;
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
 }
 
-.form-box h2{
-    color:#1b5e20;
-    margin-bottom:20px;
+.add-btn{
+  background:#1b5e20;
+  color:white;
+  border:none;
+  padding:12px 18px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-    gap:18px;
+.search-box{
+  background:white;
+  padding:18px;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom:20px;
+  display:flex;
+  gap:12px;
 }
 
-.form-group{
-    display:flex;
-    flex-direction:column;
+.search-box input{
+  flex:1;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:6px;
 }
 
-label{
-    font-weight:bold;
-    margin-bottom:7px;
+.view-btn{
+  background:#1b5e20;
+  color:white;
+  border:none;
+  padding:12px 18px;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-input,select,textarea{
-    padding:11px;
-    border:1px solid #ccc;
-    border-radius:7px;
-    font-size:15px;
-}
-
-textarea{
-    resize:none;
-    min-height:90px;
-}
-
-.save-btn{
-    margin-top:20px;
-    background:#1b5e20;
-    color:white;
-    border:none;
-    padding:13px 25px;
-    border-radius:7px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.save-btn:hover{
-    background:#124116;
-}
-
-.preview-box{
-    margin-top:25px;
-    background:linear-gradient(135deg,#0b3d1d,#237a32);
-    color:white;
-    padding:28px;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:25px;
-}
-
-.preview-box img{
-    width:260px;
-    height:130px;
-    object-fit:cover;
-    border-radius:12px;
-    display:none;
-}
-
-.offer-label{
-    background:#e4a900;
-    color:#10391e;
-    padding:8px 16px;
-    border-radius:25px;
-    font-weight:bold;
-    display:inline-block;
-    margin-bottom:12px;
-}
-
-.preview-box h2{
-    font-size:32px;
-    margin-bottom:10px;
-}
-
-.preview-code{
-    background:white;
-    color:#10391e;
-    padding:9px 14px;
-    border-radius:8px;
-    display:inline-block;
-    margin-top:12px;
-}
-
-.discount-circle{
-    background:white;
-    color:#10391e;
-    width:150px;
-    height:110px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:26px;
-    font-weight:bold;
-    text-align:center;
+.table-wrapper{
+  overflow-x:auto;
 }
 
 table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  width:100%;
+  min-width:1150px;
+  border-collapse:collapse;
+  background:white;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
 }
 
 th{
-    background:#2e7d32;
-    color:white;
-    padding:14px;
+  background:#2e7d32;
+  color:white;
+  padding:14px;
 }
 
 td{
-    padding:13px;
-    text-align:center;
-    border-bottom:1px solid #ddd;
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #ddd;
 }
 
 .banner-thumb{
-    width:100px;
-    height:55px;
-    object-fit:cover;
-    border-radius:8px;
+  width:100px;
+  height:55px;
+  object-fit:cover;
+  border-radius:8px;
 }
 
 .status{
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:bold;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:bold;
 }
 
 .active{
-    background:#d4edda;
-    color:#155724;
+  background:#d4edda;
+  color:#155724;
 }
 
 .inactive{
-    background:#f8d7da;
-    color:#721c24;
+  background:#f8d7da;
+  color:#721c24;
 }
 
-.edit-btn,.delete-btn{
-    border:none;
-    padding:8px 12px;
-    border-radius:5px;
-    cursor:pointer;
-    color:white;
-    margin:2px;
+.edit-btn,
+.delete-btn{
+  border:none;
+  padding:8px 12px;
+  border-radius:5px;
+  color:white;
+  cursor:pointer;
+  margin:2px;
 }
 
 .edit-btn{
-    background:#1976d2;
+  background:#1976d2;
 }
 
 .delete-btn{
-    background:#d32f2f;
+  background:#d32f2f;
 }
 
-@media(max-width:800px){
-    .preview-box{
-        flex-direction:column;
-        text-align:center;
-    }
+.no-result{
+  display:none;
+  text-align:center;
+  color:#d32f2f;
+  font-weight:bold;
+  margin-top:18px;
+}
+
+/* Modal */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9999;
+  overflow:auto;
+}
+
+.modal-content{
+  background:white;
+  width:750px;
+  max-width:92%;
+  margin:40px auto;
+  padding:28px;
+  border-radius:14px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:22px;
+}
+
+.modal-header h2{
+  color:#1b5e20;
+}
+
+.close-btn{
+  font-size:28px;
+  cursor:pointer;
+  color:#333;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:15px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  font-weight:bold;
+  margin-bottom:6px;
+  color:#333;
+}
+
+input,
+textarea,
+select{
+  padding:11px;
+  border:1px solid #ccc;
+  border-radius:7px;
+  font-size:14px;
+}
+
+textarea{
+  resize:none;
+  min-height:90px;
+}
+
+.save-btn,
+.cancel-btn{
+  margin-top:20px;
+  border:none;
+  padding:12px 20px;
+  border-radius:6px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.save-btn{
+  background:#1b5e20;
+}
+
+.cancel-btn{
+  background:#777;
+  margin-left:8px;
+}
+
+@media(max-width:768px){
+  header{
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .top-bar{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px;
+  }
+
+  .search-box{
+    flex-direction:column;
+  }
 }
 </style>
 </head>
@@ -226,204 +267,444 @@ td{
 <body>
 
 <header>
-    <h1>Manage Offers & Banners</h1>
-    <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
+  <h1>Manage Offers & Banners</h1>
+  <a href="admin-dashboard.html" class="back-btn">Dashboard</a>
 </header>
 
 <div class="container">
 
-<div class="form-box">
-    <h2>Add Homepage Offer Banner</h2>
+  <div class="top-bar">
+    <h2>Offer Banner List</h2>
+    <button class="add-btn" onclick="openOfferModal()">+ Add Offer</button>
+  </div>
+
+  <div class="search-box">
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Search by title, coupon, discount, status..."
+      onkeyup="searchOffers()">
+
+    <button class="view-btn" onclick="viewAllOffers()">View All</button>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Banner</th>
+          <th>Label</th>
+          <th>Title</th>
+          <th>Discount</th>
+          <th>Coupon</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="offerTable"></tbody>
+    </table>
+  </div>
+
+  <p class="no-result" id="noResult">No offers found.</p>
+
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal" id="offerModal">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Offer Banner</h2>
+      <span class="close-btn" onclick="closeOfferModal()">&times;</span>
+    </div>
+
+    <input type="hidden" id="offerId">
 
     <div class="form-grid">
 
-        <div class="form-group">
-            <label>Offer Label</label>
-            <input type="text" id="offerLabel" placeholder="Festival Offer">
-        </div>
+      <div class="form-group">
+        <label>Offer Label</label>
+        <input type="text" id="offerLabel" placeholder="LIMITED TIME">
+      </div>
 
-        <div class="form-group">
-            <label>Offer Title</label>
-            <input type="text" id="offerTitle" placeholder="Diwali Wellness Offer">
-        </div>
+      <div class="form-group">
+        <label>Offer Title</label>
+        <input type="text" id="offerTitle" placeholder="Hair Care Special Offer">
+      </div>
 
-        <div class="form-group">
-            <label>Description</label>
-            <textarea id="offerDescription" placeholder="Flat 30% OFF on selected Ayurvedic products."></textarea>
-        </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="description" placeholder="Get 20% OFF on all Hair Care Products."></textarea>
+      </div>
 
-        <div class="form-group">
-            <label>Discount Text</label>
-            <input type="text" id="offerDiscount" placeholder="30% OFF">
-        </div>
+      <div class="form-group">
+        <label>Discount Text</label>
+        <input type="text" id="discountText" placeholder="20% OFF">
+      </div>
 
-        <div class="form-group">
-            <label>Coupon Code</label>
-            <input type="text" id="offerCode" placeholder="DIWALI30">
-        </div>
+      <div class="form-group">
+        <label>Coupon Code</label>
+        <input type="text" id="couponCode" placeholder="HAIR20">
+      </div>
 
-        <div class="form-group">
-            <label>Button Text</label>
-            <input type="text" id="buttonText" placeholder="Shop Now">
-        </div>
+      <div class="form-group">
+        <label>Button Text</label>
+        <input type="text" id="buttonText" placeholder="Shop Now">
+      </div>
 
-        <div class="form-group">
-            <label>Button Link</label>
-            <input type="text" id="buttonLink" placeholder="products.html">
-        </div>
+      <div class="form-group">
+        <label>Button Link</label>
+        <input type="text" id="buttonLink" placeholder="/products/hair-care">
+      </div>
 
-        <div class="form-group">
-            <label>Start Date</label>
-            <input type="date" id="startDate">
-        </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="startDate">
+      </div>
 
-        <div class="form-group">
-            <label>End Date</label>
-            <input type="date" id="endDate">
-        </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input type="date" id="endDate">
+      </div>
 
-        <div class="form-group">
-            <label>Priority</label>
-            <input type="number" id="priority" placeholder="1">
-        </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <input type="number" id="priority" placeholder="1">
+      </div>
 
-        <div class="form-group">
-            <label>Status</label>
-            <select id="offerStatus">
-                <option>Active</option>
-                <option>Inactive</option>
-            </select>
-        </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="active">
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
 
-        <div class="form-group">
-            <label>Upload Banner Image</label>
-            <input type="file" id="bannerImage" accept="image/*" onchange="previewImage(event)">
-        </div>
+      <div class="form-group">
+        <label>Banner Image URL</label>
+        <input type="text" id="bannerImageUrl" placeholder="https://example.com/banner.jpg">
+      </div>
 
     </div>
 
-    <button class="save-btn" onclick="saveOffer()">Save Offer Banner</button>
+    <button class="save-btn" onclick="saveOffer()">Save Offer</button>
+    <button class="cancel-btn" onclick="closeOfferModal()">Cancel</button>
 
-    <div class="preview-box">
-        <div>
-            <span class="offer-label" id="previewLabel">Festival Offer</span>
-            <h2 id="previewTitle">Diwali Wellness Offer</h2>
-            <p id="previewDescription">Flat 30% OFF on selected Ayurvedic products.</p>
-            <div class="preview-code">Use Code: <strong id="previewCode">DIWALI30</strong></div>
-        </div>
-
-        <img id="previewImg">
-
-        <div class="discount-circle" id="previewDiscount">30% OFF</div>
-    </div>
+  </div>
 </div>
-
-<table>
-    <thead>
-        <tr>
-            <th>Banner</th>
-            <th>Title</th>
-            <th>Discount</th>
-            <th>Coupon</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-
-    <tbody id="offerTable">
-        <tr>
-            <td><img src="../assets/offer-banner.jpg" class="banner-thumb" alt="Offer"></td>
-            <td>Diwali Wellness Offer</td>
-            <td>30% OFF</td>
-            <td>DIWALI30</td>
-            <td>01-11-2026</td>
-            <td>10-11-2026</td>
-            <td>1</td>
-            <td><span class="status active">Active</span></td>
-            <td>
-                <button class="edit-btn" onclick="editOffer(this)">Edit</button>
-                <button class="delete-btn" onclick="deleteOffer(this)">Delete</button>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-</div>
-
 <script>
-let uploadedImage = "";
+const API_BASE_URL = "http://localhost:8085";
 
-function previewImage(event){
-    const file = event.target.files[0];
+let offers = [];
+let editId = null;
 
-    if(file){
-        uploadedImage = URL.createObjectURL(file);
+window.onload = function(){
+  loadOffers();
+};
 
-        const img = document.getElementById("previewImg");
-        img.src = uploadedImage;
-        img.style.display = "block";
-    }
+function getToken(){
+  return localStorage.getItem("token");
 }
 
-function saveOffer(){
-    const label = document.getElementById("offerLabel").value || "Festival Offer";
-    const title = document.getElementById("offerTitle").value || "Diwali Wellness Offer";
-    const desc = document.getElementById("offerDescription").value || "Flat 30% OFF on selected Ayurvedic products.";
-    const discount = document.getElementById("offerDiscount").value || "30% OFF";
-    const code = document.getElementById("offerCode").value || "DIWALI30";
-    const start = document.getElementById("startDate").value || "-";
-    const end = document.getElementById("endDate").value || "-";
-    const priority = document.getElementById("priority").value || "1";
-    const status = document.getElementById("offerStatus").value;
+function openOfferModal(){
+  editId = null;
+  clearForm();
+  document.getElementById("modalTitle").innerText = "Add Offer Banner";
+  document.getElementById("offerModal").style.display = "block";
+}
 
-    document.getElementById("previewLabel").innerText = label;
-    document.getElementById("previewTitle").innerText = title;
-    document.getElementById("previewDescription").innerText = desc;
-    document.getElementById("previewDiscount").innerText = discount;
-    document.getElementById("previewCode").innerText = code;
+function closeOfferModal(){
+  editId = null;
+  clearForm();
+  document.getElementById("offerModal").style.display = "none";
+}
 
-    const imageSrc = uploadedImage || "../assets/offer-banner.jpg";
+async function loadOffers(){
+  const token = getToken();
 
-    const row = `
-        <tr>
-            <td><img src="${imageSrc}" class="banner-thumb" alt="Offer"></td>
-            <td>${title}</td>
-            <td>${discount}</td>
-            <td>${code}</td>
-            <td>${start}</td>
-            <td>${end}</td>
-            <td>${priority}</td>
-            <td><span class="status ${status.toLowerCase()}">${status}</span></td>
-            <td>
-                <button class="edit-btn" onclick="editOffer(this)">Edit</button>
-                <button class="delete-btn" onclick="deleteOffer(this)">Delete</button>
-            </td>
-        </tr>
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/offers/admin/all`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if(!response.ok){
+      alert("Access denied. Please login again as admin.");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      offers = result.data;
+      displayOffers(offers);
+    }else{
+      alert(result.message || "Failed to load offers");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+function displayOffers(list){
+  const table = document.getElementById("offerTable");
+  table.innerHTML = "";
+
+  if(!list || list.length === 0){
+    document.getElementById("noResult").style.display = "block";
+    return;
+  }
+
+  document.getElementById("noResult").style.display = "none";
+
+  list.forEach(offer => {
+    const image = offer.bannerImageUrl || "../assets/main_logo.jpeg";
+
+    table.innerHTML += `
+      <tr>
+        <td>${offer.id}</td>
+
+        <td>
+          <img 
+            src="${image}" 
+            class="banner-thumb"
+            onerror="this.src='../assets/main_logo.jpeg'">
+        </td>
+
+        <td>${offer.offerLabel || "-"}</td>
+        <td>${offer.offerTitle || "-"}</td>
+        <td>${offer.discountText || "-"}</td>
+        <td>${offer.couponCode || "-"}</td>
+        <td>${offer.startDate || "-"}</td>
+        <td>${offer.endDate || "-"}</td>
+        <td>${offer.priority ?? "-"}</td>
+
+        <td>
+          <span class="status ${offer.active ? "active" : "inactive"}">
+            ${offer.active ? "Active" : "Inactive"}
+          </span>
+        </td>
+
+        <td>
+          <button class="edit-btn" onclick="editOffer(${offer.id})">
+            Edit
+          </button>
+
+          <button class="delete-btn" onclick="deleteOffer(${offer.id})">
+            Delete
+          </button>
+        </td>
+      </tr>
     `;
-
-    document.getElementById("offerTable").innerHTML += row;
-
-    alert("Offer banner saved successfully.");
+  });
 }
 
-function editOffer(button){
-    const cells = button.closest("tr").querySelectorAll("td");
+function searchOffers(){
+  const value = document.getElementById("searchInput").value.toLowerCase();
 
-    document.getElementById("offerTitle").value = cells[1].innerText;
-    document.getElementById("offerDiscount").value = cells[2].innerText;
-    document.getElementById("offerCode").value = cells[3].innerText;
-    document.getElementById("priority").value = cells[6].innerText;
+  const filtered = offers.filter(offer =>
+    String(offer.offerTitle || "").toLowerCase().includes(value) ||
+    String(offer.offerLabel || "").toLowerCase().includes(value) ||
+    String(offer.discountText || "").toLowerCase().includes(value) ||
+    String(offer.couponCode || "").toLowerCase().includes(value) ||
+    String(offer.startDate || "").toLowerCase().includes(value) ||
+    String(offer.endDate || "").toLowerCase().includes(value) ||
+    String(offer.active ? "active" : "inactive").includes(value)
+  );
 
-    alert("Offer loaded for editing.");
+  displayOffers(filtered);
 }
 
-function deleteOffer(button){
-    if(confirm("Delete this offer banner?")){
-        button.closest("tr").remove();
+function viewAllOffers(){
+  document.getElementById("searchInput").value = "";
+  displayOffers(offers);
+}
+async function saveOffer(){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  const offer = {
+    offerLabel: document.getElementById("offerLabel").value.trim(),
+    offerTitle: document.getElementById("offerTitle").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    discountText: document.getElementById("discountText").value.trim(),
+    couponCode: document.getElementById("couponCode").value.trim(),
+    buttonText: document.getElementById("buttonText").value.trim(),
+    buttonLink: document.getElementById("buttonLink").value.trim(),
+    startDate: document.getElementById("startDate").value,
+    endDate: document.getElementById("endDate").value,
+    priority: Number(document.getElementById("priority").value),
+    active: document.getElementById("active").value === "true",
+    bannerImageUrl: document.getElementById("bannerImageUrl").value.trim()
+  };
+
+  try{
+    let url = `${API_BASE_URL}/api/offers/create`;
+    let method = "POST";
+
+    if(editId !== null){
+      url = `${API_BASE_URL}/api/offers/update/${editId}`;
+      method = "PUT";
     }
+
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(offer)
+    });
+
+    if(!response.ok){
+      const text = await response.text();
+      alert(text || "Failed to save offer");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message);
+      closeOfferModal();
+      loadOffers();
+    }else{
+      alert(result.message || "Failed to save offer");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function editOffer(id){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/offers/${id}/get`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if(!response.ok){
+      alert("Failed to fetch offer details");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      const offer = result.data;
+      editId = id;
+
+      document.getElementById("offerId").value = offer.id || "";
+      document.getElementById("offerLabel").value = offer.offerLabel || "";
+      document.getElementById("offerTitle").value = offer.offerTitle || "";
+      document.getElementById("description").value = offer.description || "";
+      document.getElementById("discountText").value = offer.discountText || "";
+      document.getElementById("couponCode").value = offer.couponCode || "";
+      document.getElementById("buttonText").value = offer.buttonText || "";
+      document.getElementById("buttonLink").value = offer.buttonLink || "";
+      document.getElementById("startDate").value = offer.startDate || "";
+      document.getElementById("endDate").value = offer.endDate || "";
+      document.getElementById("priority").value = offer.priority ?? "";
+      document.getElementById("active").value = String(offer.active);
+      document.getElementById("bannerImageUrl").value = offer.bannerImageUrl || "";
+
+      document.getElementById("modalTitle").innerText = "Edit Offer Banner";
+      document.getElementById("offerModal").style.display = "block";
+    }else{
+      alert(result.message || "Offer not found");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+async function deleteOffer(id){
+  const token = getToken();
+
+  if(!token){
+    alert("Please login as admin first");
+    return;
+  }
+
+  if(!confirm("Are you sure you want to delete this offer banner?")){
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/offers/remove/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if(!response.ok){
+      const text = await response.text();
+      alert(text || "Failed to delete offer");
+      return;
+    }
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message);
+      loadOffers();
+    }else{
+      alert(result.message || "Delete failed");
+    }
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+function clearForm(){
+  document.getElementById("offerId").value = "";
+  document.getElementById("offerLabel").value = "";
+  document.getElementById("offerTitle").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("discountText").value = "";
+  document.getElementById("couponCode").value = "";
+  document.getElementById("buttonText").value = "";
+  document.getElementById("buttonLink").value = "";
+  document.getElementById("startDate").value = "";
+  document.getElementById("endDate").value = "";
+  document.getElementById("priority").value = "";
+  document.getElementById("active").value = "true";
+  document.getElementById("bannerImageUrl").value = "";
 }
 </script>
 

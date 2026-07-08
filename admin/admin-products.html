@@ -231,7 +231,7 @@ table td{
         </button>
 
         <div class="product-count">
-            Total Products : <span id="productCount">2</span>
+            Total Products : <span id="productCount">0</span>
         </div>
 
     </div>
@@ -255,51 +255,7 @@ table td{
                 </tr>
             </thead>
 
-            <tbody id="productTable">
-
-                <tr>
-                    <td>1</td>
-                    <td>PROD001</td>
-                    <td>
-                        <img src="../assets/products/hair-oil.jpg" class="product-img" alt="Hair Oil">
-                    </td>
-                    <td>Neolife Special Hair Oil</td>
-                    <td>200 ml</td>
-                    <td>100</td>
-                    <td>Neolife Wellness Center</td>
-                    <td>Hair Growth & Hair Fall</td>
-                    <td>12/2028</td>
-                    <td>₹299</td>
-                    <td>
-                        <a href="edit-product.html?id=1">
-                            <button class="edit-btn">Edit</button>
-                        </a>
-                        <button class="delete-btn">Delete</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>2</td>
-                    <td>PROD002</td>
-                    <td>
-                        <img src="../assets/products/joints-care.jpg" class="product-img" alt="Joints Care">
-                    </td>
-                    <td>Neolife Joints Care Choorna</td>
-                    <td>100 gm</td>
-                    <td>75</td>
-                    <td>Neolife Wellness Center</td>
-                    <td>Joint Pain Support</td>
-                    <td>10/2028</td>
-                    <td>₹250</td>
-                    <td>
-                        <a href="edit-product.html?id=2">
-                            <button class="edit-btn">Edit</button>
-                        </a>
-                        <button class="delete-btn">Delete</button>
-                    </td>
-                </tr>
-
-            </tbody>
+            <tbody id="productTable"></tbody>
 
         </table>
     </div>
@@ -311,42 +267,115 @@ table td{
 </div>
 
 <script>
-function searchProducts(){
-    let searchValue = document.getElementById("searchInput").value.toLowerCase();
-    let rows = document.querySelectorAll("#productTable tr");
-    let visibleCount = 0;
+const API_BASE_URL = "http://localhost:8085";
+let allProducts = [];
 
-    rows.forEach(row => {
-        let rowText = row.innerText.toLowerCase();
+window.onload = function(){
+  loadProducts();
+};
 
-        if(rowText.includes(searchValue)){
-            row.style.display = "";
-            visibleCount++;
-        }else{
-            row.style.display = "none";
-        }
+async function loadProducts(){
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/products/getAll`, {
+      method: "GET"
     });
 
-    document.getElementById("productCount").innerText = visibleCount;
+    const result = await response.json();
 
-    if(visibleCount === 0){
-        document.getElementById("noResult").style.display = "block";
+    if(result.success === true){
+      allProducts = result.data;
+      displayProducts(allProducts);
     }else{
-        document.getElementById("noResult").style.display = "none";
+      alert(result.message || "Failed to load products");
     }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected. Start Spring Boot backend on port 8085.");
+  }
+}
+
+function displayProducts(products){
+  const table = document.getElementById("productTable");
+  table.innerHTML = "";
+
+  document.getElementById("productCount").innerText = products.length;
+
+  if(products.length === 0){
+    document.getElementById("noResult").style.display = "block";
+    return;
+  }
+
+  document.getElementById("noResult").style.display = "none";
+
+  products.forEach(product => {
+    let imageHtml = "-";
+
+if(product.imageUrls && product.imageUrls.length > 0){
+  imageHtml = product.imageUrls.map(url => {
+    let imageSrc = url;
+
+    if(!imageSrc.startsWith("http") &&
+       !imageSrc.startsWith("../") &&
+       !imageSrc.startsWith("/")){
+      imageSrc = API_BASE_URL + "/" + imageSrc;
+    }
+
+    if(imageSrc.startsWith("/")){
+      imageSrc = API_BASE_URL + imageSrc;
+    }
+
+    return `<img src="${imageSrc}" class="product-img" alt="${product.name}">`;
+  }).join("");
+}
+
+    table.innerHTML += `
+      <tr>
+        <td>${product.id}</td>
+        <td>${product.productCode || "-"}</td>
+        <td>${imageHtml}</td>
+        <td>${product.name || "-"}</td>
+        <td>${product.netQty || "-"}</td>
+        <td>${product.stock || 0}</td>
+        <td>${product.manufacturer || "-"}</td>
+        <td>${product.indication || "-"}</td>
+        <td>${product.expiryDate || "-"}</td>
+        <td>₹${product.price || 0}</td>
+        <td>
+          <a href="edit-product.html?id=${product.id}">
+            <button class="edit-btn">Edit</button>
+          </a>
+          <button class="delete-btn" onclick="deleteProduct(${product.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function searchProducts(){
+  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+
+  const filteredProducts = allProducts.filter(product => {
+    return (
+      String(product.id).includes(searchValue) ||
+      String(product.productCode || "").toLowerCase().includes(searchValue) ||
+      String(product.name || "").toLowerCase().includes(searchValue) ||
+      String(product.stock || "").toLowerCase().includes(searchValue) ||
+      String(product.manufacturer || "").toLowerCase().includes(searchValue) ||
+      String(product.indication || "").toLowerCase().includes(searchValue)
+    );
+  });
+
+  displayProducts(filteredProducts);
 }
 
 function viewAllProducts(){
-    document.getElementById("searchInput").value = "";
+  document.getElementById("searchInput").value = "";
+  displayProducts(allProducts);
+}
 
-    let rows = document.querySelectorAll("#productTable tr");
-
-    rows.forEach(row => {
-        row.style.display = "";
-    });
-
-    document.getElementById("productCount").innerText = rows.length;
-    document.getElementById("noResult").style.display = "none";
+async function deleteProduct(id){
+  alert("Delete Product API will be connected next.");
 }
 </script>
 

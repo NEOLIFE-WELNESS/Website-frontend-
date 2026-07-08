@@ -40,62 +40,74 @@
 
 </header>
 
-<section class="blog-details">
-
-  <div class="blog-details-box">
-
-    <img src="../assets/ayurvedapancha.png" alt="Panchakarma Therapy" class="blog-detail-img">
-
-    <span class="blog-category">Ayurveda & Panchakarma</span>
-
-    <h1>Benefits of Panchakarma Therapy</h1>
-
-    <p class="blog-meta">
-      Written by: Dr. N. G. Muraleedhara, BAMS | Published on: 20 June 2026
-    </p>
-
-    <p>
-      Panchakarma is one of the most important detoxification and rejuvenation therapies
-      in Ayurveda. It helps cleanse the body, balance doshas and support natural healing.
-    </p>
-
-    <h2>What is Panchakarma?</h2>
-    <p>
-      Panchakarma is a traditional Ayurvedic treatment process that includes therapies
-      designed to remove toxins from the body and improve overall wellness.
-    </p>
-
-    <h2>Benefits of Panchakarma</h2>
-    <ul>
-      <li>Supports natural detoxification</li>
-      <li>Helps improve digestion and metabolism</li>
-      <li>Supports stress relief and relaxation</li>
-      <li>Helps rejuvenate body and mind</li>
-      <li>Supports long-term wellness and lifestyle balance</li>
-    </ul>
-
-    <h2>Who can benefit?</h2>
-    <p>
-      People with lifestyle imbalance, stress, poor digestion, body stiffness, tiredness
-      and general wellness concerns may benefit from Panchakarma after doctor consultation.
-    </p>
-
-    <p class="blog-note">
-      Note: Panchakarma should be done only after proper consultation with a qualified
-      Ayurvedic doctor.
-    </p>
-
-    <a href="blog.html" class="blog-btn">← Back to Blogs</a>
-
-  </div>
-
-</section>
+<div class="blog-details-box" id="blogDetailsBox"></div>
 
 <footer class="footer">
   <div class="footer-bottom">
     <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
   </div>
 </footer>
+<script>
+const API_BASE_URL = "http://localhost:8085";
+function getImageUrl(imageUrl){
+  if(!imageUrl || imageUrl.trim() === ""){
+    return "";
+  }
 
+  if(imageUrl.startsWith("http")){
+    return imageUrl;
+  }
+
+  if(imageUrl.startsWith("/")){
+    return API_BASE_URL + imageUrl;
+  }
+
+  return API_BASE_URL + "/" + imageUrl;
+}
+window.onload = loadBlogDetails;
+
+async function loadBlogDetails(){
+  const token = localStorage.getItem("token");
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  const response = await fetch(`${API_BASE_URL}/api/blogs/${id}/get`, {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+  const box = document.getElementById("blogDetailsBox");
+
+  if(!result.success){
+    box.innerHTML = "<p>Blog not found.</p>";
+    return;
+  }
+
+  const blog = result.data;
+  const image = getImageUrl(blog.imageUrl);
+
+const imageHtml = image
+  ? `<img src="${image}" alt="${blog.title}" class="blog-detail-img">`
+  : "";
+  box.innerHTML = `
+    ${imageHtml}
+
+    <span class="blog-category">${blog.category || "Wellness"}</span>
+
+    <h1>${blog.title}</h1>
+
+    <p class="blog-meta">
+      Written by: ${blog.authorName || "Neolife Wellness Team"} |
+      Published on: ${blog.createdAt ? blog.createdAt.substring(0,10) : ""}
+    </p>
+
+    <p>${blog.content}</p>
+
+    <a href="blog.html" class="blog-btn">← Back to Blogs</a>
+  `;
+}
+</script>
 </body>
 </html>

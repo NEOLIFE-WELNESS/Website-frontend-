@@ -205,21 +205,22 @@ header h1{
             <div class="form-group">
                 <label>Manufacturer</label>
                 <select id="manufacturer" required>
-                    <option value="">Select Manufacturer</option>
-                    <option value="Neolife Wellness Center">Neolife Wellness Center</option>
-                    <option value="Neolives">Neolives</option>
-                    <option value="Arya Vaidya Pharmacy">Arya Vaidya Pharmacy</option>
-                    <option value="Kottakkal Ayurveda">Kottakkal Ayurveda</option>
-                    <option value="Other">Other</option>
-                </select>
+  <option value="">Select Manufacturer</option>
+</select>
             </div>
         </div>
+  <div class="form-group">
+    <label>Product Image URLs</label>
 
-        <div class="form-group">
-            <label>Current Product Image</label>
-            <img src="../assets/products/hair-oil.jpg" id="currentImage" class="current-img" alt="Product Image">
-        </div>
+    <textarea
+        id="imageUrls"
+        placeholder="Enter one image URL per line"></textarea>
+</div>
 
+<div class="form-group">
+    <div id="imagePreviewBox"></div>
+</div>
+        
         <div class="form-group">
             <label>Change Product Image</label>
             <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)">
@@ -234,70 +235,196 @@ header h1{
 </div>
 
 <script>
-window.onload = function(){
+const API_BASE_URL = "http://localhost:8085";
 
-    const product = {
-        id: 1,
-        productNo: "PROD001",
-        name: "Neolife Special Hair Oil",
-        description: "Ayurvedic hair oil for hair growth and hair fall support.",
-        price: 299,
-        stock: 100,
-        netQty: "200 ml",
-        expiryDate: "2028-12",
-        indication: "Hair fall, Hair growth",
-        category: "Hair Care",
-        manufacturer: "Neolife Wellness Center",
-        image: "../assets/products/hair-oil.jpg"
-    };
-
-    document.getElementById("productId").value = product.id;
-    document.getElementById("productNo").value = product.productNo;
-    document.getElementById("name").value = product.name;
-    document.getElementById("description").value = product.description;
-    document.getElementById("price").value = product.price;
-    document.getElementById("stock").value = product.stock;
-    document.getElementById("netQty").value = product.netQty;
-    document.getElementById("expiryDate").value = product.expiryDate;
-    document.getElementById("indication").value = product.indication;
-    document.getElementById("category").value = product.category;
-    document.getElementById("manufacturer").value = product.manufacturer;
-    document.getElementById("currentImage").src = product.image;
+window.onload = async function(){
+  await loadManufacturers();
+  await loadProduct();
+  document.getElementById("imageUrls")
+.addEventListener("input", previewImagesFromUrls);
 };
 
-function previewImage(event){
-    const image = document.getElementById("currentImage");
-    const file = event.target.files[0];
-
-    if(file){
-        image.src = URL.createObjectURL(file);
-    }
+function getProductId(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
 }
 
-document.getElementById("editProductForm").addEventListener("submit", function(e){
-    e.preventDefault();
+async function loadManufacturers(){
+  const token = localStorage.getItem("token");
 
-    const imageFile = document.getElementById("productImage").files[0];
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/manufacturers/getAll`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
 
-    const updatedProduct = {
-        id: document.getElementById("productId").value,
-        productNo: document.getElementById("productNo").value,
-        name: document.getElementById("name").value,
-        description: document.getElementById("description").value,
-        price: document.getElementById("price").value,
-        stock: document.getElementById("stock").value,
-        netQty: document.getElementById("netQty").value,
-        expiryDate: document.getElementById("expiryDate").value,
-        indication: document.getElementById("indication").value,
-        category: document.getElementById("category").value,
-        manufacturer: document.getElementById("manufacturer").value,
-        imageName: imageFile ? imageFile.name : "existing image"
-    };
+    const result = await response.json();
 
-    console.log(updatedProduct);
+    if(result.success){
+      const select = document.getElementById("manufacturer");
+      select.innerHTML = `<option value="">Select Manufacturer</option>`;
 
-    document.getElementById("message").style.color = "green";
-    document.getElementById("message").innerText = "Product updated successfully!";
+      result.data.forEach(item => {
+        select.innerHTML += `
+          <option value="${item.type}">
+            ${item.name} (${item.type})
+          </option>
+        `;
+      });
+    }
+  }catch(error){
+    console.log(error);
+  }
+}
+
+async function loadProduct(){
+  const productId = getProductId();
+
+  if(!productId){
+    alert("Product ID missing");
+    window.location.href = "admin-products.html";
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+      method: "GET"
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      const product = result.data;
+
+      document.getElementById("productId").value = product.id;
+      document.getElementById("productNo").value = product.productCode || "";
+      document.getElementById("name").value = product.productName || product.name || "";
+      document.getElementById("description").value = product.description || "";
+      document.getElementById("price").value = product.price || "";
+      document.getElementById("stock").value = product.stock || "";
+      document.getElementById("netQty").value = product.netQty || "";
+      document.getElementById("indication").value = product.indication || "";
+      document.getElementById("category").value = product.category || "";
+
+      if(product.manufacturer){
+        document.getElementById("manufacturer").value = product.manufacturer;
+      }
+
+      if(product.expiryDate){
+        document.getElementById("expiryDate").value = product.expiryDate.substring(0, 7);
+      }
+
+      if(product.imageUrls){
+
+    const urls = product.imageUrls.split(",");
+
+    document.getElementById("imageUrls").value = urls.join("\n");
+
+    previewImagesFromUrls();
+
+}
+      document.getElementById("currentImage").src = imageSrc;
+
+    }else{
+      alert(result.message || "Product not found");
+      window.location.href = "admin-products.html";
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected");
+  }
+}
+function previewImagesFromUrls(){
+
+    const previewBox = document.getElementById("imagePreviewBox");
+
+    previewBox.innerHTML = "";
+
+    const urls = document.getElementById("imageUrls").value
+        .split("\n")
+        .map(x => x.trim())
+        .filter(x => x !== "");
+
+    urls.forEach(url=>{
+
+        const img=document.createElement("img");
+
+        img.src=url;
+
+        img.className="preview-img";
+
+        previewBox.appendChild(img);
+
+    });
+
+}
+
+
+document.getElementById("editProductForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+  const productId = document.getElementById("productId").value;
+  const imageFile = document.getElementById("productImage").files[0];
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
+
+  const updatedProduct = {
+    productName: document.getElementById("name").value.trim(),
+    category: document.getElementById("category").value,
+    description: document.getElementById("description").value.trim(),
+    price: Number(document.getElementById("price").value),
+    stock: Number(document.getElementById("stock").value),
+    productCode: document.getElementById("productNo").value.trim(),
+    netQty: document.getElementById("netQty").value.trim(),
+    indication: document.getElementById("indication").value.trim(),
+    dosageForm: "Liquid",
+    manufacturer: document.getElementById("manufacturer").value,
+    expiryDate: document.getElementById("expiryDate").value + "-01",
+    imageUrls: document.getElementById("imageUrls").value
+    .split("\n")
+    .map(url => url.trim())
+    .filter(url => url !== "")
+    .join(","),
+    lowStockLimit: 5
+  };
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(updatedProduct)
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      document.getElementById("message").style.color = "green";
+      document.getElementById("message").innerText = "Product updated successfully!";
+
+      setTimeout(() => {
+        window.location.href = "admin-products.html";
+      }, 1000);
+    }else{
+      document.getElementById("message").style.color = "red";
+      document.getElementById("message").innerText = result.message || "Update failed";
+    }
+
+  }catch(error){
+    console.log(error);
+    document.getElementById("message").style.color = "red";
+    document.getElementById("message").innerText = "Backend not connected or admin token invalid";
+  }
 });
 </script>
 

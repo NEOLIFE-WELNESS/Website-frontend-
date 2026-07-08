@@ -15,9 +15,7 @@
 
     body{
       min-height:100vh;
-      background:
-        linear-gradient(rgba(15,61,29,0.70), rgba(15,61,29,0.70)),
-        url("../assets/center1.jpg");
+       background: linear-gradient(rgba(15,61,29,0.70), rgba(15,61,29,0.70));
       background-size:cover;
       background-position:center;
       display:flex;
@@ -302,6 +300,8 @@
       }
     }
   </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 </head>
 
 <body>
@@ -317,14 +317,10 @@
     <div class="social-title">Continue with:</div>
 
     <div class="social-buttons">
-      <button class="social-btn google" onclick="googleLogin()">
-        <span>G</span> Google
-      </button>
-
-      <button class="social-btn facebook" onclick="facebookLogin()">
-        <span>f</span> Facebook
-      </button>
-    </div>
+  <button class="social-btn google" onclick="startGoogleLogin()">
+  <span>G</span> Google
+</button>
+</div>
 
     <div class="divider">or</div>
 
@@ -338,7 +334,7 @@
       </button>
     </div>
 
-    <form id="emailLoginForm" onsubmit="return emailLogin()">
+    <form id="emailLoginForm" onsubmit="return emailLogin(event)">
 
       <div class="form-group">
         <input type="email" id="email" placeholder="Email Address">
@@ -400,10 +396,11 @@
 </div>
 
 <script>
+const API_BASE_URL = "http://localhost:8085";
+
 function showEmailLogin(){
   document.getElementById("emailLoginForm").classList.remove("hide");
   document.getElementById("phoneLoginForm").classList.add("hide");
-
   document.getElementById("emailTab").classList.add("active");
   document.getElementById("phoneTab").classList.remove("active");
 }
@@ -411,171 +408,164 @@ function showEmailLogin(){
 function showPhoneLogin(){
   document.getElementById("phoneLoginForm").classList.remove("hide");
   document.getElementById("emailLoginForm").classList.add("hide");
-
   document.getElementById("phoneTab").classList.add("active");
   document.getElementById("emailTab").classList.remove("active");
 }
 
-async function emailLogin() {
+async function emailLogin(event){
     event.preventDefault();
 
-    let email = document.getElementById("email").value.trim();
-    let password = document.getElementById("password").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-    // Admin Login
-    if (email === "admin@neolife.com" && password === "admin123") {
-
-        localStorage.setItem("role", "ADMIN");
-        localStorage.setItem("isLoggedIn", "true");
-
-        window.location.href = "../admin/admin-dashboard.html";
+    if(email === "" || password === ""){
+        alert("Please enter email and password");
         return false;
     }
- if (email === "nisha@neolife.com" && password === "nisha123") {
 
-        localStorage.setItem("role", "USER");
-        localStorage.setItem("isLoggedIn", "true");
+    try{
 
-        window.location.href = "homepage.html";
-        return false;
+        // Step 1: Login
+        const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                email:email,
+                password:password
+            })
+        });
+
+        const loginResult = await loginResponse.json();
+
+        if(!loginResult.success){
+            alert(loginResult.message || "Invalid Email or Password");
+            return false;
+        }
+
+        // Step 2: Save login details
+        const token = loginResult.data.token;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("refreshToken", loginResult.data.refreshToken);
+        localStorage.setItem("userId", loginResult.data.id);
+        localStorage.setItem("email", loginResult.data.email);
+        localStorage.setItem("isLoggedIn","true");
+
+        // Step 3: Try User Profile API
+let profileResponse = await fetch(`${API_BASE_URL}/api/users/getProfile`, {
+    method: "GET",
+    headers: {
+        "Authorization": "Bearer " + token
     }
-    // User Login
-    // try {
+});
 
-    //     const response = await fetch("http://localhost:8085/api/auth/login", {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json"
-    //         },
-    //         body: JSON.stringify({
-    //             email: email,
-    //             password: password
-    //         })
-    //     });
+let profileResult = await profileResponse.json();
 
-    //     const data = await response.json();
+// If user API says only users can access, try Admin API
+if (!profileResult.success && profileResult.message === "Only users can access this API") {
 
-    //     if (response.ok) {
+    profileResponse = await fetch(`${API_BASE_URL}/api/admin/getAdminProfile`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
 
-    //         localStorage.setItem("role", "USER");
-    //         localStorage.setItem("isLoggedIn", "true");
+    profileResult = await profileResponse.json();
+}
 
-    //         window.location.href = "profile.html";
-    //     }
-    //     else {
-    //         alert(data.message || "Invalid Credentials");
-    //     }
+if (!profileResult.success) {
+    alert(profileResult.message || "Unable to fetch profile");
+    return false;
+}
 
-    // }
-    // catch (error) {
-    //     alert("Unable to connect to server");
-    // }
+// Save profile details
+localStorage.setItem("name", profileResult.data.name);
+localStorage.setItem("phoneNumber", profileResult.data.phoneNumber);
+localStorage.setItem("age", profileResult.data.age);
+localStorage.setItem("gender", profileResult.data.gender);
+localStorage.setItem("role", profileResult.data.role);
+
+// Redirect
+if (profileResult.data.role === "ADMIN") {
+    alert("Welcome Admin");
+    window.location.href = "../admin/admin-dashboard.html";
+} else {
+    alert("Welcome " + profileResult.data.name);
+    window.location.href = "profile.html";
+}
+    }catch(error){
+        console.log(error);
+        alert("Unable to connect to backend.");
+    }
 
     return false;
 }
 
 async function sendOTP(){
-  const phone = document.getElementById("phone").value.trim();
-
-  if(phone.length !== 10){
-    alert("Please enter valid 10 digit phone number");
-    return;
-  }
-
-  try{
-    const response = await fetch("http://localhost:8085/api/auth/send-otp", {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        phone:phone
-      })
-    });
-
-    const data = await response.json();
-
-    if(response.ok){
-      alert("OTP sent successfully");
-    }else{
-      alert(data.message || "Failed to send OTP");
-    }
-
-  }catch(error){
-    alert("Unable to connect to server");
-  }
+  alert("Phone OTP API is not available now. Use Email Login.");
 }
 
 async function verifyOTP(){
-  const phone = document.getElementById("phone").value.trim();
-  const otp = document.getElementById("otp").value.trim();
-
-  if(phone.length !== 10){
-    alert("Please enter valid phone number");
-    return false;
-  }
-
-  if(otp.length !== 6){
-    alert("Please enter valid 6 digit OTP");
-    return false;
-  }
-
-  try{
-    const response = await fetch("http://localhost:8085/api/auth/verify-otp", {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        phone:phone,
-        otp:otp
-      })
-    });
-
-    const data = await response.json();
-
-    if(response.ok){
-      alert("OTP verified successfully");
-      window.location.href = "consultation.html";
-    }else{
-      alert(data.message || "Invalid OTP");
-    }
-
-  }catch(error){
-    alert("Unable to connect to server");
-  }
-
+  alert("Phone OTP API is not available now. Use Email Login.");
   return false;
 }
 
-function googleLogin(){
-  alert("Google Login will be connected using Google OAuth later");
+let googleReady = false;
+
+window.onload = function(){
+  initGoogleLogin();
+};
+
+function initGoogleLogin(){
+  google.accounts.id.initialize({
+    client_id: "277109720887-bd1pfueg8eodgbm76qh18kn8rc22quvl.apps.googleusercontent.com",
+    callback: handleGoogleResponse,
+    use_fedcm_for_prompt: false
+  });
+
+  googleReady = true;
 }
 
-function facebookLogin(){
-  alert("Facebook Login can be connected later if required");
-}
-// testing login with local storage
-function loginUser(){
+function startGoogleLogin(){
+  if(!googleReady){
+    alert("Google login is loading. Try again.");
+    return;
+  }
 
-let user = JSON.parse(localStorage.getItem("user"));
-
-let email = document.getElementById("email").value;
-let password = document.getElementById("password").value;
-
-if(user && user.email===email && user.password===password){
-
-alert("Login Successful");
-
-window.location.href="profile.html";
-
-}
-else{
-alert("Invalid Email or Password");
+  google.accounts.id.prompt();
 }
 
-return false;
+async function handleGoogleResponse(response){
+  const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      idToken: response.credential
+    })
+  });
+
+  const result = await res.json();
+
+  if(result.success){
+    localStorage.setItem("token", result.data.token);
+    localStorage.setItem("refreshToken", result.data.refreshToken);
+    localStorage.setItem("userId", result.data.id);
+    localStorage.setItem("email", result.data.email);
+    localStorage.setItem("isLoggedIn", "true");
+
+    alert("Google login successful");
+    window.location.href = "profile.html";
+  }else{
+    alert(result.message || "Google login failed");
+  }
 }
+
+
 </script>
 
 </body>

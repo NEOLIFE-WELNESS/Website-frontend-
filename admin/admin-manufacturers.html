@@ -208,9 +208,9 @@ td{
             <div class="form-group">
                 <select id="manufacturerType">
                     <option value="">Select Type</option>
-                    <option value="Manufacturer">Manufacturer</option>
-                    <option value="Brand Owner">Brand Owner</option>
-                    <option value="Distributor">Distributor</option>
+                    <option value="MANUFACTURER">Manufacturer</option>
+<option value="BRAND_OWNER">Brand Owner</option>
+<option value="DISTRIBUTOR">Distributor</option>
                 </select>
             </div>
         </div>
@@ -310,154 +310,228 @@ td{
 </div>
 
 <script>
-function saveManufacturer(){
+const API_BASE_URL = "http://localhost:8085";
+let manufacturers = [];
+let editId = null;
 
-    let name = document.getElementById("manufacturerName").value.trim();
-    let type = document.getElementById("manufacturerType").value;
-    let phone = document.getElementById("phone").value.trim();
-    let email = document.getElementById("email").value.trim();
-    let address = document.getElementById("address").value.trim();
-    let editIndex = document.getElementById("editIndex").value;
+window.onload = function(){
+  loadManufacturers();
+};
 
-    if(name === ""){
-        alert("Please enter name");
-        return;
-    }
-
-    if(type === ""){
-        alert("Please select type");
-        return;
-    }
-
-    let table = document.getElementById("manufacturerTable");
-
-    if(editIndex === ""){
-        let rowCount = table.rows.length + 1;
-
-        let row = table.insertRow();
-
-        row.innerHTML = `
-            <td>${rowCount}</td>
-            <td>${name}</td>
-            <td>${type}</td>
-            <td>${phone}</td>
-            <td>${email}</td>
-            <td>${address}</td>
-            <td>
-                <button class="edit-btn" onclick="editManufacturer(this)">Edit</button>
-                <button class="delete-btn" onclick="deleteManufacturer(this)">Delete</button>
-            </td>
-        `;
-
-        alert("Manufacturer added successfully");
-    }
-    else{
-        let row = table.rows[editIndex];
-
-        row.cells[1].innerText = name;
-        row.cells[2].innerText = type;
-        row.cells[3].innerText = phone;
-        row.cells[4].innerText = email;
-        row.cells[5].innerText = address;
-
-        alert("Manufacturer updated successfully");
-
-        document.getElementById("formTitle").innerText = "Add New Manufacturer";
-        document.getElementById("saveBtn").innerText = "Save Manufacturer";
-        document.getElementById("cancelBtn").style.display = "none";
-        document.getElementById("editIndex").value = "";
-    }
-
-    clearForm();
-    updateIds();
+function getToken(){
+  return localStorage.getItem("token");
 }
 
-function editManufacturer(button){
+async function loadManufacturers(){
+  const token = getToken();
 
-    let row = button.closest("tr");
-    let index = row.rowIndex - 1;
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../frontend/login.html";
+    return;
+  }
 
-    document.getElementById("editIndex").value = index;
-
-    document.getElementById("manufacturerName").value = row.cells[1].innerText;
-    document.getElementById("manufacturerType").value = row.cells[2].innerText;
-    document.getElementById("phone").value = row.cells[3].innerText;
-    document.getElementById("email").value = row.cells[4].innerText;
-    document.getElementById("address").value = row.cells[5].innerText;
-
-    document.getElementById("formTitle").innerText = "Edit Manufacturer";
-    document.getElementById("saveBtn").innerText = "Update Manufacturer";
-    document.getElementById("cancelBtn").style.display = "inline-block";
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/manufacturers/getAll`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
     });
-}
 
-function deleteManufacturer(button){
+    const result = await response.json();
 
-    if(confirm("Are you sure you want to delete this record?")){
-        button.closest("tr").remove();
-        updateIds();
+    if(result.success){
+      manufacturers = result.data;
+      displayManufacturers(manufacturers);
+    }else{
+      alert(result.message || "Failed to load manufacturers");
     }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected");
+  }
 }
 
-function updateIds(){
-    let rows = document.querySelectorAll("#manufacturerTable tr");
+function displayManufacturers(list){
+  const table = document.getElementById("manufacturerTable");
+  table.innerHTML = "";
 
-    rows.forEach((row,index)=>{
-        row.cells[0].innerText = index + 1;
+  if(list.length === 0){
+    document.getElementById("noResult").style.display = "block";
+    return;
+  }
+
+  document.getElementById("noResult").style.display = "none";
+
+  list.forEach(item => {
+    table.innerHTML += `
+      <tr>
+        <td>${item.id}</td>
+        <td>${item.name || "-"}</td>
+        <td>${item.type || "-"}</td>
+        <td>${item.phone || "-"}</td>
+        <td>${item.email || "-"}</td>
+        <td>${item.address || "-"}</td>
+        <td>
+          <button class="edit-btn" onclick="editManufacturer(${item.id})">Edit</button>
+          <button class="delete-btn" onclick="deleteManufacturer(${item.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function saveManufacturer(){
+  const token = getToken();
+
+  const name = document.getElementById("manufacturerName").value.trim();
+  const type = document.getElementById("manufacturerType").value;
+  const phone = document.getElementById("phone").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const address = document.getElementById("address").value.trim();
+
+  if(!name){
+    alert("Please enter name");
+    return;
+  }
+
+  if(!type){
+    alert("Please select type");
+    return;
+  }
+
+  const data = {
+    name: name,
+    type: type,
+    phone: phone,
+    email: email,
+    address: address
+  };
+
+  try{
+    let url = `${API_BASE_URL}/api/manufacturers/add`;
+    let method = "POST";
+
+    if(editId !== null){
+      url = `${API_BASE_URL}/api/manufacturers/update/${editId}`;
+      method = "PUT";
+    }
+
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(data)
     });
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message);
+      clearForm();
+      cancelEdit();
+      loadManufacturers();
+    }else{
+      alert(result.message || "Operation failed");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected");
+  }
 }
 
-function clearForm(){
-    document.getElementById("manufacturerName").value = "";
-    document.getElementById("manufacturerType").value = "";
-    document.getElementById("phone").value = "";
-    document.getElementById("email").value = "";
-    document.getElementById("address").value = "";
+function editManufacturer(id){
+  const item = manufacturers.find(m => m.id === id);
+
+  if(!item){
+    alert("Manufacturer not found");
+    return;
+  }
+
+  editId = id;
+
+  document.getElementById("manufacturerName").value = item.name || "";
+  document.getElementById("manufacturerType").value = item.type || "";
+  document.getElementById("phone").value = item.phone || "";
+  document.getElementById("email").value = item.email || "";
+  document.getElementById("address").value = item.address || "";
+
+  document.getElementById("formTitle").innerText = "Edit Manufacturer";
+  document.getElementById("saveBtn").innerText = "Update Manufacturer";
+  document.getElementById("cancelBtn").style.display = "inline-block";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function cancelEdit(){
-    clearForm();
+async function deleteManufacturer(id){
+  const token = getToken();
 
-    document.getElementById("editIndex").value = "";
-    document.getElementById("formTitle").innerText = "Add New Manufacturer";
-    document.getElementById("saveBtn").innerText = "Save Manufacturer";
-    document.getElementById("cancelBtn").style.display = "none";
+  if(!confirm("Are you sure you want to delete this manufacturer?")){
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/manufacturers/remove/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+      alert(result.message);
+      loadManufacturers();
+    }else{
+      alert(result.message || "Delete failed");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected");
+  }
 }
 
 function searchManufacturer(){
-    let searchValue = document.getElementById("searchInput").value.toLowerCase();
-    let rows = document.querySelectorAll("#manufacturerTable tr");
-    let visibleCount = 0;
+  const searchValue = document.getElementById("searchInput").value.toLowerCase();
 
-    rows.forEach(row=>{
-        let rowText = row.innerText.toLowerCase();
+  const filtered = manufacturers.filter(item =>
+    String(item.name || "").toLowerCase().includes(searchValue) ||
+    String(item.type || "").toLowerCase().includes(searchValue) ||
+    String(item.phone || "").toLowerCase().includes(searchValue) ||
+    String(item.email || "").toLowerCase().includes(searchValue) ||
+    String(item.address || "").toLowerCase().includes(searchValue)
+  );
 
-        if(rowText.includes(searchValue)){
-            row.style.display = "";
-            visibleCount++;
-        }else{
-            row.style.display = "none";
-        }
-    });
-
-    document.getElementById("noResult").style.display =
-        visibleCount === 0 ? "block" : "none";
+  displayManufacturers(filtered);
 }
 
 function viewAllManufacturers(){
-    document.getElementById("searchInput").value = "";
+  document.getElementById("searchInput").value = "";
+  displayManufacturers(manufacturers);
+}
 
-    let rows = document.querySelectorAll("#manufacturerTable tr");
+function clearForm(){
+  document.getElementById("manufacturerName").value = "";
+  document.getElementById("manufacturerType").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("address").value = "";
+}
 
-    rows.forEach(row=>{
-        row.style.display = "";
-    });
+function cancelEdit(){
+  editId = null;
+  clearForm();
 
-    document.getElementById("noResult").style.display = "none";
+  document.getElementById("formTitle").innerText = "Add New Manufacturer";
+  document.getElementById("saveBtn").innerText = "Save Manufacturer";
+  document.getElementById("cancelBtn").style.display = "none";
 }
 </script>
 
