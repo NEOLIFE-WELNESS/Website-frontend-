@@ -38,6 +38,7 @@
     <a href="consultation.html">Consultation</a>
     <a href="blog.html">Blogs</a>
     <a href="contact.html">Contact</a>
+    
   </nav>
 
 </header>
@@ -188,6 +189,39 @@
 <a class="whatsapp" href="https://wa.me/919481489866" target="_blank">
   <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
 </a>
+<script>
+  async function loadProfileIcon(){
 
+    const token = localStorage.getItem("token");
+
+    if(!token) return;
+
+    try{
+
+        const response = await fetch("http://localhost:8085/api/users/getProfile",{
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        });
+
+        const result = await response.json();
+
+        if(result.success){
+
+            const name = result.data.name || "U";
+
+            document.getElementById("profileIcon").innerText =
+                name.charAt(0).toUpperCase();
+
+        }
+
+    }catch(e){
+        console.log(e);
+    }
+
+}
+
+loadProfileIcon();
+</script>
 </body>
 </html>

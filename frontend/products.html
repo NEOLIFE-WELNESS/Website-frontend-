@@ -878,7 +878,6 @@ body{
 <body>
 
 <header class="glass-header">
-
   <div class="logo-container">
     <img src="../assets/prod_logo.png" alt="Neolife Logo" class="logo-img">
 
@@ -905,18 +904,16 @@ body{
     <a href="blog.html">Blogs</a>
     <a href="contact.html">Contact</a>
   </nav>
-
 </header>
 
 <section class="products-section">
   <h2 class="section-title">Neolife Wellness Products</h2>
   <p class="section-desc">Pure, natural and trusted Ayurvedic products for daily wellness.</p>
 
-  <div class="products-grid" id="productsGrid">
-</div>
+  <div class="products-grid" id="productsGrid"></div>
 </section>
 
-<!-- View Details -->
+<!-- Product Details Modal -->
 <div id="detailsModal" class="modal">
   <div class="details-page">
 
@@ -945,14 +942,15 @@ body{
       <button class="details-buy-btn" onclick="buyNow()">Buy It Now</button>
 
       <p id="modalDesc" class="details-desc"></p>
-<p><b>Indication:</b> <span id="modalIndication">-</span></p>
-<p><b>Net Qty:</b> <span id="modalNetQty">-</span></p>
-<p><b>Exp. Date:</b> <span id="modalExpiryDate">-</span></p>
 
-            <button onclick="shareProduct()" class="share-btn">
-    <i class="fa-solid fa-share-nodes"></i>
-    <span>Share</span>
-</button>
+      <p><b>Indication:</b> <span id="modalIndication">-</span></p>
+      <p><b>Net Qty:</b> <span id="modalNetQty">-</span></p>
+      <p><b>Exp. Date:</b> <span id="modalExpiryDate">-</span></p>
+
+      <button onclick="shareProduct()" class="share-btn">
+        <i class="fa-solid fa-share-nodes"></i>
+        <span>Share</span>
+      </button>
     </div>
 
   </div>
@@ -979,6 +977,8 @@ body{
   🛒
   <span id="cartCount">0</span>
 </div>
+
+<!-- Checkout Modal -->
 <div id="checkoutModal" class="modal">
   <div class="checkout-box">
 
@@ -1014,8 +1014,9 @@ body{
         <input type="radio" name="paymentMethod" value="COD" checked>
         Cash on Delivery
       </label>
+
       <label class="address-card">
-        <input type="radio" name="paymentMethod" value="COD" checked>
+        <input type="radio" name="paymentMethod" value="ONLINE">
         Online Payment
       </label>
 
@@ -1032,38 +1033,6 @@ body{
   </div>
 </div>
 
-    <div id="summaryStep" class="checkout-step" style="display:none;">
-  <h3>Selected Address</h3>
-  <div id="checkoutAddress" class="address-card"></div>
-
-  <h3>2. Order Summary</h3>
-  <div id="checkoutItems"></div>
-
-  <h3>3. Delivery Option</h3>
-  <label class="address-card">
-    <input type="radio" checked>
-    Standard Delivery - 3 to 5 days - ₹50
-  </label>
-
-  <h3>4. Payment Method</h3>
-  <label class="address-card">
-    <input type="radio" name="paymentMethod" value="COD" checked>
-    Cash on Delivery
-  </label>
-
-  <div class="checkout-total">
-    Total: ₹<span id="checkoutTotal">0</span>
-  </div>
-
-  <div class="checkout-actions">
-    <button class="back-checkout-btn" onclick="backToAddress()">Back</button>
-    <button class="continue-checkout-btn" onclick="confirmPlaceOrder()">Confirm Order</button>
-  </div>
-</div>
-
-  </div>
-</div>
-</div>
 <footer class="footer">
   <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
 </footer>
@@ -1077,11 +1046,7 @@ body{
 const API_BASE_URL = "http://localhost:8085";
 
 let cart = [];
-const savedCart = localStorage.getItem("cart");
 
-if(savedCart){
-  cart = JSON.parse(savedCart);
-}
 let selectedProduct = {};
 let productImages = [];
 let currentImageIndex = 0;
@@ -1089,7 +1054,7 @@ let modalQty = 1;
 
 window.onload = function(){
   loadProducts();
-  updateCart();
+  loadCartFromBackend();
 };
 
 async function loadProducts(){
@@ -1110,7 +1075,90 @@ function formatExpiryDate(date){
     return d.toLocaleDateString("en-IN",{
         month:"2-digit",
         year:"numeric"
+   
+      });
+}
+async function clearBackendCart() {
+  const token = localStorage.getItem("token");
+
+  for (const item of cart) {
+    try {
+      await fetch(`${API_BASE_URL}/api/cart/remove/${item.id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch (e) {
+      console.log("Failed to remove cart item", item.id);
+    }
+  }
+}
+async function confirmPlaceOrder(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login first.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const orderRequest = {
+    addressId: Number(checkoutAddressId),
+    items: cart.map(item => ({
+      productId: Number(item.productId),
+      quantity: Number(item.quantity)
+    }))
+  };
+
+  console.log("ORDER REQUEST:", orderRequest);
+
+  if(!orderRequest.addressId){
+    alert("Please select address.");
+    return;
+  }
+
+  if(orderRequest.items.length === 0){
+    alert("Cart is empty.");
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(orderRequest)
     });
+
+    const result = await response.json();
+    console.log("ORDER RESPONSE:", result);
+
+    if(result.success){
+
+    await clearBackendCart();
+
+    cart = [];
+
+    updateCart([]);
+
+    closeCheckoutModal();
+
+    closeCart();
+
+    alert("Order placed successfully!\nOrder No: " + result.data.orderNumber);
+
+    window.location.href = "my-orders.html";
+}else{
+      alert(result.message || "Failed to place order");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Order API failed. Check backend.");
+  }
 }
 function getImages(product){
   let urls = product.imageUrls || [];
@@ -1167,9 +1215,9 @@ function displayProducts(products){
               View Details
             </button>
 
-            <button class="cart-btn" onclick="addToCart('${productName}', ${price}, '${mainImage}', ${product.id})">
-              Add to Cart
-            </button>
+            <button class="cart-btn" onclick="addProductToCart(${index})">
+  Add to Cart
+</button>
           </div>
         </div>
       </div>
@@ -1179,6 +1227,16 @@ function displayProducts(products){
   });
 
   window.loadedProducts = products;
+}
+function addProductToCart(index){
+  const product = window.loadedProducts[index];
+
+  if(!product || !product.id){
+    alert("Product ID missing");
+    return;
+  }
+
+  addToCart(product.id, 1, true);
 }
 // async function placeOrder(){
 //   const token = localStorage.getItem("token");
@@ -1276,6 +1334,7 @@ function continueToSummary(){
   }
 
   checkoutAddressId = Number(selected.value);
+
   document.getElementById("checkoutAddress").innerText =
     selected.closest("label").innerText;
 
@@ -1283,12 +1342,15 @@ function continueToSummary(){
   let html = "";
 
   cart.forEach(item => {
-    const subtotal = item.price * item.qty;
+    const subtotal = Number(item.price) * Number(item.quantity);
     total += subtotal;
 
     html += `
       <div class="summary-item">
-        <div><b>${item.name}</b><br>Qty: ${item.qty}</div>
+        <div>
+          <b>${item.productName}</b><br>
+          Qty: ${item.quantity}
+        </div>
         <div>₹${subtotal}</div>
       </div>
     `;
@@ -1308,40 +1370,6 @@ function continueToSummary(){
 
   document.getElementById("addressStep").style.display = "none";
   document.getElementById("summaryStep").style.display = "block";
-}
-
-async function confirmPlaceOrder(){
-  const token = localStorage.getItem("token");
-
-  const orderRequest = {
-    addressId: Number(checkoutAddressId),
-    items: cart.map(item => ({
-      productId: item.productId,
-      quantity: item.qty
-    }))
-  };
-
-  const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify(orderRequest)
-  });
-
-  const result = await response.json();
-
-  if(result.success){
-    alert("Order placed successfully! Order No: " + result.data.orderNumber);
-    cart = [];
-    localStorage.removeItem("cart");
-    updateCart();
-    closeCheckoutModal();
-    window.location.href = "my-orders.html";
-  }else{
-    alert(result.message || "Failed to place order");
-  }
 }
 function viewDetails(index){
   const product = window.loadedProducts[index];
@@ -1415,25 +1443,10 @@ function modalDecreaseQty(){
   }
 }
 
-function addToCart(name, price, img, productId, shouldOpenCart = true){
-  let existing = cart.find(item => item.name === name);
 
-  if(existing){
-    existing.qty++;
-  }else{
-    cart.push({name, price, img, productId, qty:1});
-  }
 
-  updateCart();
-
-  if(shouldOpenCart) openCart();
-}
-
-function addModalProduct(){
-  for(let i = 0; i < modalQty; i++){
-    addToCart(selectedProduct.name, selectedProduct.price, selectedProduct.img, selectedProduct.id, false);
-  }
-
+async function addModalProduct(){
+  await addToCart(selectedProduct.id, modalQty, false);
   closeModal();
   openCart();
 }
@@ -1442,8 +1455,70 @@ function buyNow(){
   addModalProduct();
 }
 
-function updateCart(){
-  localStorage.setItem("cart", JSON.stringify(cart));
+async function addToCart(productId, quantity = 1, shouldOpenCart = true){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login first");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try{
+    console.log("ADDING TO CART:", { productId, quantity });
+
+    const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        productId: Number(productId),
+        quantity: Number(quantity)
+      })
+    });
+
+    const result = await response.json();
+    console.log("ADD CART RESPONSE:", result);
+
+    if(result.success){
+      await loadCartFromBackend();
+      if(shouldOpenCart) openCart();
+    }else{
+      alert(result.message || "Failed to add to cart");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Cart API failed. Check backend or token.");
+  }
+}
+
+async function loadCartFromBackend(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    updateCart([]);
+    return;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/cart/getCart`, {
+    method: "GET",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    cart = result.data || [];
+    updateCart(cart);
+  }
+}
+
+function updateCart(cartData = cart){
   const cartItems = document.getElementById("cartItems");
   const cartTotal = document.getElementById("cartTotal");
   const cartCount = document.getElementById("cartCount");
@@ -1453,24 +1528,31 @@ function updateCart(){
   let total = 0;
   let count = 0;
 
-  if(cart.length === 0){
+  if(!cartData || cartData.length === 0){
     cartItems.innerHTML = `<p class="cart-empty">Your cart is empty</p>`;
     cartTotal.innerText = "0";
     cartCount.innerText = "0";
     return;
   }
 
-  cart.forEach((item,index)=>{
-    total += item.price * item.qty;
-    count += item.qty;
+  cartData.forEach(item => {
+    total += item.totalPrice;
+    count += item.quantity;
 
     cartItems.innerHTML += `
       <div class="cart-item">
-        <img src="${item.img}">
+        <img src="${getCartImage(item.productId)}">
         <div class="cart-info">
-          <h4>${item.name}</h4>
-          <p>₹${item.price} × ${item.qty}</p>
-          <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+          <h4>${item.productName}</h4>
+          <p>₹${item.price} × ${item.quantity}</p>
+
+          <div class="qty-box">
+            <button onclick="updateCartQty(${item.id}, ${item.productId}, ${item.quantity - 1})">−</button>
+            <span>${item.quantity}</span>
+            <button onclick="updateCartQty(${item.id}, ${item.productId}, ${item.quantity + 1})">+</button>
+          </div>
+
+          <button class="remove-btn" onclick="removeItem(${item.id})">Remove</button>
         </div>
       </div>
     `;
@@ -1480,10 +1562,55 @@ function updateCart(){
   cartCount.innerText = count;
 }
 
-function removeItem(index){
-  cart.splice(index,1);
-  updateCart();
+async function updateCartQty(cartId, productId, quantity){
+  const token = localStorage.getItem("token");
+
+  if(quantity <= 0){
+    removeItem(cartId);
+    return;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/cart/update/${cartId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      productId: Number(productId),
+      quantity: Number(quantity)
+    })
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    loadCartFromBackend();
+  }else{
+    alert(result.message || "Failed to update cart");
+  }
 }
+
+async function removeItem(cartId){
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/api/cart/remove/${cartId}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    loadCartFromBackend();
+  }else{
+    alert(result.message || "Failed to remove item");
+  }
+}
+
+
 
 function openCart(){
   document.getElementById("cartSidebar").classList.add("active");
@@ -1513,14 +1640,14 @@ async function loadUserAddresses() {
 
         if (!result.success || !result.data || result.data.length === 0) {
 
-            alert("No delivery address found. Please add an address first.");
+    alert("Please add a delivery address first.");
 
-            closeCheckoutModal();
+    // Remember that user came from checkout
+    sessionStorage.setItem("returnToCheckout", "true");
 
-            window.location.href = "profile.html#address";
-
-            return;
-        }
+    window.location.href = "profile.html?tab=address";
+    return;
+}
 
         result.data.forEach(address => {
 
@@ -1559,7 +1686,15 @@ async function openAddressModal(){
   await loadUserAddresses();
   document.getElementById("addressModal").style.display = "block";
 }
+function getCartImage(productId){
+  const product = window.loadedProducts?.find(p => Number(p.id) === Number(productId));
 
+  if(product && product._images && product._images.length > 0){
+    return product._images[0];
+  }
+
+  return "../assets/prod_logo.png";
+}
 function closeAddressModal(){
   document.getElementById("addressModal").style.display = "none";
 }

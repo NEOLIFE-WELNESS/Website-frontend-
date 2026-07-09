@@ -203,55 +203,7 @@ select{
             </tr>
         </thead>
 
-        <tbody id="ordersTable">
-
-            <tr>
-                <td>#ORD001</td>
-                <td>Ramesh</td>
-                <td>9876543210</td>
-                <td>Neolife Hair Oil</td>
-                <td>1</td>
-                <td>₹299</td>
-                <td>COD</td>
-                <td><span class="status pending">Pending</span></td>
-                <td>
-                    <select onchange="changeStatus(this)">
-                        <option>Pending</option>
-                        <option>Confirmed</option>
-                        <option>Shipped</option>
-                        <option>Delivered</option>
-                        <option>Cancelled</option>
-                    </select>
-                </td>
-                <td>
-                    <button class="view-btn" onclick="viewOrder('ORD001')">View</button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>#ORD002</td>
-                <td>Suresh</td>
-                <td>9123456780</td>
-                <td>Joint Care Choorna</td>
-                <td>2</td>
-                <td>₹500</td>
-                <td>Online</td>
-                <td><span class="status confirmed">Confirmed</span></td>
-                <td>
-                    <select onchange="changeStatus(this)">
-                        <option>Pending</option>
-                        <option selected>Confirmed</option>
-                        <option>Shipped</option>
-                        <option>Delivered</option>
-                        <option>Cancelled</option>
-                    </select>
-                </td>
-                <td>
-                    <button class="view-btn" onclick="viewOrder('ORD002')">View</button>
-                </td>
-            </tr>
-
-        </tbody>
+       <tbody id="ordersTable"></tbody>
     </table>
 
 </div>
@@ -273,40 +225,162 @@ select{
     </div>
 </div>
 <script>
-function changeStatus(selectElement){
-    const selectedStatus = selectElement.value;
-    const row = selectElement.closest("tr");
-    const statusSpan = row.querySelector(".status");
+const API_BASE_URL = "http://localhost:8085";
+let allOrders = [];
 
-    statusSpan.innerText = selectedStatus;
+window.onload = loadOrders;
 
-    statusSpan.className = "status " + selectedStatus.toLowerCase();
+async function loadOrders(){
+  const token = localStorage.getItem("token");
 
-    alert("Order status changed to " + selectedStatus);
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/orders/getAll`, {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const text = await response.text();
+    console.log("ORDERS RAW RESPONSE:", text);
+
+    if(!response.ok){
+      alert("Failed to load orders. Status: " + response.status);
+      return;
+    }
+
+    const result = JSON.parse(text);
+    console.log("ADMIN ORDERS RESPONSE:", result);
+
+    if(result.success){
+      allOrders = (result.data || []).sort((a, b) => b.id - a.id);
+      displayOrders(allOrders);
+    }else{
+      alert(result.message || "Failed to load orders");
+    }
+
+  }catch(error){
+    console.log(error);
+    alert("Backend not connected or token issue");
+  }
 }
 
-function viewOrder(orderId){
-    const rows = document.querySelectorAll("#ordersTable tr");
+function displayOrders(orders){
+  const table = document.getElementById("ordersTable");
+  table.innerHTML = "";
 
-    rows.forEach(row => {
-        if(row.children[0].innerText === "#" + orderId){
+  if(!orders || orders.length === 0){
+    table.innerHTML = `
+      <tr>
+        <td colspan="10">No orders found</td>
+      </tr>
+    `;
+    return;
+  }
 
-            document.getElementById("mOrderId").innerText = row.children[0].innerText;
-            document.getElementById("mCustomer").innerText = row.children[1].innerText;
-            document.getElementById("mPhone").innerText = row.children[2].innerText;
-            document.getElementById("mProduct").innerText = row.children[3].innerText;
-            document.getElementById("mQty").innerText = row.children[4].innerText;
-            document.getElementById("mTotal").innerText = row.children[5].innerText;
-            document.getElementById("mPayment").innerText = row.children[6].innerText;
-            document.getElementById("mStatus").innerText = row.children[7].innerText;
+  orders.forEach(order => {
+    const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
 
-            document.getElementById("orderModal").style.display = "block";
-        }
-    });
+    const productName = firstItem
+      ? firstItem.productName
+      : "-";
+
+    const qty = firstItem
+      ? firstItem.quantity
+      : "-";
+
+    const statusText = order.status || "PENDING";
+    const statusClass = getStatusClass(statusText);
+
+    table.innerHTML += `
+      <tr>
+        <td>#${order.orderNumber || order.id}</td>
+        <td>User ${order.userId || "-"}</td>
+        <td>-</td>
+        <td>${productName}</td>
+        <td>${qty}</td>
+        <td>₹${order.totalAmount || 0}</td>
+        <td>COD / Pending</td>
+
+        <td>
+          <span class="status ${statusClass}">
+            ${statusText}
+          </span>
+        </td>
+
+        <td>
+          <select onchange="changeStatus(this)" disabled>
+            <option selected>${statusText}</option>
+          </select>
+        </td>
+
+        <td>
+          <button class="view-btn" onclick="viewOrder(${order.id})">View</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function getStatusClass(status){
+  status = String(status || "").toLowerCase();
+
+  if(status.includes("pending")) return "pending";
+  if(status.includes("confirmed")) return "confirmed";
+  if(status.includes("shipped")) return "shipped";
+  if(status.includes("delivered")) return "delivered";
+  if(status.includes("cancelled")) return "cancelled";
+
+  return "pending";
+}
+
+function viewOrder(id){
+  const order = allOrders.find(o => o.id === id);
+
+  if(!order){
+    alert("Order not found");
+    return;
+  }
+
+  const items = order.items || [];
+
+  const productText = items.length > 0
+    ? items.map(item =>
+        `${item.productName} (Qty: ${item.quantity}, ₹${item.subtotal})`
+      ).join(", ")
+    : "-";
+
+  const qtyText = items.length > 0
+    ? items.map(item => item.quantity).join(", ")
+    : "-";
+
+  document.getElementById("mOrderId").innerText = order.orderNumber || order.id;
+  document.getElementById("mCustomer").innerText = "User " + (order.userId || "-");
+  document.getElementById("mPhone").innerText = "-";
+  document.getElementById("mProduct").innerText = productText;
+  document.getElementById("mQty").innerText = qtyText;
+  document.getElementById("mTotal").innerText = "₹" + (order.totalAmount || 0);
+  document.getElementById("mPayment").innerText = order.status || "PENDING_PAYMENT";
+  document.getElementById("mStatus").innerText = order.status || "-";
+
+  document.querySelector("#orderModal .modal-content p:last-child").innerHTML =
+    `<b>Address:</b> ${order.shippingAddress || "-"}`;
+
+  document.getElementById("orderModal").style.display = "block";
+}
+
+function changeStatus(selectElement){
+  alert("Status update API is not available yet.");
 }
 
 function closeModal(){
-    document.getElementById("orderModal").style.display = "none";
+  document.getElementById("orderModal").style.display = "none";
 }
 </script>
 
