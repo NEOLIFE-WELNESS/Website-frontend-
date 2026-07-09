@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <link rel="icon" type="image/jpeg" href="../assets/prod_logo.png">
+   <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
    <title>Neolife Wellness Center</title>
    <link rel="stylesheet" href="../css/style.css">
    <link rel="stylesheet"
@@ -15,7 +15,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
   <header class="home-glass-header">
 
   <div class="home-logo-container">
-    <img src="../assets/prod_logo.png" alt="Neolife Logo" class="home-logo-img">
+    <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="home-logo-img">
 
     <div class="home-logo-details">
       <span class="home-logo-text">Neolife Wellness Center</span>
@@ -199,70 +199,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
   </p>
 
   <div class="product-slider">
-  <div class="product-track">
-
-    <div class="card product-card">
-      <img src="../assets/neodia-kashayam.jpg" alt="Neodia Kashayam">
-      <h3>Neodia Kashayam</h3>
-      <p>Supports healthy blood sugar management.</p>
-      <span class="product-tag">500 ml</span>
-    </div>
-
-    <div class="card product-card">
-      <img src="../assets/NEO9-KH.jpeg" alt="Neo9 KH">
-      <h3>Neo9 KH Syrup</h3>
-      <p>Supports urinary and kidney wellness.</p>
-      <span class="product-tag">300 ml</span>
-    </div>
-
-    <div class="card product-card">
-      <img src="../assets/neo-liv.jpg" alt="Neoliv">
-      <h3>Neoliv Liver Tonic</h3>
-      <p>Supports digestion, appetite and liver wellness.</p>
-      <span class="product-tag">500 ml</span>
-    </div>
-
-    <div class="card product-card">
-      <img src="../assets/neo-painil.jpg" alt="NeoPainil">
-      <h3>NeoPainil Capsule</h3>
-      <p>Supports joint comfort and mobility.</p>
-      <span class="product-tag">60 Capsules</span>
-    </div>
-
-    <!-- duplicate cards for smooth continuous movement -->
-    <div class="card product-card">
-      <img src="../assets/neodia-kashayam.jpg" alt="Neodia Kashayam">
-      <h3>Neodia Kashayam</h3>
-      <p>Supports healthy blood sugar management.</p>
-      <span class="product-tag">500 ml</span>
-    </div>
-
-    <div class="card product-card">
-      <img src="../assets/NEO9-KH.jpeg" alt="Neo9 KH">
-      <h3>Neo9 KH Syrup</h3>
-      <p>Supports urinary and kidney wellness.</p>
-      <span class="product-tag">300 ml</span>
-    </div>
-
-  </div>
+  <div class="product-track" id="homeProductsTrack"></div>
 </div>
 
-  <div class="product-cta">
+ 
 
-    <h3>Interested in Ordering?</h3>
-
-    <p>
-      Click below to order these products or explore our complete Ayurvedic product range.
-    </p>
-
-    <div class="product-buttons">
-
-     <button class="btn order-btn" onclick="goToProductPage()">Order Now</button>
-      
-
-    </div>
-
-  </div>
 
 </section>
 
@@ -672,6 +613,67 @@ async function loadActiveOffer(){
   }
 }
 
+const API_BASE_URL = "http://localhost:8085";
+
+async function loadHomeProducts(){
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/products/getAll`);
+    const result = await response.json();
+    console.log(result.data);
+
+    if(!result.success || !result.data){
+      return;
+    }
+
+    const track = document.getElementById("homeProductsTrack");
+    track.innerHTML = "";
+
+    result.data.forEach(product => {
+      const image = getProductImage(product);
+
+      track.innerHTML += `
+        <div class="card product-card"
+             onclick="window.location.href='products.html?id=${product.id}'">
+          ${image ? `<img src="${image}" alt="${product.name}">` : ""}
+          <h3>${product.productName || "No Name"}</h3>
+          <p>${product.description || ""}</p>
+          <span class="product-tag">${product.netQty || ""}</span>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.log("Products loading failed", error);
+  }
+}
+
+function getProductImage(product){
+  let imageUrl = product.imageUrl || product.imageUrls || "";
+
+  if(Array.isArray(imageUrl)){
+    imageUrl = imageUrl[0] || "";
+  }
+
+  if(typeof imageUrl === "string" && imageUrl.includes(",")){
+    imageUrl = imageUrl.split(",")[0].trim();
+  }
+
+  if(!imageUrl || imageUrl.trim() === ""){
+    return "";
+  }
+
+  if(imageUrl.startsWith("http")){
+    return imageUrl;
+  }
+
+  if(imageUrl.startsWith("/")){
+    return API_BASE_URL + imageUrl;
+  }
+
+  return imageUrl;
+}
+
+loadHomeProducts();
 function showOffer(index){
   const offer = offers[index];
 

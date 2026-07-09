@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Write Clinic Review - Neolife</title>
-<link rel="icon" href="../assets/prod_logo.png">
+<link rel="icon" href="../assets/main_logo.jpeg">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif}
@@ -57,6 +57,44 @@ textarea{min-height:120px;resize:vertical}
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
+const params = new URLSearchParams(window.location.search);
+const reviewId = params.get("id");
+
+window.onload = function(){
+  if(reviewId){
+    document.querySelector("h1").innerText = "Edit Clinic Review";
+    document.querySelector(".submit-btn").innerText = "Update Review";
+    loadReviewForEdit();
+  }
+};
+
+async function loadReviewForEdit(){
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/getById/${reviewId}`, {
+    method: "GET",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    const review = result.data;
+
+    document.getElementById("doctor").value = review.doctor || "";
+    document.getElementById("therapyService").value = review.therapyService || "";
+    document.getElementById("rating").value = review.rating || "";
+    document.getElementById("message").value = review.message || "";
+
+    if(review.photoUrls && review.photoUrls.length > 0){
+      document.getElementById("photo1").value = review.photoUrls[0] || "";
+      document.getElementById("photo2").value = review.photoUrls[1] || "";
+    }
+  }
+}
+
 async function submitReview(){
   const token = localStorage.getItem("token");
 
@@ -86,33 +124,28 @@ async function submitReview(){
     return;
   }
 
-  try{
-    const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify(review)
-    });
+  const url = reviewId
+    ? `${API_BASE_URL}/api/clinic-reviews/update/${reviewId}`
+    : `${API_BASE_URL}/api/clinic-reviews/create`;
 
-    if(!response.ok){
-      alert("Failed to submit review");
-      return;
-    }
+  const method = reviewId ? "PUT" : "POST";
 
-    const result = await response.json();
+  const response = await fetch(url, {
+    method: method,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(review)
+  });
 
-    if(result.success){
-      alert("Review submitted successfully. It will show after approval.");
-      window.location.href = "profile.html";
-    }else{
-      alert(result.message || "Review submission failed");
-    }
+  const result = await response.json();
 
-  }catch(error){
-    console.error(error);
-    alert(error.message);
+  if(result.success){
+    alert(reviewId ? "Review updated successfully" : "Review submitted successfully");
+    window.location.href = "profile.html";
+  }else{
+    alert(result.message || "Review save failed");
   }
 }
 </script>

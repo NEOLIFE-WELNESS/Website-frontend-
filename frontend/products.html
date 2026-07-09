@@ -945,11 +945,11 @@ body{
       <button class="details-buy-btn" onclick="buyNow()">Buy It Now</button>
 
       <p id="modalDesc" class="details-desc"></p>
+<p><b>Indication:</b> <span id="modalIndication">-</span></p>
+<p><b>Net Qty:</b> <span id="modalNetQty">-</span></p>
+<p><b>Exp. Date:</b> <span id="modalExpiryDate">-</span></p>
 
-      <p><b>Indication:</b> Daily wellness support, digestion support and natural body balance.</p>
-      <p><b>Net Qty:</b> 500 ml</p>
-      <p><b>Exp. Date:</b> 04/2029</p>
-      <button onclick="shareProduct()" class="share-btn">
+            <button onclick="shareProduct()" class="share-btn">
     <i class="fa-solid fa-share-nodes"></i>
     <span>Share</span>
 </button>
@@ -1077,12 +1077,20 @@ body{
 const API_BASE_URL = "http://localhost:8085";
 
 let cart = [];
+const savedCart = localStorage.getItem("cart");
+
+if(savedCart){
+  cart = JSON.parse(savedCart);
+}
 let selectedProduct = {};
 let productImages = [];
 let currentImageIndex = 0;
 let modalQty = 1;
 
-window.onload = loadProducts;
+window.onload = function(){
+  loadProducts();
+  updateCart();
+};
 
 async function loadProducts(){
   const response = await fetch(`${API_BASE_URL}/api/products/getAll`);
@@ -1094,7 +1102,16 @@ async function loadProducts(){
     displayProducts(result.data || []);
   }
 }
+function formatExpiryDate(date){
+    if(!date) return "-";
 
+    const d = new Date(date);
+
+    return d.toLocaleDateString("en-IN",{
+        month:"2-digit",
+        year:"numeric"
+    });
+}
 function getImages(product){
   let urls = product.imageUrls || [];
 
@@ -1318,6 +1335,7 @@ async function confirmPlaceOrder(){
   if(result.success){
     alert("Order placed successfully! Order No: " + result.data.orderNumber);
     cart = [];
+    localStorage.removeItem("cart");
     updateCart();
     closeCheckoutModal();
     window.location.href = "my-orders.html";
@@ -1347,12 +1365,16 @@ function viewDetails(index){
   document.getElementById("modalName").innerText = productName;
   document.getElementById("modalPrice").innerText = "₹" + price;
   document.getElementById("modalDesc").innerText = description;
+  document.getElementById("modalIndication").innerText = product.indication || "-";
+document.getElementById("modalNetQty").innerText = product.netQty || "-";
+document.getElementById("modalExpiryDate").innerText = formatExpiryDate(product.expiryDate);
   document.getElementById("modalQty").innerText = modalQty;
 
   loadThumbnails();
   showProductImage();
 
   document.getElementById("detailsModal").style.display = "block";
+console.log(product);
 }
 
 function loadThumbnails(){
@@ -1421,6 +1443,7 @@ function buyNow(){
 }
 
 function updateCart(){
+  localStorage.setItem("cart", JSON.stringify(cart));
   const cartItems = document.getElementById("cartItems");
   const cartTotal = document.getElementById("cartTotal");
   const cartCount = document.getElementById("cartCount");

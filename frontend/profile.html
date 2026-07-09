@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>My Profile - Neolife Wellness Center</title>
-<link rel="icon" type="image/jpeg" href="../assets/prod_logo.png">
+<link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <style>
@@ -295,7 +295,7 @@ header{
 
 <header>
   <div class="logo-container">
-    <img src="../assets/prod_logo.png" alt="Neolife Logo" class="logo-img">
+    <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
 
     <div class="logo-details">
       <span class="logo-text">Neolife Wellness Center</span>
@@ -446,8 +446,40 @@ async function loadProfile(){
   }
 }
 
-function saveProfile(){
-  alert("Update Profile API should be connected next.");
+async function saveProfile(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login first");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const profileData = {
+    name: document.getElementById("fullName").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    phoneNumber: document.getElementById("phone").value.trim(),
+    age: Number(document.getElementById("age").value),
+    gender: document.getElementById("gender").value
+  };
+
+  const response = await fetch(`${API_BASE_URL}/api/users/updateProfile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(profileData)
+  });
+
+  const result = await response.json();
+
+  if(result.success){
+    alert("Profile updated successfully");
+    loadProfile();
+  }else{
+    alert(result.message || "Profile update failed");
+  }
 }
 
 function showTab(tab, btn){
@@ -761,47 +793,46 @@ function logout(){
   window.location.href = "login.html";
 }
 async function loadMyReviews() {
+  const token = localStorage.getItem("token");
 
-    const token = localStorage.getItem("token");
-
-const response = await fetch(
-    "http://localhost:8085/api/clinic-reviews/my-reviews",
-    {
-        method: "GET",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
+  const response = await fetch(`${API_BASE_URL}/api/clinic-reviews/my-reviews`, {
+    method: "GET",
+    headers: {
+      "Authorization": "Bearer " + token
     }
-);
+  });
 
-    const result = await response.json();
+  const result = await response.json();
 
-    if (!result.success) return;
+  if (!result.success) return;
 
-    let html = "";
+  let html = "";
 
-    result.data.forEach(review => {
+  result.data.forEach(review => {
+    html += `
+      <div class="info-box">
+        <h3>${review.doctor}</h3>
 
-            html += `
-            <div class="info-box">
-                <h3>${review.doctor}</h3>
+        <p>
+          <b>Therapy:</b> ${review.therapyService}<br>
+          <b>Rating:</b> ${"⭐".repeat(review.rating)}<br>
+          <b>Status:</b> ${review.status}<br><br>
+          ${review.message}
+        </p>
 
-                <p>
-    <b>Therapy:</b> ${review.therapyService}<br>
-    <b>Rating:</b> ${"⭐".repeat(review.rating)}<br>
-    <b>Status:</b> ${review.status}<br><br>
+        <button class="save-btn" onclick="editReview(${review.id})">
+          Edit Review
+        </button>
+      </div>
+    `;
+  });
 
-    ${review.message}
-</p>
-            </div>
-            `;
-
-        });
-
-    document.getElementById("myReviews").innerHTML =
-        html || "<p>No approved reviews.</p>";
+  document.getElementById("myReviews").innerHTML =
+    html || "<p>No reviews found.</p>";
 }
-
+function editReview(id){
+  window.location.href = `write-review.html?id=${id}`;
+}
 loadProfile();
 
 </script>
