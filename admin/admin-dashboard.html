@@ -1,225 +1,1826 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>Admin Dashboard - Neolife Wellness Center</title>
+    <title>Admin Dashboard - Neolife Wellness Center</title>
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="../assets/main_logo.jpeg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <style>
+        :root {
+            --dark-green: #153d29;
+            --green: #2d6844;
+            --green-light: #edf5ef;
+            --gold: #c99a16;
+            --gold-dark: #9b7200;
+            --cream: #f6f8f4;
+            --white: #ffffff;
+            --text: #173c29;
+            --muted: #6e7871;
+            --border: #dfe7e1;
+
+            --success: #287146;
+            --success-light: #ebf7ef;
+
+            --warning: #d88b18;
+            --warning-light: #fff6e8;
+
+            --danger: #c74747;
+            --danger-light: #fff0f0;
+
+            --info: #31708f;
+            --info-light: #edf6fb;
+
+            --purple: #76548f;
+            --purple-light: #f5effb;
+
+            --sidebar-width: 285px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--cream);
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .admin-layout {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .admin-sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            #123824,
+            #1e5134
+        );
+
+    box-shadow:
+        8px 0 30px rgba(18,56,36,0.14);
+
+    transition: transform 0.3s ease;
+}
+        .admin-brand {
+            min-height: 104px;
+            padding: 20px 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .admin-brand img {
+            width: 58px;
+            height: 58px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            background: var(--white);
+        }
+
+        .admin-brand h2 {
+            margin-bottom: 5px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .admin-brand span {
+            color: #f2cf69;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        .admin-menu {
+    flex: 1;
+    padding: 18px 13px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 transparent;
 }
 
-body{
-    background:#f4f8f4;
-}
+        .menu-label {
+            display: block;
+            margin: 10px 12px 9px;
+            color: rgba(255, 255, 255, 0.46);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
 
-/* Header */
-.admin-header{
-    background:#1b5e20;
-    color:white;
-    padding:18px 8%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
+        .admin-menu a {
+            min-height: 46px;
+            margin-bottom: 6px;
+            padding: 11px 14px;
 
-.admin-header h1{
-    font-size:26px;
-}
+            display: flex;
+            align-items: center;
+            gap: 13px;
 
-.logout-btn{
-    background:#ffffff;
-    color:#1b5e20;
-    border:none;
-    padding:10px 18px;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:bold;
-}
+            border-radius: 12px;
 
-.logout-btn:hover{
-    background:#e8f5e9;
-}
+            color: rgba(255, 255, 255, 0.82);
 
-/* Layout */
-.dashboard-container{
-    padding:40px 8%;
-}
+            font-size: 13px;
+            font-weight: 700;
 
-.welcome-box{
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
-    margin-bottom:35px;
-}
+            transition: 0.25s;
+        }
 
-.welcome-box h2{
-    color:#1b5e20;
-    margin-bottom:10px;
-}
+        .admin-menu a i {
+            width: 21px;
+            text-align: center;
+            font-size: 16px;
+        }
 
-.welcome-box p{
-    color:#555;
-}
+        .admin-menu a:hover,
+        .admin-menu a.active {
+            color: var(--dark-green);
+            background: var(--white);
+            transform: translateX(3px);
+        }
 
-/* Cards */
-.card-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:25px;
-}
+        .admin-menu a.active i {
+            color: var(--gold);
+        }
 
-.card{
-    background:white;
-    padding:30px;
-    border-radius:14px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-    text-align:center;
-    transition:0.3s;
-}
+        .sidebar-footer {
+            padding: 17px 13px;
+            border-top:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
 
-.card:hover{
-    transform:translateY(-6px);
-}
+        .sidebar-logout {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
 
-.card h3{
-    color:#1b5e20;
-    margin-bottom:12px;
-    font-size:22px;
-}
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
 
-.card p{
-    color:#666;
-    margin-bottom:20px;
-}
+            border:
+                1px solid rgba(255, 255, 255, 0.20);
 
-.card a{
-    display:inline-block;
-    background:#1b5e20;
-    color:white;
-    padding:10px 18px;
-    border-radius:6px;
-    text-decoration:none;
-}
+            border-radius: 12px;
 
-.card a:hover{
-    background:#2e7d32;
-}
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.08);
 
-/* Footer */
-.admin-footer{
-    text-align:center;
-    padding:20px;
-    color:#666;
-    margin-top:40px;
-}
-</style>
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .sidebar-logout:hover {
+            color: var(--dark-green);
+            background: var(--white);
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .admin-main {
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+        }
+
+        /* =========================
+           TOPBAR
+        ========================== */
+
+        .admin-topbar {
+            min-height: 86px;
+            padding: 15px 28px;
+
+            position: sticky;
+            top: 0;
+            z-index: 900;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--border);
+
+            box-shadow:
+                0 4px 18px rgba(18, 56, 36, 0.06);
+
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar-left,
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            width: 43px;
+            height: 43px;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 11px;
+            color: var(--white);
+            background: var(--dark-green);
+            font-size: 18px;
+        }
+
+        .page-title h1 {
+            margin-bottom: 5px;
+            color: var(--dark-green);
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .topbar-button {
+            width: 43px;
+            height: 43px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            color: var(--dark-green);
+            background: var(--white);
+            position: relative;
+        }
+
+        .topbar-button:hover {
+            color: var(--white);
+            background: var(--dark-green);
+        }
+
+        .notification-badge {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            position: absolute;
+            top: -5px;
+            right: -4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            color: var(--white);
+            background: var(--danger);
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .admin-profile-box {
+            padding: 6px 11px 6px 7px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            background: var(--white);
+        }
+
+        .admin-avatar {
+            width: 39px;
+            height: 39px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--white);
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--gold),
+                    var(--gold-dark)
+                );
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .admin-profile-text strong {
+            display: block;
+            margin-bottom: 2px;
+            color: var(--dark-green);
+            font-size: 13px;
+        }
+
+        .admin-profile-text span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        /* =========================
+           CONTENT
+        ========================== */
+
+        .admin-content {
+            padding: 28px;
+        }
+
+        .welcome-banner {
+            margin-bottom: 24px;
+            padding: 30px;
+
+            position: relative;
+            overflow: hidden;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+
+            border-radius: 22px;
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    120deg,
+                    var(--dark-green),
+                    #347650
+                );
+
+            box-shadow:
+                0 16px 38px rgba(21, 61, 41, 0.15);
+        }
+
+        .welcome-banner::before {
+            content: "";
+            width: 260px;
+            height: 260px;
+            position: absolute;
+            top: -150px;
+            right: -60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .welcome-banner::after {
+            content: "";
+            width: 180px;
+            height: 180px;
+            position: absolute;
+            bottom: -110px;
+            left: 45%;
+            border-radius: 50%;
+            background: rgba(201, 154, 22, 0.12);
+        }
+
+        .welcome-content,
+        .welcome-icon {
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-content span {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffe28b;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+        }
+
+        .welcome-content h2 {
+            margin-bottom: 9px;
+            font-size: 29px;
+            font-weight: 800;
+        }
+
+        .welcome-content p {
+            max-width: 760px;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .welcome-icon {
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 20px;
+            color: #ffe28b;
+            background: rgba(255, 255, 255, 0.10);
+            font-size: 31px;
+        }
+
+        /* =========================
+           SUMMARY
+        ========================== */
+
+        .summary-grid {
+            margin-bottom: 24px;
+
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .summary-card {
+            padding: 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 17px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .summary-icon {
+            width: 49px;
+            height: 49px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 14px;
+
+            font-size: 19px;
+        }
+
+        .summary-icon.patients {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .summary-icon.doctors {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .summary-icon.staff {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .summary-icon.appointments {
+            color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        .summary-icon.orders {
+            color: var(--gold-dark);
+            background: #fff7df;
+        }
+
+        .summary-icon.revenue {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .summary-icon.stock {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .summary-icon.reviews {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .summary-card p {
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .summary-card h3 {
+            color: var(--dark-green);
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           SECTION HEADER
+        ========================== */
+
+        .section-header {
+            margin: 30px 0 15px;
+
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .section-header h2 {
+            margin-bottom: 4px;
+            color: var(--dark-green);
+            font-size: 20px;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .section-label {
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: var(--dark-green);
+            background: var(--green-light);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           MODULE CARDS
+        ========================== */
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 17px;
+        }
+
+        .module-card {
+            min-height: 205px;
+            padding: 20px;
+
+            display: flex;
+            flex-direction: column;
+
+            border: 1px solid var(--border);
+            border-radius: 18px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 10px 28px rgba(21, 61, 41, 0.06);
+
+            transition: 0.25s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow:
+                0 16px 36px rgba(21, 61, 41, 0.12);
+        }
+
+        .module-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 14px;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+
+            font-size: 19px;
+        }
+
+        .module-card:nth-child(4n + 2) .module-icon {
+            color: var(--gold-dark);
+            background: #fff7df;
+        }
+
+        .module-card:nth-child(4n + 3) .module-icon {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .module-card:nth-child(4n + 4) .module-icon {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .module-card h3 {
+            margin-bottom: 8px;
+            color: var(--dark-green);
+            font-size: 16px;
+        }
+
+        .module-card p {
+            margin-bottom: 18px;
+            flex: 1;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.65;
+        }
+
+        .module-card a {
+            min-height: 40px;
+            padding: 10px 14px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border-radius: 10px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .module-card a:hover {
+            background: var(--gold-dark);
+        }
+
+        /* =========================
+           ALERT
+        ========================== */
+
+        .page-alert {
+            width: min(390px, calc(100% - 35px));
+            padding: 15px 17px;
+
+            position: fixed;
+            top: 102px;
+            right: 22px;
+            z-index: 5000;
+
+            display: none;
+            align-items: flex-start;
+            gap: 11px;
+
+            border-radius: 13px;
+
+            color: var(--white);
+
+            box-shadow:
+                0 14px 35px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-alert.show {
+            display: flex;
+        }
+
+        .page-alert.info {
+            background: var(--info);
+        }
+
+        .page-alert.success {
+            background: var(--success);
+        }
+
+        .page-alert.error {
+            background: var(--danger);
+        }
+
+        .alert-message {
+            flex: 1;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 950;
+
+            display: none;
+
+            background: rgba(13, 36, 24, 0.58);
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .admin-footer {
+            padding: 26px 28px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1350px) {
+            .summary-grid,
+            .module-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 1050px) {
+            .summary-grid,
+            .module-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 900px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .admin-topbar {
+                padding: 13px 16px;
+            }
+
+            .admin-content {
+                padding: 20px 14px;
+            }
+
+            .page-title h1 {
+                font-size: 21px;
+            }
+
+            .page-title p,
+            .admin-profile-text {
+                display: none;
+            }
+
+            .welcome-banner {
+                align-items: flex-start;
+                flex-direction: column-reverse;
+            }
+
+            .summary-grid,
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<header class="admin-header">
-    <h1>Neolife Admin Panel</h1>
-    <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
-</header>
+    <div
+        class="page-alert"
+        id="pageAlert"
+    >
+        <i
+            class="fa-solid fa-circle-info"
+            id="alertIcon"
+        ></i>
 
-<section class="dashboard-container">
-
-    <div class="welcome-box">
-        <h2>Welcome, Admin</h2>
-        <p>Manage products, orders, consultations and website content from here.</p>
+        <div
+            class="alert-message"
+            id="alertMessage"
+        ></div>
     </div>
 
-    <div class="card-grid">
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeSidebar()"
+    ></div>
 
-        <div class="card">
-            <h3>Products</h3>
-            <p>Add, edit and delete Ayurvedic products.</p>
-            <a href="admin-products.html">Manage Products</a>
-        </div>
+    <div class="admin-layout">
 
-        <div class="card">
-            <h3>Add Product</h3>
-            <p>Add new Ayurvedic medicine or wellness product.</p>
-            <a href="add-product.html">Add Product</a>
-        </div>
+        <aside
+            class="admin-sidebar"
+            id="adminSidebar"
+        >
 
-        <div class="card">
-            <h3>Orders</h3>
-            <p>View customer product orders.</p>
-            <a href="admin-orders.html">View Orders</a>
-        </div>
-        <!-- <div class="card">
-    <h3>Appointments</h3>
-    <p>Manage clinic appointments and patient bookings.</p>
-    <a href="admin-appointments.html">Manage Appointments</a>
-</div>
-        
-  
-        <div class="card">
-            <h3>Consultations</h3>
-            <p>Manage online and offline consultation requests.</p>
-            <a href="admin-consultations.html">View Consultations</a>
-        </div> -->
-        <div class="card">
-    <h3>Doctors</h3>
-    <p>Add and manage doctor profiles.</p>
-    <a href="admin-doctors.html">Manage Doctors</a>
-</div>
-<div class="card">
-    <h3>Blogs</h3>
-    <p>Add and manage Blogs.</p>
-    <a href="admin-blogs.html">Manage Blogs</a>
-</div>
-<div class="card">
-    <h3>Inventory</h3>
-    <p>Manage product stock, low stock alerts and stock updates.</p>
-    <a href="admin-inventory.html">Manage Inventory</a>
-</div>
-<div class="card">
-    <h3>Manufacturers</h3>
-    <p>Add and manage manufacturers.</p>
-    <a href="admin-manufacturers.html">Manage Manufacturers</a>
-</div>
-<div class="card">
-    <h3>Product Reviews</h3>
-    <p>Manage customer reviews for Ayurvedic products.</p>
-    <a href="admin-product-reviews.html">Manage Product Reviews</a>
-</div>
-<div class="card">
-    <h3>Clinic Reviews</h3>
-    <p>Manage patient reviews for consultations and therapies.</p>
-    <a href="admin-clinic-reviews.html">Manage Clinic Reviews</a>
-</div>
-<div class="card">
-    <h3>Offers & Banners</h3>
-    <p>Manage homepage offer banners and promotional offers.</p>
-    <a href="admin-offers.html">Manage Offers</a>
-</div>
-<div class="card">
-    <h3>Image Management</h3>
-    <p>Upload, update, view and delete product, banner and review images.</p>
-    <a href="admin-images.html">Manage Images</a>
-</div>
+            <div class="admin-brand">
+
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
+
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Admin Portal</span>
+                </div>
+
+            </div>
+
+            <nav class="admin-menu">
+
+                <span class="menu-label">Main</span>
+
+                <a
+                    href="admin-dashboard.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <span class="menu-label">User Management</span>
+
+                <a href="admin-doctors.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    Doctors
+                </a>
+
+                <a href="admin-medical-staff.html">
+                    <i class="fa-solid fa-user-nurse"></i>
+                    Medical Staff
+                </a>
+
+                <a href="admin-therapists.html">
+                    <i class="fa-solid fa-spa"></i>
+                    Therapists
+                </a>
+
+                <a href="admin-users.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patients / Users
+                </a>
+
+                <span class="menu-label">Clinical Oversight</span>
+
+                <a href="admin-appointments.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Appointments
+                </a>
+
+                <a href="admin-consultations.html">
+                    <i class="fa-solid fa-video"></i>
+                    Consultations
+                </a>
+
+                <a href="admin-therapy-bookings.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Therapy Bookings
+                </a>
+
+                <span class="menu-label">Commerce</span>
+
+                <a href="admin-products.html">
+                    <i class="fa-solid fa-box-open"></i>
+                    Products
+                </a>
+
+                <a href="admin-inventory.html">
+                    <i class="fa-solid fa-warehouse"></i>
+                    Inventory
+                </a>
+
+                <a href="admin-orders.html">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Orders
+                </a>
+
+                <a href="admin-manufacturers.html">
+                    <i class="fa-solid fa-industry"></i>
+                    Manufacturers
+                </a>
+
+                <a href="admin-coupons.html">
+                    <i class="fa-solid fa-ticket"></i>
+                    Coupons
+                </a>
+
+                <span class="menu-label">Content & Reviews</span>
+
+                <a href="admin-blogs.html">
+                    <i class="fa-solid fa-newspaper"></i>
+                    Blogs
+                </a>
+
+                <a href="admin-offers.html">
+                    <i class="fa-solid fa-images"></i>
+                    Offers & Banners
+                </a>
+
+                <a href="admin-images.html">
+                    <i class="fa-solid fa-photo-film"></i>
+                    Image Management
+                </a>
+
+                <a href="admin-clinic-reviews.html">
+                    <i class="fa-solid fa-star"></i>
+                    Clinic Reviews
+                </a>
+
+                <a href="admin-product-reviews.html">
+                    <i class="fa-solid fa-comments"></i>
+                    Product Reviews
+                </a>
+
+                <span class="menu-label">Finance & Shipping</span>
+
+                <a href="admin-transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="admin-refunds.html">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Refunds
+                </a>
+
+                <a href="admin-settlements.html">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    Settlements
+                </a>
+
+                <a href="admin-shipping-settings.html">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    Shipping Settings
+                </a>
+
+                <a href="admin-payment-settings.html">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Payment Settings
+                </a>
+
+                <span class="menu-label">System</span>
+
+                <a href="admin-reports.html">
+                    <i class="fa-solid fa-chart-column"></i>
+                    Reports & Analytics
+                </a>
+
+                <a href="admin-notification-templates.html">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                    Notification Templates
+                </a>
+
+                <a href="admin-profile.html">
+                    <i class="fa-solid fa-user-gear"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="logoutAdmin()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+        <main class="admin-main">
+
+            <header class="admin-topbar">
+
+                <div class="topbar-left">
+
+                    <button
+                        type="button"
+                        class="sidebar-toggle"
+                        onclick="toggleSidebar()"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <div class="page-title">
+                        <h1>Admin Dashboard</h1>
+                        <p>Full system control and platform oversight.</p>
+                    </div>
+
+                </div>
+
+                <div class="topbar-actions">
+
+                    <button
+                        type="button"
+                        class="topbar-button"
+                        onclick="showAlert('Dashboard data refreshed.', 'success')"
+                        title="Refresh"
+                    >
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="topbar-button"
+                        onclick="showAlert('You have pending approvals and alerts.', 'info')"
+                        title="Notifications"
+                    >
+                        <i class="fa-solid fa-bell"></i>
+
+                        <span class="notification-badge">
+                            6
+                        </span>
+                    </button>
+
+                    <div class="admin-profile-box">
+
+                        <span
+                            class="admin-avatar"
+                            id="adminInitial"
+                        >
+                            A
+                        </span>
+
+                        <div class="admin-profile-text">
+                            <strong id="adminName">Admin</strong>
+                            <span>System Administrator</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+            <section class="admin-content">
+
+                <section class="welcome-banner">
+
+                    <div class="welcome-content">
+
+                        <span>Neolife Administration</span>
+
+                        <h2>
+                            Welcome back, Admin
+                        </h2>
+
+                        <p>
+                            Manage users, doctors, therapists, appointments,
+                            therapy bookings, products, orders, payments,
+                            shipping, content, reviews and system reports from
+                            one centralized dashboard.
+                        </p>
+
+                    </div>
+
+                    <div class="welcome-icon">
+                        <i class="fa-solid fa-shield-heart"></i>
+                    </div>
+
+                </section>
+
+                <section class="summary-grid">
+
+                    <article class="summary-card">
+                        <div class="summary-icon patients">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p>Total Patients</p>
+                            <h3 id="totalPatients">1,248</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon doctors">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <div>
+                            <p>Doctors</p>
+                            <h3 id="totalDoctors">6</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon staff">
+                            <i class="fa-solid fa-user-nurse"></i>
+                        </div>
+                        <div>
+                            <p>Staff & Therapists</p>
+                            <h3 id="totalStaff">18</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon appointments">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                        <div>
+                            <p>Today's Appointments</p>
+                            <h3 id="todayAppointments">34</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon orders">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <div>
+                            <p>Pending Orders</p>
+                            <h3 id="pendingOrders">21</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon revenue">
+                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                        </div>
+                        <div>
+                            <p>Monthly Revenue</p>
+                            <h3 id="monthlyRevenue">₹4.8L</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon stock">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <p>Low Stock Items</p>
+                            <h3 id="lowStockCount">9</h3>
+                        </div>
+                    </article>
+
+                    <article class="summary-card">
+                        <div class="summary-icon reviews">
+                            <i class="fa-solid fa-star-half-stroke"></i>
+                        </div>
+                        <div>
+                            <p>Pending Reviews</p>
+                            <h3 id="pendingReviews">14</h3>
+                        </div>
+                    </article>
+
+                </section>
+
+                <div class="section-header">
+                    <div>
+                        <h2>User Management</h2>
+                        <p>Onboard and manage all platform users.</p>
+                    </div>
+                    <span class="section-label">Admin Only</span>
+                </div>
+
+                <section class="module-grid">
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <h3>Doctors</h3>
+                        <p>
+                            Add, edit, activate, deactivate and remove doctor
+                            profiles. Only admins can onboard doctors.
+                        </p>
+                        <a href="admin-doctors.html">
+                            Manage Doctors
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-user-nurse"></i>
+                        </div>
+                        <h3>Medical Staff</h3>
+                        <p>
+                            Manage medical staff accounts, roles, permissions
+                            and active status.
+                        </p>
+                        <a href="admin-medical-staff.html">
+                            Manage Medical Staff
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-spa"></i>
+                        </div>
+                        <h3>Therapist Staff</h3>
+                        <p>
+                            Add and manage therapist profiles, departments,
+                            assigned therapies and account access.
+                        </p>
+                        <a href="admin-therapists.html">
+                            Manage Therapists
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <h3>Patients / Users</h3>
+                        <p>
+                            View registered patient accounts, addresses,
+                            account status and user details.
+                        </p>
+                        <a href="admin-users.html">
+                            View Patients
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                </section>
+
+                <div class="section-header">
+                    <div>
+                        <h2>Clinical Oversight</h2>
+                        <p>Monitor appointments, consultations and therapy bookings.</p>
+                    </div>
+                    <span class="section-label">Global View</span>
+                </div>
+
+                <section class="module-grid">
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <h3>All Appointments</h3>
+                        <p>
+                            View online and offline appointments across all
+                            doctors, dates, payment statuses and visit results.
+                        </p>
+                        <a href="admin-appointments.html">
+                            View Appointments
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-video"></i>
+                        </div>
+                        <h3>Consultations</h3>
+                        <p>
+                            Monitor online consultation requests, doctor
+                            confirmation, payment and completed sessions.
+                        </p>
+                        <a href="admin-consultations.html">
+                            View Consultations
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <h3>Therapy Bookings</h3>
+                        <p>
+                            View bookings across therapists, treatment plans,
+                            session progress, attendance and completion.
+                        </p>
+                        <a href="admin-therapy-bookings.html">
+                            View Therapy Bookings
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3>Clinical Analytics</h3>
+                        <p>
+                            Track doctor performance, therapist utilization,
+                            appointment volume and completion rates.
+                        </p>
+                        <a href="admin-reports.html">
+                            View Analytics
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                </section>
+
+                <div class="section-header">
+                    <div>
+                        <h2>Products, Orders & Inventory</h2>
+                        <p>Manage commerce and fulfillment operations.</p>
+                    </div>
+                    <span class="section-label">Commerce</span>
+                </div>
+
+                <section class="module-grid">
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <h3>Products</h3>
+                        <p>
+                            Add, edit, deactivate and delete Ayurvedic products,
+                            prices, stock and descriptions.
+                        </p>
+                        <a href="admin-products.html">
+                            Manage Products
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-warehouse"></i>
+                        </div>
+                        <h3>Inventory</h3>
+                        <p>
+                            Track stock levels, low-stock alerts, batches,
+                            expiry dates and restocking activity.
+                        </p>
+                        <a href="admin-inventory.html">
+                            Manage Inventory
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <h3>Orders</h3>
+                        <p>
+                            View incoming orders, fulfillment status, payment,
+                            shipping and delivery tracking.
+                        </p>
+                        <a href="admin-orders.html">
+                            View Orders
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-industry"></i>
+                        </div>
+                        <h3>Manufacturers</h3>
+                        <p>
+                            Add and manage product manufacturers and supplier
+                            information.
+                        </p>
+                        <a href="admin-manufacturers.html">
+                            Manage Manufacturers
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-ticket"></i>
+                        </div>
+                        <h3>Coupon Codes</h3>
+                        <p>
+                            Create and manage coupon codes, discounts,
+                            validity, limits and active status.
+                        </p>
+                        <a href="admin-coupons.html">
+                            Manage Coupons
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+                        <h3>Shipping Oversight</h3>
+                        <p>
+                            Configure Shiprocket integration, packaging rules,
+                            shipping rates and fulfillment partners.
+                        </p>
+                        <a href="admin-shipping-settings.html">
+                            Shipping Settings
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                </section>
+
+                <div class="section-header">
+                    <div>
+                        <h2>Content & Review Moderation</h2>
+                        <p>Manage public website content and customer reviews.</p>
+                    </div>
+                    <span class="section-label">Content</span>
+                </div>
+
+                <section class="module-grid">
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-newspaper"></i>
+                        </div>
+                        <h3>Blogs</h3>
+                        <p>
+                            Create, edit, publish, unpublish and remove wellness
+                            blog articles.
+                        </p>
+                        <a href="admin-blogs.html">
+                            Manage Blogs
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-images"></i>
+                        </div>
+                        <h3>Offers & Banners</h3>
+                        <p>
+                            Manage homepage banners, promotional offers,
+                            active dates and display order.
+                        </p>
+                        <a href="admin-offers.html">
+                            Manage Offers
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-photo-film"></i>
+                        </div>
+                        <h3>Image Management</h3>
+                        <p>
+                            Upload, replace, view and remove product, banner,
+                            blog and review images.
+                        </p>
+                        <a href="admin-images.html">
+                            Manage Images
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3>Clinic Reviews</h3>
+                        <p>
+                            Moderate patient reviews for doctors,
+                            consultations and therapies.
+                        </p>
+                        <a href="admin-clinic-reviews.html">
+                            Manage Clinic Reviews
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h3>Product Reviews</h3>
+                        <p>
+                            Approve, reject and manage customer reviews for
+                            Ayurvedic products.
+                        </p>
+                        <a href="admin-product-reviews.html">
+                            Manage Product Reviews
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                </section>
+
+                <div class="section-header">
+                    <div>
+                        <h2>Finance, Payments & Reports</h2>
+                        <p>Monitor PayU transactions, refunds and business performance.</p>
+                    </div>
+                    <span class="section-label">Finance</span>
+                </div>
+
+                <section class="module-grid">
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                        </div>
+                        <h3>Transactions</h3>
+                        <p>
+                            View consultation, therapy and product-sale
+                            transactions with PayU payment status.
+                        </p>
+                        <a href="admin-transactions.html">
+                            View Transactions
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </div>
+                        <h3>Refunds</h3>
+                        <p>
+                            Review refund requests, approve or reject refunds
+                            and track processing status.
+                        </p>
+                        <a href="admin-refunds.html">
+                            Manage Refunds
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <h3>Settlements</h3>
+                        <p>
+                            View PayU settlement reports, reconciliation status
+                            and settlement dates.
+                        </p>
+                        <a href="admin-settlements.html">
+                            View Settlements
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <h3>Payment Settings</h3>
+                        <p>
+                            Manage PayU gateway configuration, payment rules
+                            and environment settings.
+                        </p>
+                        <a href="admin-payment-settings.html">
+                            Payment Settings
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-chart-column"></i>
+                        </div>
+                        <h3>Reports & Analytics</h3>
+                        <p>
+                            View revenue, doctor performance, therapist
+                            utilization and fulfillment metrics.
+                        </p>
+                        <a href="admin-reports.html">
+                            View Reports
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                    <article class="module-card">
+                        <div class="module-icon">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
+                        <h3>Notification Templates</h3>
+                        <p>
+                            Manage WhatsApp and email templates for booking,
+                            payment, appointment and order triggers.
+                        </p>
+                        <a href="admin-notification-templates.html">
+                            Manage Templates
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </article>
+
+                </section>
+
+            </section>
+
+            <footer class="admin-footer">
+                © 2026 Neolife Wellness Center. Admin Portal.
+            </footer>
+
+        </main>
+
     </div>
 
-</section>
+    <script>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                /*
+                Backend/login mode can be enabled later.
 
-<footer class="admin-footer">
-    <p>© 2026 Neolife Wellness Center. Admin Panel.</p>
-</footer>
+                requireAdminLogin();
+                loadAdminProfile();
+                loadDashboardSummary();
+                */
 
-<script>
-function logoutAdmin(){
-    window.location.href = "../frontend/login.html";
-}
-</script>
+                loadDemoDashboard();
+            }
+        );
+
+        function loadDemoDashboard() {
+            const adminName =
+                localStorage.getItem("adminName") ||
+                "Admin";
+
+            setText(
+                "adminName",
+                adminName
+            );
+
+            setText(
+                "adminInitial",
+                adminName
+                    .charAt(0)
+                    .toUpperCase()
+            );
+        }
+
+        function toggleSidebar() {
+            document
+                .getElementById("adminSidebar")
+                .classList
+                .toggle("open");
+
+            document
+                .getElementById("sidebarOverlay")
+                .classList
+                .toggle("show");
+        }
+
+        function closeSidebar() {
+            document
+                .getElementById("adminSidebar")
+                .classList
+                .remove("open");
+
+            document
+                .getElementById("sidebarOverlay")
+                .classList
+                .remove("show");
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("role");
+            localStorage.removeItem("adminName");
+            localStorage.removeItem("userId");
+
+            window.location.href =
+                "../frontend/login.html";
+        }
+
+        function showAlert(
+            message,
+            type
+        ) {
+            const box =
+                document.getElementById(
+                    "pageAlert"
+                );
+
+            const icon =
+                document.getElementById(
+                    "alertIcon"
+                );
+
+            setText(
+                "alertMessage",
+                message
+            );
+
+            box.className =
+                `page-alert show ${type}`;
+
+            if (
+                type === "success"
+            ) {
+                icon.className =
+                    "fa-solid fa-circle-check";
+
+            } else if (
+                type === "error"
+            ) {
+                icon.className =
+                    "fa-solid fa-circle-exclamation";
+
+            } else {
+                icon.className =
+                    "fa-solid fa-circle-info";
+            }
+
+            clearTimeout(
+                window.adminAlertTimer
+            );
+
+            window.adminAlertTimer =
+                setTimeout(
+                    function () {
+                        box.classList.remove(
+                            "show"
+                        );
+                    },
+                    4000
+                );
+        }
+
+        function setText(
+            id,
+            value
+        ) {
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                element.textContent =
+                    value;
+            }
+        }
+    </script>
 
 </body>
 </html>

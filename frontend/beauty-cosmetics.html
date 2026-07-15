@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Beauty & Cosmetics - Neolife Wellness Center</title>
+  <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+ <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+>
+
+<style>
+:root{
+  --green-dark:#123524;
+  --green:#2f6b3f;
+  --green-soft:#e8f1e6;
+  --gold:#d4af37;
+  --gold-dark:#9a7100;
+  --cream:#f8f6ef;
+  --white:#ffffff;
+  --text:#26382d;
+  --muted:#66736b;
+  --shadow:0 20px 50px rgba(18,53,36,.13);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Arial, Helvetica, sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  line-height:1.7;
+}
+
+a{
+  text-decoration:none;
+}
+
+img{
+  display:block;
+  max-width:100%;
+}
+
+/* ===== NAVBAR ===== */
+.glass-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  width:100%;
+  min-height:82px;
+  padding:10px 32px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(16px);
+
+  border-bottom:1px solid rgba(212,175,55,.25);
+  box-shadow:0 8px 25px rgba(0,0,0,.10);
+
+  z-index:9999;
+}
+
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.logo-img{
+  width:55px;
+  height:55px;
+  object-fit:cover;
+  border-radius:50%;
+  border:2px solid var(--gold);
+}
+
+.logo-details{
+  display:flex;
+  flex-direction:column;
+  line-height:1.2;
+}
+
+.logo-text{
+  color:var(--green-dark);
+  font-size:18px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.logo-subtitle{
+  margin-top:5px;
+  color:var(--gold-dark);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1.3px;
+}
+
+.header-right{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:22px;
+  min-width:0;
+}
+
+.main-nav{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:18px;
+  white-space:nowrap;
+}
+
+.main-nav a{
+  color:var(--green-dark);
+  font-size:14px;
+  font-weight:800;
+  text-decoration:none;
+  transition:.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.active{
+  color:var(--gold-dark);
+}
+
+.profile-icon{
+  width:44px;
+  height:44px;
+  min-width:44px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+  color:white;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+
+  font-size:18px;
+  font-weight:800;
+  box-shadow:0 8px 18px rgba(154,113,0,.24);
+}
+
+/* ===== HERO ===== */
+.services-hero{
+  min-height:540px;
+  padding:155px 20px 85px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+
+  position:relative;
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8,44,25,.88),
+      rgba(8,44,25,.42)
+    ),
+    url("../assets/facial.png") center/cover no-repeat;
+}
+
+.services-hero::after{
+  content:"";
+  position:absolute;
+  width:440px;
+  height:440px;
+  right:-130px;
+  bottom:-190px;
+  border-radius:50%;
+  background:rgba(212,175,55,.16);
+}
+
+.services-hero::before{
+  content:"✨ Beauty with professional care";
+  position:absolute;
+  z-index:2;
+  top:165px;
+
+  display:inline-flex;
+  padding:8px 14px;
+
+  border-radius:30px;
+  background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.25);
+
+  color:#f8e6a4;
+  font-size:13px;
+  font-weight:800;
+}
+
+.services-hero > div{
+  position:relative;
+  z-index:2;
+  width:min(1000px,90%);
+}
+
+.services-hero h1{
+  color:white;
+  font-size:clamp(42px,6vw,68px);
+  line-height:1.08;
+  margin:38px 0 16px;
+  font-weight:800;
+}
+
+.services-hero p{
+  color:#edf5ef;
+  font-size:18px;
+}
+
+/* ===== PAGE ===== */
+.services-page{
+  padding:90px 0;
+  background:
+    radial-gradient(circle at top right,rgba(212,175,55,.07),transparent 24%),
+    var(--cream);
+}
+
+.section-title{
+  width:min(1180px,90%);
+  margin:0 auto 50px;
+  text-align:center;
+  color:var(--green-dark);
+  font-size:clamp(32px,4vw,46px);
+  font-weight:800;
+  line-height:1.2;
+}
+
+.therapy-grid{
+  width:min(1180px,90%);
+  margin:auto;
+
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:30px;
+}
+
+.therapy-card{
+  background:white;
+  border-radius:28px;
+  overflow:hidden;
+
+  border:1px solid rgba(212,175,55,.24);
+  box-shadow:0 18px 42px rgba(18,53,36,.10);
+
+  transition:.35s;
+  position:relative;
+}
+
+.therapy-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:5px;
+  background:linear-gradient(90deg,var(--green-dark),var(--gold));
+  z-index:2;
+}
+
+.therapy-card:hover{
+  transform:translateY(-9px);
+  box-shadow:0 28px 55px rgba(18,53,36,.17);
+}
+
+.therapy-card img{
+  width:100%;
+  height:285px;
+  object-fit:cover;
+  background:#edf2eb;
+}
+
+.therapy-content{
+  padding:28px;
+}
+
+.therapy-content h3{
+  color:var(--green-dark);
+  font-size:27px;
+  margin-bottom:14px;
+}
+
+.therapy-content p{
+  color:var(--muted);
+  line-height:1.8;
+}
+
+.therapy-content ul{
+  margin:20px 0;
+  padding-left:22px;
+}
+
+.therapy-content li{
+  margin-bottom:9px;
+  color:var(--green-dark);
+}
+
+.therapy-content strong{
+  color:var(--gold-dark);
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  margin-top:12px;
+  padding:13px 24px;
+
+  border:none;
+  border-radius:40px;
+
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  color:white;
+
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+
+  transition:.3s;
+  box-shadow:0 10px 22px rgba(18,53,36,.18);
+}
+
+.btn:hover{
+  transform:translateY(-3px);
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+}
+
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;
+  inset:0;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  padding:24px;
+  background:rgba(5,25,14,.74);
+  backdrop-filter:blur(7px);
+
+  z-index:10000;
+}
+
+.modal-box{
+  width:min(1050px,100%);
+  max-height:90vh;
+  overflow-y:auto;
+
+  padding:40px;
+  border-radius:28px;
+
+  background:
+    radial-gradient(circle at top right,rgba(212,175,55,.08),transparent 24%),
+    white;
+
+  border:1px solid rgba(212,175,55,.25);
+  box-shadow:0 28px 70px rgba(0,0,0,.28);
+
+  position:relative;
+}
+
+.modal-box h2{
+  color:var(--green-dark);
+  margin-bottom:22px;
+  padding-right:48px;
+  font-size:32px;
+}
+
+#modalText{
+  color:#555;
+  line-height:1.8;
+}
+
+.close{
+  position:absolute;
+  right:20px;
+  top:18px;
+
+  width:42px;
+  height:42px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+  background:var(--green-soft);
+  color:var(--green-dark);
+
+  font-size:28px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.facial-treatment-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+  margin:24px 0;
+}
+
+.facial-treatment-item,
+.process-step{
+  background:#f8faf6;
+  border:1px solid rgba(212,175,55,.32);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 24px rgba(18,53,36,.06);
+}
+
+.facial-treatment-item h3,
+.beauty-treatment-content h3{
+  color:var(--green-dark);
+  margin-bottom:10px;
+}
+
+.facial-treatment-item h4{
+  color:var(--gold-dark);
+  margin:16px 0 8px;
+}
+
+.facial-treatment-item ul,
+.beauty-treatment-content ul{
+  padding-left:22px;
+  margin:10px 0 16px;
+}
+
+.process-box{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin:20px 0 28px;
+}
+
+.process-step strong{
+  color:var(--green-dark);
+}
+
+.beauty-treatment-content p{
+  margin-bottom:14px;
+}
+
+/* ===== WHATSAPP ===== */
+.whatsapp{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+
+  width:58px;
+  height:58px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:50%;
+  background:#25d366;
+
+  box-shadow:0 12px 25px rgba(0,0,0,.25);
+  z-index:999;
+}
+
+.whatsapp img{
+  width:34px;
+  height:34px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1100px){
+  .glass-header{
+    padding:10px 18px;
+  }
+
+  .header-right{
+    gap:14px;
+  }
+
+  .main-nav{
+    gap:12px;
+  }
+
+  .main-nav a{
+    font-size:12px;
+  }
+
+  .logo-text{
+    font-size:16px;
+  }
+}
+
+@media(max-width:900px){
+  .therapy-grid{
+    grid-template-columns:1fr;
+  }
+
+  .header-right{
+    overflow-x:auto;
+  }
+
+  .main-nav{
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+
+  .main-nav::-webkit-scrollbar{
+    display:none;
+  }
+}
+
+@media(max-width:700px){
+  .glass-header{
+    position:relative;
+    flex-wrap:wrap;
+  }
+
+  .header-right{
+    width:100%;
+    padding-top:8px;
+  }
+
+  .services-hero{
+    padding-top:100px;
+  }
+
+  .services-hero::before{
+    top:110px;
+  }
+
+  .services-hero h1{
+    margin-top:45px;
+  }
+
+  .therapy-card img{
+    height:230px;
+  }
+
+  .modal{
+    padding:10px;
+  }
+
+  .modal-box{
+    padding:28px 18px;
+  }
+
+  .facial-treatment-list,
+  .process-box{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="glass-header">
+
+  <div class="logo-container">
+    <img src="../assets/main_logo.jpeg"
+         alt="Neolife Logo"
+         class="logo-img">
+
+    <div class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+
+    <nav class="main-nav">
+      <a href="homepage.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Therapies</a>
+      <a href="beauty-cosmetics.html" class="active">Beauty &amp; Cosmetics</a>
+      <a href="products.html">Products</a>
+      <a href="consultation.html">Consultation</a>
+      <a href="blog.html">Blogs</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+    <a href="profile.html"
+       class="profile-icon"
+       id="profileIcon">
+      <i class="fa-solid fa-user"></i>
+    </a>
+
+  </div>
+
+</header>
+
+<section class="services-hero">
+  <div>
+    <h1>Beauty & Cosmetic Treatments</h1>
+    <p>Facial • Hair Care • Lip Correction • Eyebrow Enhancement • Pedicure</p>
+  </div>
+</section>
+
+<section class="services-page">
+  <h2 class="section-title">Beauty & Cosmetic Treatments</h2>
+
+  <div class="therapy-grid">
+
+    <div class="therapy-card">
+      <img src="../assets/facial.png" alt="Facial Treatment">
+      <div class="therapy-content">
+        <h3>💆 Facial Treatment</h3>
+        <p>Professional facials for glowing, healthy and rejuvenated skin.</p>
+        <ul>
+          <li>Glow Facial</li>
+          <li>Anti-Aging Facial</li>
+          <li>Acne Facial</li>
+          <li>Skin Rejuvenation</li>
+        </ul>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openBeauty('facial')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/hair-treatment.png" alt="Hair Treatment">
+      <div class="therapy-content">
+        <h3>💇 Hair Treatment</h3>
+        <p>Natural hair care therapies for hair growth, hair fall control and scalp nourishment.</p>
+        <ul>
+          <li>Hair Growth Therapy</li>
+          <li>Hair Fall Control</li>
+          <li>Scalp Detox</li>
+          <li>Hair Nourishment</li>
+        </ul>
+        <p><strong>Duration:</strong> 60–90 minutes</p>
+        <button class="btn" onclick="openBeauty('hair')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/lip.png" alt="Lip Correction">
+      <div class="therapy-content">
+        <h3>💋 Lip Correction</h3>
+        <p>Treatment for dark lips, pigmentation and natural lip brightening.</p>
+        <ul>
+          <li>Dark Lip Correction</li>
+          <li>Lip Pigmentation Care</li>
+          <li>Lip Hydration</li>
+          <li>Natural Lip Brightening</li>
+        </ul>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openBeauty('lip')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/eyebrow.png" alt="Eyebrow Correction">
+      <div class="therapy-content">
+        <h3>👁️ Eyebrow Correction</h3>
+        <p>Eyebrow enhancement for fuller, shaped and natural-looking brows.</p>
+        <ul>
+          <li>Microblading</li>
+          <li>Ombre Brows</li>
+          <li>Combination Brows</li>
+          <li>Eyebrow Reconstruction</li>
+        </ul>
+        <p><strong>Duration:</strong> 90–120 minutes</p>
+        <button class="btn" onclick="openBeauty('eyebrow')">Learn More</button>
+      </div>
+    </div>
+
+    <div class="therapy-card">
+      <img src="../assets/pedicure.png" alt="Pedicure">
+      <div class="therapy-content">
+        <h3>🦶 Pedicure</h3>
+        <p>Complete foot care with cleansing, nail care, exfoliation and massage.</p>
+        <ul>
+          <li>Foot Cleansing</li>
+          <li>Nail Trimming</li>
+          <li>Exfoliation</li>
+          <li>Foot Massage</li>
+        </ul>
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+        <button class="btn" onclick="openBeauty('pedicure')">Learn More</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+<div id="therapyModal" class="modal">
+  <div class="modal-box">
+    <span class="close" onclick="closeTherapy()">&times;</span>
+
+    <h2 id="modalTitle"></h2>
+    <p id="modalText"></p>
+
+    <a href="consultation.html" class="btn">Book Consultation</a>
+  </div>
+</div>
+
+<a class="whatsapp" href="https://wa.me/919481489866" target="_blank">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<script>
+const beautyDetails = {
+  facial: {
+  title: "💆 Facial Treatments",
+
+  text: `
+    <div class="facial-treatment-list">
+
+      <div class="facial-treatment-item">
+        <h3>Anti-Aging Treatment</h3>
+        <p>
+          Helps reduce fine lines, wrinkles and visible signs of aging while
+          improving skin elasticity and firmness.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Reduces fine lines and wrinkles</li>
+          <li>Improves skin elasticity</li>
+          <li>Supports collagen production</li>
+          <li>Restores youthful radiance</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Glow Peel</h3>
+        <p>
+          A personalized peel treatment that gently removes dull skin and
+          reveals a brighter, smoother complexion.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Brightens dull skin</li>
+          <li>Improves skin texture</li>
+          <li>Reduces pigmentation and dark spots</li>
+          <li>Promotes an even skin tone</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 30–45 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Dark Spot Treatment</h3>
+        <p>
+          Designed to support the reduction of pigmentation, dark spots and
+          uneven skin tone.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Helps fade dark spots</li>
+          <li>Improves uneven skin tone</li>
+          <li>Enhances skin clarity</li>
+          <li>Supports smoother skin texture</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Party Facial</h3>
+        <p>
+          An instant glow and hydration treatment suitable before parties,
+          weddings and special occasions.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Provides instant hydration</li>
+          <li>Improves glow and radiance</li>
+          <li>Refreshes dull skin</li>
+          <li>Enhances skin smoothness</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Acne Treatment</h3>
+        <p>
+          A deep-cleansing facial intended for acne-prone and oily skin.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Helps reduce acne and breakouts</li>
+          <li>Deep cleanses the pores</li>
+          <li>Supports oil control</li>
+          <li>Improves skin texture</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Skin Brightening Facial</h3>
+        <p>
+          Helps brighten dull skin, improve uneven tone and support a fresh,
+          radiant appearance.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Improves skin brightness</li>
+          <li>Reduces dullness and tan</li>
+          <li>Hydrates and softens skin</li>
+          <li>Supports an even complexion</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Vitamin C Facial</h3>
+        <p>
+          An antioxidant-rich facial that supports brighter skin and protects
+          against environmental damage.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Brightens dull skin</li>
+          <li>Supports antioxidant protection</li>
+          <li>Improves uneven skin tone</li>
+          <li>Promotes natural glow</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Hydra Facial</h3>
+        <p>
+          A deep-cleansing and intensive hydration treatment designed for dry
+          and dehydrated skin.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Deeply cleanses the skin</li>
+          <li>Provides intense hydration</li>
+          <li>Helps remove impurities</li>
+          <li>Improves softness and radiance</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>AHA Facial</h3>
+        <p>
+          A gentle exfoliating treatment that helps remove dead skin cells and
+          improve skin freshness.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Removes dead skin cells</li>
+          <li>Improves skin texture</li>
+          <li>Brightens dull skin</li>
+          <li>Supports an even skin tone</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 30–45 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Illuminating Facial</h3>
+        <p>
+          A rejuvenating facial designed to improve glow, hydration and skin
+          clarity.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Provides an instant glow</li>
+          <li>Improves skin clarity</li>
+          <li>Supports hydration</li>
+          <li>Reduces dull appearance</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 45–60 minutes</p>
+      </div>
+
+      <div class="facial-treatment-item">
+        <h3>Neolife Signature Facial</h3>
+        <p>
+          A complete rejuvenating and relaxing facial suitable for most skin
+          types.
+        </p>
+
+        <h4>Benefits</h4>
+        <ul>
+          <li>Deep cleansing</li>
+          <li>Nourishes and hydrates skin</li>
+          <li>Improves skin texture and tone</li>
+          <li>Promotes relaxation and radiance</li>
+        </ul>
+
+        <p><strong>Duration:</strong> 60–75 minutes</p>
+      </div>
+
+    </div>
+  `
+},
+hair: {
+  title: "💆 Hair Treatment",
+
+  text: `
+
+    <div class="beauty-treatment-content">
+
+      <p>
+        Our hair treatment is a holistic therapy designed to nourish the scalp,
+        stimulate hair growth and improve overall hair health. The treatment
+        combines traditional Ayurvedic therapies with acupuncture to reduce
+        stress, remove scalp blockages and promote soft, healthy hair.
+      </p>
+
+      <h3>✨ Benefits</h3>
+
+      <ul>
+        <li>Promotes natural hair growth.</li>
+        <li>Reduces hair fall and thinning.</li>
+        <li>Removes scalp pore blockages.</li>
+        <li>Strengthens hair roots.</li>
+        <li>Develops soft and healthy hair.</li>
+        <li>Improves blood circulation to the scalp.</li>
+        <li>Relieves stress and relaxes the body.</li>
+        <li>Nourishes the scalp and improves hair quality.</li>
+      </ul>
+
+      <h3>🌿 Treatment Procedure</h3>
+
+      <div class="process-box">
+
+        <div class="process-step">
+          <strong>Step 1: Herbal Oil Application</strong><br><br>
+
+          Herbal oil is gently applied to the scalp using cotton so that the
+          oil reaches deep into the hair roots. A relaxing scalp massage is
+          then performed to improve circulation and nourish the scalp.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 2: Steam Therapy</strong><br><br>
+
+          Steam is given to the hair and scalp to open blocked pores and help
+          the scalp absorb the herbal oils effectively.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 3: Acupuncture</strong><br><br>
+
+          Acupuncture is performed to stimulate specific points that support
+          hair growth, improve circulation and reduce stress.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 4: Shirodhara</strong><br><br>
+
+          Warm herbal liquids are poured continuously over the forehead to
+          calm the nervous system and provide deep relaxation.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 5: Herbal Hair Pack</strong><br><br>
+
+          A nourishing herbal hair pack is applied and covered with banana
+          leaves and a hair cap to allow the herbs to penetrate deeply.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 6: Washing & Kesh Dhoopana</strong><br><br>
+
+          After some time, the hair is washed and Kesh Dhoopana (traditional
+          hair fumigation) is performed. This ancient therapy helps maintain
+          scalp health and supports healthy hair growth.
+        </div>
+
+      </div>
+
+      <h3>🌱 Ancient Kesh Dhoopana Therapy</h3>
+
+      <p>
+        Kesh Dhoopana is a traditional Ayurvedic method in which herbal smoke
+        is used to dry and protect the hair. It helps keep the scalp clean,
+        improves circulation and supports stronger, healthier hair.
+      </p>
+
+      <h3>⏳ Duration</h3>
+
+      <p>
+        Approximately 90–120 minutes per session.
+      </p>
+
+      <h3>✅ Suitable For</h3>
+
+      <ul>
+        <li>Hair fall and thinning hair.</li>
+        <li>Blocked scalp pores.</li>
+        <li>Weak hair roots.</li>
+        <li>Dry and damaged hair.</li>
+        <li>People experiencing stress.</li>
+        <li>People looking for natural hair growth.</li>
+      </ul>
+
+    </div>
+
+  `
+},
+  lip: {
+  title: "💋 Dark Lip Correction",
+
+  text: `
+    <div class="beauty-treatment-content">
+
+      <p>
+        Dark Lip Correction is a gentle cosmetic treatment designed to reduce
+        lip pigmentation and improve the natural color, softness and appearance
+        of the lips. The treatment helps nourish dry lips, restore hydration
+        and enhance overall lip health.
+      </p>
+
+      <h3>✨ Benefits</h3>
+
+      <ul>
+        <li>Improves uneven lip tone and pigmentation</li>
+        <li>Helps reduce dark and dull lips</li>
+        <li>Deeply hydrates dry lips</li>
+        <li>Enhances natural lip brightness</li>
+        <li>Improves lip texture and smoothness</li>
+        <li>Supports healthy, nourished lips</li>
+        <li>Safe, gentle and non-invasive procedure</li>
+        <li>Provides long-lasting visible results</li>
+      </ul>
+
+      
+      <h3>⏳ Duration</h3>
+
+      <p>Approximately 45–60 minutes per session.</p>
+
+      <h3>✅ Suitable For</h3>
+
+      <ul>
+        <li>Dark or pigmented lips</li>
+        <li>Dry and rough lips</li>
+        <li>Uneven lip tone</li>
+        <li>People looking for naturally brighter lips</li>
+      </ul>
+
+    </div>
+  `
+},
+  eyebrow: {
+  title: "👁️ Eyebrow Correction",
+
+  text: `
+
+    <div class="beauty-treatment-content">
+
+      <p>
+        Eyebrow correction treatments enhance the shape, fullness and symmetry
+        of your eyebrows, giving a natural and elegant appearance.
+      </p>
+
+      <h3>✨ Available Treatments</h3>
+
+      <div class="process-box">
+
+        <div class="process-step">
+          <strong>🌿 Microblading</strong><br><br>
+
+          Creates fine hair-like strokes for naturally fuller eyebrows.
+
+          <br><br>
+
+          ✔ Natural look<br>
+          ✔ Hair-stroke effect<br>
+          ✔ Long-lasting results
+        </div>
+
+        <div class="process-step">
+          <strong>🌸 Ombre Brows</strong><br><br>
+
+          Creates a soft powdered makeup effect with smooth shading.
+
+          <br><br>
+
+          ✔ Soft finish<br>
+          ✔ Fuller brows<br>
+          ✔ Suitable for all skin types
+        </div>
+
+        <div class="process-step">
+          <strong>💎 Combination Brows</strong><br><br>
+
+          A combination of microblading and shading techniques.
+
+          <br><br>
+
+          ✔ Natural appearance<br>
+          ✔ Better definition<br>
+          ✔ Long-lasting
+        </div>
+
+        <div class="process-step">
+          <strong>✨ Eyebrow Reconstruction</strong><br><br>
+
+          Restores thin, damaged or uneven eyebrows.
+
+          <br><br>
+
+          ✔ Improves symmetry<br>
+          ✔ Restores shape<br>
+          ✔ Enhances confidence
+        </div>
+
+      </div>
+
+      <h3>🌿 Benefits</h3>
+
+      <ul>
+        <li>Enhances facial features.</li>
+        <li>Creates fuller and defined eyebrows.</li>
+        <li>Provides natural-looking results.</li>
+        <li>Long-lasting effect.</li>
+        <li>Reduces daily makeup time.</li>
+        <li>Suitable for all skin types.</li>
+      </ul>
+
+      <h3>⏳ Duration</h3>
+
+      <p>Approximately 90–120 minutes per session.</p>
+
+      <h3>✅ Suitable For</h3>
+
+      <ul>
+        <li>Thin eyebrows.</li>
+        <li>Uneven brows.</li>
+        <li>Sparse eyebrows.</li>
+        <li>People looking for fuller brows.</li>
+      </ul>
+
+    </div>
+
+  `
+},
+
+ pedicure: {
+  title: "🦶 Pedicure Treatment",
+
+  text: `
+
+    <div class="beauty-treatment-content">
+
+      <p>
+        Pedicure is a complete foot-care treatment that cleanses, nourishes
+        and rejuvenates the feet. The therapy helps maintain healthy nails,
+        removes dead skin and provides deep relaxation.
+      </p>
+
+      <h3>✨ Benefits</h3>
+
+      <ul>
+        <li>Deep cleanses the feet and nails.</li>
+        <li>Removes dead skin and calluses.</li>
+        <li>Softens rough heels and dry skin.</li>
+        <li>Improves blood circulation.</li>
+        <li>Relieves stress and fatigue.</li>
+        <li>Promotes healthy nail growth.</li>
+        <li>Leaves the feet soft, fresh and refreshed.</li>
+        <li>Enhances the appearance of the feet.</li>
+      </ul>
+
+      <h3>🌿 Treatment Procedure</h3>
+
+      <div class="process-box">
+
+        <div class="process-step">
+          <strong>Step 1: Foot Cleansing</strong><br><br>
+
+          The feet are gently washed and cleaned to remove dirt and impurities.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 2: Warm Water Soak</strong><br><br>
+
+          The feet are soaked in warm water with cleansing ingredients to
+          soften the skin and relax the muscles.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 3: Nail Care</strong><br><br>
+
+          Nails are trimmed and shaped properly, and the cuticles are cleaned.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 4: Exfoliation</strong><br><br>
+
+          Dead skin cells and rough areas are removed using scrubs and foot-care tools.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 5: Massage</strong><br><br>
+
+          A relaxing foot massage is performed to improve circulation and
+          relieve stress.
+        </div>
+
+        <div class="process-step">
+          <strong>Step 6: Moisturizing</strong><br><br>
+
+          Nourishing creams are applied to hydrate the skin and leave the
+          feet soft and smooth.
+        </div>
+
+      </div>
+
+      <h3>⏳ Duration</h3>
+
+      <p>
+        Approximately 45–60 minutes per session.
+      </p>
+
+      <h3>✅ Suitable For</h3>
+
+      <ul>
+        <li>Dry and cracked heels.</li>
+        <li>Rough skin and calluses.</li>
+        <li>Tired and stressed feet.</li>
+        <li>People looking for regular foot care.</li>
+        <li>Anyone wanting soft and healthy feet.</li>
+      </ul>
+
+    </div>
+
+  `
+}
+};
+
+function openBeauty(type) {
+  const treatment = beautyDetails[type];
+
+  document.getElementById("modalTitle").innerHTML =
+    treatment.title;
+
+  document.getElementById("modalText").innerHTML =
+    treatment.text;
+
+  document.getElementById("therapyModal").style.display = "flex";
+
+  document.body.style.overflow = "hidden";
+}
+function closeTherapy() {
+  document.getElementById("therapyModal").style.display = "none";
+  document.body.style.overflow = "auto";
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("therapyModal");
+  if (event.target === modal) {
+    closeTherapy();
+  }
+};
+async function loadProfileIcon(){
+
+    const icon = document.getElementById("profileIcon");
+    const token = localStorage.getItem("token");
+
+    if(!token){
+        icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+        return;
+    }
+
+    try{
+
+        const response = await fetch("http://localhost:8085/api/users/getProfile",{
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        });
+
+        const result = await response.json();
+
+        if(result.success){
+            icon.innerText = result.data.name.charAt(0).toUpperCase();
+        }else{
+            icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+        }
+
+    }catch(e){
+        icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+    }
+}
+
+loadProfileIcon();
+</script>
+
+</body>
+</html>

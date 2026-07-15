@@ -2,112 +2,1274 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Blog Details - Neolife Wellness Center</title>
-  <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+
+  <link
+    rel="icon"
+    type="image/jpeg"
+    href="../assets/main_logo.jpeg"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+  >
+
   <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    :root {
+      --dark-green: #153d29;
+      --green: #245c3b;
+      --light-green: #eef5ef;
+      --gold: #b88a00;
+      --gold-light: #d7ad2f;
+      --cream: #f8f8f4;
+      --white: #ffffff;
+      --text: #173c29;
+      --muted: #667069;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      padding-top: 85px;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(212, 175, 55, 0.08),
+          transparent 28%
+        ),
+        var(--cream);
+      color: var(--text);
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .main-header {
+      width: 100%;
+      height: 85px;
+
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+
+      display: flex;
+      align-items: center;
+
+      padding: 0 18px;
+
+      background: #ffffff;
+
+      border-top: 1px solid #dddddd;
+      border-bottom: 2px solid #193f2c;
+
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .header-logo-img {
+      width: 56px;
+      height: 56px;
+
+      object-fit: cover;
+      border-radius: 50%;
+
+      border: 2px solid #d4af37;
+    }
+
+    .logo-information {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-title {
+      color: #153d29;
+
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.1;
+
+      white-space: nowrap;
+    }
+
+    .logo-subtitle {
+      color: #a87800;
+
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+
+      white-space: nowrap;
+    }
+
+    .desktop-navigation {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+      gap: 17px;
+      margin-left: auto;
+    }
+
+    .desktop-navigation a {
+      position: relative;
+
+      color: #163b28;
+
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+
+      white-space: nowrap;
+
+      transition: 0.25s;
+    }
+
+    .desktop-navigation a:hover,
+    .desktop-navigation a.active {
+      color: #a87800;
+    }
+
+    .desktop-navigation a::after {
+      content: "";
+
+      position: absolute;
+      left: 50%;
+      bottom: -9px;
+
+      width: 0;
+      height: 2px;
+
+      background: #b88a00;
+
+      transform: translateX(-50%);
+      transition: 0.25s;
+    }
+
+    .desktop-navigation a:hover::after,
+    .desktop-navigation a.active::after {
+      width: 100%;
+    }
+
+    .profile-icon {
+      width: 44px;
+      height: 44px;
+
+      margin-left: 15px;
+      flex-shrink: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background:
+        linear-gradient(
+          145deg,
+          #d7ae24,
+          #ae7d00
+        );
+
+      color: #ffffff;
+
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 800;
+
+      box-shadow:
+        0 8px 18px rgba(174, 125, 0, 0.25);
+
+      transition: 0.25s;
+    }
+
+    .profile-icon:hover {
+      transform: translateY(-2px);
+
+      box-shadow:
+        0 11px 22px rgba(174, 125, 0, 0.35);
+    }
+
+    .mobile-menu-button {
+      display: none;
+
+      width: 42px;
+      height: 42px;
+
+      margin-left: 10px;
+
+      border: none;
+      border-radius: 9px;
+
+      background: #153d29;
+      color: #ffffff;
+
+      font-size: 19px;
+      cursor: pointer;
+    }
+
+    .mobile-navigation {
+      display: none;
+    }
+
+    /* =========================
+       PAGE HERO
+    ========================== */
+
+    .details-hero {
+      min-height: 250px;
+      padding: 60px 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(11, 42, 27, 0.97),
+          rgba(28, 83, 51, 0.88)
+        );
+    }
+
+    .details-hero-content {
+      max-width: 850px;
+    }
+
+    .details-hero span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      margin-bottom: 16px;
+      padding: 8px 17px;
+
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+
+      color: #ffe8a2;
+      background: rgba(255, 255, 255, 0.08);
+
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .details-hero h1 {
+      margin-bottom: 12px;
+
+      color: #ffffff;
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .details-hero p {
+      color: rgba(255, 255, 255, 0.8);
+
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       BLOG DETAILS
+    ========================== */
+
+    .blog-details-section {
+      padding: 70px 20px 90px;
+    }
+
+    .blog-details-box {
+      width: 100%;
+      max-width: 980px;
+      margin: auto;
+
+      overflow: hidden;
+
+      background: #ffffff;
+
+      border-radius: 28px;
+      border: 1px solid rgba(21, 61, 41, 0.08);
+
+      box-shadow:
+        0 22px 55px rgba(21, 61, 41, 0.12);
+    }
+
+    .blog-detail-img {
+      width: 100%;
+      max-height: 520px;
+
+      display: block;
+      object-fit: cover;
+    }
+
+    .blog-detail-image-placeholder {
+      width: 100%;
+      height: 360px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      gap: 12px;
+
+      color: var(--green);
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(21, 61, 41, 0.08),
+          rgba(212, 175, 55, 0.14)
+        );
+    }
+
+    .blog-detail-image-placeholder i {
+      font-size: 55px;
+    }
+
+    .blog-detail-image-placeholder span {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .blog-detail-content {
+      padding: 48px 55px 52px;
+    }
+
+    .blog-category {
+      display: inline-block;
+
+      margin-bottom: 20px;
+      padding: 8px 16px;
+
+      border-radius: 30px;
+      border: 1px solid rgba(184, 138, 0, 0.25);
+
+      color: #8b6800;
+      background: #fff7dc;
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .blog-detail-content h1 {
+      margin-bottom: 18px;
+
+      color: var(--dark-green);
+
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .blog-meta {
+      margin-bottom: 30px;
+      padding-bottom: 23px;
+
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 18px;
+
+      color: #777f79;
+
+      border-bottom: 1px solid #ebeeeb;
+
+      font-size: 14px;
+    }
+
+    .blog-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .blog-meta i {
+      color: var(--gold);
+    }
+
+    .blog-main-content {
+      color: #4f5952;
+
+      font-size: 17px;
+      line-height: 1.9;
+
+      overflow-wrap: anywhere;
+    }
+
+    .blog-main-content p {
+      margin-bottom: 20px;
+    }
+
+    .blog-main-content h2,
+    .blog-main-content h3,
+    .blog-main-content h4 {
+      margin: 30px 0 14px;
+
+      color: var(--dark-green);
+      line-height: 1.3;
+    }
+
+    .blog-main-content ul,
+    .blog-main-content ol {
+      margin: 10px 0 22px 25px;
+    }
+
+    .blog-main-content li {
+      margin-bottom: 9px;
+    }
+
+    .blog-main-content img {
+      max-width: 100%;
+      height: auto;
+
+      margin: 20px 0;
+
+      border-radius: 14px;
+    }
+
+    .blog-back-area {
+      margin-top: 38px;
+      padding-top: 25px;
+
+      border-top: 1px solid #ebeeeb;
+    }
+
+    .blog-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+
+      padding: 13px 23px;
+
+      border-radius: 30px;
+
+      color: #ffffff;
+      background: var(--dark-green);
+
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+
+      transition: 0.25s;
+    }
+
+    .blog-btn:hover {
+      background: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .details-message {
+      padding: 80px 30px;
+      text-align: center;
+
+      color: var(--muted);
+    }
+
+    .details-message i {
+      display: block;
+
+      margin-bottom: 18px;
+
+      color: var(--gold);
+      font-size: 36px;
+    }
+
+    .details-message p {
+      margin-bottom: 22px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    .footer {
+      padding: 34px 20px;
+
+      text-align: center;
+      background: var(--dark-green);
+    }
+
+    .footer p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 1100px) {
+      .main-header {
+        padding: 0 14px;
+      }
+
+      .desktop-navigation {
+        gap: 11px;
+      }
+
+      .desktop-navigation a {
+        font-size: 12px;
+      }
+
+      .logo-title {
+        font-size: 16px;
+      }
+
+      .logo-subtitle {
+        font-size: 11px;
+      }
+
+      .header-logo-img {
+        width: 52px;
+        height: 52px;
+      }
+
+      .profile-icon {
+        width: 42px;
+        height: 42px;
+
+        margin-left: 10px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding-top: 78px;
+      }
+
+      .main-header {
+        height: 78px;
+      }
+
+      .desktop-navigation {
+        display: none;
+      }
+
+      .mobile-menu-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .profile-icon {
+        margin-left: auto;
+      }
+
+      .mobile-navigation {
+        width: 100%;
+
+        position: fixed;
+        top: 78px;
+        left: 0;
+        z-index: 999;
+
+        display: flex;
+        flex-direction: column;
+
+        max-height: 0;
+        overflow: hidden;
+
+        padding: 0 18px;
+
+        background: #ffffff;
+
+        box-shadow:
+          0 15px 28px rgba(0, 0, 0, 0.12);
+
+        transition:
+          max-height 0.35s ease,
+          padding 0.35s ease;
+      }
+
+      .mobile-navigation.open {
+        max-height: 600px;
+
+        padding-top: 12px;
+        padding-bottom: 20px;
+      }
+
+      .mobile-navigation a {
+        padding: 14px 8px;
+
+        color: #153d29;
+
+        border-bottom: 1px solid #eeeeee;
+
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .mobile-navigation a:hover {
+        color: #a87800;
+      }
+
+      .details-hero h1 {
+        font-size: 37px;
+      }
+
+      .blog-detail-content {
+        padding: 40px 35px;
+      }
+
+      .blog-detail-content h1 {
+        font-size: 35px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main-header {
+        padding: 0 11px;
+      }
+
+      .header-logo-img {
+        width: 48px;
+        height: 48px;
+      }
+
+      .logo-title {
+        font-size: 14px;
+      }
+
+      .logo-subtitle {
+        font-size: 9px;
+        letter-spacing: 0.9px;
+      }
+
+      .profile-icon,
+      .mobile-menu-button {
+        width: 39px;
+        height: 39px;
+      }
+
+      .details-hero {
+        min-height: 220px;
+        padding: 45px 20px;
+      }
+
+      .details-hero h1 {
+        font-size: 31px;
+      }
+
+      .details-hero p {
+        font-size: 14px;
+      }
+
+      .blog-details-section {
+        padding: 40px 14px 65px;
+      }
+
+      .blog-details-box {
+        border-radius: 20px;
+      }
+
+      .blog-detail-img {
+        max-height: 300px;
+      }
+
+      .blog-detail-image-placeholder {
+        height: 250px;
+      }
+
+      .blog-detail-content {
+        padding: 30px 22px 35px;
+      }
+
+      .blog-detail-content h1 {
+        font-size: 29px;
+      }
+
+      .blog-main-content {
+        font-size: 16px;
+        line-height: 1.8;
+      }
+
+      .blog-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="glass-header">
+  <!-- HEADER -->
 
-  <div class="logo-container">
-    <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
+  <header class="main-header">
 
-    <div class="logo-details">
-      <span class="logo-text">Neolife Wellness Center</span>
-      <span class="logo-subtitle">Ayush Wellness Center</span>
-    </div>
-  </div>
+    <a href="homepage.html" class="header-logo">
 
-  <input type="checkbox" id="menu-toggle">
+      <img
+        src="../assets/main_logo.jpeg"
+        alt="Neolife Logo"
+        class="header-logo-img"
+      >
 
-  <label for="menu-toggle" class="hamburger">
-    <span></span>
-    <span></span>
-    <span></span>
-  </label>
+      <div class="logo-information">
 
-  <nav class="side-menu">
+        <span class="logo-title">
+          Neolife Wellness Center
+        </span>
+
+        <span class="logo-subtitle">
+          Ayush Digital Care
+        </span>
+
+      </div>
+
+    </a>
+
+    <nav class="desktop-navigation">
+
+      <a href="homepage.html">Home</a>
+
+      <a href="about.html">About</a>
+
+      <a href="services.html">Therapies</a>
+
+      <a href="services.html#beauty">
+        Beauty &amp; Cosmetics
+      </a>
+
+      <a href="products.html">Products</a>
+
+      <a href="consultation.html">
+        Consultation
+      </a>
+
+      <a href="blog.html" class="active">
+        Blogs
+      </a>
+
+      <a href="contact.html">Contact</a>
+
+    </nav>
+
+    <a
+      href="profile.html"
+      class="profile-icon"
+      id="profileIcon"
+    >
+      <i class="fa-solid fa-user"></i>
+    </a>
+
+    <button
+      type="button"
+      class="mobile-menu-button"
+      onclick="toggleMobileMenu()"
+      aria-label="Open menu"
+    >
+      <i
+        class="fa-solid fa-bars"
+        id="mobileMenuIcon"
+      ></i>
+    </button>
+
+  </header>
+
+  <!-- MOBILE NAVIGATION -->
+
+  <nav
+    class="mobile-navigation"
+    id="mobileNavigation"
+  >
     <a href="homepage.html">Home</a>
     <a href="about.html">About</a>
     <a href="services.html">Therapies</a>
+
+    <a href="services.html#beauty">
+      Beauty &amp; Cosmetics
+    </a>
+
     <a href="products.html">Products</a>
-    <a href="consultation.html">Consultation</a>
+
+    <a href="consultation.html">
+      Consultation
+    </a>
+
+    <a href="blog.html">Blogs</a>
     <a href="contact.html">Contact</a>
   </nav>
 
-</header>
+  <!-- PAGE HERO -->
 
-<div class="blog-details-box" id="blogDetailsBox"></div>
+  <section class="details-hero">
 
-<footer class="footer">
-  <div class="footer-bottom">
-    <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
-  </div>
-</footer>
-<script>
-const API_BASE_URL = "http://localhost:8085";
-function getImageUrl(imageUrl){
-  if(!imageUrl || imageUrl.trim() === ""){
-    return "";
-  }
+    <div class="details-hero-content">
 
-  if(imageUrl.startsWith("http")){
-    return imageUrl;
-  }
+      <span>
+        <i class="fa-solid fa-leaf"></i>
+        Neolife Wellness Blog
+      </span>
 
-  if(imageUrl.startsWith("/")){
-    return API_BASE_URL + imageUrl;
-  }
+      <h1>Health &amp; Wellness Article</h1>
 
-  return API_BASE_URL + "/" + imageUrl;
-}
-window.onload = loadBlogDetails;
+      <p>
+        Expert health guidance and natural wellness information
+        from the Neolife Wellness Center team.
+      </p>
 
-async function loadBlogDetails(){
-  const token = localStorage.getItem("token");
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
+    </div>
 
-  const response = await fetch(`${API_BASE_URL}/api/blogs/${id}/get`, {
-    headers: {
-      "Authorization": "Bearer " + token
-    }
-  });
+  </section>
 
-  const result = await response.json();
-  const box = document.getElementById("blogDetailsBox");
+  <!-- BLOG DETAILS -->
 
-  if(!result.success){
-    box.innerHTML = "<p>Blog not found.</p>";
-    return;
-  }
+  <section class="blog-details-section">
 
-  const blog = result.data;
-  const image = getImageUrl(blog.imageUrl);
+    <div
+      class="blog-details-box"
+      id="blogDetailsBox"
+    >
+      <div class="details-message">
 
-const imageHtml = image
-  ? `<img src="${image}" alt="${blog.title}" class="blog-detail-img">`
-  : "";
-  box.innerHTML = `
-    ${imageHtml}
+        <i class="fa-solid fa-spinner fa-spin"></i>
 
-    <span class="blog-category">${blog.category || "Wellness"}</span>
+        <p>Loading blog details...</p>
 
-    <h1>${blog.title}</h1>
+      </div>
+    </div>
 
-    <p class="blog-meta">
-      Written by: ${blog.authorName || "Neolife Wellness Team"} |
-      Published on: ${blog.createdAt ? blog.createdAt.substring(0,10) : ""}
+  </section>
+
+  <!-- FOOTER -->
+
+  <footer class="footer">
+
+    <p>
+      © 2026 Neolife Wellness Center. All Rights Reserved.
     </p>
 
-    <p>${blog.content}</p>
+  </footer>
 
-    <a href="blog.html" class="blog-btn">← Back to Blogs</a>
-  `;
-}
-</script>
+  <script>
+    const API_BASE_URL = "http://localhost:8085";
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+        loadBlogDetails();
+        loadProfileIcon();
+      }
+    );
+
+    function getImageUrl(imageUrl) {
+      if (!imageUrl || imageUrl.trim() === "") {
+        return "";
+      }
+
+      if (
+        imageUrl.startsWith("http://") ||
+        imageUrl.startsWith("https://")
+      ) {
+        return imageUrl;
+      }
+
+      if (imageUrl.startsWith("/")) {
+        return API_BASE_URL + imageUrl;
+      }
+
+      return API_BASE_URL + "/" + imageUrl;
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) {
+        return "";
+      }
+
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(dateValue) {
+      if (!dateValue) {
+        return "Date not available";
+      }
+
+      const date = new Date(dateValue);
+
+      if (Number.isNaN(date.getTime())) {
+        return String(dateValue).substring(0, 10);
+      }
+
+      return date.toLocaleDateString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "long",
+          year: "numeric"
+        }
+      );
+    }
+
+    function formatBlogContent(content) {
+      if (!content) {
+        return "<p>No content is available for this blog.</p>";
+      }
+
+      const stringContent = String(content);
+
+      /*
+        If content already contains HTML,
+        display it as formatted HTML.
+      */
+      if (/<[a-z][\s\S]*>/i.test(stringContent)) {
+        return stringContent;
+      }
+
+      /*
+        If content is plain text,
+        convert each paragraph into <p>.
+      */
+      return stringContent
+        .split(/\n\s*\n/)
+        .filter(function (paragraph) {
+          return paragraph.trim() !== "";
+        })
+        .map(function (paragraph) {
+          return `<p>${escapeHtml(paragraph.trim())}</p>`;
+        })
+        .join("");
+    }
+
+    async function loadBlogDetails() {
+      const box =
+        document.getElementById("blogDetailsBox");
+
+      const params =
+        new URLSearchParams(window.location.search);
+
+      const id = params.get("id");
+
+      if (!id) {
+        showDetailsMessage(
+          "fa-circle-exclamation",
+          "Blog ID is missing."
+        );
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("token");
+
+        const headers = {};
+
+        if (token) {
+          headers.Authorization = "Bearer " + token;
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/blogs/${encodeURIComponent(id)}/get`,
+          {
+            method: "GET",
+            headers: headers
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `HTTP error: ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+
+        if (!result.success || !result.data) {
+          showDetailsMessage(
+            "fa-newspaper",
+            result.message || "Blog not found."
+          );
+          return;
+        }
+
+        const blog = result.data;
+
+        const image = getImageUrl(blog.imageUrl);
+
+        const title = escapeHtml(
+          blog.title || "Untitled Blog"
+        );
+
+        const category = escapeHtml(
+          blog.category || "Wellness"
+        );
+
+        const author = escapeHtml(
+          blog.authorName ||
+          blog.author ||
+          "Neolife Wellness Team"
+        );
+
+        const publishedDate = formatDate(
+          blog.createdAt ||
+          blog.publishedAt ||
+          blog.updatedAt
+        );
+
+        const imageHtml = image
+          ? `
+            <img
+              src="${escapeHtml(image)}"
+              alt="${title}"
+              class="blog-detail-img"
+              onerror="showDetailImagePlaceholder(this)"
+            >
+          `
+          : `
+            <div class="blog-detail-image-placeholder">
+              <i class="fa-solid fa-leaf"></i>
+              <span>Neolife Wellness</span>
+            </div>
+          `;
+
+        box.innerHTML = `
+          ${imageHtml}
+
+          <div class="blog-detail-content">
+
+            <span class="blog-category">
+              ${category}
+            </span>
+
+            <h1>${title}</h1>
+
+            <div class="blog-meta">
+
+              <span>
+                <i class="fa-solid fa-user-doctor"></i>
+                Written by ${author}
+              </span>
+
+              <span>
+                <i class="fa-solid fa-calendar-days"></i>
+                ${escapeHtml(publishedDate)}
+              </span>
+
+            </div>
+
+            <div class="blog-main-content">
+              ${formatBlogContent(blog.content)}
+            </div>
+
+            <div class="blog-back-area">
+
+              <a
+                href="blog.html"
+                class="blog-btn"
+              >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Blogs
+              </a>
+
+            </div>
+
+          </div>
+        `;
+
+        document.title =
+          `${blog.title || "Blog Details"} - Neolife Wellness Center`;
+
+      } catch (error) {
+        console.error(
+          "Blog details loading failed:",
+          error
+        );
+
+        showDetailsMessage(
+          "fa-triangle-exclamation",
+          "Blog details could not be loaded. Please try again later."
+        );
+      }
+    }
+
+    function showDetailsMessage(icon, message) {
+      const box =
+        document.getElementById("blogDetailsBox");
+
+      box.innerHTML = `
+        <div class="details-message">
+
+          <i class="fa-solid ${icon}"></i>
+
+          <p>${escapeHtml(message)}</p>
+
+          <a href="blog.html" class="blog-btn">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Blogs
+          </a>
+
+        </div>
+      `;
+    }
+
+    function showDetailImagePlaceholder(imageElement) {
+      const placeholder = document.createElement("div");
+
+      placeholder.className =
+        "blog-detail-image-placeholder";
+
+      placeholder.innerHTML = `
+        <i class="fa-solid fa-leaf"></i>
+        <span>Neolife Wellness</span>
+      `;
+
+      imageElement.replaceWith(placeholder);
+    }
+
+    async function loadProfileIcon() {
+      const icon =
+        document.getElementById("profileIcon");
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        icon.innerHTML =
+          '<i class="fa-solid fa-user"></i>';
+
+        icon.href = "login.html";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/users/getProfile`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + token
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Profile request failed"
+          );
+        }
+
+        const result = await response.json();
+
+        if (
+          result.success &&
+          result.data &&
+          result.data.name
+        ) {
+          icon.textContent =
+            result.data.name
+              .charAt(0)
+              .toUpperCase();
+
+          icon.href = "profile.html";
+        } else {
+          icon.innerHTML =
+            '<i class="fa-solid fa-user"></i>';
+        }
+
+      } catch (error) {
+        console.error(
+          "Profile loading failed:",
+          error
+        );
+
+        icon.innerHTML =
+          '<i class="fa-solid fa-user"></i>';
+      }
+    }
+
+    function toggleMobileMenu() {
+      const menu =
+        document.getElementById(
+          "mobileNavigation"
+        );
+
+      const icon =
+        document.getElementById(
+          "mobileMenuIcon"
+        );
+
+      menu.classList.toggle("open");
+
+      if (menu.classList.contains("open")) {
+        icon.classList.remove("fa-bars");
+        icon.classList.add("fa-xmark");
+      } else {
+        icon.classList.remove("fa-xmark");
+        icon.classList.add("fa-bars");
+      }
+    }
+
+    document.addEventListener(
+      "click",
+      function (event) {
+        const menu =
+          document.getElementById(
+            "mobileNavigation"
+          );
+
+        const menuButton =
+          document.querySelector(
+            ".mobile-menu-button"
+          );
+
+        if (
+          menu.classList.contains("open") &&
+          !menu.contains(event.target) &&
+          !menuButton.contains(event.target)
+        ) {
+          menu.classList.remove("open");
+
+          const icon =
+            document.getElementById(
+              "mobileMenuIcon"
+            );
+
+          icon.classList.remove("fa-xmark");
+          icon.classList.add("fa-bars");
+        }
+      }
+    );
+  </script>
+
 </body>
 </html>

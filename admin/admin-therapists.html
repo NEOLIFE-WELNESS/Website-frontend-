@@ -1,0 +1,3864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Therapists - Neolife Admin Portal</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="../assets/main_logo.jpeg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <style>
+        :root {
+            --dark-green: #153d29;
+            --green: #2d6844;
+            --green-light: #edf5ef;
+
+            --gold: #c99a16;
+            --gold-dark: #9b7200;
+
+            --cream: #f6f8f4;
+            --white: #ffffff;
+
+            --text: #173c29;
+            --muted: #6e7871;
+            --border: #dfe7e1;
+
+            --success: #287146;
+            --success-light: #ebf7ef;
+
+            --warning: #d88b18;
+            --warning-light: #fff6e8;
+
+            --danger: #c74747;
+            --danger-light: #fff0f0;
+
+            --info: #31708f;
+            --info-light: #edf6fb;
+
+            --purple: #76548f;
+            --purple-light: #f5effb;
+
+            --sidebar-width: 285px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            color: var(--text);
+            background: var(--cream);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .admin-layout {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .admin-sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+
+            display: flex;
+            flex-direction: column;
+
+            overflow: hidden;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #123824,
+                    #1e5134
+                );
+
+            box-shadow:
+                8px 0 30px rgba(18, 56, 36, 0.14);
+
+            transition: transform 0.3s ease;
+        }
+
+        .admin-brand {
+            min-height: 104px;
+            padding: 20px 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .admin-brand img {
+            width: 58px;
+            height: 58px;
+
+            object-fit: cover;
+
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+
+            background: var(--white);
+        }
+
+        .admin-brand h2 {
+            margin-bottom: 5px;
+
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .admin-brand span {
+            color: #f2cf69;
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        .admin-menu {
+            flex: 1;
+            padding: 18px 13px;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) transparent;
+        }
+
+        .admin-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .admin-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .admin-menu::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        .menu-label {
+            display: block;
+
+            margin: 10px 12px 9px;
+
+            color: rgba(255, 255, 255, 0.46);
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .admin-menu a {
+            min-height: 46px;
+            margin-bottom: 6px;
+            padding: 11px 14px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-radius: 12px;
+
+            color: rgba(255, 255, 255, 0.82);
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition: 0.25s;
+        }
+
+        .admin-menu a i {
+            width: 21px;
+
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .admin-menu a:hover,
+        .admin-menu a.active {
+            color: var(--dark-green);
+            background: var(--white);
+
+            transform: translateX(3px);
+        }
+
+        .admin-menu a.active i {
+            color: var(--gold);
+        }
+
+        .sidebar-footer {
+            padding: 17px 13px;
+
+            border-top:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .sidebar-logout {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.20);
+
+            border-radius: 12px;
+
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.08);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .sidebar-logout:hover {
+            color: var(--dark-green);
+            background: var(--white);
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .admin-main {
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
+
+            margin-left: var(--sidebar-width);
+        }
+
+        /* =========================
+           TOPBAR
+        ========================== */
+
+        .admin-topbar {
+            min-height: 86px;
+            padding: 15px 28px;
+
+            position: sticky;
+            top: 0;
+            z-index: 900;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+
+            background: rgba(255, 255, 255, 0.96);
+
+            border-bottom: 1px solid var(--border);
+
+            box-shadow:
+                0 4px 18px rgba(18, 56, 36, 0.06);
+
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar-left,
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+
+            width: 43px;
+            height: 43px;
+
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 18px;
+        }
+
+        .page-title h1 {
+            margin-bottom: 5px;
+
+            color: var(--dark-green);
+
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .topbar-button {
+            width: 43px;
+            height: 43px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            color: var(--dark-green);
+            background: var(--white);
+        }
+
+        .topbar-button:hover {
+            color: var(--white);
+            background: var(--dark-green);
+        }
+
+        .admin-profile-box {
+            padding: 6px 11px 6px 7px;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            border: 1px solid var(--border);
+            border-radius: 30px;
+
+            background: var(--white);
+        }
+
+        .admin-avatar {
+            width: 39px;
+            height: 39px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--gold),
+                    var(--gold-dark)
+                );
+
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .admin-profile-text strong {
+            display: block;
+
+            margin-bottom: 2px;
+
+            color: var(--dark-green);
+            font-size: 13px;
+        }
+
+        .admin-profile-text span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        /* =========================
+           CONTENT
+        ========================== */
+
+        .admin-content {
+            padding: 28px;
+        }
+
+        .page-banner {
+            margin-bottom: 23px;
+            padding: 27px 29px;
+
+            position: relative;
+            overflow: hidden;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+
+            border-radius: 21px;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    120deg,
+                    var(--dark-green),
+                    #347650
+                );
+
+            box-shadow:
+                0 16px 38px rgba(21, 61, 41, 0.15);
+        }
+
+        .page-banner::before {
+            content: "";
+
+            width: 230px;
+            height: 230px;
+
+            position: absolute;
+            top: -135px;
+            right: -55px;
+
+            border-radius: 50%;
+
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .page-banner-content,
+        .page-banner-icon {
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-banner h2 {
+            margin-bottom: 8px;
+
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .page-banner p {
+            max-width: 760px;
+
+            color: rgba(255, 255, 255, 0.82);
+
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .page-banner-icon {
+            width: 66px;
+            height: 66px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 18px;
+
+            color: #ffe28b;
+            background: rgba(255, 255, 255, 0.10);
+
+            font-size: 28px;
+        }
+
+        /* =========================
+           SUMMARY
+        ========================== */
+
+        .summary-grid {
+            margin-bottom: 23px;
+
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+
+            gap: 16px;
+        }
+
+        .summary-card {
+            padding: 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 17px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .summary-icon {
+            width: 49px;
+            height: 49px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 14px;
+
+            font-size: 19px;
+        }
+
+        .summary-icon.total {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .summary-icon.active {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .summary-icon.inactive {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .summary-icon.today {
+            color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        .summary-icon.therapies {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .summary-card p {
+            margin-bottom: 5px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .summary-card h3 {
+            color: var(--dark-green);
+
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           ACTION BAR
+        ========================== */
+
+        .action-bar {
+            margin-bottom: 21px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .action-bar-text h2 {
+            margin-bottom: 4px;
+
+            color: var(--dark-green);
+            font-size: 20px;
+        }
+
+        .action-bar-text p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .add-button {
+            min-height: 45px;
+            padding: 11px 18px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .add-button:hover {
+            background: var(--gold-dark);
+        }
+
+        /* =========================
+           FILTERS
+        ========================== */
+
+        .filter-panel {
+            margin-bottom: 22px;
+            padding: 20px;
+
+            display: grid;
+            grid-template-columns:
+                minmax(250px, 1.5fr)
+                repeat(4, minmax(145px, 0.75fr))
+                auto;
+
+            gap: 13px;
+            align-items: end;
+
+            border: 1px solid var(--border);
+            border-radius: 18px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--dark-green);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+
+            color: #7c877f;
+            font-size: 13px;
+
+            transform: translateY(-50%);
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            color: #354039;
+            background: var(--white);
+
+            outline: none;
+        }
+
+        .input-wrapper .form-control {
+            padding-left: 38px;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+
+            box-shadow:
+                0 0 0 3px rgba(201, 154, 22, 0.12);
+        }
+
+        .reset-button {
+            min-height: 46px;
+            padding: 11px 18px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .reset-button:hover {
+            background: var(--gold-dark);
+        }
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        .therapist-panel {
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: 21px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 11px 32px rgba(21, 61, 41, 0.07);
+        }
+
+        .panel-header {
+            min-height: 70px;
+            padding: 18px 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header h2 {
+            margin-bottom: 4px;
+
+            color: var(--dark-green);
+
+            font-size: 19px;
+        }
+
+        .panel-header p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .result-count {
+            padding: 8px 12px;
+
+            border-radius: 20px;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .therapist-table {
+            width: 100%;
+            min-width: 1580px;
+
+            border-collapse: collapse;
+        }
+
+        .therapist-table th {
+            padding: 14px 13px;
+
+            color: var(--muted);
+            background: #f8faf7;
+
+            border-bottom: 1px solid var(--border);
+
+            font-size: 9px;
+            font-weight: 800;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .therapist-table td {
+            padding: 15px 13px;
+
+            color: #4f5b53;
+
+            border-bottom: 1px solid #edf0ed;
+
+            font-size: 11px;
+            vertical-align: middle;
+        }
+
+        .therapist-table tbody tr:hover {
+            background: #fcfdfb;
+        }
+
+        .therapist-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .therapist-avatar {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .therapist-cell strong {
+            display: block;
+
+            margin-bottom: 3px;
+
+            color: var(--dark-green);
+            font-size: 12px;
+        }
+
+        .therapist-cell small {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .therapy-badge,
+        .status-badge,
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+
+            padding: 6px 9px;
+
+            border-radius: 20px;
+
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .therapy-badge {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .status-active {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .status-inactive {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .status-on-leave {
+            color: #946300;
+            background: var(--warning-light);
+        }
+
+        .availability-available {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .availability-busy {
+            color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        .availability-unavailable {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .therapy-list {
+            max-width: 250px;
+
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .action-button {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 9px;
+
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .view-button {
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .edit-button {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .schedule-button {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .toggle-button {
+            color: #946300;
+            background: var(--warning-light);
+        }
+
+        .delete-button {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .action-button:hover {
+            color: var(--white);
+            background: var(--dark-green);
+        }
+
+        .table-message {
+            padding: 55px 25px !important;
+
+            text-align: center;
+
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .table-message i {
+            display: block;
+
+            margin-bottom: 12px;
+
+            color: var(--gold);
+            font-size: 28px;
+        }
+
+        /* =========================
+           PAGINATION
+        ========================== */
+
+        .pagination-area {
+            padding: 17px 21px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination-info {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .pagination-button {
+            min-width: 35px;
+            height: 35px;
+            padding: 0 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            color: var(--dark-green);
+            background: var(--white);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .pagination-button.active {
+            color: var(--white);
+            border-color: var(--dark-green);
+            background: var(--dark-green);
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           MODALS
+        ========================== */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(13, 36, 24, 0.67);
+
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 820px;
+            max-height: 92vh;
+
+            overflow-y: auto;
+
+            border-radius: 21px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 25px 75px rgba(0, 0, 0, 0.27);
+        }
+
+        .small-modal {
+            max-width: 520px;
+        }
+
+        .modal-header {
+            padding: 20px 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            color: var(--dark-green);
+            font-size: 20px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 50%;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .modal-content {
+            padding: 22px;
+        }
+
+        .modal-therapist-card {
+            margin-bottom: 19px;
+            padding: 17px;
+
+            display: flex;
+            align-items: center;
+            gap: 14px;
+
+            border-radius: 15px;
+
+            background: var(--green-light);
+        }
+
+        .modal-therapist-card h3 {
+            margin-bottom: 5px;
+
+            color: var(--dark-green);
+            font-size: 17px;
+        }
+
+        .modal-therapist-card p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 12px;
+        }
+
+        .detail-box {
+            padding: 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            background: #fbfcfa;
+        }
+
+        .detail-box.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-box span {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: var(--muted);
+
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .detail-box strong,
+        .detail-box p {
+            color: var(--dark-green);
+
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            padding: 18px 22px;
+
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-button {
+            min-height: 42px;
+            padding: 10px 17px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border-radius: 10px;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .modal-cancel-button {
+            color: var(--dark-green);
+
+            border: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        .modal-primary-button {
+            color: var(--white);
+
+            border: 1px solid var(--dark-green);
+            background: var(--dark-green);
+        }
+
+        .modal-delete-button {
+            color: var(--white);
+
+            border: 1px solid var(--danger);
+            background: var(--danger);
+        }
+
+        /* =========================
+           ALERT
+        ========================== */
+
+        .page-alert {
+            width: min(390px, calc(100% - 35px));
+            padding: 15px 17px;
+
+            position: fixed;
+            top: 102px;
+            right: 22px;
+            z-index: 5000;
+
+            display: none;
+            align-items: flex-start;
+            gap: 11px;
+
+            border-radius: 13px;
+
+            color: var(--white);
+
+            box-shadow:
+                0 14px 35px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-alert.show {
+            display: flex;
+        }
+
+        .page-alert.success {
+            background: var(--success);
+        }
+
+        .page-alert.error {
+            background: var(--danger);
+        }
+
+        .page-alert.info {
+            background: var(--info);
+        }
+
+        .alert-message {
+            flex: 1;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 950;
+
+            display: none;
+
+            background: rgba(13, 36, 24, 0.58);
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1300px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .filter-panel {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .reset-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .admin-topbar {
+                padding: 13px 16px;
+            }
+
+            .admin-content {
+                padding: 20px 14px;
+            }
+
+            .page-title h1 {
+                font-size: 21px;
+            }
+
+            .page-title p,
+            .admin-profile-text {
+                display: none;
+            }
+
+            .page-banner {
+                align-items: flex-start;
+                flex-direction: column-reverse;
+            }
+
+            .summary-grid,
+            .filter-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .action-bar,
+            .panel-header,
+            .pagination-area {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .add-button {
+                width: 100%;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-box.full-width {
+                grid-column: auto;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div
+        class="page-alert"
+        id="pageAlert"
+    >
+        <i
+            class="fa-solid fa-circle-info"
+            id="alertIcon"
+        ></i>
+
+        <div
+            class="alert-message"
+            id="alertMessage"
+        ></div>
+    </div>
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeSidebar()"
+    ></div>
+
+    <div class="admin-layout">
+
+        <aside
+            class="admin-sidebar"
+            id="adminSidebar"
+        >
+
+            <div class="admin-brand">
+
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
+
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Admin Portal</span>
+                </div>
+
+            </div>
+
+            <nav class="admin-menu">
+
+                <span class="menu-label">Main</span>
+
+                <a href="admin-dashboard.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <span class="menu-label">User Management</span>
+
+                <a href="admin-doctors.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    Doctors
+                </a>
+
+                <a href="admin-medical-staff.html">
+                    <i class="fa-solid fa-user-nurse"></i>
+                    Medical Staff
+                </a>
+
+                <a
+                    href="admin-therapists.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-spa"></i>
+                    Therapists
+                </a>
+
+                <a href="admin-users.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patients / Users
+                </a>
+
+                <span class="menu-label">Clinical Oversight</span>
+
+                <a href="admin-appointments.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Appointments
+                </a>
+
+                <a href="admin-consultations.html">
+                    <i class="fa-solid fa-video"></i>
+                    Consultations
+                </a>
+
+                <a href="admin-therapy-bookings.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Therapy Bookings
+                </a>
+
+                <span class="menu-label">Commerce</span>
+
+                <a href="admin-products.html">
+                    <i class="fa-solid fa-box-open"></i>
+                    Products
+                </a>
+
+                <a href="admin-inventory.html">
+                    <i class="fa-solid fa-warehouse"></i>
+                    Inventory
+                </a>
+
+                <a href="admin-orders.html">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Orders
+                </a>
+
+                <a href="admin-manufacturers.html">
+                    <i class="fa-solid fa-industry"></i>
+                    Manufacturers
+                </a>
+
+                <a href="admin-coupons.html">
+                    <i class="fa-solid fa-ticket"></i>
+                    Coupons
+                </a>
+
+                <span class="menu-label">Content & Reviews</span>
+
+                <a href="admin-blogs.html">
+                    <i class="fa-solid fa-newspaper"></i>
+                    Blogs
+                </a>
+
+                <a href="admin-offers.html">
+                    <i class="fa-solid fa-images"></i>
+                    Offers & Banners
+                </a>
+
+                <a href="admin-images.html">
+                    <i class="fa-solid fa-photo-film"></i>
+                    Image Management
+                </a>
+
+                <a href="admin-clinic-reviews.html">
+                    <i class="fa-solid fa-star"></i>
+                    Clinic Reviews
+                </a>
+
+                <a href="admin-product-reviews.html">
+                    <i class="fa-solid fa-comments"></i>
+                    Product Reviews
+                </a>
+
+                <span class="menu-label">Finance & Shipping</span>
+
+                <a href="admin-transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="admin-refunds.html">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Refunds
+                </a>
+
+                <a href="admin-settlements.html">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    Settlements
+                </a>
+
+                <a href="admin-shipping-settings.html">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    Shipping Settings
+                </a>
+
+                <a href="admin-payment-settings.html">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Payment Settings
+                </a>
+
+                <span class="menu-label">System</span>
+
+                <a href="admin-reports.html">
+                    <i class="fa-solid fa-chart-column"></i>
+                    Reports & Analytics
+                </a>
+
+                <a href="admin-notification-templates.html">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                    Notification Templates
+                </a>
+
+                <a href="admin-profile.html">
+                    <i class="fa-solid fa-user-gear"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="logoutAdmin()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+        <main class="admin-main">
+
+            <header class="admin-topbar">
+
+                <div class="topbar-left">
+
+                    <button
+                        type="button"
+                        class="sidebar-toggle"
+                        onclick="toggleSidebar()"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <div class="page-title">
+
+                        <h1>Therapists</h1>
+
+                        <p>
+                            Add and manage therapist staff accounts.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="topbar-actions">
+
+                    <button
+                        type="button"
+                        class="topbar-button"
+                        onclick="loadTherapists()"
+                        title="Refresh"
+                    >
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+
+                    <div class="admin-profile-box">
+
+                        <span class="admin-avatar">
+                            A
+                        </span>
+
+                        <div class="admin-profile-text">
+
+                            <strong>Admin</strong>
+
+                            <span>
+                                System Administrator
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+            <section class="admin-content">
+
+                <section class="page-banner">
+
+                    <div class="page-banner-content">
+
+                        <h2>
+                            Therapist Staff Management
+                        </h2>
+
+                        <p>
+                            Add therapist accounts, assign therapy services,
+                            review schedules, monitor current workload and
+                            manage portal access.
+                        </p>
+
+                    </div>
+
+                    <div class="page-banner-icon">
+                        <i class="fa-solid fa-spa"></i>
+                    </div>
+
+                </section>
+
+                <section class="summary-grid">
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon total">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+
+                        <div>
+                            <p>Total Therapists</p>
+                            <h3 id="totalTherapistCount">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon active">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+
+                        <div>
+                            <p>Active Therapists</p>
+                            <h3 id="activeTherapistCount">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon inactive">
+                            <i class="fa-solid fa-user-xmark"></i>
+                        </div>
+
+                        <div>
+                            <p>Inactive Therapists</p>
+                            <h3 id="inactiveTherapistCount">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon today">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+
+                        <div>
+                            <p>Today's Sessions</p>
+                            <h3 id="todaySessionCount">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon therapies">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+
+                        <div>
+                            <p>Therapy Services</p>
+                            <h3 id="therapyServiceCount">0</h3>
+                        </div>
+
+                    </article>
+
+                </section>
+
+                <div class="action-bar">
+
+                    <div class="action-bar-text">
+
+                        <h2>Therapist Directory</h2>
+
+                        <p>
+                            Search, view, edit or manage therapist availability.
+                        </p>
+
+                    </div>
+
+                    <a
+                        href="add-therapist.html"
+                        class="add-button"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        Add Therapist
+                    </a>
+
+                </div>
+
+                <section class="filter-panel">
+
+                    <div class="form-group">
+
+                        <label for="searchInput">
+                            Search
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="text"
+                                id="searchInput"
+                                class="form-control"
+                                placeholder="Name, email, phone or therapist ID"
+                                oninput="applyFilters()"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="therapyFilter">
+                            Therapy
+                        </label>
+
+                        <select
+                            id="therapyFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Therapies
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="specializationFilter">
+                            Specialization
+                        </label>
+
+                        <select
+                            id="specializationFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Specializations
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="availabilityFilter">
+                            Availability
+                        </label>
+
+                        <select
+                            id="availabilityFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Availability
+                            </option>
+
+                            <option value="AVAILABLE">
+                                Available
+                            </option>
+
+                            <option value="BUSY">
+                                Busy
+                            </option>
+
+                            <option value="UNAVAILABLE">
+                                Unavailable
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="statusFilter">
+                            Status
+                        </label>
+
+                        <select
+                            id="statusFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Statuses
+                            </option>
+
+                            <option value="ACTIVE">
+                                Active
+                            </option>
+
+                            <option value="INACTIVE">
+                                Inactive
+                            </option>
+
+                            <option value="ON_LEAVE">
+                                On Leave
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="reset-button"
+                        onclick="resetFilters()"
+                    >
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Reset
+                    </button>
+
+                </section>
+
+                <section class="therapist-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h2>Therapist Accounts</h2>
+
+                            <p>
+                                Manage therapist profiles, therapies and schedules.
+                            </p>
+
+                        </div>
+
+                        <span
+                            class="result-count"
+                            id="resultCount"
+                        >
+                            0 Therapists
+                        </span>
+
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table class="therapist-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Therapist ID</th>
+                                    <th>Therapist</th>
+                                    <th>Specialization</th>
+                                    <th>Assigned Therapies</th>
+                                    <th>Experience</th>
+                                    <th>Phone</th>
+                                    <th>Today's Sessions</th>
+                                    <th>Availability</th>
+                                    <th>Status</th>
+                                    <th>Joined On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="therapistTableBody">
+
+                                <tr>
+                                    <td
+                                        colspan="11"
+                                        class="table-message"
+                                    >
+                                        <i class="fa-solid fa-spinner fa-spin"></i>
+                                        Loading therapists...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="pagination-area">
+
+                        <p
+                            class="pagination-info"
+                            id="paginationInfo"
+                        >
+                            Showing 0 therapists
+                        </p>
+
+                        <div
+                            class="pagination-buttons"
+                            id="paginationButtons"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- DETAILS MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="detailsModal"
+        onclick="handleModalOutside(event, 'detailsModal')"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h2>
+                    Therapist Details
+                </h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closeModal('detailsModal')"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div
+                class="modal-content"
+                id="detailsModalContent"
+            ></div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-button modal-cancel-button"
+                    onclick="closeModal('detailsModal')"
+                >
+                    Close
+                </button>
+
+                <button
+                    type="button"
+                    class="modal-button modal-primary-button"
+                    onclick="openSelectedSchedule()"
+                >
+                    <i class="fa-solid fa-calendar-days"></i>
+                    View Schedule
+                </button>
+
+                <button
+                    type="button"
+                    class="modal-button modal-primary-button"
+                    onclick="editSelectedTherapist()"
+                >
+                    <i class="fa-solid fa-pen"></i>
+                    Edit Therapist
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DELETE MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="deleteModal"
+        onclick="handleModalOutside(event, 'deleteModal')"
+    >
+
+        <div class="modal-box small-modal">
+
+            <div class="modal-header">
+
+                <h2>
+                    Remove Therapist
+                </h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closeModal('deleteModal')"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="modal-content">
+
+                <div
+                    class="modal-therapist-card"
+                    id="deleteTherapistCard"
+                ></div>
+
+                <p
+                    style="
+                        color:#6e7871;
+                        font-size:12px;
+                        line-height:1.7;
+                    "
+                >
+                    This removes the therapist from the current demo list.
+                    In backend mode, prefer deactivation when the therapist has
+                    existing bookings or treatment records.
+                </p>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-button modal-cancel-button"
+                    onclick="closeModal('deleteModal')"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="modal-button modal-delete-button"
+                    onclick="confirmDeleteTherapist()"
+                >
+                    <i class="fa-solid fa-trash"></i>
+                    Remove Therapist
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE_URL =
+            "http://localhost:8085";
+
+        let allTherapists = [];
+        let filteredTherapists = [];
+        let selectedTherapist = null;
+
+        let currentPage = 1;
+        const pageSize = 8;
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                /*
+                Backend/login calls are disabled temporarily.
+
+                requireAdminLogin();
+                loadAdminProfile();
+                */
+
+                loadTherapists();
+            }
+        );
+
+        /* =========================
+           LOAD THERAPISTS
+        ========================== */
+
+        function loadTherapists() {
+            document.getElementById(
+                "therapistTableBody"
+            ).innerHTML = `
+                <tr>
+                    <td
+                        colspan="11"
+                        class="table-message"
+                    >
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Loading therapists...
+                    </td>
+                </tr>
+            `;
+
+            /*
+            Enable this API code later:
+
+            const token =
+                localStorage.getItem("token");
+
+            fetch(
+                API_BASE_URL +
+                "/api/admin/therapists",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            )
+            .then(response => response.json())
+            .then(result => {
+                allTherapists =
+                    (result.data || [])
+                    .map(normalizeTherapist);
+
+                populateFilters();
+                updateSummary();
+                applyFilters();
+            })
+            .catch(error => {
+                console.error(error);
+
+                allTherapists =
+                    getDemoTherapists();
+
+                populateFilters();
+                updateSummary();
+                applyFilters();
+            });
+
+            return;
+            */
+
+            allTherapists =
+                mergeStoredTherapists(
+                    getDemoTherapists()
+                );
+
+            populateFilters();
+            updateSummary();
+            applyFilters();
+
+            showAlert(
+                "Demo therapist data loaded.",
+                "info"
+            );
+        }
+
+        function getDemoTherapists() {
+            return [
+                {
+                    id: 1,
+                    therapistCode: "THR-1001",
+                    name: "Sowmya Shetty",
+                    email: "sowmya.therapist@neolife.com",
+                    phone: "9876543201",
+                    gender: "FEMALE",
+                    age: 30,
+                    specialization: "Panchakarma Therapy",
+                    qualification: "Diploma in Panchakarma",
+                    experience: "6 Years",
+                    assignedTherapies: [
+                        "Panchakarma",
+                        "Abhyanga",
+                        "Shirodhara"
+                    ],
+                    todaySessions: 5,
+                    availability: "BUSY",
+                    status: "ACTIVE",
+                    joiningDate: "2024-03-12",
+                    shift: "Morning",
+                    address: "Udupi, Karnataka",
+                    emergencyContact: "9876500101",
+                    notes: "Senior therapist for Panchakarma procedures."
+                },
+                {
+                    id: 2,
+                    therapistCode: "THR-1002",
+                    name: "Arun Kumar",
+                    email: "arun.therapist@neolife.com",
+                    phone: "9876543202",
+                    gender: "MALE",
+                    age: 35,
+                    specialization: "Acupuncture Therapy",
+                    qualification: "Certificate in Acupuncture Assistance",
+                    experience: "8 Years",
+                    assignedTherapies: [
+                        "Acupuncture",
+                        "Pain Management"
+                    ],
+                    todaySessions: 3,
+                    availability: "AVAILABLE",
+                    status: "ACTIVE",
+                    joiningDate: "2023-09-18",
+                    shift: "General",
+                    address: "Manipal, Karnataka",
+                    emergencyContact: "9876500102",
+                    notes: "Supports acupuncture and pain-management sessions."
+                },
+                {
+                    id: 3,
+                    therapistCode: "THR-1003",
+                    name: "Anusha Rao",
+                    email: "anusha.therapist@neolife.com",
+                    phone: "9876543203",
+                    gender: "FEMALE",
+                    age: 28,
+                    specialization: "Beauty & Cosmetic Therapy",
+                    qualification: "Advanced Diploma in Cosmetology",
+                    experience: "5 Years",
+                    assignedTherapies: [
+                        "Facial",
+                        "Lip Correction",
+                        "Eyebrow Treatment",
+                        "Pedicure"
+                    ],
+                    todaySessions: 4,
+                    availability: "BUSY",
+                    status: "ACTIVE",
+                    joiningDate: "2025-01-10",
+                    shift: "General",
+                    address: "Brahmavar, Karnataka",
+                    emergencyContact: "9876500103",
+                    notes: "Handles beauty and cosmetic therapy services."
+                },
+                {
+                    id: 4,
+                    therapistCode: "THR-1004",
+                    name: "Vishal Pai",
+                    email: "vishal.therapist@neolife.com",
+                    phone: "9876543204",
+                    gender: "MALE",
+                    age: 33,
+                    specialization: "Yoga & Naturopathy",
+                    qualification: "Diploma in Yoga Therapy",
+                    experience: "7 Years",
+                    assignedTherapies: [
+                        "Yoga",
+                        "Naturopathy",
+                        "Breathing Therapy"
+                    ],
+                    todaySessions: 2,
+                    availability: "AVAILABLE",
+                    status: "ACTIVE",
+                    joiningDate: "2024-07-05",
+                    shift: "Morning",
+                    address: "Kundapura, Karnataka",
+                    emergencyContact: "9876500104",
+                    notes: "Conducts guided yoga and naturopathy sessions."
+                },
+                {
+                    id: 5,
+                    therapistCode: "THR-1005",
+                    name: "Meera K",
+                    email: "meera.therapist@neolife.com",
+                    phone: "9876543205",
+                    gender: "FEMALE",
+                    age: 31,
+                    specialization: "Hair Therapy",
+                    qualification: "Certificate in Ayurvedic Hair Care",
+                    experience: "4 Years",
+                    assignedTherapies: [
+                        "Hair Treatment",
+                        "Shirodhara",
+                        "Kesha Dhoopana"
+                    ],
+                    todaySessions: 0,
+                    availability: "UNAVAILABLE",
+                    status: "ON_LEAVE",
+                    joiningDate: "2025-04-22",
+                    shift: "Evening",
+                    address: "Udupi, Karnataka",
+                    emergencyContact: "9876500105",
+                    notes: "Currently on approved leave."
+                },
+                {
+                    id: 6,
+                    therapistCode: "THR-1006",
+                    name: "Pradeep Acharya",
+                    email: "pradeep.therapist@neolife.com",
+                    phone: "9876543206",
+                    gender: "MALE",
+                    age: 39,
+                    specialization: "Ayurvedic Body Therapy",
+                    qualification: "Diploma in Ayurvedic Therapy",
+                    experience: "10 Years",
+                    assignedTherapies: [
+                        "Abhyanga",
+                        "Swedana",
+                        "Body Therapy"
+                    ],
+                    todaySessions: 0,
+                    availability: "UNAVAILABLE",
+                    status: "INACTIVE",
+                    joiningDate: "2022-11-14",
+                    shift: "General",
+                    address: "Udupi, Karnataka",
+                    emergencyContact: "9876500106",
+                    notes: "Account currently inactive."
+                }
+            ];
+        }
+
+        function mergeStoredTherapists(baseData) {
+            const created =
+                readLocalArray(
+                    "demoTherapists"
+                );
+
+            const updated =
+                readLocalArray(
+                    "updatedDemoTherapists"
+                );
+
+            const removedIds =
+                readLocalArray(
+                    "removedDemoTherapistIds"
+                )
+                .map(String);
+
+            const therapistMap =
+                new Map();
+
+            baseData.forEach(
+                therapist =>
+                    therapistMap.set(
+                        String(therapist.id),
+                        { ...therapist }
+                    )
+            );
+
+            created.forEach(
+                therapist =>
+                    therapistMap.set(
+                        String(therapist.id),
+                        { ...therapist }
+                    )
+            );
+
+            updated.forEach(
+                therapist =>
+                    therapistMap.set(
+                        String(therapist.id),
+                        {
+                            ...therapistMap.get(
+                                String(therapist.id)
+                            ),
+                            ...therapist
+                        }
+                    )
+            );
+
+            removedIds.forEach(
+                id =>
+                    therapistMap.delete(id)
+            );
+
+            return Array.from(
+                therapistMap.values()
+            );
+        }
+
+        function readLocalArray(key) {
+            try {
+                const value =
+                    JSON.parse(
+                        localStorage.getItem(
+                            key
+                        ) ||
+                        "[]"
+                    );
+
+                return Array.isArray(value)
+                    ? value
+                    : [];
+
+            } catch (error) {
+                console.error(
+                    "Unable to read " + key,
+                    error
+                );
+
+                return [];
+            }
+        }
+
+        /* =========================
+           SUMMARY
+        ========================== */
+
+        function updateSummary() {
+            setText(
+                "totalTherapistCount",
+                allTherapists.length
+            );
+
+            setText(
+                "activeTherapistCount",
+                allTherapists.filter(
+                    therapist =>
+                        therapist.status ===
+                        "ACTIVE"
+                ).length
+            );
+
+            setText(
+                "inactiveTherapistCount",
+                allTherapists.filter(
+                    therapist =>
+                        therapist.status ===
+                        "INACTIVE"
+                ).length
+            );
+
+            setText(
+                "todaySessionCount",
+                allTherapists.reduce(
+                    (
+                        total,
+                        therapist
+                    ) =>
+                        total +
+                        Number(
+                            therapist.todaySessions ||
+                            0
+                        ),
+                    0
+                )
+            );
+
+            setText(
+                "therapyServiceCount",
+                new Set(
+                    allTherapists
+                        .flatMap(
+                            therapist =>
+                                therapist.assignedTherapies ||
+                                []
+                        )
+                ).size
+            );
+        }
+
+        /* =========================
+           FILTERS
+        ========================== */
+
+        function populateFilters() {
+            populateSelect(
+                "therapyFilter",
+                allTherapists.flatMap(
+                    therapist =>
+                        therapist.assignedTherapies ||
+                        []
+                ),
+                "All Therapies"
+            );
+
+            populateSelect(
+                "specializationFilter",
+                allTherapists.map(
+                    therapist =>
+                        therapist.specialization
+                ),
+                "All Specializations"
+            );
+        }
+
+        function populateSelect(
+            elementId,
+            values,
+            firstLabel
+        ) {
+            const select =
+                document.getElementById(
+                    elementId
+                );
+
+            const valuesList = [
+                ...new Set(
+                    values.filter(Boolean)
+                )
+            ].sort();
+
+            select.innerHTML = `
+                <option value="">
+                    ${escapeHtml(firstLabel)}
+                </option>
+            `;
+
+            valuesList.forEach(
+                function (value) {
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value = value;
+                    option.textContent = value;
+
+                    select.appendChild(option);
+                }
+            );
+        }
+
+        function applyFilters() {
+            const search =
+                document.getElementById(
+                    "searchInput"
+                ).value
+                .trim()
+                .toLowerCase();
+
+            const therapy =
+                document.getElementById(
+                    "therapyFilter"
+                ).value;
+
+            const specialization =
+                document.getElementById(
+                    "specializationFilter"
+                ).value;
+
+            const availability =
+                document.getElementById(
+                    "availabilityFilter"
+                ).value;
+
+            const status =
+                document.getElementById(
+                    "statusFilter"
+                ).value;
+
+            filteredTherapists =
+                allTherapists.filter(
+                    function (therapist) {
+                        const matchesSearch =
+                            !search ||
+                            therapist.name
+                                .toLowerCase()
+                                .includes(search) ||
+                            therapist.email
+                                .toLowerCase()
+                                .includes(search) ||
+                            therapist.phone
+                                .toLowerCase()
+                                .includes(search) ||
+                            therapist.therapistCode
+                                .toLowerCase()
+                                .includes(search);
+
+                        const matchesTherapy =
+                            !therapy ||
+                            (
+                                therapist.assignedTherapies ||
+                                []
+                            ).includes(therapy);
+
+                        const matchesSpecialization =
+                            !specialization ||
+                            therapist.specialization ===
+                                specialization;
+
+                        const matchesAvailability =
+                            !availability ||
+                            therapist.availability ===
+                                availability;
+
+                        const matchesStatus =
+                            !status ||
+                            therapist.status ===
+                                status;
+
+                        return (
+                            matchesSearch &&
+                            matchesTherapy &&
+                            matchesSpecialization &&
+                            matchesAvailability &&
+                            matchesStatus
+                        );
+                    }
+                );
+
+            currentPage = 1;
+
+            renderTherapists();
+        }
+
+        function resetFilters() {
+            document.getElementById(
+                "searchInput"
+            ).value = "";
+
+            document.getElementById(
+                "therapyFilter"
+            ).value = "";
+
+            document.getElementById(
+                "specializationFilter"
+            ).value = "";
+
+            document.getElementById(
+                "availabilityFilter"
+            ).value = "";
+
+            document.getElementById(
+                "statusFilter"
+            ).value = "";
+
+            applyFilters();
+        }
+
+        /* =========================
+           RENDER THERAPISTS
+        ========================== */
+
+        function renderTherapists() {
+            const body =
+                document.getElementById(
+                    "therapistTableBody"
+                );
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredTherapists.length /
+                        pageSize
+                    )
+                );
+
+            if (
+                currentPage >
+                totalPages
+            ) {
+                currentPage =
+                    totalPages;
+            }
+
+            const startIndex =
+                (currentPage - 1) *
+                pageSize;
+
+            const pageItems =
+                filteredTherapists.slice(
+                    startIndex,
+                    startIndex + pageSize
+                );
+
+            setText(
+                "resultCount",
+                `${filteredTherapists.length} Therapist${
+                    filteredTherapists.length === 1
+                        ? ""
+                        : "s"
+                }`
+            );
+
+            if (!pageItems.length) {
+                body.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="11"
+                            class="table-message"
+                        >
+                            <i class="fa-solid fa-users-slash"></i>
+                            No therapists matched the selected filters.
+                        </td>
+                    </tr>
+                `;
+
+                updatePaginationInfo(
+                    0,
+                    0,
+                    0
+                );
+
+                renderPaginationButtons(1);
+
+                return;
+            }
+
+            body.innerHTML = "";
+
+            pageItems.forEach(
+                function (therapist) {
+                    const therapyHtml =
+                        (
+                            therapist.assignedTherapies ||
+                            []
+                        )
+                        .slice(0, 3)
+                        .map(
+                            therapy => `
+                                <span class="therapy-badge">
+                                    ${escapeHtml(therapy)}
+                                </span>
+                            `
+                        )
+                        .join("");
+
+                    const extraCount =
+                        Math.max(
+                            0,
+                            (
+                                therapist.assignedTherapies ||
+                                []
+                            ).length - 3
+                        );
+
+                    body.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${escapeHtml(
+                                        therapist.therapistCode
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+
+                                <div class="therapist-cell">
+
+                                    <span class="therapist-avatar">
+                                        ${escapeHtml(
+                                            therapist.name
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        )}
+                                    </span>
+
+                                    <div>
+
+                                        <strong>
+                                            ${escapeHtml(
+                                                therapist.name
+                                            )}
+                                        </strong>
+
+                                        <small>
+                                            ${escapeHtml(
+                                                therapist.email
+                                            )}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    therapist.specialization
+                                )}
+                            </td>
+
+                            <td>
+
+                                <div class="therapy-list">
+                                    ${therapyHtml}
+
+                                    ${
+                                        extraCount > 0
+                                            ? `
+                                            <span class="therapy-badge">
+                                                +${extraCount}
+                                            </span>
+                                            `
+                                            : ""
+                                    }
+                                </div>
+
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    therapist.experience
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    therapist.phone
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    therapist.todaySessions
+                                )}
+                            </td>
+
+                            <td>
+                                ${createAvailabilityBadge(
+                                    therapist.availability
+                                )}
+                            </td>
+
+                            <td>
+                                ${createStatusBadge(
+                                    therapist.status
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    formatDate(
+                                        therapist.joiningDate
+                                    )
+                                )}
+                            </td>
+
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    <button
+                                        type="button"
+                                        class="action-button view-button"
+                                        onclick="openDetailsModal('${therapist.id}')"
+                                        title="View therapist"
+                                    >
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button edit-button"
+                                        onclick="editTherapist('${therapist.id}')"
+                                        title="Edit therapist"
+                                    >
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button schedule-button"
+                                        onclick="viewTherapistSchedule('${therapist.id}')"
+                                        title="View schedule"
+                                    >
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button toggle-button"
+                                        onclick="toggleTherapistStatus('${therapist.id}')"
+                                        title="Activate or deactivate"
+                                    >
+                                        <i class="fa-solid fa-power-off"></i>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button delete-button"
+                                        onclick="openDeleteModal('${therapist.id}')"
+                                        title="Remove therapist"
+                                    >
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                        `
+                    );
+                }
+            );
+
+            updatePaginationInfo(
+                startIndex + 1,
+                Math.min(
+                    startIndex + pageSize,
+                    filteredTherapists.length
+                ),
+                filteredTherapists.length
+            );
+
+            renderPaginationButtons(
+                totalPages
+            );
+        }
+
+        function createStatusBadge(status) {
+            const normalized =
+                String(
+                    status ||
+                    "INACTIVE"
+                ).toUpperCase();
+
+            const className = {
+                ACTIVE:
+                    "status-active",
+
+                INACTIVE:
+                    "status-inactive",
+
+                ON_LEAVE:
+                    "status-on-leave"
+            }[normalized] ||
+                "status-inactive";
+
+            return `
+                <span
+                    class="status-badge ${className}"
+                >
+                    ${escapeHtml(
+                        formatStatus(
+                            normalized
+                        )
+                    )}
+                </span>
+            `;
+        }
+
+        function createAvailabilityBadge(
+            availability
+        ) {
+            const normalized =
+                String(
+                    availability ||
+                    "UNAVAILABLE"
+                ).toUpperCase();
+
+            const className = {
+                AVAILABLE:
+                    "availability-available",
+
+                BUSY:
+                    "availability-busy",
+
+                UNAVAILABLE:
+                    "availability-unavailable"
+            }[normalized] ||
+                "availability-unavailable";
+
+            return `
+                <span
+                    class="availability-badge ${className}"
+                >
+                    ${escapeHtml(
+                        formatStatus(
+                            normalized
+                        )
+                    )}
+                </span>
+            `;
+        }
+
+        /* =========================
+           DETAILS
+        ========================== */
+
+        function openDetailsModal(id) {
+            selectedTherapist =
+                findTherapist(id);
+
+            if (!selectedTherapist) {
+                return;
+            }
+
+            const assignedTherapies =
+                (
+                    selectedTherapist.assignedTherapies ||
+                    []
+                )
+                .map(
+                    therapy =>
+                        `<span class="therapy-badge">${escapeHtml(therapy)}</span>`
+                )
+                .join(" ");
+
+            document.getElementById(
+                "detailsModalContent"
+            ).innerHTML = `
+                <div class="modal-therapist-card">
+
+                    <span class="therapist-avatar">
+                        ${escapeHtml(
+                            selectedTherapist.name
+                                .charAt(0)
+                                .toUpperCase()
+                        )}
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            ${escapeHtml(
+                                selectedTherapist.name
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHtml(
+                                selectedTherapist.therapistCode
+                            )}
+                            ·
+                            ${escapeHtml(
+                                selectedTherapist.email
+                            )}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="details-grid">
+
+                    <div class="detail-box">
+                        <span>Specialization</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.specialization
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Qualification</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.qualification
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Experience</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.experience
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Shift</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.shift
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Phone</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.phone
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Emergency Contact</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.emergencyContact
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Age / Gender</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.age
+                            )}
+                            /
+                            ${escapeHtml(
+                                formatStatus(
+                                    selectedTherapist.gender
+                                )
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Joining Date</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                formatDate(
+                                    selectedTherapist.joiningDate
+                                )
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Today's Sessions</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                selectedTherapist.todaySessions
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Availability</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                formatStatus(
+                                    selectedTherapist.availability
+                                )
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>Account Status</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                formatStatus(
+                                    selectedTherapist.status
+                                )
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box full-width">
+                        <span>Assigned Therapies</span>
+
+                        <div class="therapy-list">
+                            ${assignedTherapies || "-"}
+                        </div>
+                    </div>
+
+                    <div class="detail-box full-width">
+                        <span>Address</span>
+
+                        <p>
+                            ${escapeHtml(
+                                selectedTherapist.address
+                            )}
+                        </p>
+                    </div>
+
+                    <div class="detail-box full-width">
+                        <span>Notes</span>
+
+                        <p>
+                            ${escapeHtml(
+                                selectedTherapist.notes
+                            )}
+                        </p>
+                    </div>
+
+                </div>
+            `;
+
+            openModal(
+                "detailsModal"
+            );
+        }
+
+        function editSelectedTherapist() {
+            if (!selectedTherapist) {
+                return;
+            }
+
+            editTherapist(
+                selectedTherapist.id
+            );
+        }
+
+        function openSelectedSchedule() {
+            if (!selectedTherapist) {
+                return;
+            }
+
+            viewTherapistSchedule(
+                selectedTherapist.id
+            );
+        }
+
+        function editTherapist(id) {
+            window.location.href =
+                `edit-therapist.html?id=${encodeURIComponent(
+                    id
+                )}`;
+        }
+
+        function viewTherapistSchedule(id) {
+            window.location.href =
+                `admin-therapist-schedule.html?id=${encodeURIComponent(
+                    id
+                )}`;
+        }
+
+        /* =========================
+           STATUS
+        ========================== */
+
+        function toggleTherapistStatus(id) {
+            const therapist =
+                findTherapist(id);
+
+            if (!therapist) {
+                return;
+            }
+
+            therapist.status =
+                therapist.status ===
+                "ACTIVE"
+                    ? "INACTIVE"
+                    : "ACTIVE";
+
+            if (
+                therapist.status ===
+                "INACTIVE"
+            ) {
+                therapist.availability =
+                    "UNAVAILABLE";
+
+            } else if (
+                therapist.availability ===
+                "UNAVAILABLE"
+            ) {
+                therapist.availability =
+                    "AVAILABLE";
+            }
+
+            persistTherapistUpdate(
+                therapist
+            );
+
+            updateSummary();
+            applyFilters();
+
+            showAlert(
+                `${therapist.name} is now ${formatStatus(
+                    therapist.status
+                )}.`,
+                "success"
+            );
+
+            /*
+            Enable backend later:
+
+            PUT /api/admin/therapists/{id}/status
+
+            {
+                "active": true
+            }
+            */
+        }
+
+        function persistTherapistUpdate(
+            therapist
+        ) {
+            const updated =
+                readLocalArray(
+                    "updatedDemoTherapists"
+                );
+
+            const index =
+                updated.findIndex(
+                    item =>
+                        String(item.id) ===
+                        String(therapist.id)
+                );
+
+            if (index >= 0) {
+                updated[index] = {
+                    ...updated[index],
+                    ...therapist
+                };
+
+            } else {
+                updated.push({
+                    ...therapist
+                });
+            }
+
+            localStorage.setItem(
+                "updatedDemoTherapists",
+                JSON.stringify(updated)
+            );
+        }
+
+        /* =========================
+           DELETE
+        ========================== */
+
+        function openDeleteModal(id) {
+            selectedTherapist =
+                findTherapist(id);
+
+            if (!selectedTherapist) {
+                return;
+            }
+
+            document.getElementById(
+                "deleteTherapistCard"
+            ).innerHTML = `
+                <span class="therapist-avatar">
+                    ${escapeHtml(
+                        selectedTherapist.name
+                            .charAt(0)
+                            .toUpperCase()
+                    )}
+                </span>
+
+                <div>
+
+                    <h3>
+                        ${escapeHtml(
+                            selectedTherapist.name
+                        )}
+                    </h3>
+
+                    <p>
+                        ${escapeHtml(
+                            selectedTherapist.therapistCode
+                        )}
+                        ·
+                        ${escapeHtml(
+                            selectedTherapist.specialization
+                        )}
+                    </p>
+
+                </div>
+            `;
+
+            openModal(
+                "deleteModal"
+            );
+        }
+
+        function confirmDeleteTherapist() {
+            if (!selectedTherapist) {
+                return;
+            }
+
+            const name =
+                selectedTherapist.name;
+
+            const removedIds =
+                readLocalArray(
+                    "removedDemoTherapistIds"
+                )
+                .map(String);
+
+            if (
+                !removedIds.includes(
+                    String(
+                        selectedTherapist.id
+                    )
+                )
+            ) {
+                removedIds.push(
+                    String(
+                        selectedTherapist.id
+                    )
+                );
+            }
+
+            localStorage.setItem(
+                "removedDemoTherapistIds",
+                JSON.stringify(
+                    removedIds
+                )
+            );
+
+            allTherapists =
+                allTherapists.filter(
+                    therapist =>
+                        String(
+                            therapist.id
+                        ) !==
+                        String(
+                            selectedTherapist.id
+                        )
+                );
+
+            closeModal(
+                "deleteModal"
+            );
+
+            selectedTherapist = null;
+
+            populateFilters();
+            updateSummary();
+            applyFilters();
+
+            showAlert(
+                `${name} was removed successfully.`,
+                "success"
+            );
+
+            /*
+            Enable backend later:
+
+            DELETE /api/admin/therapists/{id}
+            */
+        }
+
+        /* =========================
+           PAGINATION
+        ========================== */
+
+        function updatePaginationInfo(
+            start,
+            end,
+            total
+        ) {
+            setText(
+                "paginationInfo",
+                total === 0
+                    ? "Showing 0 therapists"
+                    : `Showing ${start}–${end} of ${total} therapists`
+            );
+        }
+
+        function renderPaginationButtons(
+            totalPages
+        ) {
+            const container =
+                document.getElementById(
+                    "paginationButtons"
+                );
+
+            container.innerHTML = "";
+
+            const previous =
+                document.createElement(
+                    "button"
+                );
+
+            previous.type = "button";
+
+            previous.className =
+                "pagination-button";
+
+            previous.innerHTML =
+                '<i class="fa-solid fa-chevron-left"></i>';
+
+            previous.disabled =
+                currentPage === 1;
+
+            previous.onclick =
+                function () {
+                    changePage(
+                        currentPage - 1
+                    );
+                };
+
+            container.appendChild(
+                previous
+            );
+
+            for (
+                let page = 1;
+                page <= totalPages;
+                page++
+            ) {
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                button.type = "button";
+
+                button.className =
+                    `pagination-button ${
+                        page === currentPage
+                            ? "active"
+                            : ""
+                    }`;
+
+                button.textContent =
+                    page;
+
+                button.onclick =
+                    function () {
+                        changePage(page);
+                    };
+
+                container.appendChild(
+                    button
+                );
+            }
+
+            const next =
+                document.createElement(
+                    "button"
+                );
+
+            next.type = "button";
+
+            next.className =
+                "pagination-button";
+
+            next.innerHTML =
+                '<i class="fa-solid fa-chevron-right"></i>';
+
+            next.disabled =
+                currentPage ===
+                totalPages;
+
+            next.onclick =
+                function () {
+                    changePage(
+                        currentPage + 1
+                    );
+                };
+
+            container.appendChild(
+                next
+            );
+        }
+
+        function changePage(page) {
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredTherapists.length /
+                        pageSize
+                    )
+                );
+
+            if (
+                page < 1 ||
+                page > totalPages
+            ) {
+                return;
+            }
+
+            currentPage = page;
+
+            renderTherapists();
+        }
+
+        /* =========================
+           HELPERS
+        ========================== */
+
+        function findTherapist(id) {
+            return allTherapists.find(
+                therapist =>
+                    String(therapist.id) ===
+                    String(id)
+            );
+        }
+
+        function openModal(id) {
+            document
+                .getElementById(id)
+                .classList
+                .add("show");
+        }
+
+        function closeModal(id) {
+            document
+                .getElementById(id)
+                .classList
+                .remove("show");
+        }
+
+        function handleModalOutside(
+            event,
+            modalId
+        ) {
+            if (
+                event.target.id ===
+                modalId
+            ) {
+                closeModal(
+                    modalId
+                );
+            }
+        }
+
+        function formatDate(value) {
+            if (!value) {
+                return "-";
+            }
+
+            const date =
+                new Date(
+                    String(value).includes("T")
+                        ? value
+                        : `${value}T00:00:00`
+                );
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+                return String(value);
+            }
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
+        }
+
+        function formatStatus(value) {
+            return String(value || "-")
+                .replaceAll("_", " ")
+                .toLowerCase()
+                .replace(
+                    /\b\w/g,
+                    character =>
+                        character.toUpperCase()
+                );
+        }
+
+        function toggleSidebar() {
+            document
+                .getElementById(
+                    "adminSidebar"
+                )
+                .classList
+                .toggle("open");
+
+            document
+                .getElementById(
+                    "sidebarOverlay"
+                )
+                .classList
+                .toggle("show");
+        }
+
+        function closeSidebar() {
+            document
+                .getElementById(
+                    "adminSidebar"
+                )
+                .classList
+                .remove("open");
+
+            document
+                .getElementById(
+                    "sidebarOverlay"
+                )
+                .classList
+                .remove("show");
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("role");
+            localStorage.removeItem("userId");
+
+            window.location.href =
+                "../frontend/login.html";
+        }
+
+        function showAlert(
+            message,
+            type
+        ) {
+            const box =
+                document.getElementById(
+                    "pageAlert"
+                );
+
+            const icon =
+                document.getElementById(
+                    "alertIcon"
+                );
+
+            setText(
+                "alertMessage",
+                message
+            );
+
+            box.className =
+                `page-alert show ${type}`;
+
+            if (
+                type === "success"
+            ) {
+                icon.className =
+                    "fa-solid fa-circle-check";
+
+            } else if (
+                type === "error"
+            ) {
+                icon.className =
+                    "fa-solid fa-circle-exclamation";
+
+            } else {
+                icon.className =
+                    "fa-solid fa-circle-info";
+            }
+
+            clearTimeout(
+                window.therapistAlertTimer
+            );
+
+            window.therapistAlertTimer =
+                setTimeout(
+                    function () {
+                        box.classList.remove(
+                            "show"
+                        );
+                    },
+                    4000
+                );
+        }
+
+        function setText(
+            id,
+            value
+        ) {
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                element.textContent =
+                    value;
+            }
+        }
+
+        function escapeHtml(value) {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
+            }
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+    </script>
+
+</body>
+</html>

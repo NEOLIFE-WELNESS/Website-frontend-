@@ -1,0 +1,3968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Therapy Booking - Neolife Wellness Center</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="../assets/main_logo.jpeg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        :root {
+            --dark-green: #143d29;
+            --green: #2f6b43;
+            --light-green: #edf5ef;
+            --gold: #c99b16;
+            --gold-dark: #9d7500;
+            --cream: #f7f8f3;
+            --white: #ffffff;
+            --text: #173c29;
+            --muted: #68736c;
+            --danger: #c54a4a;
+            --border: #dbe5dd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            padding-top: 85px;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            color: var(--text);
+
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(201, 155, 22, 0.08),
+                    transparent 28%
+                ),
+                var(--cream);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================
+           NAVBAR
+        ========================== */
+
+        .main-header {
+            width: 100%;
+            height: 85px;
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 18px;
+
+            background: #ffffff;
+
+            border-top: 1px solid #dddddd;
+            border-bottom: 2px solid #193f2c;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            flex-shrink: 0;
+
+            text-decoration: none;
+        }
+
+        .header-logo-img {
+            width: 56px;
+            height: 56px;
+
+            object-fit: cover;
+
+            border-radius: 50%;
+            border: 2px solid #d4af37;
+        }
+
+        .logo-information {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .logo-title {
+            color: var(--dark-green);
+
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.1;
+
+            white-space: nowrap;
+        }
+
+        .logo-subtitle {
+            color: #a87800;
+
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+
+            white-space: nowrap;
+        }
+
+        .desktop-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 17px;
+
+            margin-left: auto;
+        }
+
+        .desktop-navigation a {
+            position: relative;
+
+            color: #163b28;
+
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: 800;
+
+            white-space: nowrap;
+
+            transition: 0.25s;
+        }
+
+        .desktop-navigation a:hover,
+        .desktop-navigation a.active {
+            color: #a87800;
+        }
+
+        .desktop-navigation a::after {
+            content: "";
+
+            position: absolute;
+            left: 50%;
+            bottom: -9px;
+
+            width: 0;
+            height: 2px;
+
+            background: #b88a00;
+
+            transform: translateX(-50%);
+            transition: 0.25s;
+        }
+
+        .desktop-navigation a:hover::after,
+        .desktop-navigation a.active::after {
+            width: 100%;
+        }
+
+        .profile-icon {
+            width: 44px;
+            height: 44px;
+
+            margin-left: 15px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #d7ae24,
+                    #ae7d00
+                );
+
+            text-decoration: none;
+
+            font-size: 18px;
+            font-weight: 800;
+
+            box-shadow:
+                0 8px 18px rgba(174, 125, 0, 0.25);
+        }
+
+        .mobile-menu-button {
+            display: none;
+
+            width: 42px;
+            height: 42px;
+
+            margin-left: 10px;
+
+            border: none;
+            border-radius: 9px;
+
+            color: #ffffff;
+            background: var(--dark-green);
+
+            font-size: 19px;
+        }
+
+        .mobile-navigation {
+            display: none;
+        }
+
+        /* =========================
+           HERO
+        ========================== */
+
+        .therapy-hero {
+            min-height: 300px;
+            padding: 65px 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            background:
+                linear-gradient(
+                    100deg,
+                    rgba(11, 44, 29, 0.97),
+                    rgba(40, 101, 65, 0.82)
+                );
+        }
+
+        .therapy-hero-content {
+            max-width: 850px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+
+            margin-bottom: 18px;
+            padding: 9px 18px;
+
+            border-radius: 30px;
+            border:
+                1px solid rgba(255, 255, 255, 0.24);
+
+            color: #ffe291;
+            background:
+                rgba(255, 255, 255, 0.08);
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .therapy-hero h1 {
+            margin-bottom: 16px;
+
+            color: #ffffff;
+
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.15;
+        }
+
+        .therapy-hero h1 span {
+            color: #e4b936;
+        }
+
+        .therapy-hero p {
+            color:
+                rgba(255, 255, 255, 0.84);
+
+            font-size: 17px;
+            line-height: 1.75;
+        }
+
+        /* =========================
+           STEPPER
+        ========================== */
+
+        .stepper-wrapper {
+            width: 92%;
+            max-width: 1100px;
+
+            margin: -34px auto 40px;
+
+            position: relative;
+            z-index: 4;
+        }
+
+        .stepper {
+            padding: 24px 20px;
+
+            display: grid;
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            background: #ffffff;
+            border-radius: 22px;
+
+            box-shadow:
+                0 18px 45px
+                rgba(18, 61, 41, 0.14);
+        }
+
+        .step-item {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+
+            color: #8a928d;
+        }
+
+        .step-item:not(:last-child)::after {
+            content: "";
+
+            position: absolute;
+            right: -15px;
+
+            width: 30px;
+            height: 2px;
+
+            background: #dde5df;
+        }
+
+        .step-circle {
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            color: #778079;
+            background: #edf1ee;
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .step-item.active {
+            color: var(--dark-green);
+        }
+
+        .step-item.active .step-circle {
+            color: #ffffff;
+            background: var(--gold);
+        }
+
+        .step-item.completed .step-circle {
+            color: #ffffff;
+            background: var(--dark-green);
+        }
+
+        /* =========================
+           MAIN PANEL
+        ========================== */
+
+        .therapy-section {
+            width: 92%;
+            max-width: 1180px;
+
+            margin: 0 auto 90px;
+        }
+
+        .therapy-panel {
+            overflow: hidden;
+
+            background: #ffffff;
+
+            border:
+                1px solid rgba(21, 61, 41, 0.08);
+
+            border-radius: 28px;
+
+            box-shadow:
+                0 20px 55px
+                rgba(21, 61, 41, 0.10);
+        }
+
+        .therapy-step {
+            display: none;
+            padding: 45px;
+        }
+
+        .therapy-step.active {
+            display: block;
+        }
+
+        .step-heading {
+            margin-bottom: 32px;
+        }
+
+        .step-heading h2 {
+            margin-bottom: 10px;
+
+            color: var(--dark-green);
+
+            font-size: 30px;
+        }
+
+        .step-heading p {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        /* =========================
+           THERAPY CARDS
+        ========================== */
+
+        .therapy-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 20px;
+        }
+
+        .therapy-card {
+            min-height: 205px;
+            padding: 25px 20px;
+
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            border:
+                1px solid var(--border);
+            border-radius: 20px;
+
+            color: var(--dark-green);
+            background: #ffffff;
+
+            transition: 0.25s;
+        }
+
+        .therapy-card:hover,
+        .therapy-card.selected {
+            border-color: var(--gold);
+            background: #fffaf0;
+
+            transform: translateY(-5px);
+
+            box-shadow:
+                0 14px 32px
+                rgba(21, 61, 41, 0.11);
+        }
+
+        .therapy-icon {
+            width: 64px;
+            height: 64px;
+
+            margin-bottom: 16px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            color: var(--gold);
+            background: var(--light-green);
+
+            font-size: 28px;
+        }
+
+        .therapy-card.selected .therapy-icon {
+            color: #ffffff;
+            background: var(--gold);
+        }
+
+        .therapy-card h3 {
+            margin-bottom: 8px;
+
+            font-size: 18px;
+        }
+
+        .therapy-card p {
+            color: var(--muted);
+
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .selected-check {
+            width: 25px;
+            height: 25px;
+
+            position: absolute;
+            top: 14px;
+            right: 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border:
+                2px solid #ccd6ce;
+            border-radius: 50%;
+
+            color: transparent;
+        }
+
+        .therapy-card.selected
+        .selected-check {
+            color: #ffffff;
+            border-color: var(--gold);
+            background: var(--gold);
+        }
+
+        /* =========================
+           DOCTOR CARDS
+        ========================== */
+
+        .selected-therapy-box {
+            margin-bottom: 28px;
+            padding: 18px 20px;
+
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+            border-radius: 16px;
+            background: var(--light-green);
+        }
+
+        .selected-therapy-box i {
+            width: 48px;
+            height: 48px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            color: #ffffff;
+            background: var(--gold);
+
+            font-size: 20px;
+        }
+
+        .selected-therapy-box h3 {
+            margin-bottom: 4px;
+
+            color: var(--dark-green);
+
+            font-size: 18px;
+        }
+
+        .selected-therapy-box p {
+            color: var(--muted);
+
+            font-size: 13px;
+        }
+
+        .doctor-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .doctor-card {
+            padding: 20px;
+
+            display: flex;
+            align-items: center;
+            gap: 18px;
+
+            border:
+                1px solid var(--border);
+            border-radius: 18px;
+
+            background: #ffffff;
+
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .doctor-card:hover,
+        .doctor-card.selected {
+            border-color: var(--gold);
+            background: #fffaf0;
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 12px 28px
+                rgba(21, 61, 41, 0.10);
+        }
+
+        .doctor-image {
+            width: 90px;
+            height: 90px;
+
+            object-fit: cover;
+            flex-shrink: 0;
+
+            border-radius: 50%;
+            border: 3px solid #edf3ee;
+        }
+
+        .doctor-info {
+            flex: 1;
+        }
+
+        .doctor-info h3 {
+            margin-bottom: 7px;
+
+            color: var(--dark-green);
+            font-size: 18px;
+        }
+
+        .doctor-info p {
+            margin-bottom: 5px;
+
+            color: #69726c;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .doctor-select-indicator {
+            width: 24px;
+            height: 24px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border:
+                2px solid #ccd6ce;
+            border-radius: 50%;
+
+            color: transparent;
+        }
+
+        .doctor-card.selected
+        .doctor-select-indicator {
+            color: #ffffff;
+            border-color: var(--gold);
+            background: var(--gold);
+        }
+
+        .empty-message {
+            grid-column: 1 / -1;
+
+            padding: 35px 20px;
+
+            text-align: center;
+
+            color: var(--muted);
+            background: #fafcf9;
+
+            border:
+                1px dashed #cfd8d1;
+            border-radius: 16px;
+        }
+
+        /* =========================
+           SCHEDULE TYPE
+        ========================== */
+
+        .schedule-type-grid {
+            margin-bottom: 30px;
+
+            display: grid;
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .schedule-option {
+            min-height: 145px;
+            padding: 24px;
+
+            position: relative;
+
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+
+            border:
+                1px solid var(--border);
+            border-radius: 18px;
+
+            background: #ffffff;
+
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .schedule-option:hover,
+        .schedule-option.selected {
+            border-color: var(--gold);
+            background: #fffaf0;
+
+            box-shadow:
+                0 12px 28px
+                rgba(21, 61, 41, 0.10);
+        }
+
+        .schedule-radio {
+            width: 24px;
+            height: 24px;
+
+            margin-top: 2px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border:
+                2px solid #cbd6cd;
+            border-radius: 50%;
+        }
+
+        .schedule-option.selected
+        .schedule-radio {
+            border-color: var(--gold);
+        }
+
+        .schedule-option.selected
+        .schedule-radio::after {
+            content: "";
+
+            width: 12px;
+            height: 12px;
+
+            border-radius: 50%;
+
+            background: var(--gold);
+        }
+
+        .schedule-option h3 {
+            margin-bottom: 8px;
+
+            color: var(--dark-green);
+
+            font-size: 18px;
+        }
+
+        .schedule-option p {
+            color: var(--muted);
+
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        /* =========================
+           DATE AND SLOTS
+        ========================== */
+
+        .schedule-layout {
+            display: grid;
+            grid-template-columns:
+                305px 1fr;
+
+            gap: 32px;
+            align-items: start;
+        }
+
+        .schedule-left {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .selected-doctor-box {
+            min-height: 92px;
+            padding: 16px;
+
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+            border-radius: 16px;
+            background: var(--light-green);
+        }
+
+        .selected-doctor-box img {
+            width: 66px;
+            height: 66px;
+
+            object-fit: cover;
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            border:
+                2px solid rgba(201, 155, 22, 0.3);
+        }
+
+        .selected-doctor-box h3 {
+            margin-bottom: 7px;
+
+            color: var(--dark-green);
+
+            font-size: 17px;
+        }
+
+        .selected-doctor-box p {
+            color: #6b766f;
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 2px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: var(--dark-green);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 54px;
+
+            padding: 13px 16px;
+
+            border:
+                1px solid var(--border);
+            border-radius: 14px;
+
+            color: #303832;
+            background: #fffdf7;
+
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--green);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(47, 107, 67, 0.12);
+        }
+
+        textarea.form-control {
+            min-height: 110px;
+
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .slot-panel {
+            min-height: 213px;
+            padding: 28px;
+
+            border:
+                1px solid var(--border);
+            border-radius: 18px;
+
+            background: #ffffff;
+        }
+
+        .slot-panel h3 {
+            margin-bottom: 24px;
+
+            color: var(--dark-green);
+
+            font-size: 20px;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 20px 22px;
+        }
+
+        .slot-btn {
+            min-height: 43px;
+            padding: 10px 8px;
+
+            border:
+                1px solid #d4dfd7;
+            border-radius: 11px;
+
+            color: var(--dark-green);
+            background: #ffffff;
+
+            font-size: 13px;
+            font-weight: 800;
+
+            transition: 0.22s;
+        }
+
+        .slot-btn:hover:not(:disabled) {
+            border-color: var(--green);
+            background: #f1f7f2;
+
+            transform: translateY(-2px);
+        }
+
+        .slot-btn.selected {
+            color: #ffffff;
+            border-color: var(--dark-green);
+            background: var(--dark-green);
+
+            box-shadow:
+                0 7px 17px
+                rgba(20, 61, 41, 0.2);
+        }
+
+        .slot-btn:disabled {
+            cursor: not-allowed;
+
+            color: #aaafab;
+            background: #eff1ef;
+
+            text-decoration: line-through;
+        }
+
+        .slot-message {
+            grid-column: 1 / -1;
+
+            padding: 35px 20px;
+
+            text-align: center;
+
+            color: var(--muted);
+
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           PATIENT FORM
+        ========================== */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* =========================
+           REVIEW
+        ========================== */
+
+        .review-layout {
+            display: grid;
+            grid-template-columns:
+                1.25fr 0.75fr;
+
+            gap: 30px;
+        }
+
+        .review-card,
+        .payment-card {
+            padding: 28px;
+
+            border:
+                1px solid var(--border);
+            border-radius: 20px;
+
+            background: #ffffff;
+        }
+
+        .review-card h3,
+        .payment-card h3 {
+            margin-bottom: 22px;
+
+            color: var(--dark-green);
+
+            font-size: 22px;
+        }
+
+        .summary-row {
+            padding: 14px 0;
+
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+
+            border-bottom:
+                1px solid #edf0ed;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #737c76;
+            font-size: 14px;
+        }
+
+        .summary-value {
+            max-width: 60%;
+
+            color: var(--dark-green);
+
+            font-size: 14px;
+            font-weight: 800;
+
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-card {
+            height: max-content;
+
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #173f2a,
+                    #2e6b43
+                );
+        }
+
+        .payment-card h3 {
+            color: #ffffff;
+        }
+
+        .fee-row {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .fee-row span:first-child {
+            color:
+                rgba(255, 255, 255, 0.76);
+        }
+
+        .fee-amount {
+            color: #ffe08a;
+
+            font-size: 31px;
+            font-weight: 800;
+        }
+
+        .payment-note {
+            margin-bottom: 18px;
+
+            color:
+                rgba(255, 255, 255, 0.78);
+
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .approval-status {
+            margin-bottom: 18px;
+            padding: 14px;
+
+            border-radius: 13px;
+
+            color: #ffe28c;
+            background:
+                rgba(255, 255, 255, 0.08);
+
+            text-align: center;
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .secure-payment {
+            margin-bottom: 22px;
+
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            color: #e7f2e9;
+
+            font-size: 13px;
+        }
+
+        .pay-btn {
+            width: 100%;
+            min-height: 50px;
+
+            border: none;
+            border-radius: 13px;
+
+            color: var(--dark-green);
+            background: #ffffff;
+
+            font-size: 15px;
+            font-weight: 800;
+
+            transition: 0.25s;
+        }
+
+        .pay-btn:hover {
+            background: #f5d66d;
+
+            transform: translateY(-2px);
+        }
+
+        .pay-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+        /* =========================
+           ACTION BUTTONS
+        ========================== */
+
+        .step-actions {
+            margin-top: 32px;
+            padding-top: 24px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-top:
+                1px solid #edf0ed;
+        }
+
+        .back-btn,
+        .next-btn {
+            min-height: 48px;
+            padding: 12px 25px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+
+            border-radius: 12px;
+
+            font-size: 14px;
+            font-weight: 800;
+
+            transition: 0.25s;
+        }
+
+        .back-btn {
+            color: var(--dark-green);
+            background: #ffffff;
+
+            border:
+                1px solid #ccd7ce;
+        }
+
+        .back-btn:hover {
+            border-color: var(--dark-green);
+            background: #f1f6f2;
+        }
+
+        .next-btn {
+            margin-left: auto;
+
+            color: #ffffff;
+            background: var(--dark-green);
+
+            border:
+                1px solid var(--dark-green);
+        }
+
+        .next-btn:hover {
+            background: var(--gold-dark);
+            border-color: var(--gold-dark);
+
+            transform: translateY(-2px);
+        }
+
+        /* =========================
+           ALERT
+        ========================== */
+
+        .page-alert {
+            width:
+                min(390px, calc(100% - 40px));
+
+            padding: 16px 18px;
+
+            position: fixed;
+            top: 105px;
+            right: 22px;
+            z-index: 2000;
+
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+
+            border-radius: 14px;
+
+            color: #ffffff;
+
+            box-shadow:
+                0 14px 35px
+                rgba(0, 0, 0, 0.18);
+        }
+
+        .page-alert.show {
+            display: flex;
+        }
+
+        .page-alert.error {
+            background: #b94040;
+        }
+
+        .page-alert.success {
+            background: #267044;
+        }
+
+        .page-alert.info {
+            background: #2e617c;
+        }
+
+        .page-alert-message {
+            flex: 1;
+
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        .footer {
+            padding: 32px 20px;
+
+            text-align: center;
+
+            background: var(--dark-green);
+        }
+
+        .footer p {
+            color:
+                rgba(255, 255, 255, 0.78);
+
+            font-size: 14px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1100px) {
+            .main-header {
+                padding: 0 14px;
+            }
+
+            .desktop-navigation {
+                gap: 11px;
+            }
+
+            .desktop-navigation a {
+                font-size: 12px;
+            }
+
+            .logo-title {
+                font-size: 16px;
+            }
+
+            .logo-subtitle {
+                font-size: 11px;
+            }
+
+            .header-logo-img {
+                width: 52px;
+                height: 52px;
+            }
+
+            .profile-icon {
+                width: 42px;
+                height: 42px;
+
+                margin-left: 10px;
+            }
+
+            .therapy-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .schedule-layout {
+                grid-template-columns:
+                    280px 1fr;
+            }
+
+            .slot-grid {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding-top: 78px;
+            }
+
+            .main-header {
+                height: 78px;
+            }
+
+            .desktop-navigation {
+                display: none;
+            }
+
+            .mobile-menu-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .profile-icon {
+                margin-left: auto;
+            }
+
+            .mobile-navigation {
+                width: 100%;
+
+                position: fixed;
+                top: 78px;
+                left: 0;
+                z-index: 999;
+
+                display: flex;
+                flex-direction: column;
+
+                max-height: 0;
+                overflow: hidden;
+
+                padding: 0 18px;
+
+                background: #ffffff;
+
+                box-shadow:
+                    0 15px 28px
+                    rgba(0, 0, 0, 0.12);
+
+                transition:
+                    max-height 0.35s ease,
+                    padding 0.35s ease;
+            }
+
+            .mobile-navigation.open {
+                max-height: 600px;
+
+                padding-top: 12px;
+                padding-bottom: 20px;
+            }
+
+            .mobile-navigation a {
+                padding: 14px 8px;
+
+                color: var(--dark-green);
+
+                border-bottom:
+                    1px solid #eeeeee;
+
+                text-decoration: none;
+
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+            .doctor-grid,
+            .schedule-type-grid,
+            .schedule-layout,
+            .review-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .slot-grid {
+                grid-template-columns:
+                    repeat(4, 1fr);
+            }
+
+            .step-label {
+                display: none;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .therapy-hero {
+                min-height: 260px;
+                padding: 50px 18px;
+            }
+
+            .therapy-hero h1 {
+                font-size: 36px;
+            }
+
+            .therapy-hero p {
+                font-size: 15px;
+            }
+
+            .therapy-step {
+                padding: 30px 20px;
+            }
+
+            .step-heading h2 {
+                font-size: 25px;
+            }
+
+            .therapy-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .doctor-card {
+                align-items: flex-start;
+            }
+
+            .doctor-image {
+                width: 72px;
+                height: 72px;
+            }
+
+            .slot-panel {
+                padding: 22px 16px;
+            }
+
+            .slot-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+                gap: 12px;
+            }
+
+            .step-actions {
+                flex-direction: column-reverse;
+            }
+
+            .back-btn,
+            .next-btn {
+                width: 100%;
+                margin: 0;
+            }
+
+            .summary-row {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .summary-value {
+                max-width: 100%;
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .logo-title {
+                font-size: 14px;
+            }
+
+            .logo-subtitle {
+                display: none;
+            }
+
+            .header-logo-img {
+                width: 47px;
+                height: 47px;
+            }
+
+            .profile-icon,
+            .mobile-menu-button {
+                width: 39px;
+                height: 39px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <header class="main-header">
+
+        <a href="homepage.html" class="header-logo">
+
+            <img
+                src="../assets/main_logo.jpeg"
+                alt="Neolife Logo"
+                class="header-logo-img"
+            >
+
+            <div class="logo-information">
+
+                <span class="logo-title">
+                    Neolife Wellness Center
+                </span>
+
+                <span class="logo-subtitle">
+                    Ayush Digital Care
+                </span>
+
+            </div>
+
+        </a>
+
+        <nav class="desktop-navigation">
+
+            <a href="homepage.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="services.html">Therapies</a>
+
+            <a href="services.html#beauty">
+                Beauty &amp; Cosmetics
+            </a>
+
+            <a href="products.html">Products</a>
+
+            <a
+                href="consultation.html"
+                class="active"
+            >
+                Consultation
+            </a>
+
+            <a href="blog.html">Blogs</a>
+            <a href="contact.html">Contact</a>
+
+        </nav>
+
+        <a
+            href="profile.html"
+            class="profile-icon"
+            id="profileIcon"
+        >
+            <i class="fa-solid fa-user"></i>
+        </a>
+
+        <button
+            type="button"
+            class="mobile-menu-button"
+            onclick="toggleMobileMenu()"
+            aria-label="Open menu"
+        >
+            <i
+                class="fa-solid fa-bars"
+                id="mobileMenuIcon"
+            ></i>
+        </button>
+
+    </header>
+
+    <nav
+        class="mobile-navigation"
+        id="mobileNavigation"
+    >
+        <a href="homepage.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Therapies</a>
+        <a href="services.html#beauty">
+            Beauty &amp; Cosmetics
+        </a>
+        <a href="products.html">Products</a>
+        <a href="consultation.html">
+            Consultation
+        </a>
+        <a href="blog.html">Blogs</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <!-- ALERT -->
+
+    <div
+        class="page-alert"
+        id="pageAlert"
+    >
+
+        <i
+            class="fa-solid fa-circle-info"
+            id="alertIcon"
+        ></i>
+
+        <div
+            class="page-alert-message"
+            id="alertMessage"
+        ></div>
+
+    </div>
+
+    <!-- HERO -->
+
+    <section class="therapy-hero">
+
+        <div class="therapy-hero-content">
+
+            <div class="hero-badge">
+
+                <i class="fa-solid fa-spa"></i>
+
+                THERAPY BOOKING
+
+            </div>
+
+            <h1>
+                Book Your
+                <span>Wellness Therapy</span>
+            </h1>
+
+            <p>
+                Select a therapy, choose the specialist,
+                pick an available session and pay the
+                ₹50 pre-booking fee.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- STEPPER -->
+
+    <div class="stepper-wrapper">
+
+        <div class="stepper">
+
+            <div
+                class="step-item active"
+                data-step-indicator="1"
+            >
+                <div class="step-circle">1</div>
+                <span class="step-label">
+                    Therapy
+                </span>
+            </div>
+
+            <div
+                class="step-item"
+                data-step-indicator="2"
+            >
+                <div class="step-circle">2</div>
+                <span class="step-label">
+                    Doctor
+                </span>
+            </div>
+
+            <div
+                class="step-item"
+                data-step-indicator="3"
+            >
+                <div class="step-circle">3</div>
+                <span class="step-label">
+                    Schedule
+                </span>
+            </div>
+
+            <div
+                class="step-item"
+                data-step-indicator="4"
+            >
+                <div class="step-circle">4</div>
+                <span class="step-label">
+                    Patient
+                </span>
+            </div>
+
+            <div
+                class="step-item"
+                data-step-indicator="5"
+            >
+                <div class="step-circle">5</div>
+                <span class="step-label">
+                    Payment
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MAIN -->
+
+    <main class="therapy-section">
+
+        <div class="therapy-panel">
+
+            <!-- STEP 1 -->
+
+            <section
+                class="therapy-step active"
+                id="step1"
+            >
+
+                <div class="step-heading">
+
+                    <h2>Select Therapy</h2>
+
+                    <p>
+                        Choose the wellness or treatment
+                        service you would like to book.
+                    </p>
+
+                </div>
+
+                <div
+                    class="therapy-grid"
+                    id="therapyGrid"
+                ></div>
+
+                <div class="step-actions">
+
+                    <a
+                        href="consultation.html"
+                        class="back-btn"
+                        style="text-decoration:none;"
+                    >
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Back
+                    </a>
+
+                    <button
+                        type="button"
+                        class="next-btn"
+                        onclick="goToStep2()"
+                    >
+                        Continue
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </div>
+
+            </section>
+
+            <!-- STEP 2 -->
+
+            <section
+                class="therapy-step"
+                id="step2"
+            >
+
+                <div class="step-heading">
+
+                    <h2>Select Doctor</h2>
+
+                    <p>
+                        Select a doctor or specialist
+                        available for the chosen therapy.
+                    </p>
+
+                </div>
+
+                <div
+                    class="selected-therapy-box"
+                    id="selectedTherapyBox"
+                ></div>
+
+                <div
+                    class="doctor-grid"
+                    id="doctorGrid"
+                ></div>
+
+                <div class="step-actions">
+
+                    <button
+                        type="button"
+                        class="back-btn"
+                        onclick="showStep(1)"
+                    >
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Previous
+                    </button>
+
+                    <button
+                        type="button"
+                        class="next-btn"
+                        onclick="goToStep3()"
+                    >
+                        Continue
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </div>
+
+            </section>
+
+            <!-- STEP 3 -->
+
+            <section
+                class="therapy-step"
+                id="step3"
+            >
+
+                <div class="step-heading">
+
+                    <h2>Select Session and Time</h2>
+
+                    <p>
+                        Choose whether you need a single
+                        session or a complete therapy schedule.
+                    </p>
+
+                </div>
+
+                <div class="schedule-type-grid">
+
+                    <div
+                        class="schedule-option"
+                        id="singleSessionOption"
+                        onclick="selectScheduleType(
+                            'SINGLE_SESSION',
+                            this
+                        )"
+                    >
+
+                        <div class="schedule-radio"></div>
+
+                        <div>
+                            <h3>Single Session</h3>
+
+                            <p>
+                                Book one therapy session.
+                                Further sessions can be booked
+                                later if required.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="schedule-option"
+                        id="fullScheduleOption"
+                        onclick="selectScheduleType(
+                            'FULL_SCHEDULE',
+                            this
+                        )"
+                    >
+
+                        <div class="schedule-radio"></div>
+
+                        <div>
+                            <h3>Full Treatment Schedule</h3>
+
+                            <p>
+                                Request a complete treatment
+                                schedule. The doctor will confirm
+                                the remaining sessions.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="schedule-layout">
+
+                    <div class="schedule-left">
+
+                        <div
+                            class="selected-doctor-box"
+                            id="selectedDoctorBox"
+                        ></div>
+
+                        <div class="form-group">
+
+                            <label for="therapyDate">
+                                Preferred Date
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="date"
+                                id="therapyDate"
+                                class="form-control"
+                                onchange="loadAvailableSlots()"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <div class="slot-panel">
+
+                        <h3>Available Time Slots</h3>
+
+                        <div
+                            class="slot-grid"
+                            id="slotGrid"
+                        >
+                            <div class="slot-message">
+                                Select a date to view
+                                available therapy slots.
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="step-actions">
+
+                    <button
+                        type="button"
+                        class="back-btn"
+                        onclick="showStep(2)"
+                    >
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Previous
+                    </button>
+
+                    <button
+                        type="button"
+                        class="next-btn"
+                        onclick="goToStep4()"
+                    >
+                        Continue
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </div>
+
+            </section>
+
+            <!-- STEP 4 -->
+
+            <section
+                class="therapy-step"
+                id="step4"
+            >
+
+                <div class="step-heading">
+
+                    <h2>Enter Patient Details</h2>
+
+                    <p>
+                        Enter the patient's personal
+                        and health information.
+                    </p>
+
+                </div>
+
+                <form
+                    id="patientForm"
+                    onsubmit="
+                        event.preventDefault();
+                        goToStep5();
+                    "
+                >
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="patientName">
+                                Patient Name
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="patientName"
+                                class="form-control"
+                                placeholder="Enter patient name"
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="age">
+                                Age
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="number"
+                                id="age"
+                                class="form-control"
+                                min="1"
+                                max="120"
+                                placeholder="Enter age"
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="gender">
+                                Gender
+                                <span class="required">*</span>
+                            </label>
+
+                            <select
+                                id="gender"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    Select gender
+                                </option>
+
+                                <option value="MALE">
+                                    Male
+                                </option>
+
+                                <option value="FEMALE">
+                                    Female
+                                </option>
+
+                                <option value="OTHER">
+                                    Other
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="phoneNumber">
+                                Phone Number
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="phoneNumber"
+                                class="form-control"
+                                maxlength="10"
+                                placeholder="Enter phone number"
+                            >
+
+                        </div>
+
+                        <div class="form-group full-width">
+
+                            <label for="email">
+                                Email Address
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                class="form-control"
+                                placeholder="Enter email address"
+                            >
+
+                        </div>
+
+                        <div class="form-group full-width">
+
+                            <label for="healthConcern">
+                                Health Concern
+                                <span class="required">*</span>
+                            </label>
+
+                            <textarea
+                                id="healthConcern"
+                                class="form-control"
+                                placeholder="Describe the condition or reason for therapy"
+                            ></textarea>
+
+                        </div>
+
+                        <div class="form-group full-width">
+
+                            <label for="pastHistory">
+                                Past Medical History
+                            </label>
+
+                            <textarea
+                                id="pastHistory"
+                                class="form-control"
+                                placeholder="Mention previous illnesses, surgeries or treatments"
+                            ></textarea>
+
+                        </div>
+
+                        <div class="form-group full-width">
+
+                            <label for="specialNotes">
+                                Special Notes
+                            </label>
+
+                            <textarea
+                                id="specialNotes"
+                                class="form-control"
+                                placeholder="Add any important notes for the doctor or therapist"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="step-actions">
+
+                        <button
+                            type="button"
+                            class="back-btn"
+                            onclick="showStep(3)"
+                        >
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Previous
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="next-btn"
+                        >
+                            Review Booking
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+            <!-- STEP 5 -->
+
+            <section
+                class="therapy-step"
+                id="step5"
+            >
+
+                <div class="step-heading">
+
+                    <h2>Review and Pay Booking Fee</h2>
+
+                    <p>
+                        Verify your therapy booking before
+                        paying the ₹50 pre-booking fee.
+                    </p>
+
+                </div>
+
+                <div class="review-layout">
+
+                    <div class="review-card">
+
+                        <h3>Therapy Booking Summary</h3>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Therapy
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryTherapy"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Doctor
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryDoctor"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Booking Type
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryScheduleType"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Preferred Date
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryDate"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Preferred Time
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryTime"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Patient Name
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryPatient"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Phone Number
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryPhone"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                Health Concern
+                            </span>
+
+                            <span
+                                class="summary-value"
+                                id="summaryConcern"
+                            >
+                                -
+                            </span>
+
+                        </div>
+
+                        <div class="step-actions">
+
+                            <button
+                                type="button"
+                                class="back-btn"
+                                onclick="showStep(4)"
+                            >
+                                <i class="fa-solid fa-pen"></i>
+                                Edit Details
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <aside class="payment-card">
+
+                        <h3>Payment Details</h3>
+
+                        <div class="fee-row">
+
+                            <span>Pre-booking Fee</span>
+
+                            <span class="fee-amount">
+                                ₹50
+                            </span>
+
+                        </div>
+
+                        <div class="approval-status">
+                            Doctor Approval Required
+                        </div>
+
+                        <p class="payment-note">
+                            After payment, the request will
+                            be sent to the doctor. The doctor
+                            can approve the selected session
+                            or provide a revised schedule.
+                        </p>
+
+                        <div class="secure-payment">
+
+                            <i class="fa-solid fa-shield-halved"></i>
+
+                            Secure payment through PayU
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="pay-btn"
+                            id="payButton"
+                            onclick="createTherapyBooking()"
+                        >
+                            Pay ₹50 and Submit
+                        </button>
+
+                    </aside>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <p>
+            © 2026 Neolife Wellness Center.
+            All Rights Reserved.
+        </p>
+
+    </footer>
+
+    <script>
+        const API_BASE_URL =
+            "http://localhost:8085";
+
+        const therapyBookingData = {
+            therapyId: null,
+            therapyCode: null,
+            therapyName: null,
+            therapyIcon: null,
+
+            doctorId: null,
+            doctorName: null,
+            doctorSpecialization: null,
+            doctorImage: null,
+
+            scheduleType: null,
+
+            availabilityId: null,
+            preferredDate: null,
+            preferredTime: null,
+
+            bookingFee: 50
+        };
+
+        const therapies = [
+            {
+                id: 1,
+                code: "PANCHAKARMA",
+                name: "Panchakarma",
+                icon: "fa-spa",
+                description:
+                    "Traditional Ayurvedic detoxification and rejuvenation therapies."
+            },
+            {
+                id: 2,
+                code: "ACUPUNCTURE",
+                name: "Acupuncture",
+                icon: "fa-notes-medical",
+                description:
+                    "Therapeutic acupuncture sessions for pain and wellness management."
+            },
+            {
+                id: 3,
+                code: "YOGA_NATUROPATHY",
+                name: "Yoga & Naturopathy",
+                icon: "fa-person-praying",
+                description:
+                    "Natural wellness sessions including yoga and lifestyle guidance."
+            },
+            {
+                id: 4,
+                code: "BEAUTY_COSMETICS",
+                name: "Beauty & Cosmetics",
+                icon: "fa-wand-magic-sparkles",
+                description:
+                    "Facials, eyebrow care, lip correction, pedicure and skin treatments."
+            },
+            {
+                id: 5,
+                code: "CHIROPRACTIC",
+                name: "Chiropractic",
+                icon: "fa-bone",
+                description:
+                    "Supportive care for posture, joint mobility and musculoskeletal wellness."
+            },
+            {
+                id: 6,
+                code: "HAIR_TREATMENT",
+                name: "Hair Treatment",
+                icon: "fa-scissors",
+                description:
+                    "Natural scalp and hair wellness therapy using holistic treatment methods."
+            }
+        ];
+
+        const doctors = [
+            {
+                id: 1,
+                name:
+                    "Dr. N. G. Muraleedhara",
+                qualification: "BAMS",
+                specialization:
+                    "Ayurveda, Panchakarma & Acupuncture Consultant",
+                experience:
+                    "20+ Years Experience",
+                imageUrl:
+                    "../assets/doctor-muraleedhara.jpg",
+                therapies: [
+                    "PANCHAKARMA",
+                    "ACUPUNCTURE",
+                    "CHIROPRACTIC",
+                    "HAIR_TREATMENT"
+                ]
+            },
+            {
+                id: 2,
+                name: "Dr. Aditi",
+                qualification: "BNYS",
+                specialization:
+                    "Yoga & Naturopathy Consultant",
+                experience:
+                    "Wellness Consultant",
+                imageUrl:
+                    "../assets/doctor-aditi.jpg",
+                therapies: [
+                    "YOGA_NATUROPATHY"
+                ]
+            },
+            {
+                id: 3,
+                name:
+                    "Dr. Sibagath Ulla Sharieff R",
+                qualification:
+                    "BAMS, MD (Ayu)",
+                specialization:
+                    "Ayurveda & Panchakarma Consultant",
+                experience:
+                    "Experienced Consultant",
+                imageUrl:
+                    "../assets/doctor-sibagath.jpg",
+                therapies: [
+                    "PANCHAKARMA",
+                    "HAIR_TREATMENT"
+                ]
+            },
+            {
+                id: 4,
+                name:
+                    "Beauty Therapy Specialist",
+                qualification:
+                    "Cosmetology Specialist",
+                specialization:
+                    "Beauty & Cosmetic Therapy",
+                experience:
+                    "Professional Therapist",
+                imageUrl:
+                    "../assets/main_logo.jpeg",
+                therapies: [
+                    "BEAUTY_COSMETICS"
+                ]
+            }
+        ];
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                renderTherapies();
+                setMinimumDate();
+                loadProfileIcon();
+                loadPatientProfile();
+            }
+        );
+
+        function renderTherapies() {
+            const grid =
+                document.getElementById(
+                    "therapyGrid"
+                );
+
+            grid.innerHTML = "";
+
+            therapies.forEach(
+                function (therapy) {
+                    grid.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <button
+                            type="button"
+                            class="therapy-card"
+                            id="therapy-${therapy.id}"
+                            onclick="selectTherapy(${therapy.id})"
+                        >
+
+                            <div class="selected-check">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+
+                            <div class="therapy-icon">
+                                <i class="fa-solid ${therapy.icon}"></i>
+                            </div>
+
+                            <h3>
+                                ${escapeHtml(therapy.name)}
+                            </h3>
+
+                            <p>
+                                ${escapeHtml(therapy.description)}
+                            </p>
+
+                        </button>
+                        `
+                    );
+                }
+            );
+        }
+
+        function selectTherapy(therapyId) {
+            const therapy =
+                therapies.find(
+                    function (item) {
+                        return item.id === therapyId;
+                    }
+                );
+
+            if (!therapy) {
+                return;
+            }
+
+            therapyBookingData.therapyId =
+                therapy.id;
+
+            therapyBookingData.therapyCode =
+                therapy.code;
+
+            therapyBookingData.therapyName =
+                therapy.name;
+
+            therapyBookingData.therapyIcon =
+                therapy.icon;
+
+            therapyBookingData.doctorId = null;
+            therapyBookingData.doctorName = null;
+
+            document
+                .querySelectorAll(
+                    ".therapy-card"
+                )
+                .forEach(
+                    function (card) {
+                        card.classList.remove(
+                            "selected"
+                        );
+                    }
+                );
+
+            document
+                .getElementById(
+                    `therapy-${therapyId}`
+                )
+                .classList.add("selected");
+        }
+
+        function goToStep2() {
+            if (
+                !therapyBookingData.therapyId
+            ) {
+                showAlert(
+                    "Please select a therapy.",
+                    "error"
+                );
+
+                return;
+            }
+
+            displaySelectedTherapy();
+            displayDoctors();
+
+            showStep(2);
+        }
+
+        function displaySelectedTherapy() {
+            const box =
+                document.getElementById(
+                    "selectedTherapyBox"
+                );
+
+            box.innerHTML = `
+                <i class="fa-solid ${therapyBookingData.therapyIcon}"></i>
+
+                <div>
+                    <h3>
+                        ${escapeHtml(
+                            therapyBookingData.therapyName
+                        )}
+                    </h3>
+
+                    <p>
+                        Select a doctor available
+                        for this therapy.
+                    </p>
+                </div>
+            `;
+        }
+
+        function displayDoctors() {
+            const grid =
+                document.getElementById(
+                    "doctorGrid"
+                );
+
+            const availableDoctors =
+                doctors.filter(
+                    function (doctor) {
+                        return doctor.therapies.includes(
+                            therapyBookingData.therapyCode
+                        );
+                    }
+                );
+
+            if (
+                availableDoctors.length === 0
+            ) {
+                grid.innerHTML = `
+                    <div class="empty-message">
+                        No doctors are currently
+                        available for this therapy.
+                    </div>
+                `;
+
+                return;
+            }
+
+            grid.innerHTML = "";
+
+            availableDoctors.forEach(
+                function (doctor) {
+                    grid.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <article
+                            class="doctor-card"
+                            id="doctor-${doctor.id}"
+                            onclick="selectDoctor(${doctor.id})"
+                        >
+
+                            <img
+                                src="${escapeHtml(doctor.imageUrl)}"
+                                alt="${escapeHtml(doctor.name)}"
+                                class="doctor-image"
+                                onerror="this.src='../assets/main_logo.jpeg'"
+                            >
+
+                            <div class="doctor-info">
+
+                                <h3>
+                                    ${escapeHtml(doctor.name)}
+                                </h3>
+
+                                <p>
+                                    ${escapeHtml(
+                                        doctor.qualification
+                                    )}
+                                </p>
+
+                                <p>
+                                    ${escapeHtml(
+                                        doctor.specialization
+                                    )}
+                                </p>
+
+                                <p>
+                                    ${escapeHtml(
+                                        doctor.experience
+                                    )}
+                                </p>
+
+                            </div>
+
+                            <div class="doctor-select-indicator">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+
+                        </article>
+                        `
+                    );
+                }
+            );
+        }
+
+        function selectDoctor(doctorId) {
+            const doctor =
+                doctors.find(
+                    function (item) {
+                        return item.id === doctorId;
+                    }
+                );
+
+            if (!doctor) {
+                return;
+            }
+
+            therapyBookingData.doctorId =
+                doctor.id;
+
+            therapyBookingData.doctorName =
+                doctor.name;
+
+            therapyBookingData.doctorSpecialization =
+                doctor.specialization;
+
+            therapyBookingData.doctorImage =
+                doctor.imageUrl;
+
+            document
+                .querySelectorAll(
+                    ".doctor-card"
+                )
+                .forEach(
+                    function (card) {
+                        card.classList.remove(
+                            "selected"
+                        );
+                    }
+                );
+
+            const selectedCard =
+                document.getElementById(
+                    `doctor-${doctorId}`
+                );
+
+            if (selectedCard) {
+                selectedCard.classList.add(
+                    "selected"
+                );
+            }
+        }
+
+        function goToStep3() {
+            if (
+                !therapyBookingData.doctorId
+            ) {
+                showAlert(
+                    "Please select a doctor.",
+                    "error"
+                );
+
+                return;
+            }
+
+            displaySelectedDoctor();
+            resetScheduleSection();
+
+            showStep(3);
+        }
+
+        function displaySelectedDoctor() {
+            const box =
+                document.getElementById(
+                    "selectedDoctorBox"
+                );
+
+            box.innerHTML = `
+                <img
+                    src="${escapeHtml(
+                        therapyBookingData.doctorImage
+                    )}"
+                    alt="${escapeHtml(
+                        therapyBookingData.doctorName
+                    )}"
+                    onerror="this.src='../assets/main_logo.jpeg'"
+                >
+
+                <div>
+                    <h3>
+                        ${escapeHtml(
+                            therapyBookingData.doctorName
+                        )}
+                    </h3>
+
+                    <p>
+                        ${escapeHtml(
+                            therapyBookingData.doctorSpecialization
+                        )}
+                    </p>
+                </div>
+            `;
+        }
+
+        function resetScheduleSection() {
+            therapyBookingData.scheduleType =
+                null;
+
+            therapyBookingData.availabilityId =
+                null;
+
+            therapyBookingData.preferredDate =
+                null;
+
+            therapyBookingData.preferredTime =
+                null;
+
+            document
+                .querySelectorAll(
+                    ".schedule-option"
+                )
+                .forEach(
+                    function (option) {
+                        option.classList.remove(
+                            "selected"
+                        );
+                    }
+                );
+
+            document.getElementById(
+                "therapyDate"
+            ).value = "";
+
+            document.getElementById(
+                "slotGrid"
+            ).innerHTML = `
+                <div class="slot-message">
+                    Select a date to view
+                    available therapy slots.
+                </div>
+            `;
+        }
+
+        function selectScheduleType(
+            scheduleType,
+            selectedElement
+        ) {
+            therapyBookingData.scheduleType =
+                scheduleType;
+
+            document
+                .querySelectorAll(
+                    ".schedule-option"
+                )
+                .forEach(
+                    function (option) {
+                        option.classList.remove(
+                            "selected"
+                        );
+                    }
+                );
+
+            selectedElement.classList.add(
+                "selected"
+            );
+        }
+
+        async function loadAvailableSlots() {
+            const date =
+                document.getElementById(
+                    "therapyDate"
+                ).value;
+
+            const slotGrid =
+                document.getElementById(
+                    "slotGrid"
+                );
+
+            therapyBookingData.preferredDate =
+                date;
+
+            therapyBookingData.preferredTime =
+                null;
+
+            therapyBookingData.availabilityId =
+                null;
+
+            if (!date) {
+                slotGrid.innerHTML = `
+                    <div class="slot-message">
+                        Select a date to view
+                        available therapy slots.
+                    </div>
+                `;
+
+                return;
+            }
+
+            slotGrid.innerHTML = `
+                <div class="slot-message">
+
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+
+                    Loading available time slots...
+
+                </div>
+            `;
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/doctor-availability/doctor/${therapyBookingData.doctorId}/date/${date}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP error ${response.status}`
+                    );
+                }
+
+                const result =
+                    await response.json();
+
+                if (
+                    !result.success ||
+                    !Array.isArray(result.data)
+                ) {
+                    throw new Error(
+                        result.message ||
+                        "Unable to load slots."
+                    );
+                }
+
+                renderSlots(result.data);
+
+            } catch (error) {
+                console.error(
+                    "Therapy slot loading failed:",
+                    error
+                );
+
+                const demoSlots = [
+                    {
+                        id: 201,
+                        startTime: "09:00",
+                        available: true
+                    },
+                    {
+                        id: 202,
+                        startTime: "09:30",
+                        available: true
+                    },
+                    {
+                        id: 203,
+                        startTime: "10:00",
+                        available: false
+                    },
+                    {
+                        id: 204,
+                        startTime: "10:30",
+                        available: true
+                    },
+                    {
+                        id: 205,
+                        startTime: "11:00",
+                        available: true
+                    },
+                    {
+                        id: 206,
+                        startTime: "11:30",
+                        available: true
+                    },
+                    {
+                        id: 207,
+                        startTime: "15:00",
+                        available: true
+                    },
+                    {
+                        id: 208,
+                        startTime: "15:30",
+                        available: true
+                    }
+                ];
+
+                renderSlots(demoSlots);
+
+                showAlert(
+                    "Availability API is unavailable. Demo slots are shown.",
+                    "info"
+                );
+            }
+        }
+
+        function renderSlots(slots) {
+            const slotGrid =
+                document.getElementById(
+                    "slotGrid"
+                );
+
+            if (!slots || slots.length === 0) {
+                slotGrid.innerHTML = `
+                    <div class="slot-message">
+                        No therapy slots are available
+                        for the selected date.
+                    </div>
+                `;
+
+                return;
+            }
+
+            slotGrid.innerHTML = "";
+
+            slots.forEach(
+                function (slot) {
+                    const availabilityId =
+                        slot.id ||
+                        slot.availabilityId ||
+                        slot.slotId;
+
+                    const time =
+                        slot.startTime ||
+                        slot.time ||
+                        slot.slotTime;
+
+                    if (!time) {
+                        return;
+                    }
+
+                    const available =
+                        slot.available !== false &&
+                        slot.booked !== true &&
+                        slot.status !== "BOOKED" &&
+                        slot.status !==
+                            "UNAVAILABLE";
+
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+                    button.type = "button";
+                    button.className =
+                        "slot-btn";
+
+                    button.textContent =
+                        formatTime(time);
+
+                    if (!available) {
+                        button.disabled = true;
+                    } else {
+                        button.addEventListener(
+                            "click",
+                            function () {
+                                selectSlot(
+                                    availabilityId,
+                                    time,
+                                    button
+                                );
+                            }
+                        );
+                    }
+
+                    slotGrid.appendChild(
+                        button
+                    );
+                }
+            );
+        }
+
+        function selectSlot(
+            availabilityId,
+            time,
+            selectedButton
+        ) {
+            therapyBookingData.availabilityId =
+                availabilityId;
+
+            therapyBookingData.preferredTime =
+                time;
+
+            document
+                .querySelectorAll(
+                    ".slot-btn"
+                )
+                .forEach(
+                    function (button) {
+                        button.classList.remove(
+                            "selected"
+                        );
+                    }
+                );
+
+            selectedButton.classList.add(
+                "selected"
+            );
+        }
+
+        function goToStep4() {
+            const date =
+                document.getElementById(
+                    "therapyDate"
+                ).value;
+
+            if (
+                !therapyBookingData.scheduleType
+            ) {
+                showAlert(
+                    "Please select single session or full schedule.",
+                    "error"
+                );
+
+                return;
+            }
+
+            if (!date) {
+                showAlert(
+                    "Please select a preferred date.",
+                    "error"
+                );
+
+                return;
+            }
+
+            if (
+                !therapyBookingData.preferredTime
+            ) {
+                showAlert(
+                    "Please select an available time slot.",
+                    "error"
+                );
+
+                return;
+            }
+
+            therapyBookingData.preferredDate =
+                date;
+
+            showStep(4);
+        }
+
+        function validatePatientForm() {
+            const patientName =
+                document.getElementById(
+                    "patientName"
+                ).value.trim();
+
+            const age =
+                document.getElementById(
+                    "age"
+                ).value.trim();
+
+            const gender =
+                document.getElementById(
+                    "gender"
+                ).value;
+
+            const phoneNumber =
+                document.getElementById(
+                    "phoneNumber"
+                ).value.trim();
+
+            const email =
+                document.getElementById(
+                    "email"
+                ).value.trim();
+
+            const healthConcern =
+                document.getElementById(
+                    "healthConcern"
+                ).value.trim();
+
+            if (!patientName) {
+                showAlert(
+                    "Please enter the patient name.",
+                    "error"
+                );
+
+                return false;
+            }
+
+            if (
+                !age ||
+                Number(age) < 1 ||
+                Number(age) > 120
+            ) {
+                showAlert(
+                    "Please enter a valid age.",
+                    "error"
+                );
+
+                return false;
+            }
+
+            if (!gender) {
+                showAlert(
+                    "Please select gender.",
+                    "error"
+                );
+
+                return false;
+            }
+
+            if (
+                !/^[6-9]\d{9}$/.test(
+                    phoneNumber
+                )
+            ) {
+                showAlert(
+                    "Please enter a valid 10-digit phone number.",
+                    "error"
+                );
+
+                return false;
+            }
+
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    email
+                )
+            ) {
+                showAlert(
+                    "Please enter a valid email address.",
+                    "error"
+                );
+
+                return false;
+            }
+
+            if (!healthConcern) {
+                showAlert(
+                    "Please enter the health concern or reason for therapy.",
+                    "error"
+                );
+
+                return false;
+            }
+
+            return true;
+        }
+
+        function goToStep5() {
+            if (!validatePatientForm()) {
+                return;
+            }
+
+            updateBookingSummary();
+            showStep(5);
+        }
+
+        function updateBookingSummary() {
+            document.getElementById(
+                "summaryTherapy"
+            ).textContent =
+                therapyBookingData.therapyName ||
+                "-";
+
+            document.getElementById(
+                "summaryDoctor"
+            ).textContent =
+                therapyBookingData.doctorName ||
+                "-";
+
+            document.getElementById(
+                "summaryScheduleType"
+            ).textContent =
+                therapyBookingData.scheduleType ===
+                "FULL_SCHEDULE"
+                    ? "Full Treatment Schedule"
+                    : "Single Session";
+
+            document.getElementById(
+                "summaryDate"
+            ).textContent =
+                formatDate(
+                    therapyBookingData.preferredDate
+                );
+
+            document.getElementById(
+                "summaryTime"
+            ).textContent =
+                formatTime(
+                    therapyBookingData.preferredTime
+                );
+
+            document.getElementById(
+                "summaryPatient"
+            ).textContent =
+                document.getElementById(
+                    "patientName"
+                ).value.trim();
+
+            document.getElementById(
+                "summaryPhone"
+            ).textContent =
+                document.getElementById(
+                    "phoneNumber"
+                ).value.trim();
+
+            document.getElementById(
+                "summaryConcern"
+            ).textContent =
+                document.getElementById(
+                    "healthConcern"
+                ).value.trim();
+        }
+
+        async function createTherapyBooking() {
+            const token =
+                localStorage.getItem("token");
+
+            if (!token) {
+                showAlert(
+                    "Please log in before booking therapy.",
+                    "error"
+                );
+
+                setTimeout(
+                    function () {
+                        window.location.href =
+                            "login.html";
+                    },
+                    1300
+                );
+
+                return;
+            }
+
+            const payButton =
+                document.getElementById(
+                    "payButton"
+                );
+
+            payButton.disabled = true;
+
+            payButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Creating Booking...
+            `;
+
+            const requestBody = {
+                therapyId:
+                    Number(
+                        therapyBookingData.therapyId
+                    ),
+
+                therapyCode:
+                    therapyBookingData.therapyCode,
+
+                doctorId:
+                    Number(
+                        therapyBookingData.doctorId
+                    ),
+
+                scheduleType:
+                    therapyBookingData.scheduleType,
+
+                availabilityId:
+                    therapyBookingData.availabilityId
+                        ? Number(
+                            therapyBookingData.availabilityId
+                          )
+                        : null,
+
+                preferredDate:
+                    therapyBookingData.preferredDate,
+
+                preferredTime:
+                    therapyBookingData.preferredTime,
+
+                patientName:
+                    document.getElementById(
+                        "patientName"
+                    ).value.trim(),
+
+                age:
+                    Number(
+                        document.getElementById(
+                            "age"
+                        ).value
+                    ),
+
+                gender:
+                    document.getElementById(
+                        "gender"
+                    ).value,
+
+                phoneNumber:
+                    document.getElementById(
+                        "phoneNumber"
+                    ).value.trim(),
+
+                email:
+                    document.getElementById(
+                        "email"
+                    ).value.trim(),
+
+                healthConcern:
+                    document.getElementById(
+                        "healthConcern"
+                    ).value.trim(),
+
+                pastHistory:
+                    document.getElementById(
+                        "pastHistory"
+                    ).value.trim(),
+
+                specialNotes:
+                    document.getElementById(
+                        "specialNotes"
+                    ).value.trim(),
+
+                bookingFee: 50
+            };
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/therapy-bookings/book`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                "Bearer " + token
+                        },
+
+                        body:
+                            JSON.stringify(
+                                requestBody
+                            )
+                    }
+                );
+
+                const result =
+                    await response.json();
+
+                if (
+                    !response.ok ||
+                    !result.success
+                ) {
+                    throw new Error(
+                        result.message ||
+                        "Unable to create therapy booking."
+                    );
+                }
+
+                sessionStorage.setItem(
+                    "pendingTherapyBooking",
+                    JSON.stringify(result.data)
+                );
+
+                const bookingId =
+                    result.data.id ||
+                    result.data.therapyBookingId;
+
+                window.location.href =
+                    `booking-payment.html?type=THERAPY&id=${bookingId}`;
+
+            } catch (error) {
+                console.error(
+                    "Therapy booking failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Therapy booking could not be created.",
+                    "error"
+                );
+
+                payButton.disabled = false;
+
+                payButton.textContent =
+                    "Pay ₹50 and Submit";
+            }
+        }
+
+        function showStep(stepNumber) {
+            document
+                .querySelectorAll(
+                    ".therapy-step"
+                )
+                .forEach(
+                    function (step) {
+                        step.classList.remove(
+                            "active"
+                        );
+                    }
+                );
+
+            document
+                .getElementById(
+                    `step${stepNumber}`
+                )
+                .classList.add("active");
+
+            document
+                .querySelectorAll(
+                    ".step-item"
+                )
+                .forEach(
+                    function (item) {
+                        const indicator =
+                            Number(
+                                item.dataset
+                                    .stepIndicator
+                            );
+
+                        item.classList.remove(
+                            "active",
+                            "completed"
+                        );
+
+                        if (
+                            indicator <
+                            stepNumber
+                        ) {
+                            item.classList.add(
+                                "completed"
+                            );
+
+                            item.querySelector(
+                                ".step-circle"
+                            ).innerHTML =
+                                '<i class="fa-solid fa-check"></i>';
+                        } else {
+                            item.querySelector(
+                                ".step-circle"
+                            ).textContent =
+                                indicator;
+                        }
+
+                        if (
+                            indicator ===
+                            stepNumber
+                        ) {
+                            item.classList.add(
+                                "active"
+                            );
+                        }
+                    }
+                );
+
+            window.scrollTo({
+                top:
+                    document.querySelector(
+                        ".stepper-wrapper"
+                    ).offsetTop - 95,
+
+                behavior: "smooth"
+            });
+        }
+
+        function setMinimumDate() {
+            const dateInput =
+                document.getElementById(
+                    "therapyDate"
+                );
+
+            const today = new Date();
+
+            const year =
+                today.getFullYear();
+
+            const month =
+                String(
+                    today.getMonth() + 1
+                ).padStart(2, "0");
+
+            const day =
+                String(
+                    today.getDate()
+                ).padStart(2, "0");
+
+            dateInput.min =
+                `${year}-${month}-${day}`;
+        }
+
+        async function loadPatientProfile() {
+            const token =
+                localStorage.getItem("token");
+
+            if (!token) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/users/getProfile`,
+                    {
+                        headers: {
+                            "Authorization":
+                                "Bearer " + token
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const result =
+                    await response.json();
+
+                if (
+                    !result.success ||
+                    !result.data
+                ) {
+                    return;
+                }
+
+                const user = result.data;
+
+                setInputValue(
+                    "patientName",
+                    user.name
+                );
+
+                setInputValue(
+                    "age",
+                    user.age
+                );
+
+                setInputValue(
+                    "gender",
+                    user.gender
+                );
+
+                setInputValue(
+                    "phoneNumber",
+                    user.phoneNumber ||
+                    user.phone
+                );
+
+                setInputValue(
+                    "email",
+                    user.email
+                );
+
+            } catch (error) {
+                console.error(
+                    "Profile prefill failed:",
+                    error
+                );
+            }
+        }
+
+        function setInputValue(id, value) {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return;
+            }
+
+            const input =
+                document.getElementById(id);
+
+            if (input) {
+                input.value = value;
+            }
+        }
+
+        async function loadProfileIcon() {
+            const icon =
+                document.getElementById(
+                    "profileIcon"
+                );
+
+            const token =
+                localStorage.getItem("token");
+
+            if (!token) {
+                icon.innerHTML =
+                    '<i class="fa-solid fa-user"></i>';
+
+                icon.href = "login.html";
+
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/users/getProfile`,
+                    {
+                        headers: {
+                            "Authorization":
+                                "Bearer " + token
+                        }
+                    }
+                );
+
+                const result =
+                    await response.json();
+
+                if (
+                    result.success &&
+                    result.data &&
+                    result.data.name
+                ) {
+                    icon.textContent =
+                        result.data.name
+                            .charAt(0)
+                            .toUpperCase();
+                } else {
+                    icon.innerHTML =
+                        '<i class="fa-solid fa-user"></i>';
+                }
+
+            } catch (error) {
+                icon.innerHTML =
+                    '<i class="fa-solid fa-user"></i>';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu =
+                document.getElementById(
+                    "mobileNavigation"
+                );
+
+            const icon =
+                document.getElementById(
+                    "mobileMenuIcon"
+                );
+
+            menu.classList.toggle("open");
+
+            if (
+                menu.classList.contains(
+                    "open"
+                )
+            ) {
+                icon.classList.remove(
+                    "fa-bars"
+                );
+
+                icon.classList.add(
+                    "fa-xmark"
+                );
+            } else {
+                icon.classList.remove(
+                    "fa-xmark"
+                );
+
+                icon.classList.add(
+                    "fa-bars"
+                );
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertBox =
+                document.getElementById(
+                    "pageAlert"
+                );
+
+            const alertMessage =
+                document.getElementById(
+                    "alertMessage"
+                );
+
+            const alertIcon =
+                document.getElementById(
+                    "alertIcon"
+                );
+
+            alertBox.className =
+                `page-alert show ${type}`;
+
+            alertMessage.textContent =
+                message;
+
+            if (type === "error") {
+                alertIcon.className =
+                    "fa-solid fa-circle-exclamation";
+            } else if (
+                type === "success"
+            ) {
+                alertIcon.className =
+                    "fa-solid fa-circle-check";
+            } else {
+                alertIcon.className =
+                    "fa-solid fa-circle-info";
+            }
+
+            clearTimeout(
+                window.pageAlertTimer
+            );
+
+            window.pageAlertTimer =
+                setTimeout(
+                    function () {
+                        alertBox.classList.remove(
+                            "show"
+                        );
+                    },
+                    4000
+                );
+        }
+
+        function formatDate(dateValue) {
+            if (!dateValue) {
+                return "-";
+            }
+
+            const date =
+                new Date(
+                    `${dateValue}T00:00:00`
+                );
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+        }
+
+        function formatTime(timeValue) {
+            if (!timeValue) {
+                return "-";
+            }
+
+            const time =
+                String(timeValue)
+                    .substring(0, 5);
+
+            const parts =
+                time.split(":");
+
+            let hour =
+                Number(parts[0]);
+
+            const minute =
+                parts[1];
+
+            const period =
+                hour >= 12
+                    ? "PM"
+                    : "AM";
+
+            hour =
+                hour % 12 || 12;
+
+            return `${hour}:${minute} ${period}`;
+        }
+
+        function escapeHtml(value) {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
+            }
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+    </script>
+
+</body>
+</html>

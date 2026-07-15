@@ -3719,3 +3719,510 @@ font-weight:600;
     background:#d4af37;
     color:#123524;
 }
+.header-actions{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile-icon{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #d4af37;
+    background: #123524;
+    color: white;
+    text-decoration: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    flex-shrink: 0;
+}
+.client-reviews-section{
+  width:90%;
+  max-width:1250px;
+  margin:70px auto;
+  padding:55px 45px 42px;
+  border-radius:28px;
+  background:
+    linear-gradient(135deg,#fdfaf0,#f4f8f1);
+  border:1px solid rgba(212,175,55,.42);
+  box-shadow:0 18px 45px rgba(18,53,36,.12);
+  position:relative;
+  overflow:hidden;
+}
+
+.client-reviews-section::before{
+  content:"";
+  position:absolute;
+  width:260px;
+  height:260px;
+  border-radius:50%;
+  top:-150px;
+  right:-110px;
+  background:rgba(47,107,63,.08);
+}
+
+.client-reviews-section::after{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  bottom:-150px;
+  left:-100px;
+  background:rgba(212,175,55,.10);
+}
+
+.client-review-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:25px;
+  margin-bottom:30px;
+  position:relative;
+  z-index:2;
+}
+
+.client-review-header h2{
+  font-size:38px;
+  color:#123524;
+  line-height:1.2;
+  margin-bottom:8px;
+}
+
+.client-review-header h2 span{
+  color:#b8860b;
+}
+
+.client-review-header p{
+  color:#666;
+  font-size:15px;
+}
+
+.review-arrows{
+  display:flex;
+  gap:12px;
+}
+
+.review-arrows button{
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:50%;
+  cursor:pointer;
+  background:white;
+  color:#123524;
+  border:1px solid rgba(212,175,55,.45);
+  box-shadow:0 6px 16px rgba(18,53,36,.12);
+  transition:.25s;
+}
+
+.review-arrows button:last-child{
+  background:linear-gradient(135deg,#123524,#2f6b3f);
+  color:white;
+  border:none;
+}
+
+.review-arrows button:hover{
+  transform:translateY(-2px);
+  background:#d4af37;
+  color:#123524;
+}
+
+.client-review-window{
+  overflow:hidden;
+  position:relative;
+  z-index:2;
+}
+
+.client-review-track{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:22px;
+}
+
+.client-review-card{
+  background:white;
+  border-radius:20px;
+  padding:24px;
+  min-height:255px;
+  display:flex;
+  flex-direction:column;
+  border:1px solid rgba(212,175,55,.30);
+  box-shadow:0 10px 28px rgba(18,53,36,.10);
+  transition:.3s;
+}
+
+.client-review-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 18px 36px rgba(18,53,36,.16);
+}
+
+.client-review-quote{
+  font-family:Georgia,serif;
+  font-size:46px;
+  line-height:1;
+  color:#d7c16c;
+  opacity:.55;
+  margin-bottom:4px;
+}
+
+.client-review-stars{
+  color:#d4a000;
+  font-size:16px;
+  letter-spacing:2px;
+  text-align:right;
+  margin-top:-32px;
+  margin-bottom:18px;
+}
+
+.client-review-message{
+  color:#4d4d4d;
+  font-size:14px;
+  line-height:1.75;
+  flex:1;
+  margin-bottom:22px;
+}
+
+.client-review-user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:auto;
+  padding-top:15px;
+  border-top:1px solid #eee7cc;
+}
+
+.client-review-avatar{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#123524,#2f6b3f);
+  border:2px solid #d4af37;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  font-weight:800;
+  flex-shrink:0;
+}
+
+.client-review-user h4{
+  color:#123524;
+  margin-bottom:4px;
+  font-size:15px;
+}
+
+.client-review-user p{
+  color:#8a7a50;
+  font-size:12px;
+}
+
+.review-dots{
+  display:flex;
+  justify-content:center;
+  gap:7px;
+  margin-top:24px;
+  position:relative;
+  z-index:2;
+}
+
+.review-dot{
+  width:8px;
+  height:8px;
+  border:none;
+  border-radius:50%;
+  background:#d9cfab;
+  cursor:pointer;
+  padding:0;
+}
+
+.review-dot.active{
+  width:22px;
+  border-radius:10px;
+  background:#123524;
+}
+
+@media(max-width:950px){
+  .client-review-track{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:650px){
+  .client-reviews-section{
+    width:92%;
+    padding:38px 20px 30px;
+  }
+
+  .client-review-header{
+    align-items:flex-start;
+  }
+
+  .client-review-header h2{
+    font-size:29px;
+  }
+
+  .client-review-track{
+    grid-template-columns:1fr;
+  }
+
+  .review-arrows{
+    flex-shrink:0;
+  }
+}
+.home-category-menu{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.home-category-btn{
+  border:none;
+  background:transparent;
+  color:white;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+  padding:11px 15px;
+  border-radius:24px;
+  white-space:nowrap;
+  transition:.25s ease;
+}
+
+.home-category-btn:hover,
+.home-category-btn.active{
+  background:#d4af37;
+  color:#123524;
+}
+
+.home-category-dropdown{
+  display:none;
+  position:absolute;
+  top:calc(100% + 12px);
+  z-index:3000;
+  background:#fffaf0;
+  border:1px solid rgba(212,175,55,.65);
+  border-radius:18px;
+  box-shadow:0 18px 40px rgba(0,0,0,.22);
+}
+
+.home-category-dropdown.open{
+  display:grid;
+}
+
+/* Small More dropdown */
+.more-dropdown{
+  right:0;
+  width:210px;
+  min-width:210px;
+  padding:10px;
+  grid-template-columns:1fr;
+  gap:2px;
+}
+
+.more-dropdown a{
+  display:block;
+  padding:12px 14px;
+  color:#123524;
+  text-decoration:none;
+  border-radius:10px;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.more-dropdown a:hover{
+  background:#eef5ec;
+  color:#b8860b;
+}
+
+/* Large Categories mega menu */
+.categories-dropdown{
+  right:0;
+  width:650px;
+  max-width:85vw;
+  padding:28px;
+  grid-template-columns:repeat(3,1fr);
+  gap:35px;
+}
+
+.categories-dropdown h4{
+  color:#123524;
+  font-size:17px;
+  margin-bottom:12px;
+}
+
+.categories-dropdown a{
+  display:block;
+  color:#555;
+  text-decoration:none;
+  padding:7px 0;
+  font-size:14px;
+}
+
+.categories-dropdown a:hover{
+  color:#b8860b;
+  transform:translateX(3px);
+}
+
+/* Prevent dropdown from leaving screen */
+@media(max-width:1000px){
+  .categories-dropdown{
+    right:-80px;
+    width:600px;
+  }
+}
+
+@media(max-width:700px){
+  .more-dropdown,
+  .categories-dropdown{
+    position:static;
+    width:100%;
+    max-width:none;
+    margin-top:8px;
+  }
+
+  .categories-dropdown{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+}
+#therapyModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:25px;
+  z-index:9999;
+}
+
+#therapyModal .modal-box{
+  width:90%;
+  max-width:1000px;
+  max-height:88vh;
+  overflow-y:auto;
+  background:#fff;
+  border-radius:24px;
+  padding:35px;
+  position:relative;
+  box-shadow:0 25px 70px rgba(0,0,0,.28);
+}
+
+#therapyModal .close{
+  position:sticky;
+  top:0;
+  float:right;
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:#fff;
+  color:#123524;
+  font-size:28px;
+  cursor:pointer;
+  z-index:5;
+}
+
+.facial-treatment-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+  margin-top:25px;
+}
+
+.facial-treatment-item{
+  background:#f7f8f3;
+  border:1px solid rgba(212,175,55,.45);
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 10px 25px rgba(20,53,36,.08);
+}
+
+.facial-treatment-item h3{
+  color:#174d2c;
+  font-size:22px;
+  margin:0 0 12px;
+}
+
+.facial-treatment-item h4{
+  color:#9a7100;
+  margin:18px 0 8px;
+}
+
+.facial-treatment-item p{
+  color:#555;
+  line-height:1.7;
+}
+
+.facial-treatment-item ul{
+  padding-left:20px;
+  color:#444;
+  line-height:1.8;
+}
+
+@media(max-width:700px){
+  #therapyModal{
+    padding:12px;
+  }
+
+  #therapyModal .modal-box{
+    width:100%;
+    max-height:92vh;
+    padding:24px 18px;
+  }
+
+  .facial-treatment-list{
+    grid-template-columns:1fr;
+  }
+}
+.beauty-treatment-content h3{
+    color: #1c5a2d;
+    margin-top: 25px;
+}
+
+.beauty-treatment-content p{
+    line-height: 1.8;
+}
+
+.beauty-treatment-content ul,
+.beauty-treatment-content ol{
+    padding-left: 22px;
+    line-height: 1.8;
+}
+
+.beauty-treatment-content hr{
+    margin: 25px 0;
+    border: none;
+    border-top: 1px solid #ddd;
+}
+.process-box{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+    margin:20px 0;
+}
+
+.process-step{
+    background:#f7f8f3;
+    border:1px solid #d8dfd3;
+    border-radius:14px;
+    padding:16px;
+    line-height:1.7;
+}
+
+@media(max-width:768px){
+    .process-box{
+        grid-template-columns:1fr;
+    }
+}

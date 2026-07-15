@@ -4,7 +4,502 @@
   <meta charset="UTF-8">
   <title>Services - Neolife Wellness Center</title>
   <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
-  <link rel="stylesheet" href="../css/style.css">
+ <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+>
+
+<style>
+:root{
+  --green-dark:#123524;
+  --green:#2f6b3f;
+  --green-light:#e9f2e8;
+  --gold:#d4af37;
+  --gold-dark:#9a7100;
+  --cream:#f8f7f1;
+  --white:#ffffff;
+  --text:#26382d;
+  --muted:#65716a;
+  --shadow:0 18px 45px rgba(18,53,36,.13);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Arial, Helvetica, sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  line-height:1.7;
+}
+
+a{
+  text-decoration:none;
+}
+
+img{
+  display:block;
+  max-width:100%;
+}
+
+/* ===== NAVBAR ===== */
+.glass-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  width:100%;
+  min-height:82px;
+  padding:10px 32px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(16px);
+
+  border-bottom:1px solid rgba(212,175,55,.25);
+  box-shadow:0 8px 25px rgba(0,0,0,.10);
+
+  z-index:9999;
+}
+
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.logo-img{
+  width:55px;
+  height:55px;
+  object-fit:cover;
+  border-radius:50%;
+  border:2px solid var(--gold);
+}
+
+.logo-details{
+  display:flex;
+  flex-direction:column;
+  line-height:1.2;
+}
+
+.logo-text{
+  color:var(--green-dark);
+  font-size:18px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.logo-subtitle{
+  margin-top:5px;
+  color:var(--gold-dark);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1.3px;
+}
+
+.header-right{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:22px;
+  min-width:0;
+}
+
+.main-nav{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:18px;
+  white-space:nowrap;
+}
+
+.main-nav a{
+  color:var(--green-dark);
+  font-size:14px;
+  font-weight:800;
+  text-decoration:none;
+  transition:.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.active{
+  color:var(--gold-dark);
+}
+
+.profile-icon{
+  width:44px;
+  height:44px;
+  min-width:44px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+  color:white;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+
+  font-size:18px;
+  font-weight:800;
+  box-shadow:0 8px 18px rgba(154,113,0,.24);
+}
+
+/* ===== HERO ===== */
+.services-hero{
+  min-height:520px;
+  padding:150px 20px 80px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+
+  position:relative;
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8,44,25,.90),
+      rgba(8,44,25,.45)
+    ),
+    url("../assets/neolife2.png") center/cover no-repeat;
+}
+
+.services-hero::after{
+  content:"";
+  position:absolute;
+  width:420px;
+  height:420px;
+  right:-120px;
+  bottom:-180px;
+
+  border-radius:50%;
+  background:rgba(212,175,55,.14);
+}
+
+.services-hero > div{
+  position:relative;
+  z-index:2;
+  width:min(1000px,90%);
+}
+
+.services-hero::before{
+  content:"🌿 Natural therapies for complete wellness";
+  position:absolute;
+  z-index:2;
+  top:165px;
+
+  display:inline-flex;
+  padding:8px 14px;
+
+  border-radius:30px;
+  background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.25);
+
+  color:#f8e6a4;
+  font-size:13px;
+  font-weight:800;
+}
+
+.services-hero h1{
+  color:white;
+  font-size:clamp(42px,6vw,68px);
+  line-height:1.08;
+  margin:35px 0 16px;
+  font-weight:800;
+}
+
+.services-hero p{
+  color:#edf5ef;
+  font-size:18px;
+}
+
+/* ===== SERVICES ===== */
+.services-page{
+  padding:90px 0;
+  background:var(--cream);
+}
+
+.section-title{
+  width:min(1180px,90%);
+  margin:0 auto 50px;
+
+  text-align:center;
+  color:var(--green-dark);
+  font-size:clamp(32px,4vw,46px);
+  line-height:1.2;
+  font-weight:800;
+}
+
+.therapy-grid{
+  width:min(1180px,90%);
+  margin:auto;
+
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:30px;
+}
+
+.therapy-card{
+  background:white;
+  border-radius:28px;
+  overflow:hidden;
+
+  border:1px solid rgba(212,175,55,.25);
+  box-shadow:0 18px 40px rgba(18,53,36,.10);
+
+  transition:.35s;
+}
+
+.therapy-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 25px 50px rgba(18,53,36,.18);
+}
+
+.therapy-card img{
+  width:100%;
+  height:280px;
+  object-fit:cover;
+  background:#edf2eb;
+}
+
+.therapy-content{
+  padding:28px;
+}
+
+.therapy-content h3{
+  color:var(--green-dark);
+  font-size:28px;
+  margin-bottom:14px;
+}
+
+.therapy-content p{
+  color:var(--muted);
+  line-height:1.8;
+}
+
+.therapy-content ul{
+  margin:20px 0;
+  padding-left:22px;
+}
+
+.therapy-content li{
+  margin-bottom:9px;
+  color:var(--green-dark);
+}
+
+.therapy-content strong{
+  color:var(--gold-dark);
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  margin-top:12px;
+  padding:13px 24px;
+
+  border:none;
+  border-radius:40px;
+
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  color:white;
+
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+
+  transition:.3s;
+  box-shadow:0 10px 22px rgba(18,53,36,.18);
+}
+
+.btn:hover{
+  transform:translateY(-3px);
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+}
+
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;
+  inset:0;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  padding:25px;
+  background:rgba(5,25,14,.72);
+  backdrop-filter:blur(6px);
+
+  z-index:10000;
+}
+
+.modal-box{
+  width:min(900px,100%);
+  max-height:88vh;
+  overflow-y:auto;
+
+  padding:40px;
+  border-radius:28px;
+
+  background:white;
+  border:1px solid rgba(212,175,55,.25);
+  box-shadow:0 25px 60px rgba(0,0,0,.25);
+
+  position:relative;
+}
+
+.modal-box h2{
+  color:var(--green-dark);
+  margin-bottom:20px;
+  padding-right:40px;
+}
+
+.modal-box p{
+  color:#555;
+  line-height:1.9;
+  white-space:pre-line;
+}
+
+.close{
+  position:absolute;
+  right:22px;
+  top:18px;
+
+  width:40px;
+  height:40px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+  background:var(--green-light);
+  color:var(--green-dark);
+
+  font-size:28px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* ===== WHATSAPP ===== */
+.whatsapp{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+
+  width:58px;
+  height:58px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:50%;
+  background:#25d366;
+
+  box-shadow:0 12px 25px rgba(0,0,0,.25);
+  z-index:999;
+}
+
+.whatsapp img{
+  width:34px;
+  height:34px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1100px){
+  .glass-header{
+    padding:10px 18px;
+  }
+
+  .header-right{
+    gap:14px;
+  }
+
+  .main-nav{
+    gap:12px;
+  }
+
+  .main-nav a{
+    font-size:12px;
+  }
+
+  .logo-text{
+    font-size:16px;
+  }
+}
+
+@media(max-width:900px){
+  .therapy-grid{
+    grid-template-columns:1fr;
+  }
+
+  .header-right{
+    overflow-x:auto;
+  }
+
+  .main-nav{
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+
+  .main-nav::-webkit-scrollbar{
+    display:none;
+  }
+}
+
+@media(max-width:700px){
+  .glass-header{
+    position:relative;
+    flex-wrap:wrap;
+  }
+
+  .header-right{
+    width:100%;
+    padding-top:8px;
+  }
+
+  .services-hero{
+    padding-top:100px;
+  }
+
+  .services-hero::before{
+    top:110px;
+  }
+
+  .services-hero h1{
+    margin-top:45px;
+  }
+
+  .therapy-card img{
+    height:230px;
+  }
+
+  .modal{
+    padding:12px;
+  }
+
+  .modal-box{
+    padding:28px 20px;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -12,31 +507,36 @@
 <header class="glass-header">
 
   <div class="logo-container">
-    <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
+    <img src="../assets/main_logo.jpeg"
+         alt="Neolife Logo"
+         class="logo-img">
 
     <div class="logo-details">
       <span class="logo-text">Neolife Wellness Center</span>
-      <span class="logo-subtitle">Ayush Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
     </div>
   </div>
 
-  <input type="checkbox" id="menu-toggle">
+  <div class="header-right">
 
-  <label for="menu-toggle" class="hamburger">
-    <span></span>
-    <span></span>
-    <span></span>
-  </label>
+    <nav class="main-nav">
+      <a href="homepage.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html" class="active">Therapies</a>
+      <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+      <a href="products.html">Products</a>
+      <a href="consultation.html">Consultation</a>
+      <a href="blog.html">Blogs</a>
+      <a href="contact.html">Contact</a>
+    </nav>
 
-  <nav class="side-menu">
-    <a href="homepage.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="services.html">Therapies</a>
-    <a href="products.html">Products</a>
-    <a href="consultation.html">Consultation</a>
-    <a href="blog.html">Blogs</a>
-    <a href="contact.html">Contact</a>
-  </nav>
+    <a href="profile.html"
+       class="profile-icon"
+       id="profileIcon">
+      <i class="fa-solid fa-user"></i>
+    </a>
+
+  </div>
 
 </header>
 
@@ -114,93 +614,6 @@
     </div>
 
     
-
-  </div>
-</section>
-<section class="services-page">
-  <h2 class="section-title">Beauty & Cosmetic Treatments</h2>
-
-  <div class="therapy-grid">
-
-    <div class="therapy-card">
-      <img src="../assets/facial.png" alt="Facial Treatment">
-      <div class="therapy-content">
-        <h3>💆 Facial Treatment</h3>
-        <p>Professional facials for glowing, healthy and rejuvenated skin.</p>
-        <ul>
-          <li>Glow Facial</li>
-          <li>Anti-Aging Facial</li>
-          <li>Acne Facial</li>
-          <li>Skin Rejuvenation</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openBeauty('facial')">Learn More</button>
-      </div>
-    </div>
-
-    <div class="therapy-card">
-      <img src="../assets/hair-treatment.png" alt="Hair Treatment">
-      <div class="therapy-content">
-        <h3>💇 Hair Treatment</h3>
-        <p>Natural hair care therapies for hair growth, hair fall control and scalp nourishment.</p>
-        <ul>
-          <li>Hair Growth Therapy</li>
-          <li>Hair Fall Control</li>
-          <li>Scalp Detox</li>
-          <li>Hair Nourishment</li>
-        </ul>
-        <p><strong>Duration:</strong> 60–90 minutes</p>
-        <button class="btn" onclick="openBeauty('hair')">Learn More</button>
-      </div>
-    </div>
-
-    <div class="therapy-card">
-      <img src="../assets/lip.png" alt="Lip Correction">
-      <div class="therapy-content">
-        <h3>💋 Lip Correction</h3>
-        <p>Treatment for dark lips, pigmentation and natural lip brightening.</p>
-        <ul>
-          <li>Dark Lip Correction</li>
-          <li>Lip Pigmentation Care</li>
-          <li>Lip Hydration</li>
-          <li>Natural Lip Brightening</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openBeauty('lip')">Learn More</button>
-      </div>
-    </div>
-
-    <div class="therapy-card">
-      <img src="../assets/eyebrow.png" alt="Eyebrow Correction">
-      <div class="therapy-content">
-        <h3>👁️ Eyebrow Correction</h3>
-        <p>Eyebrow enhancement for fuller, shaped and natural-looking brows.</p>
-        <ul>
-          <li>Microblading</li>
-          <li>Ombre Brows</li>
-          <li>Combination Brows</li>
-          <li>Eyebrow Reconstruction</li>
-        </ul>
-        <p><strong>Duration:</strong> 90–120 minutes</p>
-        <button class="btn" onclick="openBeauty('eyebrow')">Learn More</button>
-      </div>
-    </div>
-
-    <div class="therapy-card">
-      <img src="../assets/pedicure.png" alt="Pedicure">
-      <div class="therapy-content">
-        <h3>🦶 Pedicure</h3>
-        <p>Complete foot care with cleansing, nail care, exfoliation and massage.</p>
-        <ul>
-          <li>Foot Cleansing</li>
-          <li>Nail Trimming</li>
-          <li>Exfoliation</li>
-          <li>Foot Massage</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openBeauty('pedicure')">Learn More</button>
-      </div>
-    </div>
 
   </div>
 </section>
@@ -410,143 +823,9 @@ Treatment Duration:
 Each naturopathy session generally lasts between 30 and 60 minutes. The number of sessions and treatment duration vary depending on the individual's health condition, therapeutic goals and personalized treatment plan recommended by the practitioner.
 
 Experience the healing power of nature at Neolife Wellness Center. Our personalized naturopathy therapies help restore balance, improve overall health and support long-term wellness through safe, natural and holistic methods.`
-},
- beauty: {
-title: "💄 Beauty & Cosmetic Therapy",
-
-text: `Beauty & Cosmetic Therapy focuses on enhancing natural beauty, improving skin health and boosting self-confidence through safe, non-surgical and personalized treatments. Rather than simply improving appearance, these therapies help maintain healthy skin, restore facial features and promote overall well-being.
-
-At Neolife Wellness Center, we combine modern cosmetic techniques with holistic wellness principles to provide treatments that are safe, effective and tailored to each individual's skin type and aesthetic goals. Every treatment begins with a detailed consultation to understand your concerns and recommend the most suitable therapy.
-
-Our beauty treatments are performed by trained professionals using high-quality products and hygienic procedures, ensuring both safety and comfort throughout every session.
-
-Benefits of Beauty & Cosmetic Therapy:
-• Enhances natural facial features
-• Improves skin health and texture
-• Reduces pigmentation and uneven skin tone
-• Restores youthful appearance
-• Improves self-confidence and self-esteem
-• Provides healthy, glowing skin
-• Supports long-term skin maintenance
-• Safe, personalized and non-surgical treatments
-• Promotes healthy skin through professional care
-• Helps achieve a refreshed and rejuvenated appearance
-
-Suitable For:
-✔ Uneven skin tone
-✔ Dull and tired-looking skin
-✔ Dry or oily skin
-✔ Hyperpigmentation
-✔ Dark lips
-✔ Sparse or uneven eyebrows
-✔ Facial skin rejuvenation
-✔ General beauty enhancement
-✔ Bridal and special occasion preparation
-✔ Regular skin maintenance
-
-Beauty & Cosmetic Services Include:
-• Eyebrow Microblading
-• Black Lip Treatment
-• Skin Care Consultation
-• Facial Therapy
-• Skin Rejuvenation Treatments
-• Personalized Beauty Consultation
-
-Treatment Procedure:
-Every treatment begins with a professional skin and beauty assessment. Based on your skin condition and desired results, our specialists recommend the most appropriate therapy. Treatments are performed using hygienic techniques and quality products while ensuring maximum comfort and safety.
-
-Treatment Duration:
-The duration of each beauty therapy session typically ranges from 30 to 60 minutes, depending on the treatment selected and the individual's specific requirements.
-
-At Neolife Wellness Center, we believe true beauty comes from healthy skin and personalized care. Our Beauty & Cosmetic Therapy services are designed to help you look your best, feel confident and maintain naturally beautiful, healthy skin with safe and professional treatments.`
 }
 };
-const beautyDetails = {
-  facial: {
-    title: "💆 Facial Treatment",
-    text: `Facial treatments help cleanse, nourish and rejuvenate the skin.
 
-Benefits:
-• Deep skin cleansing
-• Improves skin glow
-• Reduces dullness
-• Supports acne care
-• Helps skin hydration
-• Refreshes and relaxes the face
-
-Duration: 45–60 minutes`
-  },
-
-  hair: {
-    title: "💇 Hair Treatment",
-    text: `Hair treatment helps improve scalp health, reduce hair fall and support natural hair growth.
-
-Benefits:
-• Promotes healthy hair growth
-• Reduces hair fall
-• Strengthens hair roots
-• Nourishes scalp
-• Improves hair texture
-• Supports dandruff control
-
-Procedure:
-• Herbal oil application
-• Scalp massage
-• Steam therapy
-• Hair pack
-• Hair wash
-• Kesh dhoopana / hair dhuni
-
-Duration: 60–90 minutes`
-  },
-
-  lip: {
-    title: "💋 Lip Correction",
-    text: `Lip correction treatment helps reduce dark lip pigmentation and supports smoother, healthier lips.
-
-Benefits:
-• Reduces dark lips
-• Improves lip texture
-• Supports natural lip brightness
-• Hydrates dry lips
-• Enhances appearance
-
-Duration: 45–60 minutes`
-  },
-
-  eyebrow: {
-    title: "👁️ Eyebrow Correction",
-    text: `Eyebrow correction helps improve eyebrow shape, fullness and natural appearance.
-
-Services:
-• Microblading
-• Ombre brows
-• Combination brows
-• Eyebrow reconstruction
-
-Duration: 90–120 minutes`
-  },
-
-  pedicure: {
-    title: "🦶 Pedicure",
-    text: `Pedicure is a complete foot care treatment for clean, healthy and relaxed feet.
-
-Procedure:
-• Foot cleansing
-• Nail trimming
-• Exfoliation
-• Massage
-• Moisturizing
-
-Duration: 45–60 minutes`
-  }
-};
-
-function openBeauty(type) {
-  document.getElementById("modalTitle").innerText = beautyDetails[type].title;
-  document.getElementById("modalText").innerText = beautyDetails[type].text;
-  document.getElementById("therapyModal").style.display = "flex";
-}
 function openTherapy(type) {
   document.getElementById("modalTitle").innerText = therapyDetails[type].title;
   document.getElementById("modalText").innerText = therapyDetails[type].text;
@@ -563,6 +842,38 @@ window.onclick = function(event) {
     closeTherapy();
   }
 };
+async function loadProfileIcon(){
+
+    const icon = document.getElementById("profileIcon");
+    const token = localStorage.getItem("token");
+
+    if(!token){
+        icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+        return;
+    }
+
+    try{
+
+        const response = await fetch("http://localhost:8085/api/users/getProfile",{
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        });
+
+        const result = await response.json();
+
+        if(result.success){
+            icon.innerText = result.data.name.charAt(0).toUpperCase();
+        }else{
+            icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+        }
+
+    }catch(e){
+        icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+    }
+}
+
+loadProfileIcon();
 </script>
 
 </body>

@@ -1,0 +1,4147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Inventory Management - Neolife Medical Staff</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="../assets/main_logo.jpeg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <style>
+        :root {
+            --dark-green: #153d29;
+            --green: #2d6844;
+            --green-light: #edf5ef;
+            --gold: #c99a16;
+            --gold-dark: #9b7200;
+            --cream: #f6f8f4;
+            --white: #ffffff;
+            --text: #173c29;
+            --muted: #6e7871;
+            --border: #dfe7e1;
+
+            --success: #287146;
+            --success-light: #ebf7ef;
+
+            --warning: #d88b18;
+            --warning-light: #fff6e8;
+
+            --danger: #c74747;
+            --danger-light: #fff0f0;
+
+            --info: #31708f;
+            --info-light: #edf6fb;
+
+            --purple: #76548f;
+            --purple-light: #f5effb;
+
+            --sidebar-width: 275px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--cream);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .staff-layout {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .staff-sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+
+            display: flex;
+            flex-direction: column;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #123824,
+                    #1e5134
+                );
+
+            box-shadow:
+                8px 0 30px rgba(18, 56, 36, 0.14);
+
+            transition: transform 0.3s ease;
+        }
+
+        .staff-brand {
+            min-height: 104px;
+            padding: 20px 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .staff-brand img {
+            width: 58px;
+            height: 58px;
+            object-fit: cover;
+
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+
+            background: var(--white);
+        }
+
+        .staff-brand h2 {
+            margin-bottom: 5px;
+
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .staff-brand span {
+            color: #f2cf69;
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        .staff-menu {
+            flex: 1;
+            padding: 20px 13px;
+            overflow-y: auto;
+        }
+
+        .menu-label {
+            display: block;
+
+            margin: 9px 12px 10px;
+
+            color: rgba(255, 255, 255, 0.48);
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .staff-menu a {
+            min-height: 49px;
+            margin-bottom: 7px;
+            padding: 12px 14px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-radius: 12px;
+
+            color: rgba(255, 255, 255, 0.82);
+
+            font-size: 14px;
+            font-weight: 700;
+
+            transition: 0.25s;
+        }
+
+        .staff-menu a i {
+            width: 21px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .staff-menu a:hover,
+        .staff-menu a.active {
+            color: var(--dark-green);
+            background: var(--white);
+            transform: translateX(3px);
+        }
+
+        .staff-menu a.active i {
+            color: var(--gold);
+        }
+
+        .sidebar-footer {
+            padding: 17px 13px;
+
+            border-top:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .sidebar-logout {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.20);
+
+            border-radius: 12px;
+
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.08);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .sidebar-logout:hover {
+            color: var(--dark-green);
+            background: var(--white);
+        }
+
+        /* =========================
+           MAIN / TOPBAR
+        ========================== */
+
+        .staff-main {
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+        }
+
+        .staff-topbar {
+            min-height: 86px;
+            padding: 15px 28px;
+
+            position: sticky;
+            top: 0;
+            z-index: 900;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+
+            background: rgba(255, 255, 255, 0.96);
+
+            border-bottom: 1px solid var(--border);
+
+            box-shadow:
+                0 4px 18px rgba(18, 56, 36, 0.06);
+
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar-left,
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+
+            width: 43px;
+            height: 43px;
+
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 18px;
+        }
+
+        .page-title h1 {
+            margin-bottom: 5px;
+
+            color: var(--dark-green);
+
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .add-stock-top-button {
+            min-height: 43px;
+            padding: 10px 17px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .add-stock-top-button:hover {
+            background: var(--gold-dark);
+        }
+
+        .staff-profile-box {
+            padding: 6px 11px 6px 7px;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            border: 1px solid var(--border);
+            border-radius: 30px;
+
+            background: var(--white);
+        }
+
+        .staff-avatar {
+            width: 39px;
+            height: 39px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--gold),
+                    var(--gold-dark)
+                );
+
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .staff-profile-text strong {
+            display: block;
+
+            margin-bottom: 2px;
+
+            color: var(--dark-green);
+            font-size: 13px;
+        }
+
+        .staff-profile-text span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        /* =========================
+           CONTENT
+        ========================== */
+
+        .staff-content {
+            padding: 28px;
+        }
+
+        .page-banner {
+            margin-bottom: 23px;
+            padding: 26px 28px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+
+            position: relative;
+            overflow: hidden;
+
+            border-radius: 21px;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    120deg,
+                    var(--dark-green),
+                    #347650
+                );
+
+            box-shadow:
+                0 16px 38px rgba(21, 61, 41, 0.15);
+        }
+
+        .page-banner::before {
+            content: "";
+
+            width: 220px;
+            height: 220px;
+
+            position: absolute;
+            top: -130px;
+            right: -50px;
+
+            border-radius: 50%;
+
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .page-banner-content,
+        .page-banner-icon {
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-banner h2 {
+            margin-bottom: 8px;
+
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .page-banner p {
+            max-width: 720px;
+
+            color: rgba(255, 255, 255, 0.80);
+
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .page-banner-icon {
+            width: 66px;
+            height: 66px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 18px;
+
+            color: #ffe28b;
+            background: rgba(255, 255, 255, 0.10);
+
+            font-size: 28px;
+        }
+
+        /* =========================
+           SUMMARY
+        ========================== */
+
+        .summary-grid {
+            margin-bottom: 23px;
+
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .summary-card {
+            padding: 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 17px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 14px;
+
+            font-size: 19px;
+        }
+
+        .summary-icon.total {
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .summary-icon.stock {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .summary-icon.low {
+            color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        .summary-icon.out {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .summary-icon.expiry {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .summary-card p {
+            margin-bottom: 5px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .summary-card h3 {
+            color: var(--dark-green);
+
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           FILTERS
+        ========================== */
+
+        .filter-panel {
+            margin-bottom: 22px;
+            padding: 20px;
+
+            display: grid;
+            grid-template-columns:
+                minmax(240px, 1.4fr)
+                repeat(4, minmax(145px, 0.65fr))
+                auto;
+
+            gap: 13px;
+            align-items: end;
+
+            border: 1px solid var(--border);
+            border-radius: 18px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--dark-green);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+
+            color: #7c877f;
+            font-size: 13px;
+
+            transform: translateY(-50%);
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            color: #354039;
+            background: var(--white);
+
+            outline: none;
+        }
+
+        .input-wrapper .form-control {
+            padding-left: 38px;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+
+            box-shadow:
+                0 0 0 3px rgba(201, 154, 22, 0.12);
+        }
+
+        textarea.form-control {
+            min-height: 95px;
+            resize: vertical;
+        }
+
+        .reset-button {
+            min-height: 46px;
+            padding: 11px 18px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .reset-button:hover {
+            background: var(--gold-dark);
+        }
+
+        /* =========================
+           INVENTORY TABLE
+        ========================== */
+
+        .inventory-panel {
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: 21px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 11px 32px rgba(21, 61, 41, 0.07);
+        }
+
+        .panel-header {
+            min-height: 70px;
+            padding: 18px 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header h2 {
+            margin-bottom: 4px;
+
+            color: var(--dark-green);
+
+            font-size: 19px;
+        }
+
+        .panel-header p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .result-count {
+            padding: 8px 12px;
+
+            border-radius: 20px;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .inventory-table {
+            width: 100%;
+            min-width: 1350px;
+
+            border-collapse: collapse;
+        }
+
+        .inventory-table th {
+            padding: 14px 13px;
+
+            color: var(--muted);
+            background: #f8faf7;
+
+            border-bottom: 1px solid var(--border);
+
+            font-size: 9px;
+            font-weight: 800;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .inventory-table td {
+            padding: 15px 13px;
+
+            color: #4f5b53;
+
+            border-bottom: 1px solid #edf0ed;
+
+            font-size: 11px;
+            vertical-align: middle;
+        }
+
+        .inventory-table tbody tr:hover {
+            background: #fcfdfb;
+        }
+
+        .product-cell {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .product-image {
+            width: 46px;
+            height: 46px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            overflow: hidden;
+
+            border-radius: 12px;
+
+            background: var(--green-light);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+        .product-image i {
+            color: var(--gold-dark);
+            font-size: 18px;
+        }
+
+        .product-cell strong {
+            display: block;
+
+            margin-bottom: 4px;
+
+            color: var(--dark-green);
+            font-size: 12px;
+        }
+
+        .product-cell small {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .stock-number {
+            color: var(--dark-green);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+
+            padding: 6px 9px;
+
+            border-radius: 20px;
+
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .status-in-stock {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .status-low-stock {
+            color: #946300;
+            background: var(--warning-light);
+        }
+
+        .status-out-stock {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .status-expiring {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .status-expired {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .action-button {
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 9px;
+
+            transition: 0.2s;
+        }
+
+        .add-button {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .add-button:hover {
+            color: var(--white);
+            background: var(--success);
+        }
+
+        .remove-button {
+            color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        .remove-button:hover {
+            color: var(--white);
+            background: var(--warning);
+        }
+
+        .history-button {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .history-button:hover {
+            color: var(--white);
+            background: var(--info);
+        }
+
+        .table-message {
+            padding: 55px 25px !important;
+
+            text-align: center;
+
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .table-message i {
+            display: block;
+
+            margin-bottom: 12px;
+
+            color: var(--gold);
+            font-size: 28px;
+        }
+
+        /* =========================
+           PAGINATION
+        ========================== */
+
+        .pagination-area {
+            padding: 17px 21px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination-info {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .pagination-button {
+            min-width: 35px;
+            height: 35px;
+            padding: 0 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            color: var(--dark-green);
+            background: var(--white);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .pagination-button.active {
+            color: var(--white);
+            border-color: var(--dark-green);
+            background: var(--dark-green);
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           MODAL
+        ========================== */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(13, 36, 24, 0.67);
+
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 650px;
+            max-height: 92vh;
+
+            overflow-y: auto;
+
+            border-radius: 21px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 25px 75px rgba(0, 0, 0, 0.27);
+        }
+
+        .modal-header {
+            padding: 20px 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            color: var(--dark-green);
+            font-size: 20px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 50%;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .modal-content {
+            padding: 22px;
+        }
+
+        .modal-product-card {
+            margin-bottom: 20px;
+            padding: 16px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-radius: 14px;
+
+            background: var(--green-light);
+        }
+
+        .modal-product-card h3 {
+            margin-bottom: 5px;
+
+            color: var(--dark-green);
+            font-size: 16px;
+        }
+
+        .modal-product-card p {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .modal-form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .modal-actions {
+            padding: 18px 22px;
+
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-button {
+            min-height: 42px;
+            padding: 10px 18px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border-radius: 10px;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .modal-cancel {
+            color: var(--dark-green);
+            border: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        .modal-submit {
+            color: var(--white);
+            border: 1px solid var(--dark-green);
+            background: var(--dark-green);
+        }
+
+        .modal-submit.remove {
+            border-color: var(--warning);
+            background: var(--warning);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            padding: 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            background: #fbfcfa;
+        }
+
+        .history-item strong {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: var(--dark-green);
+            font-size: 12px;
+        }
+
+        .history-item p {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .history-quantity {
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .history-positive {
+            color: var(--success);
+        }
+
+        .history-negative {
+            color: var(--danger);
+        }
+
+        /* =========================
+           ALERT
+        ========================== */
+
+        .page-alert {
+            width: min(390px, calc(100% - 35px));
+            padding: 15px 17px;
+
+            position: fixed;
+            top: 102px;
+            right: 22px;
+            z-index: 5000;
+
+            display: none;
+            align-items: flex-start;
+            gap: 11px;
+
+            border-radius: 13px;
+
+            color: var(--white);
+
+            box-shadow:
+                0 14px 35px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-alert.show {
+            display: flex;
+        }
+
+        .page-alert.success {
+            background: var(--success);
+        }
+
+        .page-alert.error {
+            background: var(--danger);
+        }
+
+        .page-alert.info {
+            background: var(--info);
+        }
+
+        .alert-message {
+            flex: 1;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 950;
+
+            display: none;
+
+            background: rgba(13, 36, 24, 0.58);
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1250px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .filter-panel {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .reset-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .staff-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .staff-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .staff-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .staff-topbar {
+                padding: 13px 16px;
+            }
+
+            .staff-content {
+                padding: 20px 14px;
+            }
+
+            .page-title h1 {
+                font-size: 21px;
+            }
+
+            .page-title p,
+            .staff-profile-text {
+                display: none;
+            }
+
+            .add-stock-top-button span {
+                display: none;
+            }
+
+            .add-stock-top-button {
+                width: 43px;
+                padding: 0;
+            }
+
+            .page-banner {
+                align-items: flex-start;
+                flex-direction: column-reverse;
+            }
+
+            .summary-grid,
+            .filter-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-header,
+            .pagination-area {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .modal-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-form-grid .full-width {
+                grid-column: auto;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ALERT -->
+
+    <div
+        class="page-alert"
+        id="pageAlert"
+    >
+        <i
+            class="fa-solid fa-circle-info"
+            id="alertIcon"
+        ></i>
+
+        <div
+            class="alert-message"
+            id="alertMessage"
+        ></div>
+    </div>
+
+    <!-- SIDEBAR OVERLAY -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeSidebar()"
+    ></div>
+
+    <div class="staff-layout">
+
+        <!-- SIDEBAR -->
+
+        <aside
+            class="staff-sidebar"
+            id="staffSidebar"
+        >
+
+            <div class="staff-brand">
+
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
+
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Medical Staff Portal</span>
+                </div>
+
+            </div>
+
+            <nav class="staff-menu">
+
+                <span class="menu-label">
+                    Main
+                </span>
+
+                <a href="staff-dashboard.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <a href="products.html">
+                    <i class="fa-solid fa-box-open"></i>
+                    Product Management
+                </a>
+
+                <a href="patients.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patient Dashboard
+                </a>
+
+                <a
+                    href="inventory.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-warehouse"></i>
+                    Inventory Management
+                </a>
+
+                <span class="menu-label">
+                    Clinical Operations
+                </span>
+
+                <a href="consultation-management.html">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    Consultation Management
+                </a>
+
+                <a href="daily-treatment.html">
+                    <i class="fa-solid fa-spa"></i>
+                    Daily Treatments
+                </a>
+
+                <a href="prescriptions.html">
+                    <i class="fa-solid fa-file-prescription"></i>
+                    Prescriptions
+                </a>
+
+                <span class="menu-label">
+                    Sales & Delivery
+                </span>
+
+                <a href="orders.html">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Order Management
+                </a>
+
+                <a href="transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="profile.html">
+                    <i class="fa-solid fa-user-gear"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="staffLogout()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN -->
+
+        <main class="staff-main">
+
+            <!-- TOPBAR -->
+
+            <header class="staff-topbar">
+
+                <div class="topbar-left">
+
+                    <button
+                        type="button"
+                        class="sidebar-toggle"
+                        onclick="toggleSidebar()"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <div class="page-title">
+
+                        <h1>Inventory Management</h1>
+
+                        <p>
+                            Monitor stock, batches and expiry dates.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="topbar-actions">
+
+                    <button
+                        type="button"
+                        class="add-stock-top-button"
+                        onclick="openGeneralStockModal()"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Stock</span>
+                    </button>
+
+                    <div class="staff-profile-box">
+
+                        <span
+                            class="staff-avatar"
+                            id="staffInitial"
+                        >
+                            S
+                        </span>
+
+                        <div class="staff-profile-text">
+
+                            <strong id="staffTopbarName">
+                                Medical Staff
+                            </strong>
+
+                            <span>
+                                Medical Staff Portal
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+            <!-- CONTENT -->
+
+            <section class="staff-content">
+
+                <!-- BANNER -->
+
+                <section class="page-banner">
+
+                    <div class="page-banner-content">
+
+                        <h2>Stock and Batch Control</h2>
+
+                        <p>
+                            Track current stock, minimum stock levels,
+                            batches, expiry dates and complete stock movement
+                            history for all Neolife products.
+                        </p>
+
+                    </div>
+
+                    <div class="page-banner-icon">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+
+                </section>
+
+                <!-- SUMMARY -->
+
+                <section class="summary-grid">
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon total">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+
+                        <div>
+                            <p>Total Products</p>
+                            <h3 id="totalProducts">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon stock">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <div>
+                            <p>In Stock</p>
+                            <h3 id="inStockProducts">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon low">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+
+                        <div>
+                            <p>Low Stock</p>
+                            <h3 id="lowStockProducts">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon out">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </div>
+
+                        <div>
+                            <p>Out of Stock</p>
+                            <h3 id="outOfStockProducts">0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon expiry">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                        </div>
+
+                        <div>
+                            <p>Expiring Soon</p>
+                            <h3 id="expiringProducts">0</h3>
+                        </div>
+
+                    </article>
+
+                </section>
+
+                <!-- FILTERS -->
+
+                <section class="filter-panel">
+
+                    <div class="form-group">
+
+                        <label for="searchInput">
+                            Search Product
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="text"
+                                id="searchInput"
+                                class="form-control"
+                                placeholder="Product name, code or batch"
+                                oninput="applyFilters()"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="categoryFilter">
+                            Category
+                        </label>
+
+                        <select
+                            id="categoryFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Categories
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="stockFilter">
+                            Stock Status
+                        </label>
+
+                        <select
+                            id="stockFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Stock Statuses
+                            </option>
+
+                            <option value="IN_STOCK">
+                                In Stock
+                            </option>
+
+                            <option value="LOW_STOCK">
+                                Low Stock
+                            </option>
+
+                            <option value="OUT_OF_STOCK">
+                                Out of Stock
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="expiryFilter">
+                            Expiry Status
+                        </label>
+
+                        <select
+                            id="expiryFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Expiry Statuses
+                            </option>
+
+                            <option value="VALID">
+                                Valid
+                            </option>
+
+                            <option value="EXPIRING_SOON">
+                                Expiring Soon
+                            </option>
+
+                            <option value="EXPIRED">
+                                Expired
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="batchFilter">
+                            Batch Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="batchFilter"
+                            class="form-control"
+                            placeholder="Enter batch number"
+                            oninput="applyFilters()"
+                        >
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="reset-button"
+                        onclick="resetFilters()"
+                    >
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Reset
+                    </button>
+
+                </section>
+
+                <!-- TABLE -->
+
+                <section class="inventory-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h2>Inventory Records</h2>
+
+                            <p>
+                                Add stock, remove stock and view movement history.
+                            </p>
+
+                        </div>
+
+                        <span
+                            class="result-count"
+                            id="resultCount"
+                        >
+                            0 Products
+                        </span>
+
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table class="inventory-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Current Stock</th>
+                                    <th>Minimum Stock</th>
+                                    <th>Batch Number</th>
+                                    <th>Manufactured</th>
+                                    <th>Expiry</th>
+                                    <th>Stock Status</th>
+                                    <th>Expiry Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="inventoryTableBody">
+
+                                <tr>
+                                    <td
+                                        colspan="10"
+                                        class="table-message"
+                                    >
+                                        <i class="fa-solid fa-spinner fa-spin"></i>
+                                        Loading inventory...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="pagination-area">
+
+                        <p
+                            class="pagination-info"
+                            id="paginationInfo"
+                        >
+                            Showing 0 inventory records
+                        </p>
+
+                        <div
+                            class="pagination-buttons"
+                            id="paginationButtons"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ADD / REMOVE STOCK MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="stockModal"
+        onclick="handleStockModalOutside(event)"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h2 id="stockModalTitle">
+                    Add Stock
+                </h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closeStockModal()"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="modal-content">
+
+                <div
+                    class="modal-product-card"
+                    id="stockModalProductCard"
+                >
+                    <div class="product-image">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+
+                    <div>
+                        <h3>Select a product</h3>
+                        <p>Choose a product below.</p>
+                    </div>
+                </div>
+
+                <div class="modal-form-grid">
+
+                    <div
+                        class="form-group full-width"
+                        id="stockProductSelectGroup"
+                    >
+
+                        <label for="stockProductSelect">
+                            Product
+                        </label>
+
+                        <select
+                            id="stockProductSelect"
+                            class="form-control"
+                            onchange="handleStockProductSelect()"
+                        >
+                            <option value="">
+                                Select Product
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="stockQuantity">
+                            Quantity
+                        </label>
+
+                        <input
+                            type="number"
+                            id="stockQuantity"
+                            class="form-control"
+                            min="1"
+                            placeholder="Enter quantity"
+                        >
+
+                    </div>
+
+                    <div
+                        class="form-group"
+                        id="batchNumberGroup"
+                    >
+
+                        <label for="batchNumber">
+                            Batch Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="batchNumber"
+                            class="form-control"
+                            placeholder="Example: BATCH-2026-01"
+                        >
+
+                    </div>
+
+                    <div
+                        class="form-group"
+                        id="manufacturingDateGroup"
+                    >
+
+                        <label for="manufacturingDate">
+                            Manufacturing Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="manufacturingDate"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div
+                        class="form-group"
+                        id="expiryDateGroup"
+                    >
+
+                        <label for="stockExpiryDate">
+                            Expiry Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="stockExpiryDate"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="form-group full-width">
+
+                        <label for="stockReason">
+                            Reason / Notes
+                        </label>
+
+                        <textarea
+                            id="stockReason"
+                            class="form-control"
+                            placeholder="Enter stock movement reason"
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-button modal-cancel"
+                    onclick="closeStockModal()"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="modal-button modal-submit"
+                    id="stockSubmitButton"
+                    onclick="submitStockMovement()"
+                >
+                    Add Stock
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- HISTORY MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="historyModal"
+        onclick="handleHistoryModalOutside(event)"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h2>Stock Movement History</h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closeHistoryModal()"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div
+                class="modal-content"
+                id="historyModalContent"
+            >
+                <div class="table-message">
+                    Loading history...
+                </div>
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-button modal-submit"
+                    onclick="closeHistoryModal()"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE_URL =
+            "http://localhost:8085";
+
+        let allInventory = [];
+        let filteredInventory = [];
+
+        let selectedInventory = null;
+        let stockOperation = "ADD";
+
+        let currentPage = 1;
+        const pageSize = 8;
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                requireStaffLogin();
+                loadStaffProfile();
+                loadInventory();
+            }
+        );
+
+        /* =========================
+           AUTH
+        ========================== */
+
+        function getStaffToken() {
+            return (
+                localStorage.getItem("staffToken") ||
+                localStorage.getItem("token")
+            );
+        }
+
+        function requireStaffLogin() {
+            if (!getStaffToken()) {
+                window.location.href =
+                    "staff-login.html";
+            }
+        }
+
+        async function staffApiRequest(
+            endpoint,
+            options = {}
+        ) {
+            const token =
+                getStaffToken();
+
+            if (!token) {
+                window.location.href =
+                    "staff-login.html";
+
+                throw new Error(
+                    "Medical staff login required."
+                );
+            }
+
+            const headers = {
+                ...(options.headers || {})
+            };
+
+            if (
+                options.body &&
+                !(options.body instanceof FormData)
+            ) {
+                headers["Content-Type"] =
+                    "application/json";
+            }
+
+            headers.Authorization =
+                "Bearer " + token;
+
+            const response =
+                await fetch(
+                    API_BASE_URL + endpoint,
+                    {
+                        ...options,
+                        headers
+                    }
+                );
+
+            let result;
+
+            try {
+                result =
+                    await response.json();
+            } catch (error) {
+                result = {
+                    success: false,
+                    message:
+                        "Invalid response from server."
+                };
+            }
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+                throw new Error(
+                    result.message ||
+                    "Medical staff session expired."
+                );
+            }
+
+            if (
+                !response.ok ||
+                result.success === false
+            ) {
+                throw new Error(
+                    result.message ||
+                    "Request failed."
+                );
+            }
+
+            return result;
+        }
+
+        function staffLogout() {
+            localStorage.removeItem("staffToken");
+            localStorage.removeItem("staffRefreshToken");
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("role");
+            localStorage.removeItem("staffId");
+            localStorage.removeItem("userId");
+
+            window.location.href =
+                "staff-login.html";
+        }
+
+        /* =========================
+           PROFILE
+        ========================== */
+
+        async function loadStaffProfile() {
+            try {
+                const result =
+                    await staffApiRequest(
+                        "/api/users/getProfile"
+                    );
+
+                const name =
+                    result.data?.name ||
+                    result.data?.staffName ||
+                    "Medical Staff";
+
+                document.getElementById(
+                    "staffTopbarName"
+                ).textContent = name;
+
+                document.getElementById(
+                    "staffInitial"
+                ).textContent =
+                    name.charAt(0).toUpperCase();
+
+            } catch (error) {
+                console.error(
+                    "Staff profile loading failed:",
+                    error
+                );
+            }
+        }
+
+        /* =========================
+           LOAD INVENTORY
+        ========================== */
+
+        async function loadInventory() {
+            showLoading();
+
+            try {
+                const result =
+                    await staffApiRequest(
+                        "/api/inventory"
+                    );
+
+                const data =
+                    Array.isArray(result.data)
+                        ? result.data
+                        : Array.isArray(
+                            result.data?.content
+                          )
+                            ? result.data.content
+                            : [];
+
+                allInventory =
+                    data.map(
+                        normalizeInventory
+                    );
+
+            } catch (error) {
+                console.error(
+                    "Inventory loading failed:",
+                    error
+                );
+
+                allInventory =
+                    getDemoInventory();
+
+                showAlert(
+                    "Inventory API is not connected. Demo data is displayed.",
+                    "info"
+                );
+            }
+
+            populateCategoryFilter();
+            populateStockProductSelect();
+            updateSummary();
+            applyFilters();
+        }
+
+        function normalizeInventory(item) {
+            const currentStock =
+                Number(
+                    item.currentStock ??
+                    item.stock ??
+                    item.quantity ??
+                    0
+                );
+
+            const minimumStock =
+                Number(
+                    item.minimumStock ??
+                    item.lowStockThreshold ??
+                    10
+                );
+
+            return {
+                id:
+                    item.id ||
+                    item.inventoryId ||
+                    item.productId,
+
+                inventoryId:
+                    item.inventoryId ||
+                    item.id,
+
+                productId:
+                    item.productId ||
+                    item.product?.id ||
+                    item.id,
+
+                productName:
+                    item.productName ||
+                    item.product?.name ||
+                    item.name ||
+                    "Product",
+
+                productCode:
+                    item.productCode ||
+                    item.product?.productCode ||
+                    `PRD-${item.productId || item.id}`,
+
+                imageUrl:
+                    item.imageUrl ||
+                    item.product?.imageUrl ||
+                    "",
+
+                category:
+                    item.category ||
+                    item.product?.category ||
+                    "General",
+
+                currentStock:
+                    currentStock,
+
+                minimumStock:
+                    minimumStock,
+
+                batchNumber:
+                    item.batchNumber ||
+                    item.batchNo ||
+                    "-",
+
+                manufacturingDate:
+                    item.manufacturingDate ||
+                    item.mfgDate ||
+                    null,
+
+                expiryDate:
+                    item.expiryDate ||
+                    null
+            };
+        }
+
+        function getDemoInventory() {
+            return [
+                {
+                    id: 1,
+                    inventoryId: 1,
+                    productId: 1,
+                    productName:
+                        "NeoPainil Capsule",
+                    productCode:
+                        "NLP-001",
+                    imageUrl:
+                        "../assets/neo-painil.jpg",
+                    category:
+                        "Capsules",
+                    currentStock: 8,
+                    minimumStock: 10,
+                    batchNumber:
+                        "NP-2026-01",
+                    manufacturingDate:
+                        "2026-01-15",
+                    expiryDate:
+                        "2027-01-14"
+                },
+                {
+                    id: 2,
+                    inventoryId: 2,
+                    productId: 2,
+                    productName:
+                        "Neodia Kashayam",
+                    productCode:
+                        "NLD-002",
+                    imageUrl:
+                        "../assets/neodia-kashayam.jpg",
+                    category:
+                        "Kashayam",
+                    currentStock: 26,
+                    minimumStock: 10,
+                    batchNumber:
+                        "ND-2026-02",
+                    manufacturingDate:
+                        "2026-02-01",
+                    expiryDate:
+                        "2027-02-01"
+                },
+                {
+                    id: 3,
+                    inventoryId: 3,
+                    productId: 3,
+                    productName:
+                        "Neo9 KH Syrup",
+                    productCode:
+                        "NLK-003",
+                    imageUrl:
+                        "../assets/neo9-kh.jpg",
+                    category:
+                        "Syrups",
+                    currentStock: 0,
+                    minimumStock: 10,
+                    batchNumber:
+                        "KH-2026-03",
+                    manufacturingDate:
+                        "2026-03-05",
+                    expiryDate:
+                        "2026-08-15"
+                },
+                {
+                    id: 4,
+                    inventoryId: 4,
+                    productId: 4,
+                    productName:
+                        "Neoliv Liver Syrup",
+                    productCode:
+                        "NLL-004",
+                    imageUrl:
+                        "../assets/neoliv.jpg",
+                    category:
+                        "Syrups",
+                    currentStock: 30,
+                    minimumStock: 10,
+                    batchNumber:
+                        "NL-2026-04",
+                    manufacturingDate:
+                        "2026-04-10",
+                    expiryDate:
+                        "2027-04-10"
+                }
+            ];
+        }
+
+        /* =========================
+           SUMMARY
+        ========================== */
+
+        function updateSummary() {
+            const inStock =
+                allInventory.filter(
+                    item =>
+                        getStockStatus(item) ===
+                        "IN_STOCK"
+                ).length;
+
+            const lowStock =
+                allInventory.filter(
+                    item =>
+                        getStockStatus(item) ===
+                        "LOW_STOCK"
+                ).length;
+
+            const outOfStock =
+                allInventory.filter(
+                    item =>
+                        getStockStatus(item) ===
+                        "OUT_OF_STOCK"
+                ).length;
+
+            const expiringSoon =
+                allInventory.filter(
+                    item =>
+                        getExpiryStatus(item) ===
+                        "EXPIRING_SOON"
+                ).length;
+
+            setText(
+                "totalProducts",
+                allInventory.length
+            );
+
+            setText(
+                "inStockProducts",
+                inStock
+            );
+
+            setText(
+                "lowStockProducts",
+                lowStock
+            );
+
+            setText(
+                "outOfStockProducts",
+                outOfStock
+            );
+
+            setText(
+                "expiringProducts",
+                expiringSoon
+            );
+        }
+
+        /* =========================
+           FILTERS
+        ========================== */
+
+        function populateCategoryFilter() {
+            const select =
+                document.getElementById(
+                    "categoryFilter"
+                );
+
+            const categories =
+                [
+                    ...new Set(
+                        allInventory
+                            .map(
+                                item =>
+                                    item.category
+                            )
+                            .filter(Boolean)
+                    )
+                ].sort();
+
+            select.innerHTML = `
+                <option value="">
+                    All Categories
+                </option>
+            `;
+
+            categories.forEach(
+                function (category) {
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        category;
+
+                    option.textContent =
+                        category;
+
+                    select.appendChild(option);
+                }
+            );
+        }
+
+        function applyFilters() {
+            const search =
+                document.getElementById(
+                    "searchInput"
+                ).value
+                .trim()
+                .toLowerCase();
+
+            const category =
+                document.getElementById(
+                    "categoryFilter"
+                ).value;
+
+            const stockStatus =
+                document.getElementById(
+                    "stockFilter"
+                ).value;
+
+            const expiryStatus =
+                document.getElementById(
+                    "expiryFilter"
+                ).value;
+
+            const batch =
+                document.getElementById(
+                    "batchFilter"
+                ).value
+                .trim()
+                .toLowerCase();
+
+            filteredInventory =
+                allInventory.filter(
+                    function (item) {
+                        const matchesSearch =
+                            !search ||
+                            item.productName
+                                .toLowerCase()
+                                .includes(search) ||
+                            item.productCode
+                                .toLowerCase()
+                                .includes(search) ||
+                            item.batchNumber
+                                .toLowerCase()
+                                .includes(search);
+
+                        const matchesCategory =
+                            !category ||
+                            item.category ===
+                                category;
+
+                        const matchesStock =
+                            !stockStatus ||
+                            getStockStatus(item) ===
+                                stockStatus;
+
+                        const matchesExpiry =
+                            !expiryStatus ||
+                            getExpiryStatus(item) ===
+                                expiryStatus;
+
+                        const matchesBatch =
+                            !batch ||
+                            item.batchNumber
+                                .toLowerCase()
+                                .includes(batch);
+
+                        return (
+                            matchesSearch &&
+                            matchesCategory &&
+                            matchesStock &&
+                            matchesExpiry &&
+                            matchesBatch
+                        );
+                    }
+                );
+
+            currentPage = 1;
+            renderInventory();
+        }
+
+        function resetFilters() {
+            document.getElementById(
+                "searchInput"
+            ).value = "";
+
+            document.getElementById(
+                "categoryFilter"
+            ).value = "";
+
+            document.getElementById(
+                "stockFilter"
+            ).value = "";
+
+            document.getElementById(
+                "expiryFilter"
+            ).value = "";
+
+            document.getElementById(
+                "batchFilter"
+            ).value = "";
+
+            applyFilters();
+        }
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        function showLoading() {
+            document.getElementById(
+                "inventoryTableBody"
+            ).innerHTML = `
+                <tr>
+                    <td
+                        colspan="10"
+                        class="table-message"
+                    >
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Loading inventory...
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderInventory() {
+            const body =
+                document.getElementById(
+                    "inventoryTableBody"
+                );
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredInventory.length /
+                        pageSize
+                    )
+                );
+
+            if (currentPage > totalPages) {
+                currentPage =
+                    totalPages;
+            }
+
+            const startIndex =
+                (currentPage - 1) *
+                pageSize;
+
+            const pageItems =
+                filteredInventory.slice(
+                    startIndex,
+                    startIndex + pageSize
+                );
+
+            document.getElementById(
+                "resultCount"
+            ).textContent =
+                `${filteredInventory.length} Product${
+                    filteredInventory.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+            if (!pageItems.length) {
+                body.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="10"
+                            class="table-message"
+                        >
+                            <i class="fa-solid fa-box-open"></i>
+                            No inventory records matched the selected filters.
+                        </td>
+                    </tr>
+                `;
+
+                updatePaginationInfo(
+                    0,
+                    0,
+                    0
+                );
+
+                renderPaginationButtons(1);
+                return;
+            }
+
+            body.innerHTML = "";
+
+            pageItems.forEach(
+                function (item) {
+                    body.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <tr>
+
+                            <td>
+
+                                <div class="product-cell">
+
+                                    <div class="product-image">
+
+                                        ${
+                                            item.imageUrl
+                                                ? `
+                                                <img
+                                                    src="${escapeHtml(
+                                                        getImageUrl(
+                                                            item.imageUrl
+                                                        )
+                                                    )}"
+                                                    alt="${escapeHtml(
+                                                        item.productName
+                                                    )}"
+                                                    onerror="handleImageError(this)"
+                                                >
+                                                `
+                                                : `
+                                                <i class="fa-solid fa-box"></i>
+                                                `
+                                        }
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            ${escapeHtml(
+                                                item.productName
+                                            )}
+                                        </strong>
+
+                                        <small>
+                                            ${escapeHtml(
+                                                item.productCode
+                                            )}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    item.category
+                                )}
+                            </td>
+
+                            <td>
+                                <span class="stock-number">
+                                    ${escapeHtml(
+                                        item.currentStock
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    item.minimumStock
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    item.batchNumber
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    formatDate(
+                                        item.manufacturingDate
+                                    )
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    formatDate(
+                                        item.expiryDate
+                                    )
+                                )}
+                            </td>
+
+                            <td>
+                                ${createStockStatusBadge(
+                                    item
+                                )}
+                            </td>
+
+                            <td>
+                                ${createExpiryStatusBadge(
+                                    item
+                                )}
+                            </td>
+
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    <button
+                                        type="button"
+                                        class="action-button add-button"
+                                        onclick="openStockModal('${item.id}', 'ADD')"
+                                        title="Add stock"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button remove-button"
+                                        onclick="openStockModal('${item.id}', 'REMOVE')"
+                                        title="Remove stock"
+                                    >
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button history-button"
+                                        onclick="openHistoryModal('${item.id}')"
+                                        title="View history"
+                                    >
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                        `
+                    );
+                }
+            );
+
+            updatePaginationInfo(
+                startIndex + 1,
+                Math.min(
+                    startIndex + pageSize,
+                    filteredInventory.length
+                ),
+                filteredInventory.length
+            );
+
+            renderPaginationButtons(
+                totalPages
+            );
+        }
+
+        function getStockStatus(item) {
+            if (
+                Number(item.currentStock) <=
+                0
+            ) {
+                return "OUT_OF_STOCK";
+            }
+
+            if (
+                Number(item.currentStock) <=
+                Number(item.minimumStock)
+            ) {
+                return "LOW_STOCK";
+            }
+
+            return "IN_STOCK";
+        }
+
+        function createStockStatusBadge(item) {
+            const status =
+                getStockStatus(item);
+
+            const details = {
+                IN_STOCK: {
+                    className:
+                        "status-in-stock",
+                    label:
+                        "In Stock"
+                },
+
+                LOW_STOCK: {
+                    className:
+                        "status-low-stock",
+                    label:
+                        "Low Stock"
+                },
+
+                OUT_OF_STOCK: {
+                    className:
+                        "status-out-stock",
+                    label:
+                        "Out of Stock"
+                }
+            };
+
+            const selected =
+                details[status];
+
+            return `
+                <span
+                    class="status-badge ${selected.className}"
+                >
+                    ${selected.label}
+                </span>
+            `;
+        }
+
+        function getExpiryStatus(item) {
+            if (!item.expiryDate) {
+                return "VALID";
+            }
+
+            const today =
+                startOfDay(
+                    new Date()
+                );
+
+            const expiry =
+                startOfDay(
+                    new Date(
+                        `${item.expiryDate}T00:00:00`
+                    )
+                );
+
+            if (
+                Number.isNaN(
+                    expiry.getTime()
+                )
+            ) {
+                return "VALID";
+            }
+
+            if (expiry < today) {
+                return "EXPIRED";
+            }
+
+            const ninetyDays =
+                new Date(today);
+
+            ninetyDays.setDate(
+                ninetyDays.getDate() + 90
+            );
+
+            if (expiry <= ninetyDays) {
+                return "EXPIRING_SOON";
+            }
+
+            return "VALID";
+        }
+
+        function createExpiryStatusBadge(item) {
+            const status =
+                getExpiryStatus(item);
+
+            if (status === "EXPIRED") {
+                return `
+                    <span class="status-badge status-expired">
+                        Expired
+                    </span>
+                `;
+            }
+
+            if (
+                status ===
+                "EXPIRING_SOON"
+            ) {
+                return `
+                    <span class="status-badge status-expiring">
+                        Expiring Soon
+                    </span>
+                `;
+            }
+
+            return `
+                <span class="status-badge status-in-stock">
+                    Valid
+                </span>
+            `;
+        }
+
+        /* =========================
+           STOCK MODAL
+        ========================== */
+
+        function populateStockProductSelect() {
+            const select =
+                document.getElementById(
+                    "stockProductSelect"
+                );
+
+            select.innerHTML = `
+                <option value="">
+                    Select Product
+                </option>
+            `;
+
+            allInventory.forEach(
+                function (item) {
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        item.id;
+
+                    option.textContent =
+                        `${item.productName} (${item.productCode})`;
+
+                    select.appendChild(option);
+                }
+            );
+        }
+
+        function openGeneralStockModal() {
+            selectedInventory = null;
+            stockOperation = "ADD";
+
+            resetStockForm();
+
+            document.getElementById(
+                "stockProductSelectGroup"
+            ).style.display = "block";
+
+            document.getElementById(
+                "stockModalTitle"
+            ).textContent =
+                "Add Stock";
+
+            document.getElementById(
+                "stockSubmitButton"
+            ).className =
+                "modal-button modal-submit";
+
+            document.getElementById(
+                "stockSubmitButton"
+            ).textContent =
+                "Add Stock";
+
+            updateStockModalProductCard();
+
+            document.getElementById(
+                "stockModal"
+            ).classList.add("show");
+        }
+
+        function openStockModal(
+            id,
+            operation
+        ) {
+            selectedInventory =
+                allInventory.find(
+                    item =>
+                        String(item.id) ===
+                        String(id)
+                );
+
+            if (!selectedInventory) {
+                return;
+            }
+
+            stockOperation =
+                operation;
+
+            resetStockForm();
+
+            document.getElementById(
+                "stockProductSelectGroup"
+            ).style.display = "none";
+
+            document.getElementById(
+                "stockProductSelect"
+            ).value =
+                selectedInventory.id;
+
+            document.getElementById(
+                "stockModalTitle"
+            ).textContent =
+                operation === "ADD"
+                    ? "Add Stock"
+                    : "Remove Stock";
+
+            const submitButton =
+                document.getElementById(
+                    "stockSubmitButton"
+                );
+
+            submitButton.className =
+                operation === "ADD"
+                    ? "modal-button modal-submit"
+                    : "modal-button modal-submit remove";
+
+            submitButton.textContent =
+                operation === "ADD"
+                    ? "Add Stock"
+                    : "Remove Stock";
+
+            setStockFieldsVisibility(
+                operation
+            );
+
+            updateStockModalProductCard();
+
+            document.getElementById(
+                "stockModal"
+            ).classList.add("show");
+        }
+
+        function handleStockProductSelect() {
+            const id =
+                document.getElementById(
+                    "stockProductSelect"
+                ).value;
+
+            selectedInventory =
+                allInventory.find(
+                    item =>
+                        String(item.id) ===
+                        String(id)
+                ) || null;
+
+            updateStockModalProductCard();
+        }
+
+        function setStockFieldsVisibility(
+            operation
+        ) {
+            const display =
+                operation === "ADD"
+                    ? "block"
+                    : "none";
+
+            document.getElementById(
+                "batchNumberGroup"
+            ).style.display =
+                display;
+
+            document.getElementById(
+                "manufacturingDateGroup"
+            ).style.display =
+                display;
+
+            document.getElementById(
+                "expiryDateGroup"
+            ).style.display =
+                display;
+        }
+
+        function updateStockModalProductCard() {
+            const card =
+                document.getElementById(
+                    "stockModalProductCard"
+                );
+
+            if (!selectedInventory) {
+                card.innerHTML = `
+                    <div class="product-image">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+
+                    <div>
+                        <h3>Select a product</h3>
+                        <p>
+                            Choose a product to update its stock.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
+            card.innerHTML = `
+                <div class="product-image">
+
+                    ${
+                        selectedInventory.imageUrl
+                            ? `
+                            <img
+                                src="${escapeHtml(
+                                    getImageUrl(
+                                        selectedInventory.imageUrl
+                                    )
+                                )}"
+                                alt="${escapeHtml(
+                                    selectedInventory.productName
+                                )}"
+                                onerror="handleImageError(this)"
+                            >
+                            `
+                            : `
+                            <i class="fa-solid fa-box"></i>
+                            `
+                    }
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        ${escapeHtml(
+                            selectedInventory.productName
+                        )}
+                    </h3>
+
+                    <p>
+                        Current Stock:
+                        ${escapeHtml(
+                            selectedInventory.currentStock
+                        )}
+                        ·
+                        ${escapeHtml(
+                            selectedInventory.productCode
+                        )}
+                    </p>
+
+                </div>
+            `;
+        }
+
+        function resetStockForm() {
+            document.getElementById(
+                "stockQuantity"
+            ).value = "";
+
+            document.getElementById(
+                "batchNumber"
+            ).value = "";
+
+            document.getElementById(
+                "manufacturingDate"
+            ).value = "";
+
+            document.getElementById(
+                "stockExpiryDate"
+            ).value = "";
+
+            document.getElementById(
+                "stockReason"
+            ).value = "";
+
+            document.getElementById(
+                "stockProductSelect"
+            ).value = "";
+
+            setStockFieldsVisibility("ADD");
+        }
+
+        function closeStockModal() {
+            document.getElementById(
+                "stockModal"
+            ).classList.remove("show");
+
+            selectedInventory = null;
+        }
+
+        function handleStockModalOutside(
+            event
+        ) {
+            if (
+                event.target.id ===
+                "stockModal"
+            ) {
+                closeStockModal();
+            }
+        }
+
+        async function submitStockMovement() {
+            if (!selectedInventory) {
+                showAlert(
+                    "Please select a product.",
+                    "error"
+                );
+
+                return;
+            }
+
+            const quantity =
+                Number(
+                    document.getElementById(
+                        "stockQuantity"
+                    ).value
+                );
+
+            const reason =
+                document.getElementById(
+                    "stockReason"
+                ).value.trim();
+
+            if (
+                Number.isNaN(quantity) ||
+                quantity <= 0
+            ) {
+                showAlert(
+                    "Enter a valid stock quantity.",
+                    "error"
+                );
+
+                return;
+            }
+
+            if (
+                stockOperation ===
+                    "REMOVE" &&
+                quantity >
+                    selectedInventory.currentStock
+            ) {
+                showAlert(
+                    "Removed quantity cannot exceed current stock.",
+                    "error"
+                );
+
+                return;
+            }
+
+            if (!reason) {
+                showAlert(
+                    "Enter a reason for the stock movement.",
+                    "error"
+                );
+
+                return;
+            }
+
+            const submitButton =
+                document.getElementById(
+                    "stockSubmitButton"
+                );
+
+            const originalText =
+                submitButton.textContent;
+
+            submitButton.disabled = true;
+
+            submitButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Saving...
+            `;
+
+            try {
+                if (
+                    stockOperation ===
+                    "ADD"
+                ) {
+                    const batchNumber =
+                        document.getElementById(
+                            "batchNumber"
+                        ).value.trim();
+
+                    const manufacturingDate =
+                        document.getElementById(
+                            "manufacturingDate"
+                        ).value;
+
+                    const expiryDate =
+                        document.getElementById(
+                            "stockExpiryDate"
+                        ).value;
+
+                    if (
+                        !batchNumber ||
+                        !manufacturingDate ||
+                        !expiryDate
+                    ) {
+                        throw new Error(
+                            "Batch number, manufacturing date and expiry date are required."
+                        );
+                    }
+
+                    await staffApiRequest(
+                        "/api/inventory/add-stock",
+                        {
+                            method: "POST",
+
+                            body:
+                                JSON.stringify({
+                                    productId:
+                                        selectedInventory.productId,
+
+                                    quantity:
+                                        quantity,
+
+                                    batchNumber:
+                                        batchNumber,
+
+                                    manufacturingDate:
+                                        manufacturingDate,
+
+                                    expiryDate:
+                                        expiryDate,
+
+                                    reason:
+                                        reason
+                                })
+                        }
+                    );
+
+                    selectedInventory.currentStock +=
+                        quantity;
+
+                    selectedInventory.batchNumber =
+                        batchNumber;
+
+                    selectedInventory.manufacturingDate =
+                        manufacturingDate;
+
+                    selectedInventory.expiryDate =
+                        expiryDate;
+
+                } else {
+                    await staffApiRequest(
+                        "/api/inventory/remove-stock",
+                        {
+                            method: "POST",
+
+                            body:
+                                JSON.stringify({
+                                    productId:
+                                        selectedInventory.productId,
+
+                                    quantity:
+                                        quantity,
+
+                                    reason:
+                                        reason
+                                })
+                        }
+                    );
+
+                    selectedInventory.currentStock -=
+                        quantity;
+                }
+
+                closeStockModal();
+
+                updateSummary();
+                applyFilters();
+
+                showAlert(
+                    stockOperation === "ADD"
+                        ? "Stock added successfully."
+                        : "Stock removed successfully.",
+                    "success"
+                );
+
+            } catch (error) {
+                console.error(
+                    "Stock update failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Stock could not be updated.",
+                    "error"
+                );
+
+            } finally {
+                submitButton.disabled =
+                    false;
+
+                submitButton.textContent =
+                    originalText;
+            }
+        }
+
+        /* =========================
+           HISTORY MODAL
+        ========================== */
+
+        async function openHistoryModal(id) {
+            const item =
+                allInventory.find(
+                    inventory =>
+                        String(inventory.id) ===
+                        String(id)
+                );
+
+            if (!item) {
+                return;
+            }
+
+            const content =
+                document.getElementById(
+                    "historyModalContent"
+                );
+
+            content.innerHTML = `
+                <div class="modal-product-card">
+
+                    <div class="product-image">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+
+                    <div>
+                        <h3>
+                            ${escapeHtml(
+                                item.productName
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHtml(
+                                item.productCode
+                            )}
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="table-message">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Loading stock history...
+                </div>
+            `;
+
+            document.getElementById(
+                "historyModal"
+            ).classList.add("show");
+
+            try {
+                const result =
+                    await staffApiRequest(
+                        `/api/inventory/history/${encodeURIComponent(
+                            item.productId
+                        )}`
+                    );
+
+                const history =
+                    Array.isArray(result.data)
+                        ? result.data
+                        : [];
+
+                renderHistory(
+                    item,
+                    history
+                );
+
+            } catch (error) {
+                renderHistory(
+                    item,
+                    [
+                        {
+                            id: 1,
+                            type: "ADD",
+                            quantity: 20,
+                            reason:
+                                "New batch received",
+                            createdAt:
+                                "2026-07-10T10:30:00",
+                            batchNumber:
+                                item.batchNumber
+                        },
+                        {
+                            id: 2,
+                            type: "REMOVE",
+                            quantity: 3,
+                            reason:
+                                "Order fulfillment",
+                            createdAt:
+                                "2026-07-12T15:10:00",
+                            batchNumber:
+                                item.batchNumber
+                        }
+                    ]
+                );
+            }
+        }
+
+        function renderHistory(
+            item,
+            history
+        ) {
+            const content =
+                document.getElementById(
+                    "historyModalContent"
+                );
+
+            let historyHtml = `
+                <div class="modal-product-card">
+
+                    <div class="product-image">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+
+                    <div>
+                        <h3>
+                            ${escapeHtml(
+                                item.productName
+                            )}
+                        </h3>
+
+                        <p>
+                            Current Stock:
+                            ${escapeHtml(
+                                item.currentStock
+                            )}
+                            ·
+                            Batch:
+                            ${escapeHtml(
+                                item.batchNumber
+                            )}
+                        </p>
+                    </div>
+
+                </div>
+            `;
+
+            if (!history.length) {
+                historyHtml += `
+                    <div class="table-message">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        No stock movement history found.
+                    </div>
+                `;
+
+            } else {
+                historyHtml += `
+                    <div class="history-list">
+                `;
+
+                history.forEach(
+                    function (record) {
+                        const type =
+                            String(
+                                record.type ||
+                                record.movementType ||
+                                "ADD"
+                            ).toUpperCase();
+
+                        const positive =
+                            type === "ADD" ||
+                            type === "RESTOCK";
+
+                        historyHtml += `
+                            <div class="history-item">
+
+                                <div>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            formatStatus(type)
+                                        )}
+                                    </strong>
+
+                                    <p>
+                                        ${escapeHtml(
+                                            record.reason ||
+                                            record.notes ||
+                                            "-"
+                                        )}
+                                        ·
+                                        ${escapeHtml(
+                                            formatDateTime(
+                                                record.createdAt ||
+                                                record.date
+                                            )
+                                        )}
+                                    </p>
+
+                                    <p>
+                                        Batch:
+                                        ${escapeHtml(
+                                            record.batchNumber ||
+                                            "-"
+                                        )}
+                                    </p>
+
+                                </div>
+
+                                <span
+                                    class="history-quantity ${
+                                        positive
+                                            ? "history-positive"
+                                            : "history-negative"
+                                    }"
+                                >
+                                    ${
+                                        positive
+                                            ? "+"
+                                            : "-"
+                                    }
+                                    ${escapeHtml(
+                                        record.quantity ||
+                                        0
+                                    )}
+                                </span>
+
+                            </div>
+                        `;
+                    }
+                );
+
+                historyHtml += `
+                    </div>
+                `;
+            }
+
+            content.innerHTML =
+                historyHtml;
+        }
+
+        function closeHistoryModal() {
+            document.getElementById(
+                "historyModal"
+            ).classList.remove("show");
+        }
+
+        function handleHistoryModalOutside(
+            event
+        ) {
+            if (
+                event.target.id ===
+                "historyModal"
+            ) {
+                closeHistoryModal();
+            }
+        }
+
+        /* =========================
+           PAGINATION
+        ========================== */
+
+        function updatePaginationInfo(
+            start,
+            end,
+            total
+        ) {
+            document.getElementById(
+                "paginationInfo"
+            ).textContent =
+                total === 0
+                    ? "Showing 0 inventory records"
+                    : `Showing ${start}–${end} of ${total} inventory records`;
+        }
+
+        function renderPaginationButtons(
+            totalPages
+        ) {
+            const container =
+                document.getElementById(
+                    "paginationButtons"
+                );
+
+            container.innerHTML = "";
+
+            const previous =
+                document.createElement(
+                    "button"
+                );
+
+            previous.type = "button";
+            previous.className =
+                "pagination-button";
+
+            previous.innerHTML =
+                '<i class="fa-solid fa-chevron-left"></i>';
+
+            previous.disabled =
+                currentPage === 1;
+
+            previous.onclick =
+                function () {
+                    changePage(
+                        currentPage - 1
+                    );
+                };
+
+            container.appendChild(previous);
+
+            for (
+                let page = 1;
+                page <= totalPages;
+                page++
+            ) {
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                button.type = "button";
+
+                button.className =
+                    `pagination-button ${
+                        page === currentPage
+                            ? "active"
+                            : ""
+                    }`;
+
+                button.textContent =
+                    page;
+
+                button.onclick =
+                    function () {
+                        changePage(page);
+                    };
+
+                container.appendChild(button);
+            }
+
+            const next =
+                document.createElement(
+                    "button"
+                );
+
+            next.type = "button";
+            next.className =
+                "pagination-button";
+
+            next.innerHTML =
+                '<i class="fa-solid fa-chevron-right"></i>';
+
+            next.disabled =
+                currentPage ===
+                totalPages;
+
+            next.onclick =
+                function () {
+                    changePage(
+                        currentPage + 1
+                    );
+                };
+
+            container.appendChild(next);
+        }
+
+        function changePage(page) {
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredInventory.length /
+                        pageSize
+                    )
+                );
+
+            if (
+                page < 1 ||
+                page > totalPages
+            ) {
+                return;
+            }
+
+            currentPage = page;
+            renderInventory();
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        function toggleSidebar() {
+            document.getElementById(
+                "staffSidebar"
+            ).classList.toggle("open");
+
+            document.getElementById(
+                "sidebarOverlay"
+            ).classList.toggle("show");
+        }
+
+        function closeSidebar() {
+            document.getElementById(
+                "staffSidebar"
+            ).classList.remove("open");
+
+            document.getElementById(
+                "sidebarOverlay"
+            ).classList.remove("show");
+        }
+
+        /* =========================
+           ALERT
+        ========================== */
+
+        function showAlert(
+            message,
+            type
+        ) {
+            const box =
+                document.getElementById(
+                    "pageAlert"
+                );
+
+            const icon =
+                document.getElementById(
+                    "alertIcon"
+                );
+
+            document.getElementById(
+                "alertMessage"
+            ).textContent =
+                message;
+
+            box.className =
+                `page-alert show ${type}`;
+
+            if (type === "success") {
+                icon.className =
+                    "fa-solid fa-circle-check";
+
+            } else if (
+                type === "error"
+            ) {
+                icon.className =
+                    "fa-solid fa-circle-exclamation";
+
+            } else {
+                icon.className =
+                    "fa-solid fa-circle-info";
+            }
+
+            clearTimeout(
+                window.inventoryAlertTimer
+            );
+
+            window.inventoryAlertTimer =
+                setTimeout(
+                    function () {
+                        box.classList.remove(
+                            "show"
+                        );
+                    },
+                    4000
+                );
+        }
+
+        /* =========================
+           HELPERS
+        ========================== */
+
+        function getImageUrl(imageUrl) {
+            if (!imageUrl) {
+                return "";
+            }
+
+            if (
+                imageUrl.startsWith("http") ||
+                imageUrl.startsWith("../") ||
+                imageUrl.startsWith("./")
+            ) {
+                return imageUrl;
+            }
+
+            if (imageUrl.startsWith("/")) {
+                return (
+                    API_BASE_URL +
+                    imageUrl
+                );
+            }
+
+            return (
+                API_BASE_URL +
+                "/" +
+                imageUrl
+            );
+        }
+
+        function handleImageError(image) {
+            const parent =
+                image.parentElement;
+
+            image.remove();
+
+            parent.innerHTML =
+                '<i class="fa-solid fa-box"></i>';
+        }
+
+        function formatDate(value) {
+            if (!value) {
+                return "-";
+            }
+
+            const date =
+                new Date(
+                    String(value).includes("T")
+                        ? value
+                        : `${value}T00:00:00`
+                );
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+                return String(value);
+            }
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
+        }
+
+        function formatDateTime(value) {
+            if (!value) {
+                return "-";
+            }
+
+            const date =
+                new Date(value);
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+                return String(value);
+            }
+
+            return date.toLocaleString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+        }
+
+        function formatStatus(value) {
+            return String(value || "-")
+                .replaceAll("_", " ")
+                .toLowerCase()
+                .replace(
+                    /\b\w/g,
+                    character =>
+                        character.toUpperCase()
+                );
+        }
+
+        function startOfDay(date) {
+            const copy =
+                new Date(date);
+
+            copy.setHours(
+                0,
+                0,
+                0,
+                0
+            );
+
+            return copy;
+        }
+
+        function setText(
+            id,
+            value
+        ) {
+            document.getElementById(
+                id
+            ).textContent =
+                value;
+        }
+
+        function escapeHtml(value) {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
+            }
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+    </script>
+
+</body>
+</html>

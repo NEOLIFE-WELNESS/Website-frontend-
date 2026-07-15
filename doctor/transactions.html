@@ -1,0 +1,2971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Transactions - Neolife Doctor Portal</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="../assets/main_logo.jpeg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <style>
+        :root {
+            --dark-green: #153d29;
+            --green: #2d6844;
+            --green-light: #edf5ef;
+            --gold: #c99a16;
+            --gold-dark: #9b7200;
+            --cream: #f6f8f4;
+            --white: #ffffff;
+            --text: #173c29;
+            --muted: #6e7871;
+            --border: #dfe7e1;
+            --danger: #c74747;
+            --danger-light: #fff0f0;
+            --warning: #d88b18;
+            --warning-light: #fff6e8;
+            --success: #287146;
+            --success-light: #ebf7ef;
+            --info: #31708f;
+            --info-light: #edf6fb;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--cream);
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .doctor-layout {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* SIDEBAR */
+
+        .doctor-sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+
+            display: flex;
+            flex-direction: column;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #123824,
+                    #1e5134
+                );
+
+            box-shadow:
+                8px 0 30px rgba(18, 56, 36, 0.14);
+
+            transition: transform 0.3s ease;
+        }
+
+        .doctor-brand {
+            min-height: 104px;
+            padding: 20px 18px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .doctor-brand img {
+            width: 58px;
+            height: 58px;
+            object-fit: cover;
+
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+
+            background: var(--white);
+        }
+
+        .doctor-brand h2 {
+            margin-bottom: 5px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .doctor-brand span {
+            color: #f2cf69;
+
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        .doctor-menu {
+            flex: 1;
+            padding: 20px 13px;
+            overflow-y: auto;
+        }
+
+        .menu-label {
+            display: block;
+
+            margin: 8px 12px 10px;
+
+            color: rgba(255, 255, 255, 0.48);
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .doctor-menu a {
+            min-height: 49px;
+            margin-bottom: 7px;
+            padding: 12px 14px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border-radius: 12px;
+
+            color: rgba(255, 255, 255, 0.82);
+
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            transition: 0.25s;
+        }
+
+        .doctor-menu a i {
+            width: 21px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .doctor-menu a:hover,
+        .doctor-menu a.active {
+            color: var(--dark-green);
+            background: var(--white);
+            transform: translateX(3px);
+        }
+
+        .doctor-menu a.active i {
+            color: var(--gold);
+        }
+
+        .sidebar-footer {
+            padding: 17px 13px;
+
+            border-top:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .sidebar-logout {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.20);
+
+            border-radius: 12px;
+
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.08);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .sidebar-logout:hover {
+            color: var(--dark-green);
+            background: var(--white);
+        }
+
+        /* MAIN */
+
+        .doctor-main {
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+        }
+
+        .doctor-topbar {
+            min-height: 86px;
+            padding: 15px 28px;
+
+            position: sticky;
+            top: 0;
+            z-index: 900;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+
+            background: rgba(255, 255, 255, 0.96);
+
+            border-bottom: 1px solid var(--border);
+
+            box-shadow:
+                0 4px 18px rgba(18, 56, 36, 0.06);
+
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+
+            width: 43px;
+            height: 43px;
+
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 18px;
+        }
+
+        .page-title h1 {
+            margin-bottom: 5px;
+
+            color: var(--dark-green);
+
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .doctor-profile-box {
+            padding: 6px 11px 6px 7px;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            border: 1px solid var(--border);
+            border-radius: 30px;
+
+            background: var(--white);
+        }
+
+        .doctor-avatar {
+            width: 39px;
+            height: 39px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            color: var(--white);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--gold),
+                    var(--gold-dark)
+                );
+
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .doctor-profile-text strong {
+            display: block;
+            margin-bottom: 2px;
+
+            color: var(--dark-green);
+            font-size: 13px;
+        }
+
+        .doctor-profile-text span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        /* CONTENT */
+
+        .doctor-content {
+            padding: 28px;
+        }
+
+        .page-banner {
+            margin-bottom: 22px;
+            padding: 25px 27px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+
+            color: var(--white);
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    var(--dark-green),
+                    #347650
+                );
+
+            box-shadow:
+                0 15px 35px rgba(21, 61, 41, 0.14);
+        }
+
+        .page-banner h2 {
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+
+        .page-banner p {
+            max-width: 720px;
+
+            color: rgba(255, 255, 255, 0.80);
+
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .banner-icon {
+            width: 66px;
+            height: 66px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 18px;
+
+            color: #ffe28b;
+            background: rgba(255, 255, 255, 0.10);
+
+            font-size: 28px;
+        }
+
+        /* SUMMARY */
+
+        .summary-grid {
+            margin-bottom: 22px;
+
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .summary-card {
+            padding: 19px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 17px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .summary-icon {
+            width: 49px;
+            height: 49px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 14px;
+
+            font-size: 20px;
+        }
+
+        .summary-icon.today {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .summary-icon.month {
+            color: var(--gold-dark);
+            background: #fff7df;
+        }
+
+        .summary-icon.online {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .summary-icon.offline {
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .summary-icon.refund {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .summary-card p {
+            margin-bottom: 6px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .summary-card h3 {
+            color: var(--dark-green);
+
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        /* FILTERS */
+
+        .filter-panel {
+            margin-bottom: 22px;
+            padding: 20px;
+
+            display: grid;
+            grid-template-columns:
+                minmax(220px, 1.4fr)
+                repeat(4, minmax(140px, 0.7fr))
+                auto;
+
+            gap: 13px;
+            align-items: end;
+
+            border: 1px solid var(--border);
+            border-radius: 18px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 9px 25px rgba(21, 61, 41, 0.06);
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--dark-green);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+
+            color: #7c877f;
+
+            font-size: 13px;
+
+            transform: translateY(-50%);
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            color: #354039;
+            background: var(--white);
+
+            outline: none;
+        }
+
+        .input-wrapper .form-control {
+            padding-left: 38px;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+
+            box-shadow:
+                0 0 0 3px rgba(201, 154, 22, 0.12);
+        }
+
+        .filter-button {
+            min-height: 46px;
+            padding: 11px 18px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .filter-button:hover {
+            background: var(--gold-dark);
+        }
+
+        /* TABLE */
+
+        .transaction-panel {
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: 21px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 11px 32px rgba(21, 61, 41, 0.07);
+        }
+
+        .panel-header {
+            min-height: 70px;
+            padding: 18px 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header h2 {
+            margin-bottom: 4px;
+
+            color: var(--dark-green);
+
+            font-size: 19px;
+        }
+
+        .panel-header p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .result-count {
+            padding: 8px 12px;
+
+            border-radius: 20px;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .transaction-table {
+            width: 100%;
+            min-width: 1150px;
+
+            border-collapse: collapse;
+        }
+
+        .transaction-table th {
+            padding: 14px 13px;
+
+            color: var(--muted);
+            background: #f8faf7;
+
+            border-bottom: 1px solid var(--border);
+
+            font-size: 9px;
+            font-weight: 800;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .transaction-table td {
+            padding: 15px 13px;
+
+            color: #4f5b53;
+
+            border-bottom: 1px solid #edf0ed;
+
+            font-size: 11px;
+            vertical-align: middle;
+        }
+
+        .transaction-table tbody tr:hover {
+            background: #fcfdfb;
+        }
+
+        .patient-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .patient-avatar-small {
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .patient-cell strong {
+            display: block;
+
+            margin-bottom: 3px;
+
+            color: var(--dark-green);
+
+            font-size: 12px;
+        }
+
+        .patient-cell small {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .type-badge,
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+
+            padding: 6px 9px;
+
+            border-radius: 20px;
+
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .type-online {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .type-offline {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .type-therapy {
+            color: var(--gold-dark);
+            background: #fff7df;
+        }
+
+        .status-success,
+        .status-paid {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .status-pending {
+            color: #946300;
+            background: var(--warning-light);
+        }
+
+        .status-failed,
+        .status-refunded {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .amount {
+            color: var(--dark-green);
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .view-button {
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 9px;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .view-button:hover {
+            color: var(--white);
+            background: var(--dark-green);
+        }
+
+        .table-message {
+            padding: 55px 25px !important;
+
+            text-align: center;
+
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .table-message i {
+            display: block;
+
+            margin-bottom: 12px;
+
+            color: var(--gold);
+            font-size: 28px;
+        }
+
+        /* PAGINATION */
+
+        .pagination-area {
+            padding: 17px 21px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination-info {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .pagination-button {
+            min-width: 35px;
+            height: 35px;
+            padding: 0 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            color: var(--dark-green);
+            background: var(--white);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .pagination-button.active {
+            color: var(--white);
+            border-color: var(--dark-green);
+            background: var(--dark-green);
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* MODAL */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(13, 36, 24, 0.67);
+
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 620px;
+
+            border-radius: 21px;
+
+            background: var(--white);
+
+            box-shadow:
+                0 25px 75px rgba(0, 0, 0, 0.27);
+        }
+
+        .modal-header {
+            padding: 20px 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            color: var(--dark-green);
+            font-size: 20px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            border-radius: 50%;
+
+            color: var(--dark-green);
+            background: var(--green-light);
+        }
+
+        .modal-content {
+            padding: 22px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .detail-box {
+            padding: 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            background: #fbfcfa;
+        }
+
+        .detail-box.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-box span {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: var(--muted);
+
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .detail-box strong {
+            color: var(--dark-green);
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            padding: 18px 22px;
+
+            display: flex;
+            justify-content: flex-end;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .close-modal-button {
+            min-height: 42px;
+            padding: 10px 18px;
+
+            border: none;
+            border-radius: 10px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        /* ALERT */
+
+        .page-alert {
+            width:
+                min(
+                    390px,
+                    calc(100% - 35px)
+                );
+
+            padding: 15px 17px;
+
+            position: fixed;
+            top: 102px;
+            right: 22px;
+            z-index: 5000;
+
+            display: none;
+            align-items: flex-start;
+            gap: 11px;
+
+            border-radius: 13px;
+
+            color: var(--white);
+
+            box-shadow:
+                0 14px 35px rgba(0, 0, 0, 0.20);
+        }
+
+        .page-alert.show {
+            display: flex;
+        }
+
+        .page-alert.error {
+            background: var(--danger);
+        }
+
+        .page-alert.info {
+            background: var(--info);
+        }
+
+        .alert-message {
+            flex: 1;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 950;
+
+            display: none;
+
+            background: rgba(13, 36, 24, 0.58);
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1250px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .filter-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .doctor-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .doctor-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .doctor-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .doctor-topbar {
+                padding: 13px 16px;
+            }
+
+            .doctor-content {
+                padding: 20px 14px;
+            }
+
+            .page-title h1 {
+                font-size: 21px;
+            }
+
+            .page-title p,
+            .doctor-profile-text {
+                display: none;
+            }
+
+            .page-banner {
+                align-items: flex-start;
+                flex-direction: column-reverse;
+            }
+
+            .summary-grid,
+            .filter-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-header,
+            .pagination-area {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-box.full-width {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-alert" id="pageAlert">
+
+        <i
+            class="fa-solid fa-circle-info"
+            id="alertIcon"
+        ></i>
+
+        <div
+            class="alert-message"
+            id="alertMessage"
+        ></div>
+
+    </div>
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeSidebar()"
+    ></div>
+
+    <div class="doctor-layout">
+
+        <aside
+            class="doctor-sidebar"
+            id="doctorSidebar"
+        >
+
+            <div class="doctor-brand">
+
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
+
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Doctor Portal</span>
+                </div>
+
+            </div>
+
+            <nav class="doctor-menu">
+
+                <span class="menu-label">Main</span>
+
+                <a href="doctor-dashboard.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <a href="patients.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patient Dashboard
+                </a>
+
+                <a href="appointment-calendar.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Appointment Calendar
+                </a>
+
+                <a href="add-patient.html">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Add Walk-in Patient
+                </a>
+
+                <span class="menu-label">Clinical</span>
+
+                <a href="prescription-pad.html">
+                    <i class="fa-solid fa-prescription-bottle-medical"></i>
+                    Prescription Pad
+                </a>
+
+                <a href="doctor-appointments.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Appointment Details
+                </a>
+
+                <a href="video-recordings.html">
+                    <i class="fa-solid fa-video"></i>
+                    Video Recordings
+                </a>
+
+                <span class="menu-label">Finance</span>
+
+                <a
+                    href="transactions.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="doctor-profile.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="doctorLogout()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+        <main class="doctor-main">
+
+            <header class="doctor-topbar">
+
+                <div class="topbar-left">
+
+                    <button
+                        type="button"
+                        class="sidebar-toggle"
+                        onclick="toggleSidebar()"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <div class="page-title">
+
+                        <h1>Transaction Details</h1>
+
+                        <p>
+                            View consultation fees and payment records.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="doctor-profile-box">
+
+                    <span
+                        class="doctor-avatar"
+                        id="doctorInitial"
+                    >
+                        D
+                    </span>
+
+                    <div class="doctor-profile-text">
+
+                        <strong id="doctorTopbarName">
+                            Doctor
+                        </strong>
+
+                        <span>Medical Consultant</span>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+            <section class="doctor-content">
+
+                <div class="page-banner">
+
+                    <div>
+
+                        <h2>Consultation Earnings</h2>
+
+                        <p>
+                            Review online consultation payments,
+                            offline booking fees, therapy fees,
+                            successful transactions and refunds.
+                        </p>
+
+                    </div>
+
+                    <div class="banner-icon">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+
+                </div>
+
+                <div class="summary-grid">
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon today">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+
+                        <div>
+                            <p>Today's Collection</p>
+                            <h3 id="todayCollection">₹0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon month">
+                            <i class="fa-solid fa-calendar"></i>
+                        </div>
+
+                        <div>
+                            <p>This Month</p>
+                            <h3 id="monthlyCollection">₹0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon online">
+                            <i class="fa-solid fa-video"></i>
+                        </div>
+
+                        <div>
+                            <p>Online Fees</p>
+                            <h3 id="onlineCollection">₹0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon offline">
+                            <i class="fa-solid fa-hospital-user"></i>
+                        </div>
+
+                        <div>
+                            <p>Offline / Therapy</p>
+                            <h3 id="offlineCollection">₹0</h3>
+                        </div>
+
+                    </article>
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon refund">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </div>
+
+                        <div>
+                            <p>Refunded</p>
+                            <h3 id="refundCollection">₹0</h3>
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <section class="filter-panel">
+
+                    <div class="form-group">
+
+                        <label for="searchInput">
+                            Search
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            <input
+                                type="text"
+                                id="searchInput"
+                                class="form-control"
+                                placeholder="Patient or transaction ID"
+                                oninput="applyFilters()"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="typeFilter">
+                            Payment Type
+                        </label>
+
+                        <select
+                            id="typeFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Types
+                            </option>
+
+                            <option value="ONLINE">
+                                Online Consultation
+                            </option>
+
+                            <option value="OFFLINE">
+                                Offline Appointment
+                            </option>
+
+                            <option value="THERAPY">
+                                Therapy Booking
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="statusFilter">
+                            Payment Status
+                        </label>
+
+                        <select
+                            id="statusFilter"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">
+                                All Statuses
+                            </option>
+
+                            <option value="SUCCESS">
+                                Success
+                            </option>
+
+                            <option value="PENDING">
+                                Pending
+                            </option>
+
+                            <option value="FAILED">
+                                Failed
+                            </option>
+
+                            <option value="REFUNDED">
+                                Refunded
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="fromDate">
+                            From Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fromDate"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="toDate">
+                            To Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="toDate"
+                            class="form-control"
+                            onchange="applyFilters()"
+                        >
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        onclick="resetFilters()"
+                    >
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Reset
+                    </button>
+
+                </section>
+
+                <section class="transaction-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h2>Transaction History</h2>
+
+                            <p>
+                                Date-wise and patient-wise payment details.
+                            </p>
+
+                        </div>
+
+                        <span
+                            class="result-count"
+                            id="resultCount"
+                        >
+                            0 Transactions
+                        </span>
+
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table class="transaction-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Appointment</th>
+                                    <th>Date</th>
+                                    <th>Payment Method</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="transactionTableBody">
+
+                                <tr>
+                                    <td
+                                        colspan="9"
+                                        class="table-message"
+                                    >
+                                        <i class="fa-solid fa-spinner fa-spin"></i>
+                                        Loading transactions...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="pagination-area">
+
+                        <p
+                            class="pagination-info"
+                            id="paginationInfo"
+                        >
+                            Showing 0 transactions
+                        </p>
+
+                        <div
+                            class="pagination-buttons"
+                            id="paginationButtons"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <div
+        class="modal-overlay"
+        id="transactionModal"
+        onclick="handleModalOutside(event)"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h2>Transaction Details</h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closeTransactionModal()"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div
+                class="modal-content"
+                id="transactionModalContent"
+            ></div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="close-modal-button"
+                    onclick="closeTransactionModal()"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE_URL =
+            "http://localhost:8085";
+
+        let allTransactions = [];
+        let filteredTransactions = [];
+
+        let currentPage = 1;
+        const pageSize = 8;
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                requireDoctorLogin();
+                loadDoctorProfile();
+                loadTransactions();
+            }
+        );
+
+        function getDoctorToken() {
+            return (
+                localStorage.getItem("doctorToken") ||
+                localStorage.getItem("token")
+            );
+        }
+
+        function requireDoctorLogin() {
+            if (!getDoctorToken()) {
+                window.location.href =
+                    "doctor-login.html";
+            }
+        }
+
+        async function doctorApiRequest(
+            endpoint,
+            options = {}
+        ) {
+            const token =
+                getDoctorToken();
+
+            if (!token) {
+                window.location.href =
+                    "doctor-login.html";
+
+                throw new Error(
+                    "Doctor login required."
+                );
+            }
+
+            const headers = {
+                ...(options.headers || {})
+            };
+
+            if (
+                options.body &&
+                !(options.body instanceof FormData)
+            ) {
+                headers["Content-Type"] =
+                    "application/json";
+            }
+
+            headers.Authorization =
+                "Bearer " + token;
+
+            const response =
+                await fetch(
+                    API_BASE_URL + endpoint,
+                    {
+                        ...options,
+                        headers
+                    }
+                );
+
+            let result;
+
+            try {
+                result =
+                    await response.json();
+
+            } catch (error) {
+                result = {
+                    success: false,
+                    message:
+                        "Invalid server response."
+                };
+            }
+
+            if (
+                !response.ok ||
+                result.success === false
+            ) {
+                throw new Error(
+                    result.message ||
+                    "Request failed."
+                );
+            }
+
+            return result;
+        }
+
+        function doctorLogout() {
+            localStorage.removeItem("doctorToken");
+            localStorage.removeItem("doctorRefreshToken");
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("role");
+            localStorage.removeItem("doctorId");
+            localStorage.removeItem("userId");
+
+            window.location.href =
+                "doctor-login.html";
+        }
+
+        async function loadDoctorProfile() {
+            try {
+                const result =
+                    await doctorApiRequest(
+                        "/api/users/getProfile"
+                    );
+
+                const name =
+                    result.data?.name ||
+                    result.data?.doctorName ||
+                    "Doctor";
+
+                document.getElementById(
+                    "doctorTopbarName"
+                ).textContent = name;
+
+                document.getElementById(
+                    "doctorInitial"
+                ).textContent =
+                    name.charAt(0).toUpperCase();
+
+            } catch (error) {
+                console.error(
+                    "Doctor profile failed:",
+                    error
+                );
+            }
+        }
+
+        async function loadTransactions() {
+            showLoading();
+
+            try {
+                const result =
+                    await doctorApiRequest(
+                        "/api/doctor/transactions"
+                    );
+
+                const data =
+                    Array.isArray(result.data)
+                        ? result.data
+                        : Array.isArray(
+                            result.data?.content
+                          )
+                            ? result.data.content
+                            : [];
+
+                allTransactions =
+                    data.map(
+                        normalizeTransaction
+                    );
+
+            } catch (error) {
+                console.error(
+                    "Transaction loading failed:",
+                    error
+                );
+
+                allTransactions =
+                    getDemoTransactions();
+
+                showAlert(
+                    "Transaction API is not connected. Demo data is displayed.",
+                    "info"
+                );
+            }
+
+            updateSummary();
+            applyFilters();
+        }
+
+        function normalizeTransaction(item) {
+            return {
+                id:
+                    item.id ||
+                    item.transactionId ||
+                    item.paymentId,
+
+                transactionNumber:
+                    item.transactionNumber ||
+                    item.transactionId ||
+                    item.paymentReference ||
+                    `TXN-${item.id}`,
+
+                patientName:
+                    item.patientName ||
+                    item.userName ||
+                    "Patient",
+
+                patientPhone:
+                    item.patientPhone ||
+                    item.phoneNumber ||
+                    "-",
+
+                type:
+                    String(
+                        item.type ||
+                        item.paymentType ||
+                        item.appointmentType ||
+                        "OFFLINE"
+                    ).toUpperCase(),
+
+                appointmentNumber:
+                    item.appointmentNumber ||
+                    item.appointmentCode ||
+                    "-",
+
+                appointmentId:
+                    item.appointmentId ||
+                    item.consultationId ||
+                    null,
+
+                date:
+                    item.date ||
+                    item.paymentDate ||
+                    item.createdAt,
+
+                paymentMethod:
+                    item.paymentMethod ||
+                    item.gateway ||
+                    "PAYU",
+
+                amount:
+                    Number(
+                        item.amount || 0
+                    ),
+
+                status:
+                    String(
+                        item.status ||
+                        item.paymentStatus ||
+                        "PENDING"
+                    ).toUpperCase(),
+
+                gatewayTransactionId:
+                    item.gatewayTransactionId ||
+                    item.payuTransactionId ||
+                    "-",
+
+                notes:
+                    item.notes ||
+                    item.description ||
+                    "-"
+            };
+        }
+
+        function getDemoTransactions() {
+            return [
+                {
+                    id: 1,
+                    transactionNumber: "TXN-1001",
+                    patientName: "Nisha Rao",
+                    patientPhone: "9876543210",
+                    type: "ONLINE",
+                    appointmentNumber: "APT-1001",
+                    appointmentId: 101,
+                    date: "2026-07-14T10:00:00",
+                    paymentMethod: "PAYU",
+                    amount: 200,
+                    status: "SUCCESS",
+                    gatewayTransactionId: "PAYU-102938",
+                    notes: "Online consultation fee"
+                },
+                {
+                    id: 2,
+                    transactionNumber: "TXN-1002",
+                    patientName: "Raghavendra Bhat",
+                    patientPhone: "9876543211",
+                    type: "OFFLINE",
+                    appointmentNumber: "APT-1002",
+                    appointmentId: 102,
+                    date: "2026-07-14T09:00:00",
+                    paymentMethod: "PAYU",
+                    amount: 50,
+                    status: "SUCCESS",
+                    gatewayTransactionId: "PAYU-102939",
+                    notes: "Offline booking fee"
+                },
+                {
+                    id: 3,
+                    transactionNumber: "TXN-1003",
+                    patientName: "Anitha Shetty",
+                    patientPhone: "9876543212",
+                    type: "THERAPY",
+                    appointmentNumber: "THR-1003",
+                    appointmentId: 103,
+                    date: "2026-07-13T11:30:00",
+                    paymentMethod: "PAYU",
+                    amount: 50,
+                    status: "SUCCESS",
+                    gatewayTransactionId: "PAYU-102940",
+                    notes: "Therapy booking fee"
+                },
+                {
+                    id: 4,
+                    transactionNumber: "TXN-1004",
+                    patientName: "Kiran Kumar",
+                    patientPhone: "9876543213",
+                    type: "ONLINE",
+                    appointmentNumber: "APT-1004",
+                    appointmentId: 104,
+                    date: "2026-07-12T15:00:00",
+                    paymentMethod: "PAYU",
+                    amount: 200,
+                    status: "REFUNDED",
+                    gatewayTransactionId: "PAYU-102941",
+                    notes: "Consultation cancelled"
+                },
+                {
+                    id: 5,
+                    transactionNumber: "TXN-1005",
+                    patientName: "Meghana P",
+                    patientPhone: "9876543214",
+                    type: "ONLINE",
+                    appointmentNumber: "APT-1005",
+                    appointmentId: 105,
+                    date: "2026-07-11T15:30:00",
+                    paymentMethod: "PAYU",
+                    amount: 200,
+                    status: "PENDING",
+                    gatewayTransactionId: "-",
+                    notes: "Payment pending"
+                }
+            ];
+        }
+
+        function updateSummary() {
+            const today =
+                formatDateForInput(
+                    new Date()
+                );
+
+            const currentDate =
+                new Date();
+
+            const currentMonth =
+                currentDate.getMonth();
+
+            const currentYear =
+                currentDate.getFullYear();
+
+            const successful =
+                allTransactions.filter(
+                    transaction =>
+                        transaction.status ===
+                            "SUCCESS" ||
+                        transaction.status ===
+                            "PAID"
+                );
+
+            const todayAmount =
+                successful
+                    .filter(
+                        transaction =>
+                            getDateOnly(
+                                transaction.date
+                            ) === today
+                    )
+                    .reduce(
+                        (total, transaction) =>
+                            total +
+                            transaction.amount,
+                        0
+                    );
+
+            const monthlyAmount =
+                successful
+                    .filter(
+                        transaction => {
+                            const date =
+                                new Date(
+                                    transaction.date
+                                );
+
+                            return (
+                                date.getMonth() ===
+                                    currentMonth &&
+                                date.getFullYear() ===
+                                    currentYear
+                            );
+                        }
+                    )
+                    .reduce(
+                        (total, transaction) =>
+                            total +
+                            transaction.amount,
+                        0
+                    );
+
+            const onlineAmount =
+                successful
+                    .filter(
+                        transaction =>
+                            transaction.type ===
+                            "ONLINE"
+                    )
+                    .reduce(
+                        (total, transaction) =>
+                            total +
+                            transaction.amount,
+                        0
+                    );
+
+            const offlineAmount =
+                successful
+                    .filter(
+                        transaction =>
+                            transaction.type ===
+                                "OFFLINE" ||
+                            transaction.type ===
+                                "THERAPY"
+                    )
+                    .reduce(
+                        (total, transaction) =>
+                            total +
+                            transaction.amount,
+                        0
+                    );
+
+            const refundAmount =
+                allTransactions
+                    .filter(
+                        transaction =>
+                            transaction.status ===
+                            "REFUNDED"
+                    )
+                    .reduce(
+                        (total, transaction) =>
+                            total +
+                            transaction.amount,
+                        0
+                    );
+
+            setMoney(
+                "todayCollection",
+                todayAmount
+            );
+
+            setMoney(
+                "monthlyCollection",
+                monthlyAmount
+            );
+
+            setMoney(
+                "onlineCollection",
+                onlineAmount
+            );
+
+            setMoney(
+                "offlineCollection",
+                offlineAmount
+            );
+
+            setMoney(
+                "refundCollection",
+                refundAmount
+            );
+        }
+
+        function setMoney(id, amount) {
+            document.getElementById(
+                id
+            ).textContent =
+                "₹" +
+                Number(amount).toLocaleString(
+                    "en-IN"
+                );
+        }
+
+        function applyFilters() {
+            const search =
+                document.getElementById(
+                    "searchInput"
+                ).value
+                .trim()
+                .toLowerCase();
+
+            const type =
+                document.getElementById(
+                    "typeFilter"
+                ).value;
+
+            const status =
+                document.getElementById(
+                    "statusFilter"
+                ).value;
+
+            const fromDate =
+                document.getElementById(
+                    "fromDate"
+                ).value;
+
+            const toDate =
+                document.getElementById(
+                    "toDate"
+                ).value;
+
+            filteredTransactions =
+                allTransactions.filter(
+                    function (transaction) {
+                        const transactionDate =
+                            getDateOnly(
+                                transaction.date
+                            );
+
+                        const matchesSearch =
+                            !search ||
+                            transaction.patientName
+                                .toLowerCase()
+                                .includes(search) ||
+                            transaction.patientPhone
+                                .toLowerCase()
+                                .includes(search) ||
+                            transaction.transactionNumber
+                                .toLowerCase()
+                                .includes(search);
+
+                        const matchesType =
+                            !type ||
+                            transaction.type === type;
+
+                        const matchesStatus =
+                            !status ||
+                            transaction.status === status;
+
+                        const matchesFromDate =
+                            !fromDate ||
+                            transactionDate >=
+                                fromDate;
+
+                        const matchesToDate =
+                            !toDate ||
+                            transactionDate <=
+                                toDate;
+
+                        return (
+                            matchesSearch &&
+                            matchesType &&
+                            matchesStatus &&
+                            matchesFromDate &&
+                            matchesToDate
+                        );
+                    }
+                );
+
+            currentPage = 1;
+            renderTransactions();
+        }
+
+        function resetFilters() {
+            document.getElementById(
+                "searchInput"
+            ).value = "";
+
+            document.getElementById(
+                "typeFilter"
+            ).value = "";
+
+            document.getElementById(
+                "statusFilter"
+            ).value = "";
+
+            document.getElementById(
+                "fromDate"
+            ).value = "";
+
+            document.getElementById(
+                "toDate"
+            ).value = "";
+
+            applyFilters();
+        }
+
+        function showLoading() {
+            document.getElementById(
+                "transactionTableBody"
+            ).innerHTML = `
+                <tr>
+                    <td
+                        colspan="9"
+                        class="table-message"
+                    >
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Loading transactions...
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderTransactions() {
+            const body =
+                document.getElementById(
+                    "transactionTableBody"
+                );
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredTransactions.length /
+                        pageSize
+                    )
+                );
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            const startIndex =
+                (currentPage - 1) *
+                pageSize;
+
+            const pageItems =
+                filteredTransactions.slice(
+                    startIndex,
+                    startIndex + pageSize
+                );
+
+            document.getElementById(
+                "resultCount"
+            ).textContent =
+                `${filteredTransactions.length} Transaction${
+                    filteredTransactions.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+            if (pageItems.length === 0) {
+                body.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="9"
+                            class="table-message"
+                        >
+                            <i class="fa-solid fa-receipt"></i>
+                            No transactions found.
+                        </td>
+                    </tr>
+                `;
+
+                updatePaginationInfo(
+                    0,
+                    0,
+                    0
+                );
+
+                renderPaginationButtons(1);
+                return;
+            }
+
+            body.innerHTML = "";
+
+            pageItems.forEach(
+                function (transaction) {
+                    body.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${escapeHtml(
+                                        transaction.transactionNumber
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+
+                                <div class="patient-cell">
+
+                                    <span class="patient-avatar-small">
+                                        ${escapeHtml(
+                                            transaction.patientName
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        )}
+                                    </span>
+
+                                    <div>
+
+                                        <strong>
+                                            ${escapeHtml(
+                                                transaction.patientName
+                                            )}
+                                        </strong>
+
+                                        <small>
+                                            ${escapeHtml(
+                                                transaction.patientPhone
+                                            )}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                ${createTypeBadge(
+                                    transaction.type
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    transaction.appointmentNumber
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    formatDateTime(
+                                        transaction.date
+                                    )
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    transaction.paymentMethod
+                                )}
+                            </td>
+
+                            <td>
+                                <span class="amount">
+                                    ₹${Number(
+                                        transaction.amount
+                                    ).toLocaleString(
+                                        "en-IN"
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${createStatusBadge(
+                                    transaction.status
+                                )}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    type="button"
+                                    class="view-button"
+                                    onclick="openTransactionModal('${transaction.id}')"
+                                    title="View details"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+
+                            </td>
+
+                        </tr>
+                        `
+                    );
+                }
+            );
+
+            updatePaginationInfo(
+                startIndex + 1,
+                Math.min(
+                    startIndex + pageSize,
+                    filteredTransactions.length
+                ),
+                filteredTransactions.length
+            );
+
+            renderPaginationButtons(
+                totalPages
+            );
+        }
+
+        function createTypeBadge(type) {
+            const details = {
+                ONLINE: {
+                    className:
+                        "type-online",
+                    icon:
+                        "fa-video",
+                    label:
+                        "Online"
+                },
+
+                THERAPY: {
+                    className:
+                        "type-therapy",
+                    icon:
+                        "fa-spa",
+                    label:
+                        "Therapy"
+                },
+
+                OFFLINE: {
+                    className:
+                        "type-offline",
+                    icon:
+                        "fa-hospital-user",
+                    label:
+                        "Offline"
+                }
+            };
+
+            const selected =
+                details[type] ||
+                details.OFFLINE;
+
+            return `
+                <span
+                    class="type-badge ${selected.className}"
+                >
+                    <i class="fa-solid ${selected.icon}"></i>
+                    ${selected.label}
+                </span>
+            `;
+        }
+
+        function createStatusBadge(status) {
+            const normalized =
+                String(status || "PENDING")
+                    .toUpperCase();
+
+            let className =
+                "status-pending";
+
+            if (
+                normalized === "SUCCESS" ||
+                normalized === "PAID"
+            ) {
+                className =
+                    "status-success";
+
+            } else if (
+                normalized === "FAILED" ||
+                normalized === "REFUNDED"
+            ) {
+                className =
+                    "status-failed";
+            }
+
+            return `
+                <span
+                    class="status-badge ${className}"
+                >
+                    ${escapeHtml(
+                        formatStatus(normalized)
+                    )}
+                </span>
+            `;
+        }
+
+        function openTransactionModal(id) {
+            const transaction =
+                allTransactions.find(
+                    item =>
+                        String(item.id) ===
+                        String(id)
+                );
+
+            if (!transaction) {
+                return;
+            }
+
+            document.getElementById(
+                "transactionModalContent"
+            ).innerHTML = `
+                <div class="details-grid">
+
+                    <div class="detail-box">
+
+                        <span>Transaction ID</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.transactionNumber
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Gateway ID</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.gatewayTransactionId
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Patient</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.patientName
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Phone</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.patientPhone
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Appointment</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.appointmentNumber
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Payment Type</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                formatStatus(
+                                    transaction.type
+                                )
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Amount</span>
+
+                        <strong>
+                            ₹${Number(
+                                transaction.amount
+                            ).toLocaleString(
+                                "en-IN"
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Status</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                formatStatus(
+                                    transaction.status
+                                )
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Payment Method</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.paymentMethod
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Date</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                formatDateTime(
+                                    transaction.date
+                                )
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box full-width">
+
+                        <span>Notes</span>
+
+                        <strong>
+                            ${escapeHtml(
+                                transaction.notes
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+            `;
+
+            document.getElementById(
+                "transactionModal"
+            ).classList.add("show");
+        }
+
+        function closeTransactionModal() {
+            document.getElementById(
+                "transactionModal"
+            ).classList.remove("show");
+        }
+
+        function handleModalOutside(event) {
+            if (
+                event.target.id ===
+                "transactionModal"
+            ) {
+                closeTransactionModal();
+            }
+        }
+
+        function updatePaginationInfo(
+            start,
+            end,
+            total
+        ) {
+            document.getElementById(
+                "paginationInfo"
+            ).textContent =
+                total === 0
+                    ? "Showing 0 transactions"
+                    : `Showing ${start}–${end} of ${total} transactions`;
+        }
+
+        function renderPaginationButtons(
+            totalPages
+        ) {
+            const container =
+                document.getElementById(
+                    "paginationButtons"
+                );
+
+            container.innerHTML = "";
+
+            const previous =
+                document.createElement(
+                    "button"
+                );
+
+            previous.type = "button";
+            previous.className =
+                "pagination-button";
+
+            previous.innerHTML =
+                '<i class="fa-solid fa-chevron-left"></i>';
+
+            previous.disabled =
+                currentPage === 1;
+
+            previous.onclick =
+                function () {
+                    changePage(
+                        currentPage - 1
+                    );
+                };
+
+            container.appendChild(
+                previous
+            );
+
+            for (
+                let page = 1;
+                page <= totalPages;
+                page++
+            ) {
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                button.type =
+                    "button";
+
+                button.className =
+                    `pagination-button ${
+                        page === currentPage
+                            ? "active"
+                            : ""
+                    }`;
+
+                button.textContent =
+                    page;
+
+                button.onclick =
+                    function () {
+                        changePage(page);
+                    };
+
+                container.appendChild(
+                    button
+                );
+            }
+
+            const next =
+                document.createElement(
+                    "button"
+                );
+
+            next.type = "button";
+            next.className =
+                "pagination-button";
+
+            next.innerHTML =
+                '<i class="fa-solid fa-chevron-right"></i>';
+
+            next.disabled =
+                currentPage ===
+                totalPages;
+
+            next.onclick =
+                function () {
+                    changePage(
+                        currentPage + 1
+                    );
+                };
+
+            container.appendChild(next);
+        }
+
+        function changePage(page) {
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredTransactions.length /
+                        pageSize
+                    )
+                );
+
+            if (
+                page < 1 ||
+                page > totalPages
+            ) {
+                return;
+            }
+
+            currentPage = page;
+            renderTransactions();
+        }
+
+        function toggleSidebar() {
+            document.getElementById(
+                "doctorSidebar"
+            ).classList.toggle("open");
+
+            document.getElementById(
+                "sidebarOverlay"
+            ).classList.toggle("show");
+        }
+
+        function closeSidebar() {
+            document.getElementById(
+                "doctorSidebar"
+            ).classList.remove("open");
+
+            document.getElementById(
+                "sidebarOverlay"
+            ).classList.remove("show");
+        }
+
+        function showAlert(
+            message,
+            type
+        ) {
+            const box =
+                document.getElementById(
+                    "pageAlert"
+                );
+
+            const icon =
+                document.getElementById(
+                    "alertIcon"
+                );
+
+            document.getElementById(
+                "alertMessage"
+            ).textContent = message;
+
+            box.className =
+                `page-alert show ${type}`;
+
+            icon.className =
+                type === "error"
+                    ? "fa-solid fa-circle-exclamation"
+                    : "fa-solid fa-circle-info";
+
+            clearTimeout(
+                window.alertTimer
+            );
+
+            window.alertTimer =
+                setTimeout(
+                    function () {
+                        box.classList.remove(
+                            "show"
+                        );
+                    },
+                    4000
+                );
+        }
+
+        function getDateOnly(value) {
+            if (!value) {
+                return "";
+            }
+
+            return String(value)
+                .substring(0, 10);
+        }
+
+        function formatDateForInput(date) {
+            const year =
+                date.getFullYear();
+
+            const month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(2, "0");
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(2, "0");
+
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateTime(value) {
+            if (!value) {
+                return "-";
+            }
+
+            const date =
+                new Date(value);
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+                return String(value);
+            }
+
+            return date.toLocaleString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+        }
+
+        function formatStatus(value) {
+            return String(value || "-")
+                .replaceAll("_", " ")
+                .toLowerCase()
+                .replace(
+                    /\b\w/g,
+                    character =>
+                        character.toUpperCase()
+                );
+        }
+
+        function escapeHtml(value) {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
+            }
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+    </script>
+
+</body>
+</html>

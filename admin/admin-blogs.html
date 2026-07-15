@@ -10,101 +10,169 @@
 <link rel="icon" href="../assets/main_logo.jpeg">
 
 <style>
-
-.admin-page{
-    width:95%;
-    margin:30px auto;
+* {
+    box-sizing: border-box;
 }
 
-.admin-page h1{
-    color:#1b5e20;
-    margin-bottom:20px;
+html,
+body {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.add-btn{
-    display:inline-block;
-    background:#1b5e20;
-    color:white;
-    padding:12px 20px;
-    text-decoration:none;
-    border-radius:8px;
-    margin-bottom:20px;
+body {
+    min-height: 100vh;
+    background: #fffaf1;
+    font-family: Arial, sans-serif;
+    padding-top: 0 !important;
 }
 
-.admin-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    box-shadow:0 5px 15px rgba(0,0,0,.1);
+/* Remove any global header spacing from style.css */
+.admin-page {
+    width: 95%;
+    max-width: 1200px;
+    margin: 25px auto !important;
+    padding: 25px 30px;
+    background: #ffffff;
+    border-radius: 4px;
 }
 
-.admin-table th{
-    background:#2e7d32;
-    color:white;
-    padding:14px;
+.admin-page h1 {
+    color: #1b5e20;
+    margin: 0 0 20px;
+    font-size: 26px;
 }
 
-.admin-table td{
-    padding:12px;
-    border-bottom:1px solid #ddd;
-    text-align:center;
+.add-btn {
+    display: inline-block;
+    background: #1b5e20;
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
 
-.blog-thumb{
-    width:80px;
-    height:60px;
-    object-fit:cover;
-    border-radius:6px;
+.add-btn:hover {
+    background: #124717;
 }
 
-.action-buttons{
-    display:flex;
-    justify-content:center;
-    gap:8px;
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table th {
+    background: #2e7d32;
+    color: white;
+    padding: 14px;
+    text-align: center;
+}
+
+.admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.blog-thumb {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+    margin: auto;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .edit-btn,
 .publish-btn,
-.delete-btn{
-
-    border:none;
-    padding:8px 12px;
-    border-radius:6px;
-    cursor:pointer;
-    color:white;
-    text-decoration:none;
-
+.delete-btn {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
 }
 
-.edit-btn{
-    background:#1976d2;
+.edit-btn {
+    background: #1976d2;
 }
 
-.publish-btn{
-    background:#2e7d32;
+.publish-btn {
+    background: #2e7d32;
 }
 
-.delete-btn{
-    background:#d32f2f;
+.delete-btn {
+    background: #d32f2f;
 }
 
-.status{
-
-    padding:4px 10px;
-    border-radius:15px;
-    color:white;
-    font-size:13px;
-
+.edit-btn:hover {
+    background: #125ca5;
 }
 
-.draft{
-    background:#ff9800;
+.publish-btn:hover {
+    background: #1b5e20;
 }
 
-.published{
-    background:#2e7d32;
+.delete-btn:hover {
+    background: #a82222;
 }
 
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    color: white;
+    font-size: 13px;
+}
+
+.draft {
+    background: #ff9800;
+}
+
+.published {
+    background: #2e7d32;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .admin-page {
+        width: 94%;
+        margin: 15px auto !important;
+        padding: 20px 15px;
+    }
+
+    .admin-page h1 {
+        font-size: 23px;
+    }
+
+    .admin-table {
+        min-width: 850px;
+    }
+}
+</style>
 </style>
 
 </head>

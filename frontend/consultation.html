@@ -1,135 +1,1224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Book Consultation - Neolife Wellness Center</title>
-  <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
-  <link rel="stylesheet" href="../css/style.css">
 
-  <style>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Consultation - Neolife Wellness Center</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="../assets/main_logo.jpeg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+
+        :root{
+
+            --dark-green:#143b28;
+            --green:#2b6a41;
+            --gold:#c89c19;
+            --gold-dark:#9d7400;
+            --white:#ffffff;
+            --cream:#f8f8f4;
+            --text:#173726;
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+
+            background:var(--cream);
+
+            font-family:Arial,sans-serif;
+
+            padding-top:85px;
+        }
+
+        /* =========================
+   NAVBAR
+========================= */
+
+.main-header{
+    width:100%;
+    height:85px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+
+    display:flex;
+    align-items:center;
+
+    padding:0 18px;
+
+    background:#ffffff;
+
+    border-top:1px solid #dddddd;
+    border-bottom:2px solid #193f2c;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.header-logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    text-decoration:none;
+    flex-shrink:0;
+}
+
+.header-logo-img{
+    width:56px;
+    height:56px;
+
+    object-fit:cover;
+    border-radius:50%;
+
+    border:2px solid #d4af37;
+}
+
+.logo-information{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.logo-title{
+    color:#153d29;
+
+    font-size:18px;
+    font-weight:800;
+    line-height:1.1;
+
+    white-space:nowrap;
+}
+
+.logo-subtitle{
+    color:#a87800;
+
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1.3px;
+
+    white-space:nowrap;
+}
+
+.desktop-navigation{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+
+    gap:17px;
+    margin-left:auto;
+}
+
+.desktop-navigation a{
+    position:relative;
+
+    color:#163b28;
+
+    text-decoration:none;
+    font-size:13px;
+    font-weight:800;
+
+    white-space:nowrap;
+
+    transition:.25s;
+}
+
+.desktop-navigation a:hover,
+.desktop-navigation a.active{
+    color:#a87800;
+}
+
+.desktop-navigation a::after{
+    content:"";
+
+    position:absolute;
+    left:50%;
+    bottom:-9px;
+
+    width:0;
+    height:2px;
+
+    background:#b88a00;
+
+    transform:translateX(-50%);
+    transition:.25s;
+}
+
+.desktop-navigation a:hover::after,
+.desktop-navigation a.active::after{
+    width:100%;
+}
+
+.profile-icon{
+    width:44px;
+    height:44px;
+
+    margin-left:15px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:50%;
+
+    background:linear-gradient(
+        145deg,
+        #d7ae24,
+        #ae7d00
+    );
+
+    color:#ffffff;
+    text-decoration:none;
+
+    font-size:18px;
+    font-weight:800;
+
+    box-shadow:
+        0 8px 18px rgba(174,125,0,.25);
+}
+
+.mobile-menu-button{
+    display:none;
+
+    width:42px;
+    height:42px;
+
+    margin-left:10px;
+
+    border:none;
+    border-radius:9px;
+
+    background:#153d29;
+    color:#ffffff;
+
+    font-size:19px;
+    cursor:pointer;
+}
+
+.mobile-navigation{
+    display:none;
+}
+
+@media(max-width:1100px){
+
+    .main-header{
+        padding:0 14px;
+    }
+
+    .desktop-navigation{
+        gap:11px;
+    }
+
+    .desktop-navigation a{
+        font-size:12px;
+    }
+
+    .logo-title{
+        font-size:16px;
+    }
+
+    .logo-subtitle{
+        font-size:11px;
+    }
+
+    .header-logo-img{
+        width:52px;
+        height:52px;
+    }
+
+    .profile-icon{
+        width:42px;
+        height:42px;
+        margin-left:10px;
+    }
+}
+
+@media(max-width:900px){
+
     body{
-      padding-top:0;
-      margin:0;
-      font-family:Arial, sans-serif;
-      background:#6f876f;
+        padding-top:78px;
     }
 
-    .consultation-page{
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:40px 20px;
+    .main-header{
+        height:78px;
     }
 
-    .consult-box{
-      width:75%;
-      max-width:850px;
-      background:rgba(255,255,255,0.18);
-      border:1px solid rgba(255,255,255,0.35);
-      border-radius:28px;
-      padding:55px 35px;
-      text-align:center;
-      box-shadow:0 25px 60px rgba(0,0,0,0.18);
-      backdrop-filter:blur(12px);
+    .desktop-navigation{
+        display:none;
     }
 
-    .consult-box h1{
-      color:white;
-      font-size:42px;
-      margin-bottom:15px;
-      font-weight:800;
+    .mobile-menu-button{
+        display:flex;
+        align-items:center;
+        justify-content:center;
     }
 
-    .consult-subtitle{
-      color:#ffd75a;
-      font-size:16px;
-      font-weight:700;
-      margin-bottom:30px;
+    .profile-icon{
+        margin-left:auto;
     }
 
-    .booking-choice{
-      display:flex;
-      justify-content:center;
-      gap:15px;
-      flex-wrap:wrap;
-    }
-
-    .choice-btn{
-      border:none;
-      padding:15px 32px;
-      border-radius:50px;
-      background:linear-gradient(135deg,#ffd76a,#d4a017);
-      color:#0f5c20;
-      font-weight:800;
-      cursor:pointer;
-      min-width:180px;
-      transition:0.3s ease;
-      font-size:14px;
-    }
-
-    .choice-btn.green{
-      background:linear-gradient(135deg,#1b5e20,#2e7d32);
-      color:white;
-    }
-
-    .choice-btn:hover{
-      transform:translateY(-3px);
-      box-shadow:0 10px 25px rgba(0,0,0,0.25);
-    }
-
-    @media(max-width:768px){
-      .consult-box{
-        width:95%;
-        padding:40px 20px;
-      }
-
-      .consult-box h1{
-        font-size:32px;
-      }
-
-      .choice-btn{
+    .mobile-navigation{
         width:100%;
-      }
+
+        position:fixed;
+        top:78px;
+        left:0;
+        z-index:999;
+
+        display:flex;
+        flex-direction:column;
+
+        max-height:0;
+        overflow:hidden;
+
+        padding:0 18px;
+
+        background:#ffffff;
+
+        box-shadow:
+            0 15px 28px rgba(0,0,0,.12);
+
+        transition:
+            max-height .35s ease,
+            padding .35s ease;
     }
-  </style>
+
+    .mobile-navigation.open{
+        max-height:600px;
+
+        padding-top:12px;
+        padding-bottom:20px;
+    }
+
+    .mobile-navigation a{
+        padding:14px 8px;
+
+        color:#153d29;
+
+        border-bottom:1px solid #eeeeee;
+
+        text-decoration:none;
+        font-size:14px;
+        font-weight:700;
+    }
+}
+
+        /* HERO */
+
+        .consult-hero{
+
+            min-height:420px;
+
+            padding:80px 20px;
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            text-align:center;
+
+            background:
+            linear-gradient(
+                rgba(10,35,22,.85),
+                rgba(26,80,49,.80)
+            ),
+            url("../assets/consultation-banner.jpg");
+
+            background-size:cover;
+            background-position:center;
+        }
+
+        .consult-hero-content{
+
+            max-width:900px;
+        }
+
+        .consult-badge{
+
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+
+            padding:12px 22px;
+
+            border-radius:30px;
+
+            border:1px solid rgba(255,255,255,.25);
+
+            background:rgba(255,255,255,.08);
+
+            color:#ffe08a;
+
+            font-size:13px;
+            font-weight:700;
+
+            margin-bottom:25px;
+        }
+
+        .consult-hero h1{
+
+            color:white;
+
+            font-size:65px;
+
+            font-weight:800;
+
+            margin-bottom:20px;
+        }
+
+        .consult-hero h1 span{
+
+            color:var(--gold);
+        }
+
+        .consult-hero p{
+
+            color:rgba(255,255,255,.85);
+
+            font-size:19px;
+
+            line-height:1.8;
+        }
+
+        /* SECTION */
+
+        .consult-section{
+
+            width:92%;
+            max-width:1300px;
+
+            margin:80px auto;
+        }
+
+        .section-title{
+
+            text-align:center;
+
+            margin-bottom:55px;
+        }
+
+        .section-title h2{
+
+            color:var(--dark-green);
+
+            font-size:42px;
+
+            margin-bottom:14px;
+        }
+
+        .section-title p{
+
+            color:#666;
+
+            font-size:17px;
+        }
+
+        /* CARDS */
+
+        .consult-grid{
+
+            display:grid;
+
+            grid-template-columns:
+            repeat(
+                auto-fit,
+                minmax(320px,1fr)
+            );
+
+            gap:35px;
+        }
+
+        .consult-card{
+
+            background:white;
+
+            border-radius:28px;
+
+            overflow:hidden;
+
+            box-shadow:
+            0 15px 45px rgba(0,0,0,.08);
+
+            transition:.35s;
+
+            position:relative;
+        }
+
+        .consult-card:hover{
+
+            transform:translateY(-10px);
+
+            box-shadow:
+            0 25px 55px rgba(0,0,0,.15);
+        }
+
+        .consult-top{
+
+            padding:35px;
+
+            text-align:center;
+
+            background:
+            linear-gradient(
+                135deg,
+                var(--dark-green),
+                var(--green)
+            );
+
+            color:white;
+        }
+
+        .consult-top i{
+
+            font-size:48px;
+
+            margin-bottom:18px;
+        }
+
+        .consult-top h3{
+
+            font-size:28px;
+
+            margin-bottom:12px;
+        }
+
+        .consult-price{
+
+            font-size:30px;
+
+            font-weight:800;
+
+            color:#ffe18c;
+        }
+
+        .consult-content{
+
+            padding:35px;
+        }
+
+        .consult-content p{
+
+            color:#666;
+
+            line-height:1.8;
+
+            margin-bottom:25px;
+        }
+
+        .consult-features{
+
+            list-style:none;
+
+            margin-bottom:30px;
+        }
+
+        .consult-features li{
+
+            margin-bottom:16px;
+
+            color:#444;
+
+            display:flex;
+            align-items:flex-start;
+            gap:12px;
+        }
+
+        .consult-features i{
+
+            color:var(--gold);
+
+            margin-top:4px;
+        }
+
+        .consult-btn{
+
+            width:100%;
+
+            padding:16px;
+
+            border:none;
+
+            border-radius:15px;
+
+            cursor:pointer;
+
+            font-size:16px;
+            font-weight:700;
+
+            color:white;
+
+            background:
+            linear-gradient(
+                135deg,
+                var(--dark-green),
+                var(--green)
+            );
+
+            transition:.3s;
+        }
+
+        .consult-btn:hover{
+
+            background:
+            linear-gradient(
+                135deg,
+                var(--gold),
+                var(--gold-dark)
+            );
+
+            transform:translateY(-3px);
+        }
+
+        /* STEPS */
+
+        .steps-section{
+
+            margin-top:90px;
+        }
+
+        .steps-grid{
+
+            display:grid;
+
+            grid-template-columns:
+            repeat(
+                auto-fit,
+                minmax(220px,1fr)
+            );
+
+            gap:25px;
+        }
+
+        .step-card{
+
+            background:white;
+
+            border-radius:22px;
+
+            padding:30px;
+
+            text-align:center;
+
+            box-shadow:
+            0 10px 30px rgba(0,0,0,.08);
+        }
+
+        .step-number{
+
+            width:60px;
+            height:60px;
+
+            margin:auto auto 18px;
+
+            border-radius:50%;
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            background:var(--gold);
+
+            color:white;
+
+            font-size:22px;
+            font-weight:800;
+        }
+
+        .step-card h4{
+
+            color:var(--dark-green);
+
+            margin-bottom:10px;
+        }
+
+        .step-card p{
+
+            color:#666;
+
+            line-height:1.7;
+        }
+
+        /* MOBILE */
+
+        @media(max-width:768px){
+
+            .consult-hero h1{
+
+                font-size:42px;
+            }
+
+            .consult-hero p{
+
+                font-size:16px;
+            }
+
+            .section-title h2{
+
+                font-size:32px;
+            }
+
+            .consult-grid{
+
+                gap:25px;
+            }
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-<section class="consultation-page">
-  <div class="consult-box">
+    <!-- NAVBAR -->
 
-    <h1>Neolife Booking</h1>
+    <!-- HEADER -->
 
-    <p class="consult-subtitle">
-      Choose Appointment or Online Consultation
-    </p>
+  <header class="main-header">
 
-    <div class="booking-choice">
+  <a href="homepage.html" class="header-logo">
 
-      <button type="button" class="choice-btn" onclick="openAppointmentBooking()">
-        Book Appointment
-      </button>
+    <img
+      src="../assets/main_logo.jpeg"
+      alt="Neolife Logo"
+      class="header-logo-img"
+    >
 
-      <button type="button" class="choice-btn green" onclick="openOnlineConsultation()">
-        Online Consultation
-      </button>
+    <div class="logo-information">
+      <span class="logo-title">
+        Neolife Wellness Center
+      </span>
 
+      <span class="logo-subtitle">
+        Ayush Digital Care
+      </span>
     </div>
 
-  </div>
-</section>
+  </a>
 
-<script>
-  function openAppointmentBooking(){
-    window.location.href = "https://cloud.pappyjoe.com/widget/index/UjhcZVAxCz0DYgNjAzUIYw%3D%3D";
-  }
+  <nav class="desktop-navigation">
 
-  function openOnlineConsultation(){
-    window.location.href = "https://cloud.pappyjoe.com/widget/index/UjhcZVAxCz0DYgNjAzUIYw%3D%3D";
-  }
-</script>
+    <a href="homepage.html">Home</a>
+
+    <a href="about.html">About</a>
+
+    <a href="services.html" >
+      Therapies
+    </a>
+
+    <a href="services.html#beauty">
+      Beauty &amp; Cosmetics
+    </a>
+
+    <a href="products.html">Products</a>
+
+    <a href="consultation.html" class="active">
+      Consultation
+    </a>
+
+    <a href="blog.html" >Blogs</a>
+
+    <a href="contact.html">Contact</a>
+
+  </nav>
+
+  <a href="profile.html" class="profile-icon" id="profileIcon">
+    N
+  </a>
+
+  <button
+    type="button"
+    class="mobile-menu-button"
+    onclick="toggleMobileMenu()"
+    aria-label="Open menu"
+  >
+    <i class="fa-solid fa-bars" id="mobileMenuIcon"></i>
+  </button>
+
+</header>
+
+<nav class="mobile-navigation" id="mobileNavigation">
+
+  <a href="homepage.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Therapies</a>
+  <a href="services.html#beauty">Beauty &amp; Cosmetics</a>
+  <a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a>
+  <a href="blog.html">Blogs</a>
+  <a href="contact.html">Contact</a>
+
+</nav>
+
+    <!-- HERO -->
+
+    <section class="consult-hero">
+
+        <div class="consult-hero-content">
+
+            <div class="consult-badge">
+
+                <i class="fa-solid fa-stethoscope"></i>
+
+                BOOK YOUR CONSULTATION
+
+            </div>
+
+            <h1>
+
+                Your Health,
+                <span>Our Priority</span>
+
+            </h1>
+
+            <p>
+
+                Choose between clinic appointments,
+                online consultation or therapy booking
+                with our experienced doctors.
+
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- CONSULTATION CARDS -->
+
+    <section class="consult-section">
+
+        <div class="section-title">
+
+            <h2>
+
+                Choose Your Service
+
+            </h2>
+
+            <p>
+
+                Select the consultation type that suits you.
+
+            </p>
+
+        </div>
+
+        <div class="consult-grid">
+
+            <!-- OFFLINE -->
+
+            <div class="consult-card">
+
+                <div class="consult-top">
+
+                    <i class="fa-solid fa-hospital"></i>
+
+                    <h3>
+
+                        Book Appointment
+
+                    </h3>
+
+                    <div class="consult-price">
+
+                        ₹50
+
+                    </div>
+
+                </div>
+
+                <div class="consult-content">
+
+                    <p>
+
+                        Visit Neolife Wellness Center
+                        and consult directly with our
+                        doctors.
+
+                    </p>
+
+                    <ul class="consult-features">
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Choose doctor and department
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Pick date and slot
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Pay booking fee ₹50
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Receive confirmation
+
+                        </li>
+
+                    </ul>
+
+                    <button
+                        class="consult-btn"
+                        onclick="goToOfflineBooking()"
+                    >
+
+                        Book Appointment
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- ONLINE -->
+
+            <div class="consult-card">
+
+                <div class="consult-top">
+
+                    <i class="fa-solid fa-video"></i>
+
+                    <h3>
+
+                        Online Consultation
+
+                    </h3>
+
+                    <div class="consult-price">
+
+                        ₹200
+
+                    </div>
+
+                </div>
+
+                <div class="consult-content">
+
+                    <p>
+
+                        Talk to doctors from home
+                        through secure online video
+                        consultation.
+
+                    </p>
+
+                    <ul class="consult-features">
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Video consultation
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Live prescription
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Meet link for 20 minutes
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Prescription in dashboard
+
+                        </li>
+
+                    </ul>
+
+                    <button
+                        class="consult-btn"
+                        onclick="goToOnlineConsultation()"
+                    >
+
+                        Start Consultation
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- THERAPY -->
+
+            <div class="consult-card">
+
+                <div class="consult-top">
+
+                    <i class="fa-solid fa-spa"></i>
+
+                    <h3>
+
+                        Therapy Booking
+
+                    </h3>
+
+                    <div class="consult-price">
+
+                        ₹50
+
+                    </div>
+
+                </div>
+
+                <div class="consult-content">
+
+                    <p>
+
+                        Book Panchakarma,
+                        Acupuncture, Yoga,
+                        Naturopathy and Beauty
+                        therapies.
+
+                    </p>
+
+                    <ul class="consult-features">
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Select therapy
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Select doctor
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Schedule sessions
+
+                        </li>
+
+                        <li>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Doctor approval
+
+                        </li>
+
+                    </ul>
+
+                    <button
+                        class="consult-btn"
+                        onclick="goToTherapyBooking()"
+                    >
+
+                        Book Therapy
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- HOW IT WORKS -->
+
+        <div class="steps-section">
+
+            <div class="section-title">
+
+                <h2>
+
+                    How It Works
+
+                </h2>
+
+            </div>
+
+            <div class="steps-grid">
+
+                <div class="step-card">
+
+                    <div class="step-number">
+                        1
+                    </div>
+
+                    <h4>
+
+                        Select Service
+
+                    </h4>
+
+                    <p>
+
+                        Choose appointment,
+                        consultation or therapy.
+
+                    </p>
+
+                </div>
+
+                <div class="step-card">
+
+                    <div class="step-number">
+                        2
+                    </div>
+
+                    <h4>
+
+                        Choose Doctor
+
+                    </h4>
+
+                    <p>
+
+                        Select doctor, department
+                        and time slot.
+
+                    </p>
+
+                </div>
+
+                <div class="step-card">
+
+                    <div class="step-number">
+                        3
+                    </div>
+
+                    <h4>
+
+                        Pay Online
+
+                    </h4>
+
+                    <p>
+
+                        Secure payment through
+                        PayU.
+
+                    </p>
+
+                </div>
+
+                <div class="step-card">
+
+                    <div class="step-number">
+                        4
+                    </div>
+
+                    <h4>
+
+                        Get Confirmation
+
+                    </h4>
+
+                    <p>
+
+                        Receive WhatsApp and
+                        email confirmation.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <div class="footer-bottom">
+
+            <p>
+
+                © 2026 Neolife Wellness Center.
+                All Rights Reserved.
+
+            </p>
+
+        </div>
+
+    </footer>
+
+    <script>
+
+        function goToOfflineBooking(){
+
+            window.location.href =
+                "book-appointment.html";
+        }
+
+        function goToOnlineConsultation(){
+
+            window.location.href =
+                "online-consultation.html";
+        }
+
+        function goToTherapyBooking(){
+
+            window.location.href =
+                "therapy-booking.html";
+        }
+
+    </script>
 
 </body>
 </html>
