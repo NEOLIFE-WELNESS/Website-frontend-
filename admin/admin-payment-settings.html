@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Payment Settings - Neolife Admin Portal</title>
+
+<link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+>
+
+<style>
+:root{
+  --dark-green:#153d29;
+  --green:#2d6844;
+  --green-light:#edf5ef;
+  --gold:#c99a16;
+  --gold-dark:#9b7200;
+  --cream:#f6f8f4;
+  --white:#ffffff;
+  --text:#173c29;
+  --muted:#6e7871;
+  --border:#dfe7e1;
+  --success:#287146;
+  --success-light:#ebf7ef;
+  --warning:#d88b18;
+  --warning-light:#fff6e8;
+  --danger:#c74747;
+  --danger-light:#fff0f0;
+  --info:#31708f;
+  --info-light:#edf6fb;
+  --purple:#76548f;
+  --purple-light:#f5effb;
+  --sidebar-width:285px;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  font-family:Arial, Helvetica, sans-serif;
+  color:var(--text);
+  background:var(--cream);
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+.admin-layout{
+  min-height:100vh;
+  display:flex;
+}
+
+/* SIDEBAR */
+
+.admin-sidebar{
+  width:var(--sidebar-width);
+  height:100vh;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:1000;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  color:var(--white);
+  background:linear-gradient(180deg,#123824,#1e5134);
+  box-shadow:8px 0 30px rgba(18,56,36,.14);
+  transition:transform .3s ease;
+}
+
+.admin-brand{
+  min-height:104px;
+  padding:20px 18px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.admin-brand img{
+  width:58px;
+  height:58px;
+  object-fit:cover;
+  border-radius:50%;
+  border:2px solid var(--gold);
+  background:var(--white);
+}
+
+.admin-brand h2{
+  margin-bottom:5px;
+  font-size:18px;
+  font-weight:800;
+}
+
+.admin-brand span{
+  color:#f2cf69;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.3px;
+  text-transform:uppercase;
+}
+
+.admin-menu{
+  flex:1;
+  padding:18px 13px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) transparent;
+}
+
+.admin-menu::-webkit-scrollbar{
+  width:6px;
+}
+
+.admin-menu::-webkit-scrollbar-thumb{
+  background:var(--gold);
+  border-radius:10px;
+}
+
+.menu-label{
+  display:block;
+  margin:10px 12px 9px;
+  color:rgba(255,255,255,.46);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+}
+
+.admin-menu a{
+  min-height:46px;
+  margin-bottom:6px;
+  padding:11px 14px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  border-radius:12px;
+  color:rgba(255,255,255,.82);
+  font-size:13px;
+  font-weight:700;
+  transition:.25s;
+}
+
+.admin-menu a i{
+  width:21px;
+  text-align:center;
+  font-size:16px;
+}
+
+.admin-menu a:hover,
+.admin-menu a.active{
+  color:var(--dark-green);
+  background:var(--white);
+  transform:translateX(3px);
+}
+
+.admin-menu a.active i{
+  color:var(--gold);
+}
+
+.sidebar-footer{
+  padding:17px 13px;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-logout{
+  width:100%;
+  min-height:46px;
+  padding:11px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:12px;
+  color:var(--white);
+  background:rgba(255,255,255,.08);
+  font-size:14px;
+  font-weight:800;
+}
+
+.sidebar-logout:hover{
+  color:var(--dark-green);
+  background:var(--white);
+}
+
+/* MAIN */
+
+.admin-main{
+  width:calc(100% - var(--sidebar-width));
+  min-height:100vh;
+  margin-left:var(--sidebar-width);
+}
+
+.admin-topbar{
+  min-height:86px;
+  padding:15px 28px;
+  position:sticky;
+  top:0;
+  z-index:900;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  background:rgba(255,255,255,.96);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 4px 18px rgba(18,56,36,.06);
+  backdrop-filter:blur(14px);
+}
+
+.topbar-left,
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.sidebar-toggle{
+  display:none;
+  width:43px;
+  height:43px;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  border-radius:11px;
+  color:var(--white);
+  background:var(--dark-green);
+  font-size:18px;
+}
+
+.page-title h1{
+  margin-bottom:5px;
+  color:var(--dark-green);
+  font-size:27px;
+  font-weight:800;
+}
+
+.page-title p{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.topbar-button{
+  width:43px;
+  height:43px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  border-radius:11px;
+  color:var(--dark-green);
+  background:var(--white);
+}
+
+.topbar-button:hover{
+  color:var(--white);
+  background:var(--dark-green);
+}
+
+.admin-profile-box{
+  padding:6px 11px 6px 7px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid var(--border);
+  border-radius:30px;
+  background:var(--white);
+}
+
+.admin-avatar{
+  width:39px;
+  height:39px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--white);
+  background:linear-gradient(145deg,var(--gold),var(--gold-dark));
+  font-size:16px;
+  font-weight:800;
+}
+
+.admin-profile-text strong{
+  display:block;
+  margin-bottom:2px;
+  color:var(--dark-green);
+  font-size:13px;
+}
+
+.admin-profile-text span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.admin-content{
+  padding:28px;
+}
+
+/* BANNER */
+
+.page-banner{
+  margin-bottom:23px;
+  padding:27px 29px;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  border-radius:21px;
+  color:var(--white);
+  background:linear-gradient(120deg,var(--dark-green),#347650);
+  box-shadow:0 16px 38px rgba(21,61,41,.15);
+}
+
+.page-banner::before{
+  content:"";
+  width:230px;
+  height:230px;
+  position:absolute;
+  top:-135px;
+  right:-55px;
+  border-radius:50%;
+  background:rgba(255,255,255,.07);
+}
+
+.page-banner-content,
+.page-banner-icon{
+  position:relative;
+  z-index:2;
+}
+
+.page-banner h2{
+  margin-bottom:8px;
+  font-size:27px;
+  font-weight:800;
+}
+
+.page-banner p{
+  max-width:780px;
+  color:rgba(255,255,255,.82);
+  font-size:13px;
+  line-height:1.7;
+}
+
+.page-banner-icon{
+  width:66px;
+  height:66px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  border-radius:18px;
+  color:#ffe28b;
+  background:rgba(255,255,255,.10);
+  font-size:28px;
+}
+
+/* SUMMARY */
+
+.summary-grid{
+  margin-bottom:23px;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+
+.summary-card{
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  border:1px solid var(--border);
+  border-radius:17px;
+  background:var(--white);
+  box-shadow:0 9px 25px rgba(21,61,41,.06);
+}
+
+.summary-icon{
+  width:49px;
+  height:49px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  border-radius:14px;
+  font-size:19px;
+}
+
+.summary-icon.gateway{
+  color:var(--success);
+  background:var(--success-light);
+}
+
+.summary-icon.mode{
+  color:var(--info);
+  background:var(--info-light);
+}
+
+.summary-icon.webhook{
+  color:var(--purple);
+  background:var(--purple-light);
+}
+
+.summary-icon.refund{
+  color:var(--warning);
+  background:var(--warning-light);
+}
+
+.summary-card p{
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+}
+
+.summary-card h3{
+  color:var(--dark-green);
+  font-size:18px;
+  font-weight:800;
+}
+
+/* SETTINGS PANELS */
+
+.settings-grid{
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:18px;
+}
+
+.settings-panel{
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:21px;
+  background:var(--white);
+  box-shadow:0 11px 32px rgba(21,61,41,.07);
+}
+
+.settings-panel.full-width{
+  grid-column:1/-1;
+}
+
+.panel-header{
+  padding:18px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  border-bottom:1px solid var(--border);
+}
+
+.panel-header h2{
+  margin-bottom:4px;
+  color:var(--dark-green);
+  font-size:19px;
+}
+
+.panel-header p{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.panel-body{
+  padding:22px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+.form-group.full-width{
+  grid-column:1/-1;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:7px;
+  color:var(--dark-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+.form-control{
+  width:100%;
+  min-height:46px;
+  padding:11px 13px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  color:#354039;
+  background:var(--white);
+  outline:none;
+}
+
+.form-control:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(201,154,22,.12);
+}
+
+.input-with-action{
+  position:relative;
+}
+
+.input-with-action .form-control{
+  padding-right:48px;
+}
+
+.input-action{
+  width:38px;
+  height:38px;
+  position:absolute;
+  top:4px;
+  right:4px;
+  border:none;
+  border-radius:9px;
+  color:var(--dark-green);
+  background:var(--green-light);
+}
+
+.help-text{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.5;
+}
+
+.toggle-row{
+  padding:14px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  border-bottom:1px solid #edf0ed;
+}
+
+.toggle-row:last-child{
+  border-bottom:none;
+}
+
+.toggle-info strong{
+  display:block;
+  margin-bottom:4px;
+  color:var(--dark-green);
+  font-size:12px;
+}
+
+.toggle-info span{
+  color:var(--muted);
+  font-size:9px;
+}
+
+.switch{
+  width:48px;
+  height:26px;
+  position:relative;
+  flex-shrink:0;
+}
+
+.switch input{
+  width:0;
+  height:0;
+  opacity:0;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  border-radius:30px;
+  background:#ccd5ce;
+  transition:.25s;
+}
+
+.slider::before{
+  content:"";
+  width:20px;
+  height:20px;
+  position:absolute;
+  left:3px;
+  bottom:3px;
+  border-radius:50%;
+  background:var(--white);
+  box-shadow:0 2px 5px rgba(0,0,0,.18);
+  transition:.25s;
+}
+
+.switch input:checked + .slider{
+  background:var(--dark-green);
+}
+
+.switch input:checked + .slider::before{
+  transform:translateX(22px);
+}
+
+.status-box{
+  padding:16px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:#fbfcfa;
+}
+
+.status-box i{
+  margin-top:2px;
+  color:var(--success);
+  font-size:18px;
+}
+
+.status-box strong{
+  display:block;
+  margin-bottom:5px;
+  color:var(--dark-green);
+  font-size:12px;
+}
+
+.status-box p{
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.6;
+}
+
+.actions{
+  margin-top:20px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.action-button{
+  min-height:44px;
+  padding:11px 18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.test-button{
+  color:var(--dark-green);
+  border:1px solid var(--border);
+  background:var(--white);
+}
+
+.save-button{
+  color:var(--white);
+  border:1px solid var(--dark-green);
+  background:var(--dark-green);
+}
+
+.save-button:hover{
+  background:var(--gold-dark);
+  border-color:var(--gold-dark);
+}
+
+/* ALERT */
+
+.page-alert{
+  width:min(390px,calc(100% - 35px));
+  padding:15px 17px;
+  position:fixed;
+  top:102px;
+  right:22px;
+  z-index:5000;
+  display:none;
+  align-items:flex-start;
+  gap:11px;
+  border-radius:13px;
+  color:var(--white);
+  box-shadow:0 14px 35px rgba(0,0,0,.20);
+}
+
+.page-alert.show{
+  display:flex;
+}
+
+.page-alert.success{
+  background:var(--success);
+}
+
+.page-alert.error{
+  background:var(--danger);
+}
+
+.page-alert.info{
+  background:var(--info);
+}
+
+.sidebar-overlay{
+  position:fixed;
+  inset:0;
+  z-index:950;
+  display:none;
+  background:rgba(13,36,24,.58);
+}
+
+.sidebar-overlay.show{
+  display:block;
+}
+
+@media(max-width:1100px){
+  .summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .settings-grid{
+    grid-template-columns:1fr;
+  }
+
+  .settings-panel.full-width{
+    grid-column:auto;
+  }
+}
+
+@media(max-width:900px){
+  .admin-sidebar{
+    transform:translateX(-100%);
+  }
+
+  .admin-sidebar.open{
+    transform:translateX(0);
+  }
+
+  .admin-main{
+    width:100%;
+    margin-left:0;
+  }
+
+  .sidebar-toggle{
+    display:flex;
+  }
+}
+
+@media(max-width:700px){
+  .admin-topbar{
+    padding:13px 16px;
+  }
+
+  .admin-content{
+    padding:20px 14px;
+  }
+
+  .page-title h1{
+    font-size:21px;
+  }
+
+  .page-title p,
+  .admin-profile-text{
+    display:none;
+  }
+
+  .page-banner{
+    align-items:flex-start;
+    flex-direction:column-reverse;
+  }
+
+  .summary-grid,
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-group.full-width{
+    grid-column:auto;
+  }
+
+  .actions{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .action-button{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page-alert" id="pageAlert">
+  <i class="fa-solid fa-circle-info" id="alertIcon"></i>
+  <div id="alertMessage"></div>
+</div>
+
+<div
+  class="sidebar-overlay"
+  id="sidebarOverlay"
+  onclick="closeSidebar()"
+></div>
+
+<div class="admin-layout">
+
+<aside class="admin-sidebar" id="adminSidebar">
+
+  <div class="admin-brand">
+    <img src="../assets/main_logo.jpeg" alt="Neolife Logo">
+
+    <div>
+      <h2>Neolife</h2>
+      <span>Admin Portal</span>
+    </div>
+  </div>
+
+  <nav class="admin-menu">
+
+    <span class="menu-label">Main</span>
+
+    <a href="admin-dashboard.html">
+      <i class="fa-solid fa-chart-line"></i>
+      Dashboard
+    </a>
+
+    <span class="menu-label">User Management</span>
+
+    <a href="admin-doctors.html">
+      <i class="fa-solid fa-user-doctor"></i>
+      Doctors
+    </a>
+
+    <a href="admin-medical-staff.html">
+      <i class="fa-solid fa-user-nurse"></i>
+      Medical Staff
+    </a>
+
+    <a href="admin-therapists.html">
+      <i class="fa-solid fa-spa"></i>
+      Therapists
+    </a>
+
+    <a href="admin-users.html">
+      <i class="fa-solid fa-users"></i>
+      Patients / Users
+    </a>
+
+    <span class="menu-label">Clinical Oversight</span>
+
+    <a href="admin-appointments.html">
+      <i class="fa-solid fa-calendar-check"></i>
+      Appointments
+    </a>
+
+    <a href="admin-consultations.html">
+      <i class="fa-solid fa-video"></i>
+      Consultations
+    </a>
+
+    <a href="admin-therapy-bookings.html">
+      <i class="fa-solid fa-calendar-days"></i>
+      Therapy Bookings
+    </a>
+
+    <span class="menu-label">Commerce</span>
+
+    <a href="admin-products.html">
+      <i class="fa-solid fa-box-open"></i>
+      Products
+    </a>
+
+    <a href="admin-inventory.html">
+      <i class="fa-solid fa-warehouse"></i>
+      Inventory
+    </a>
+
+    <a href="admin-orders.html">
+      <i class="fa-solid fa-cart-shopping"></i>
+      Orders
+    </a>
+
+    <a href="admin-manufacturers.html">
+      <i class="fa-solid fa-industry"></i>
+      Manufacturers
+    </a>
+
+    <a href="admin-coupons.html">
+      <i class="fa-solid fa-ticket"></i>
+      Coupons
+    </a>
+
+    <span class="menu-label">Content & Reviews</span>
+
+    <a href="admin-blogs.html">
+      <i class="fa-solid fa-newspaper"></i>
+      Blogs
+    </a>
+
+    <a href="admin-offers.html">
+      <i class="fa-solid fa-images"></i>
+      Offers & Banners
+    </a>
+
+    <a href="admin-images.html">
+      <i class="fa-solid fa-photo-film"></i>
+      Image Management
+    </a>
+
+    <a href="admin-clinic-reviews.html">
+      <i class="fa-solid fa-star"></i>
+      Clinic Reviews
+    </a>
+
+    <a href="admin-product-reviews.html">
+      <i class="fa-solid fa-comments"></i>
+      Product Reviews
+    </a>
+
+    <span class="menu-label">Finance & Shipping</span>
+
+    <a href="admin-transactions.html">
+      <i class="fa-solid fa-indian-rupee-sign"></i>
+      Transactions
+    </a>
+
+    <a href="admin-refunds.html">
+      <i class="fa-solid fa-rotate-left"></i>
+      Refunds
+    </a>
+
+    <a href="admin-settlements.html">
+      <i class="fa-solid fa-file-invoice-dollar"></i>
+      Settlements
+    </a>
+
+    <a href="admin-shipping-settings.html">
+      <i class="fa-solid fa-truck-fast"></i>
+      Shipping Settings
+    </a>
+
+    <a href="admin-payment-settings.html" class="active">
+      <i class="fa-solid fa-credit-card"></i>
+      Payment Settings
+    </a>
+
+    <span class="menu-label">System</span>
+
+    <a href="admin-reports.html">
+      <i class="fa-solid fa-chart-column"></i>
+      Reports & Analytics
+    </a>
+
+    <a href="admin-notification-templates.html">
+      <i class="fa-solid fa-envelope-open-text"></i>
+      Notification Templates
+    </a>
+
+    <a href="admin-profile.html">
+      <i class="fa-solid fa-user-gear"></i>
+      My Profile
+    </a>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <button
+      type="button"
+      class="sidebar-logout"
+      onclick="logoutAdmin()"
+    >
+      <i class="fa-solid fa-right-from-bracket"></i>
+      Logout
+    </button>
+  </div>
+
+</aside>
+
+<main class="admin-main">
+
+  <header class="admin-topbar">
+
+    <div class="topbar-left">
+
+      <button
+        type="button"
+        class="sidebar-toggle"
+        onclick="toggleSidebar()"
+      >
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="page-title">
+        <h1>Payment Settings</h1>
+        <p>Configure PayU gateway, payment methods and callbacks.</p>
+      </div>
+
+    </div>
+
+    <div class="topbar-actions">
+
+      <button
+        type="button"
+        class="topbar-button"
+        onclick="loadPaymentSettings()"
+        title="Refresh"
+      >
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+
+      <div class="admin-profile-box">
+
+        <span class="admin-avatar">A</span>
+
+        <div class="admin-profile-text">
+          <strong>Admin</strong>
+          <span>System Administrator</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <section class="admin-content">
+
+    <section class="page-banner">
+
+      <div class="page-banner-content">
+
+        <h2>PayU Gateway Configuration</h2>
+
+        <p>
+          Configure payment credentials, test or production mode, callback URLs,
+          enabled payment methods, refunds and settlement preferences.
+        </p>
+
+      </div>
+
+      <div class="page-banner-icon">
+        <i class="fa-solid fa-credit-card"></i>
+      </div>
+
+    </section>
+
+    <section class="summary-grid">
+
+      <article class="summary-card">
+
+        <div class="summary-icon gateway">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+
+        <div>
+          <p>Gateway Status</p>
+          <h3 id="gatewayStatus">Configured</h3>
+        </div>
+
+      </article>
+
+      <article class="summary-card">
+
+        <div class="summary-icon mode">
+          <i class="fa-solid fa-flask"></i>
+        </div>
+
+        <div>
+          <p>Environment</p>
+          <h3 id="environmentStatus">Test Mode</h3>
+        </div>
+
+      </article>
+
+      <article class="summary-card">
+
+        <div class="summary-icon webhook">
+          <i class="fa-solid fa-link"></i>
+        </div>
+
+        <div>
+          <p>Webhook Status</p>
+          <h3 id="webhookStatus">Enabled</h3>
+        </div>
+
+      </article>
+
+      <article class="summary-card">
+
+        <div class="summary-icon refund">
+          <i class="fa-solid fa-rotate-left"></i>
+        </div>
+
+        <div>
+          <p>Refund Processing</p>
+          <h3 id="refundStatus">Manual</h3>
+        </div>
+
+      </article>
+
+    </section>
+
+    <section class="settings-grid">
+
+      <article class="settings-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <h2>Gateway Credentials</h2>
+            <p>PayU merchant and security configuration.</p>
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="form-group">
+
+              <label for="paymentGateway">Payment Gateway</label>
+
+              <select id="paymentGateway" class="form-control">
+                <option value="PAYU">PayU</option>
+              </select>
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="environment">Environment</label>
+
+              <select
+                id="environment"
+                class="form-control"
+                onchange="updateEnvironmentStatus()"
+              >
+                <option value="TEST">Test / Sandbox</option>
+                <option value="LIVE">Live / Production</option>
+              </select>
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="merchantKey">Merchant Key</label>
+
+              <input
+                type="text"
+                id="merchantKey"
+                class="form-control"
+                placeholder="Enter PayU merchant key"
+              >
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="merchantSalt">Merchant Salt</label>
+
+              <div class="input-with-action">
+
+                <input
+                  type="password"
+                  id="merchantSalt"
+                  class="form-control"
+                  placeholder="Enter PayU merchant salt"
+                >
+
+                <button
+                  type="button"
+                  class="input-action"
+                  onclick="toggleSecret('merchantSalt', this)"
+                  title="Show or hide salt"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+            <div class="form-group full-width">
+
+              <label for="paymentBaseUrl">Payment Base URL</label>
+
+              <input
+                type="url"
+                id="paymentBaseUrl"
+                class="form-control"
+                placeholder="https://test.payu.in/_payment"
+              >
+
+            </div>
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              type="button"
+              class="action-button test-button"
+              onclick="testPaymentConnection()"
+            >
+              <i class="fa-solid fa-plug-circle-check"></i>
+              Test Connection
+            </button>
+
+            <button
+              type="button"
+              class="action-button save-button"
+              onclick="savePaymentSettings()"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+              Save Settings
+            </button>
+
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="settings-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <h2>Payment Methods</h2>
+            <p>Enable payment options shown to customers.</p>
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>UPI</strong>
+              <span>Google Pay, PhonePe, BHIM and other UPI apps.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="upiEnabled" checked>
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Credit & Debit Cards</strong>
+              <span>Visa, Mastercard, RuPay and supported cards.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="cardEnabled" checked>
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Net Banking</strong>
+              <span>Supported Indian bank payment options.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="netBankingEnabled" checked>
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Wallets</strong>
+              <span>Supported mobile wallets through PayU.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="walletEnabled">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Cash on Delivery</strong>
+              <span>Allow COD for eligible product orders.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="codEnabled">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="settings-panel full-width">
+
+        <div class="panel-header">
+
+          <div>
+            <h2>Callback & Webhook Settings</h2>
+            <p>URLs used by PayU after payment success, failure and verification.</p>
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="form-grid">
+
+            <div class="form-group full-width">
+
+              <label for="successUrl">Success Callback URL</label>
+
+              <input
+                type="url"
+                id="successUrl"
+                class="form-control"
+                placeholder="http://localhost:8085/api/payments/payu/success"
+              >
+
+            </div>
+
+            <div class="form-group full-width">
+
+              <label for="failureUrl">Failure Callback URL</label>
+
+              <input
+                type="url"
+                id="failureUrl"
+                class="form-control"
+                placeholder="http://localhost:8085/api/payments/payu/failure"
+              >
+
+            </div>
+
+            <div class="form-group full-width">
+
+              <label for="webhookUrl">Webhook URL</label>
+
+              <input
+                type="url"
+                id="webhookUrl"
+                class="form-control"
+                placeholder="http://localhost:8085/api/payments/payu/webhook"
+              >
+
+              <p class="help-text">
+                In production, use your public HTTPS domain instead of localhost.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="status-box">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+            <div>
+              <strong>Callback Security</strong>
+              <p>
+                Payment responses must be verified on the backend using PayU hash
+                validation before marking an order or consultation as paid.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="settings-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <h2>Refund Settings</h2>
+            <p>Control refund handling and approval rules.</p>
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="form-group">
+
+            <label for="refundMode">Refund Processing Mode</label>
+
+            <select
+              id="refundMode"
+              class="form-control"
+              onchange="updateRefundStatus()"
+            >
+              <option value="MANUAL">Manual Admin Approval</option>
+              <option value="AUTOMATIC">Automatic</option>
+            </select>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="refundWindowDays">Refund Window</label>
+
+            <input
+              type="number"
+              id="refundWindowDays"
+              class="form-control"
+              min="0"
+              value="7"
+              placeholder="Number of days"
+            >
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Allow Partial Refunds</strong>
+              <span>Permit refunds for part of an order amount.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="partialRefundEnabled" checked>
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="settings-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <h2>Settlement Preferences</h2>
+            <p>Configure settlement and reconciliation behavior.</p>
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="form-group">
+
+            <label for="settlementCycle">Expected Settlement Cycle</label>
+
+            <select id="settlementCycle" class="form-control">
+              <option value="T_PLUS_1">T+1 Business Day</option>
+              <option value="T_PLUS_2">T+2 Business Days</option>
+              <option value="T_PLUS_3">T+3 Business Days</option>
+            </select>
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Automatic Reconciliation</strong>
+              <span>Match PayU transactions with internal payments.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="autoReconciliation" checked>
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="toggle-row">
+
+            <div class="toggle-info">
+              <strong>Settlement Alerts</strong>
+              <span>Notify admin about settlement failures or delays.</span>
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" id="settlementAlerts" checked>
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </section>
+
+</main>
+
+</div>
+
+<script>
+const API_BASE_URL =
+  "http://localhost:8085";
+
+window.onload = function(){
+  loadPaymentSettings();
+};
+
+function getToken(){
+  return localStorage.getItem("token");
+}
+
+async function loadPaymentSettings(){
+  const token = getToken();
+
+  if(!token){
+    showAlert(
+      "Please login as admin first.",
+      "error"
+    );
+
+    setTimeout(function(){
+      window.location.href =
+        "../frontend/login.html";
+    },1000);
+
+    return;
+  }
+
+  try{
+    /*
+    Enable this when the backend Payment Settings API is ready:
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/admin/payment-settings/get`,
+      {
+        method:"GET",
+        headers:{
+          "Authorization":"Bearer " + token
+        }
+      }
+    );
+
+    const result = await response.json();
+
+    if(!response.ok || result.success === false){
+      throw new Error(
+        result.message ||
+        "Unable to load payment settings."
+      );
+    }
+
+    fillPaymentSettings(result.data);
+    return;
+    */
+
+    const saved =
+      localStorage.getItem(
+        "neolifePaymentSettings"
+      );
+
+    if(saved){
+      fillPaymentSettings(
+        JSON.parse(saved)
+      );
+    }else{
+      fillPaymentSettings(
+        getDefaultPaymentSettings()
+      );
+    }
+
+  }catch(error){
+    console.error(error);
+
+    showAlert(
+      error.message ||
+      "Unable to load payment settings.",
+      "error"
+    );
+  }
+}
+
+function fillPaymentSettings(settings){
+  document.getElementById(
+    "paymentGateway"
+  ).value =
+    settings.paymentGateway ||
+    "PAYU";
+
+  document.getElementById(
+    "environment"
+  ).value =
+    settings.environment ||
+    "TEST";
+
+  document.getElementById(
+    "merchantKey"
+  ).value =
+    settings.merchantKey ||
+    "";
+
+  document.getElementById(
+    "merchantSalt"
+  ).value =
+    settings.merchantSalt ||
+    "";
+
+  document.getElementById(
+    "paymentBaseUrl"
+  ).value =
+    settings.paymentBaseUrl ||
+    "";
+
+  document.getElementById(
+    "successUrl"
+  ).value =
+    settings.successUrl ||
+    "";
+
+  document.getElementById(
+    "failureUrl"
+  ).value =
+    settings.failureUrl ||
+    "";
+
+  document.getElementById(
+    "webhookUrl"
+  ).value =
+    settings.webhookUrl ||
+    "";
+
+  document.getElementById(
+    "upiEnabled"
+  ).checked =
+    settings.upiEnabled !== false;
+
+  document.getElementById(
+    "cardEnabled"
+  ).checked =
+    settings.cardEnabled !== false;
+
+  document.getElementById(
+    "netBankingEnabled"
+  ).checked =
+    settings.netBankingEnabled !== false;
+
+  document.getElementById(
+    "walletEnabled"
+  ).checked =
+    settings.walletEnabled === true;
+
+  document.getElementById(
+    "codEnabled"
+  ).checked =
+    settings.codEnabled === true;
+
+  document.getElementById(
+    "refundMode"
+  ).value =
+    settings.refundMode ||
+    "MANUAL";
+
+  document.getElementById(
+    "refundWindowDays"
+  ).value =
+    settings.refundWindowDays ??
+    7;
+
+  document.getElementById(
+    "partialRefundEnabled"
+  ).checked =
+    settings.partialRefundEnabled !== false;
+
+  document.getElementById(
+    "settlementCycle"
+  ).value =
+    settings.settlementCycle ||
+    "T_PLUS_2";
+
+  document.getElementById(
+    "autoReconciliation"
+  ).checked =
+    settings.autoReconciliation !== false;
+
+  document.getElementById(
+    "settlementAlerts"
+  ).checked =
+    settings.settlementAlerts !== false;
+
+  updateEnvironmentStatus();
+  updateRefundStatus();
+  updateGatewayStatus();
+}
+
+async function savePaymentSettings(){
+  const token = getToken();
+
+  if(!token){
+    showAlert(
+      "Please login as admin first.",
+      "error"
+    );
+    return;
+  }
+
+  const settings =
+    collectPaymentSettings();
+
+  if(!settings.merchantKey){
+    showAlert(
+      "Please enter the PayU merchant key.",
+      "error"
+    );
+    return;
+  }
+
+  if(!settings.merchantSalt){
+    showAlert(
+      "Please enter the PayU merchant salt.",
+      "error"
+    );
+    return;
+  }
+
+  if(
+    !settings.successUrl ||
+    !settings.failureUrl
+  ){
+    showAlert(
+      "Please enter success and failure callback URLs.",
+      "error"
+    );
+    return;
+  }
+
+  try{
+    /*
+    Enable this when the backend API is ready:
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/admin/payment-settings/save`,
+      {
+        method:"PUT",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token
+        },
+        body:JSON.stringify(settings)
+      }
+    );
+
+    const result = await response.json();
+
+    if(!response.ok || result.success === false){
+      throw new Error(
+        result.message ||
+        "Unable to save payment settings."
+      );
+    }
+    */
+
+    localStorage.setItem(
+      "neolifePaymentSettings",
+      JSON.stringify(settings)
+    );
+
+    updateGatewayStatus();
+
+    showAlert(
+      "Payment settings saved successfully.",
+      "success"
+    );
+
+  }catch(error){
+    console.error(error);
+
+    showAlert(
+      error.message ||
+      "Unable to save payment settings.",
+      "error"
+    );
+  }
+}
+
+function collectPaymentSettings(){
+  return {
+    paymentGateway:
+      document.getElementById(
+        "paymentGateway"
+      ).value,
+
+    environment:
+      document.getElementById(
+        "environment"
+      ).value,
+
+    merchantKey:
+      document.getElementById(
+        "merchantKey"
+      ).value.trim(),
+
+    merchantSalt:
+      document.getElementById(
+        "merchantSalt"
+      ).value.trim(),
+
+    paymentBaseUrl:
+      document.getElementById(
+        "paymentBaseUrl"
+      ).value.trim(),
+
+    successUrl:
+      document.getElementById(
+        "successUrl"
+      ).value.trim(),
+
+    failureUrl:
+      document.getElementById(
+        "failureUrl"
+      ).value.trim(),
+
+    webhookUrl:
+      document.getElementById(
+        "webhookUrl"
+      ).value.trim(),
+
+    upiEnabled:
+      document.getElementById(
+        "upiEnabled"
+      ).checked,
+
+    cardEnabled:
+      document.getElementById(
+        "cardEnabled"
+      ).checked,
+
+    netBankingEnabled:
+      document.getElementById(
+        "netBankingEnabled"
+      ).checked,
+
+    walletEnabled:
+      document.getElementById(
+        "walletEnabled"
+      ).checked,
+
+    codEnabled:
+      document.getElementById(
+        "codEnabled"
+      ).checked,
+
+    refundMode:
+      document.getElementById(
+        "refundMode"
+      ).value,
+
+    refundWindowDays:
+      Number(
+        document.getElementById(
+          "refundWindowDays"
+        ).value ||
+        0
+      ),
+
+    partialRefundEnabled:
+      document.getElementById(
+        "partialRefundEnabled"
+      ).checked,
+
+    settlementCycle:
+      document.getElementById(
+        "settlementCycle"
+      ).value,
+
+    autoReconciliation:
+      document.getElementById(
+        "autoReconciliation"
+      ).checked,
+
+    settlementAlerts:
+      document.getElementById(
+        "settlementAlerts"
+      ).checked
+  };
+}
+
+function testPaymentConnection(){
+  const merchantKey =
+    document.getElementById(
+      "merchantKey"
+    ).value.trim();
+
+  const merchantSalt =
+    document.getElementById(
+      "merchantSalt"
+    ).value.trim();
+
+  if(
+    !merchantKey ||
+    !merchantSalt
+  ){
+    showAlert(
+      "Enter the merchant key and salt before testing.",
+      "error"
+    );
+    return;
+  }
+
+  showAlert(
+    "Connection settings look valid. Use the backend to perform a real PayU verification.",
+    "info"
+  );
+}
+
+function updateEnvironmentStatus(){
+  const environment =
+    document.getElementById(
+      "environment"
+    ).value;
+
+  setText(
+    "environmentStatus",
+    environment === "LIVE"
+      ? "Live Mode"
+      : "Test Mode"
+  );
+
+  document.getElementById(
+    "paymentBaseUrl"
+  ).value =
+    environment === "LIVE"
+      ? "https://secure.payu.in/_payment"
+      : "https://test.payu.in/_payment";
+}
+
+function updateRefundStatus(){
+  const mode =
+    document.getElementById(
+      "refundMode"
+    ).value;
+
+  setText(
+    "refundStatus",
+    mode === "AUTOMATIC"
+      ? "Automatic"
+      : "Manual"
+  );
+}
+
+function updateGatewayStatus(){
+  const key =
+    document.getElementById(
+      "merchantKey"
+    ).value.trim();
+
+  const salt =
+    document.getElementById(
+      "merchantSalt"
+    ).value.trim();
+
+  setText(
+    "gatewayStatus",
+    key && salt
+      ? "Configured"
+      : "Not Configured"
+  );
+
+  setText(
+    "webhookStatus",
+    document.getElementById(
+      "webhookUrl"
+    ).value.trim()
+      ? "Enabled"
+      : "Not Set"
+  );
+}
+
+function getDefaultPaymentSettings(){
+  return {
+    paymentGateway:"PAYU",
+    environment:"TEST",
+    merchantKey:"",
+    merchantSalt:"",
+    paymentBaseUrl:
+      "https://test.payu.in/_payment",
+    successUrl:
+      "http://localhost:8085/api/payments/payu/success",
+    failureUrl:
+      "http://localhost:8085/api/payments/payu/failure",
+    webhookUrl:
+      "http://localhost:8085/api/payments/payu/webhook",
+    upiEnabled:true,
+    cardEnabled:true,
+    netBankingEnabled:true,
+    walletEnabled:false,
+    codEnabled:false,
+    refundMode:"MANUAL",
+    refundWindowDays:7,
+    partialRefundEnabled:true,
+    settlementCycle:"T_PLUS_2",
+    autoReconciliation:true,
+    settlementAlerts:true
+  };
+}
+
+function toggleSecret(
+  inputId,
+  button
+){
+  const input =
+    document.getElementById(inputId);
+
+  const icon =
+    button.querySelector("i");
+
+  if(input.type === "password"){
+    input.type = "text";
+    icon.className =
+      "fa-solid fa-eye-slash";
+  }else{
+    input.type = "password";
+    icon.className =
+      "fa-solid fa-eye";
+  }
+}
+
+function toggleSidebar(){
+  document.getElementById(
+    "adminSidebar"
+  ).classList.toggle("open");
+
+  document.getElementById(
+    "sidebarOverlay"
+  ).classList.toggle("show");
+}
+
+function closeSidebar(){
+  document.getElementById(
+    "adminSidebar"
+  ).classList.remove("open");
+
+  document.getElementById(
+    "sidebarOverlay"
+  ).classList.remove("show");
+}
+
+function logoutAdmin(){
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("role");
+  localStorage.removeItem("userId");
+
+  window.location.href =
+    "../frontend/login.html";
+}
+
+function showAlert(
+  message,
+  type
+){
+  const box =
+    document.getElementById(
+      "pageAlert"
+    );
+
+  const icon =
+    document.getElementById(
+      "alertIcon"
+    );
+
+  const text =
+    document.getElementById(
+      "alertMessage"
+    );
+
+  if(!box || !icon || !text){
+    return;
+  }
+
+  text.textContent = message;
+
+  box.className =
+    `page-alert show ${type}`;
+
+  icon.className =
+    type === "success"
+      ? "fa-solid fa-circle-check"
+      : type === "error"
+        ? "fa-solid fa-circle-exclamation"
+        : "fa-solid fa-circle-info";
+
+  clearTimeout(
+    window.paymentAlertTimer
+  );
+
+  window.paymentAlertTimer =
+    setTimeout(function(){
+      box.classList.remove("show");
+    },4000);
+}
+
+function setText(
+  id,
+  value
+){
+  const element =
+    document.getElementById(id);
+
+  if(element){
+    element.textContent = value;
+  }
+}
+</script>
+
+</body>
+</html>
