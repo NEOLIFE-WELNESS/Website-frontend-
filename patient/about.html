@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
   <title>About Us - Neolife Wellness Center</title>
-  <!-- <link rel="stylesheet" href="../css/style.css"> -->
+
   <link
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -14,38 +14,61 @@
 :root{
   --green-dark:#123524;
   --green:#2f6b3f;
+  --green-mid:#397a4b;
   --green-light:#e9f2e8;
   --gold:#d4af37;
-  --gold-dark:#9a7100;
+  --gold-dark:#bd8a00;
   --cream:#f8f7f1;
   --white:#ffffff;
   --text:#26382d;
-  --muted:#65716a;
+  --muted:#819689;
   --shadow:0 18px 45px rgba(18,53,36,.13);
+  --radius:24px;
 }
 
 *{
   box-sizing:border-box;
 }
 
+html{
+  scroll-behavior:smooth;
+}
+
 body{
   margin:0;
-  padding:0;
+  padding:82px 0 0;
+  font-family:Arial, Helvetica, sans-serif;
   background:var(--cream);
   color:var(--text);
-  font-family:Arial, sans-serif;
   line-height:1.7;
 }
 
-/* Header */
+img{
+  max-width:100%;
+  display:block;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+a{
+  transition:.3s ease;
+}
+
+/* SAME HEADER THEME AS HOMEPAGE */
+
 .glass-header{
+  width:100%;
+  min-height:82px;
+  padding:12px 35px;
   position:fixed;
   top:0;
   left:0;
   right:0;
-  width:100%;
-  min-height:82px;
-  padding:10px 32px;
+  z-index:9999;
 
   display:flex;
   align-items:center;
@@ -54,11 +77,10 @@ body{
 
   background:rgba(255,255,255,.96);
   backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
 
   border-bottom:1px solid rgba(212,175,55,.25);
   box-shadow:0 8px 25px rgba(0,0,0,.10);
-
-  z-index:9999;
 }
 
 .logo-container{
@@ -69,8 +91,8 @@ body{
 }
 
 .logo-img{
-  width:55px;
-  height:55px;
+  width:54px;
+  height:54px;
   object-fit:cover;
   border-radius:50%;
   border:2px solid var(--gold);
@@ -90,80 +112,165 @@ body{
 }
 
 .logo-subtitle{
-  margin-top:5px;
+  margin-top:4px;
   color:var(--gold-dark);
   font-size:12px;
   font-weight:700;
-  letter-spacing:1.3px;
 }
 
-/* Remove hamburger */
-#menu-toggle,
-.hamburger{
-  display:none !important;
-}
-
-.header-actions{
+.header-right{
   display:flex;
-  align-items:center;
-  order:3;
-}
-
-.profile-icon{
-  width:44px;
-  height:44px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  border-radius:50%;
-  color:white;
-  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-
-  font-size:18px;
-  font-weight:800;
-}
-
-/* Navbar on one line */
-.side-menu{
-  position:static !important;
-
-  display:flex !important;
   align-items:center;
   justify-content:flex-end;
   gap:20px;
-
   margin-left:auto;
+}
+
+.side-menu{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:19px;
+  margin:0;
   padding:0;
-
-  width:auto;
   background:transparent;
-  box-shadow:none;
-
-  white-space:nowrap;
 }
 
 .side-menu a{
+  position:relative;
+  padding:8px 0;
   color:var(--green-dark);
-  font-size:14px;
-  font-weight:700;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
 }
 
-.side-menu a:hover{
+.side-menu a::after{
+  content:"";
+  width:0;
+  height:2px;
+  position:absolute;
+  left:0;
+  bottom:1px;
+  background:var(--gold);
+  transition:.3s ease;
+}
+
+.side-menu a:hover,
+.side-menu a.active{
   color:var(--gold-dark);
 }
 
-/* Hero */
-.about-hero{
-  min-height:520px;
-  padding:150px 0 80px;
+.side-menu a:hover::after,
+.side-menu a.active::after{
+  width:100%;
+}
+
+.profile-icon{
+  width:42px;
+  height:42px;
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:white;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  font-size:17px;
+  font-weight:800;
+  box-shadow:0 8px 18px rgba(154,113,0,.24);
+}
+
+.mobile-menu-button{
+  width:42px;
+  height:42px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:10px;
+  color:white;
+  background:var(--green-dark);
+  font-size:18px;
+  cursor:pointer;
+}
+
+.mobile-menu{
+  width:min(310px,86vw);
+  height:100vh;
+  padding:24px 20px;
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:10001;
 
   display:flex;
-  align-items:center;
+  flex-direction:column;
+  gap:8px;
 
+  color:white;
+  background:linear-gradient(180deg,#123824,#1e5134);
+  box-shadow:-12px 0 34px rgba(0,0,0,.22);
+
+  transform:translateX(105%);
+  transition:.3s ease;
+}
+
+.mobile-menu.open{
+  transform:translateX(0);
+}
+
+.mobile-menu-header{
+  margin-bottom:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.mobile-menu-close{
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:9px;
+  color:var(--green-dark);
+  background:white;
+  cursor:pointer;
+}
+
+.mobile-menu a{
+  padding:12px 13px;
+  border-radius:10px;
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  font-weight:700;
+}
+
+.mobile-menu a:hover,
+.mobile-menu a.active{
+  color:var(--green-dark);
+  background:white;
+}
+
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:none;
+  background:rgba(13,36,24,.55);
+}
+
+.menu-overlay.show{
+  display:block;
+}
+
+/* HERO */
+
+.about-hero{
+  min-height:520px;
+  padding:80px 0;
   position:relative;
   overflow:hidden;
+  display:flex;
+  align-items:center;
 
   background:
     linear-gradient(
@@ -176,38 +283,32 @@ body{
 
 .about-hero::after{
   content:"";
-  position:absolute;
   width:420px;
   height:420px;
+  position:absolute;
   right:-120px;
   bottom:-180px;
-
   border-radius:50%;
   background:rgba(212,175,55,.14);
 }
 
 .about-hero-content{
-  position:relative;
-  z-index:2;
-
   width:min(1180px,90%);
   margin:auto;
-
+  position:relative;
+  z-index:2;
   color:white;
 }
 
 .about-hero-content::before{
   content:"🌿 Natural healing and complete wellness";
-
-  display:inline-flex;
-  padding:8px 14px;
   margin-bottom:20px;
-
+  padding:8px 14px;
+  display:inline-flex;
   border-radius:30px;
+  color:#f8e6a4;
   background:rgba(255,255,255,.13);
   border:1px solid rgba(255,255,255,.25);
-
-  color:#f8e6a4;
   font-size:13px;
   font-weight:800;
 }
@@ -215,7 +316,6 @@ body{
 .about-hero h1{
   max-width:760px;
   margin:0 0 18px;
-
   font-size:clamp(40px,6vw,68px);
   line-height:1.08;
 }
@@ -223,12 +323,12 @@ body{
 .about-hero p{
   max-width:680px;
   margin:0;
-
   color:#edf5ef;
   font-size:18px;
 }
 
-/* About content */
+/* ABOUT CONTENT */
+
 .about-section{
   padding:90px 0;
   background:white;
@@ -237,7 +337,6 @@ body{
 .about-content{
   width:min(1180px,90%);
   margin:auto;
-
   display:grid;
   grid-template-columns:1.05fr .95fr;
   align-items:center;
@@ -246,7 +345,6 @@ body{
 
 .about-text h2{
   margin:0 0 18px;
-
   color:var(--green-dark);
   font-size:clamp(32px,4vw,48px);
   line-height:1.2;
@@ -257,21 +355,18 @@ body{
 }
 
 .about-features{
+  margin-top:26px;
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:14px;
-
-  margin-top:26px;
 }
 
 .about-features div{
   padding:14px 16px;
-
   border-radius:16px;
+  color:var(--green-dark);
   background:var(--green-light);
   border:1px solid rgba(212,175,55,.20);
-
-  color:var(--green-dark);
   font-weight:700;
 }
 
@@ -283,34 +378,28 @@ body{
   width:100%;
   height:520px;
   object-fit:cover;
-
   border-radius:30px;
   box-shadow:var(--shadow);
 }
 
 .about-image::after{
   content:"Holistic Care • Natural Healing";
-
+  padding:14px 18px;
   position:absolute;
   right:20px;
   bottom:20px;
-
-  padding:14px 18px;
   border-radius:16px;
-
-  background:white;
   color:var(--green-dark);
-  font-weight:800;
-
+  background:white;
   box-shadow:var(--shadow);
+  font-weight:800;
 }
 
-/* Video */
+/* VIDEO */
+
 .clinic-video{
   padding:90px 0;
-
-  background:
-    linear-gradient(180deg,#f8f5eb,#f4f8f1);
+  background:linear-gradient(180deg,#f8f5eb,#f4f8f1);
 }
 
 .video-content{
@@ -321,7 +410,6 @@ body{
 
 .video-content h2{
   margin:0 0 14px;
-
   color:var(--green-dark);
   font-size:clamp(30px,4vw,46px);
 }
@@ -329,28 +417,26 @@ body{
 .video-content p{
   max-width:760px;
   margin:0 auto 30px;
-
   color:var(--muted);
 }
 
 .video-box{
   overflow:hidden;
-
   border-radius:28px;
-  border:1px solid rgba(212,175,55,.25);
-
   background:#0d281b;
+  border:1px solid rgba(212,175,55,.25);
   box-shadow:var(--shadow);
 }
 
 .video-box video{
   width:100%;
-  display:block;
   max-height:620px;
+  display:block;
   object-fit:cover;
 }
 
-/* Mission and services */
+/* MISSION AND SERVICES */
+
 .mission-section,
 .about-therapies{
   padding:90px 0;
@@ -366,7 +452,6 @@ body{
 
 .section-title{
   margin:0 0 40px;
-
   color:var(--green-dark);
   font-size:clamp(30px,4vw,46px);
   text-align:center;
@@ -375,7 +460,6 @@ body{
 .cards{
   width:min(1180px,90%);
   margin:auto;
-
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:24px;
@@ -383,11 +467,9 @@ body{
 
 .card{
   padding:28px;
-
   border-radius:24px;
   background:white;
   border:1px solid rgba(212,175,55,.25);
-
   box-shadow:0 12px 30px rgba(18,53,36,.08);
   transition:.3s;
 }
@@ -400,20 +482,12 @@ body{
 .card .icon{
   width:58px;
   height:58px;
-
+  margin-bottom:18px;
   display:grid;
   place-items:center;
-
-  margin-bottom:18px;
   border-radius:18px;
-
   color:white;
-  background:linear-gradient(
-    135deg,
-    var(--green-dark),
-    var(--green)
-  );
-
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
   font-size:25px;
 }
 
@@ -427,20 +501,19 @@ body{
   color:var(--muted);
 }
 
-/* Footer */
+/* FOOTER */
+
 .footer{
   padding:45px 0 22px;
-  background:#0d281b;
   color:white;
+  background:#0d281b;
 }
 
 .footer-bottom{
   width:min(1180px,90%);
   margin:auto;
-
   padding-top:20px;
   border-top:1px solid rgba(255,255,255,.12);
-
   text-align:center;
 }
 
@@ -448,89 +521,19 @@ body{
   margin:0;
   color:#c7d5cc;
 }
-/* NAVBAR */
 
-.side-menu{
-  position:static !important;
-  inset:auto !important;
-  transform:none !important;
-
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-end !important;
-  flex-direction:row !important;
-  flex-wrap:nowrap !important;
-
-  gap:18px !important;
-
-  width:auto !important;
-  height:auto !important;
-
-  margin:0 !important;
-  padding:0 !important;
-
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
-
-  overflow:visible !important;
-  white-space:nowrap !important;
-}
-
-.side-menu a{
-  display:inline-flex !important;
-  align-items:center !important;
-
-  width:auto !important;
-  margin:0 !important;
-  padding:8px 0 !important;
-
-  color:#123524 !important;
-  background:transparent !important;
-  border:none !important;
-
-  text-decoration:none !important;
-
-  font-size:14px !important;
-  font-weight:800 !important;
-
-  line-height:1 !important;
-  white-space:nowrap !important;
-
-  transition:color .3s ease !important;
-}
-
-.side-menu a:link,
-.side-menu a:visited,
-.side-menu a:focus,
-.side-menu a:active{
-  color:#123524 !important;
-  text-decoration:none !important;
-  outline:none !important;
-}
-
-.side-menu a:hover{
-  color:#9a7100 !important;
-  text-decoration:none !important;
-  background:transparent !important;
-}
-/* WhatsApp */
 .whatsapp{
+  width:58px;
+  height:58px;
   position:fixed;
   right:22px;
   bottom:22px;
-
-  width:58px;
-  height:58px;
-
+  z-index:999;
   display:grid;
   place-items:center;
-
   border-radius:50%;
   background:#25d366;
-
   box-shadow:0 12px 25px rgba(0,0,0,.25);
-  z-index:999;
 }
 
 .whatsapp img{
@@ -538,11 +541,9 @@ body{
   height:34px;
 }
 
-/* Tablet */
-@media(max-width:1050px){
-
+@media(max-width:1100px){
   .glass-header{
-    padding:10px 18px;
+    padding:12px 18px;
   }
 
   .side-menu{
@@ -556,13 +557,19 @@ body{
   .logo-text{
     font-size:16px;
   }
+}
+
+@media(max-width:900px){
+  .side-menu{
+    display:none;
+  }
+
+  .mobile-menu-button{
+    display:flex;
+  }
 
   .about-content{
     grid-template-columns:1fr;
-  }
-
-  .about-image img{
-    height:460px;
   }
 
   .cards{
@@ -570,97 +577,138 @@ body{
   }
 }
 
-/* Mobile */
-@media(max-width:760px){
-
-  .glass-header{
-    position:relative;
-    flex-wrap:wrap;
+@media(max-width:700px){
+  body{
+    padding-top:74px;
   }
 
-  .side-menu{
-    width:100%;
-    overflow-x:auto;
-    padding-top:8px;
+  .glass-header{
+    min-height:74px;
+    padding:9px 13px;
+  }
+
+  .logo-img{
+    width:47px;
+    height:47px;
+  }
+
+  .logo-text{
+    font-size:14px;
+  }
+
+  .logo-subtitle{
+    font-size:9px;
   }
 
   .about-hero{
-    padding-top:90px;
+    min-height:430px;
+    padding:65px 0;
   }
 
-  .about-features{
+  .about-hero h1{
+    font-size:38px;
+  }
+
+  .about-hero p{
+    font-size:16px;
+  }
+
+  .about-section,
+  .clinic-video,
+  .mission-section,
+  .about-therapies{
+    padding:65px 0;
+  }
+
+  .about-features,
+  .cards{
     grid-template-columns:1fr;
   }
 
   .about-image img{
     height:360px;
   }
+}
+@media(max-width:1100px) and (min-width:701px){
 
-  .cards{
-    grid-template-columns:1fr;
+  .home-glass-header{
+    padding:8px 18px !important;
+    column-gap:12px !important;
+  }
+
+  .home-logo-img{
+    width:46px !important;
+    height:46px !important;
+  }
+
+  .home-logo-text{
+    font-size:15px !important;
+  }
+
+  .home-logo-subtitle{
+    font-size:9px !important;
+  }
+
+  .home-header-right{
+    gap:9px !important;
+  }
+
+  .home-navbar{
+    gap:11px !important;
+  }
+
+  .home-navbar > a,
+  .home-category-btn{
+    font-size:11px !important;
+    padding:6px 0 !important;
+  }
+
+  .home-login-btn,
+  .home-register-btn,
+  .logout-btn{
+    min-height:37px !important;
+    padding:7px 11px !important;
+    font-size:11px !important;
+  }
+
+  .profile-icon{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
   }
 }
-
-/* ===== FINAL HOMEPAGE-MATCHING HEADER FIX ===== */
-.glass-header{
-  position:fixed !important;
-  top:0 !important;
-  left:0 !important;
-  right:0 !important;
-  width:100% !important;
-  max-width:none !important;
-  min-height:82px !important;
-  margin:0 !important;
-  padding:10px 32px !important;
-  transform:none !important;
-  border-radius:0 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  flex-wrap:nowrap !important;
-  gap:20px !important;
-  background:rgba(255,255,255,.96) !important;
-  backdrop-filter:blur(16px);
-  border-bottom:1px solid rgba(212,175,55,.25) !important;
-  box-shadow:0 8px 25px rgba(0,0,0,.10) !important;
-  z-index:9999 !important;
-}
-.logo-container{display:flex !important;align-items:center !important;gap:12px !important;flex-shrink:0 !important;}
-.logo-img{width:55px !important;height:55px !important;object-fit:cover !important;border-radius:50% !important;border:2px solid var(--gold) !important;}
-.logo-details{display:flex !important;flex-direction:column !important;line-height:1.2 !important;}
-.logo-text{color:var(--green-dark) !important;font-size:18px !important;font-weight:800 !important;white-space:nowrap !important;}
-.logo-subtitle{margin-top:5px !important;color:var(--gold-dark) !important;font-size:12px !important;font-weight:700 !important;letter-spacing:1.3px !important;}
-.header-right{margin-left:auto !important;display:flex !important;align-items:center !important;justify-content:flex-end !important;gap:22px !important;flex-wrap:nowrap !important;min-width:0 !important;}
-.side-menu{position:static !important;inset:auto !important;transform:none !important;display:flex !important;align-items:center !important;justify-content:flex-end !important;flex-direction:row !important;flex-wrap:nowrap !important;gap:18px !important;width:auto !important;max-width:none !important;height:auto !important;margin:0 !important;padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;overflow:visible !important;white-space:nowrap !important;}
-.side-menu a{display:inline-flex !important;align-items:center !important;width:auto !important;padding:8px 0 !important;margin:0 !important;color:var(--green-dark) !important;background:transparent !important;border:none !important;font-size:14px !important;font-weight:700 !important;white-space:nowrap !important;}
-.side-menu a:hover{color:var(--gold-dark) !important;background:transparent !important;}
-.profile-icon{width:44px !important;height:44px !important;min-width:44px !important;display:flex !important;align-items:center !important;justify-content:center !important;border-radius:50% !important;color:#fff !important;background:linear-gradient(135deg,var(--gold),var(--gold-dark)) !important;font-size:18px !important;font-weight:800 !important;box-shadow:0 8px 18px rgba(154,113,0,.24) !important;flex-shrink:0 !important;}
-#menu-toggle,.hamburger,.header-actions{display:none !important;}
-.about-hero{padding-top:150px !important;}
-@media(max-width:1180px){.glass-header{padding:10px 18px !important}.header-right{gap:14px !important}.side-menu{gap:12px !important}.side-menu a{font-size:12px !important}.logo-text{font-size:16px !important}}
-@media(max-width:900px){.side-menu{overflow-x:auto !important;scrollbar-width:none}.side-menu::-webkit-scrollbar{display:none}.logo-subtitle{display:none !important}}
-@media(max-width:760px){.glass-header{position:fixed !important;flex-wrap:nowrap !important}.header-right{overflow:hidden !important}.side-menu{max-width:calc(100vw - 250px) !important}.about-hero{padding-top:130px !important}}
-
 </style>
 </head>
 
 <body>
+<div
+  class="menu-overlay"
+  id="menuOverlay"
+  onclick="closeMobileMenu()"
+></div>
+
 <header class="glass-header">
 
-  <div class="logo-container">
-    <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
+  <a href="homepage.html" class="logo-container">
+
+    <img
+      src="../assets/main_logo.jpeg"
+      alt="Neolife Logo"
+      class="logo-img"
+    >
 
     <div class="logo-details">
       <span class="logo-text">Neolife Wellness Center</span>
       <span class="logo-subtitle">Ayush Digital Care</span>
     </div>
-  </div>
+
+  </a>
 
   <div class="header-right">
 
     <nav class="side-menu">
       <a href="homepage.html">Home</a>
-      <a href="about.html">About</a>
+      <a href="about.html" class="active">About</a>
       <a href="services.html">Therapies</a>
       <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
       <a href="products.html">Products</a>
@@ -669,13 +717,55 @@ body{
       <a href="contact.html">Contact</a>
     </nav>
 
-    <a href="profile.html" class="profile-icon" id="profileIcon">
+    <a
+      href="profile.html"
+      class="profile-icon"
+      id="profileIcon"
+      title="Profile"
+    >
       <i class="fa-solid fa-user"></i>
     </a>
+
+    <button
+      type="button"
+      class="mobile-menu-button"
+      onclick="openMobileMenu()"
+      aria-label="Open menu"
+    >
+      <i class="fa-solid fa-bars"></i>
+    </button>
 
   </div>
 
 </header>
+
+<nav class="mobile-menu" id="mobileMenu">
+
+  <div class="mobile-menu-header">
+
+    <strong>Neolife Menu</strong>
+
+    <button
+      type="button"
+      class="mobile-menu-close"
+      onclick="closeMobileMenu()"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+  <a href="homepage.html">Home</a>
+  <a href="about.html" class="active">About</a>
+  <a href="services.html">Therapies</a>
+  <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+  <a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a>
+  <a href="blog.html">Blogs</a>
+  <a href="contact.html">Contact</a>
+  <a href="profile.html">Profile</a>
+
+</nav>
 
 <section class="about-hero">
   <div class="about-hero-content">
@@ -856,6 +946,16 @@ body{
 }
 
 loadProfileIcon();
+
+function openMobileMenu(){
+  document.getElementById("mobileMenu").classList.add("open");
+  document.getElementById("menuOverlay").classList.add("show");
+}
+
+function closeMobileMenu(){
+  document.getElementById("mobileMenu").classList.remove("open");
+  document.getElementById("menuOverlay").classList.remove("show");
+}
 </script>
 </body>
 </html>

@@ -469,15 +469,81 @@ textarea.form-control{
   resize:vertical;
 }
 
-.file-input{
-  padding:10px;
-}
-
 .image-help{
-  margin-top:7px;
+  margin-bottom:12px;
   color:var(--muted);
   font-size:10px;
-  line-height:1.5;
+  line-height:1.6;
+}
+
+#uploadedImagesBox{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+  gap:14px;
+}
+
+.image-select-card{
+  position:relative;
+  padding:9px;
+  display:block;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:#fbfcfa;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.image-select-card:hover{
+  border-color:var(--gold);
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(21,61,41,.08);
+}
+
+.image-select-card.selected{
+  border:2px solid var(--gold);
+  background:#fff9e8;
+  box-shadow:0 8px 20px rgba(201,154,22,.15);
+}
+
+.image-select-card img{
+  width:100%;
+  height:110px;
+  object-fit:cover;
+  display:block;
+  border-radius:9px;
+  background:var(--green-light);
+}
+
+.image-select-card input{
+  width:18px;
+  height:18px;
+  margin-top:9px;
+  accent-color:var(--dark-green);
+}
+
+.image-card-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:8px;
+}
+
+.image-card-footer span{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
+}
+
+.image-message{
+  grid-column:1/-1;
+  padding:22px;
+  text-align:center;
+  border:1px dashed var(--border);
+  border-radius:12px;
+  color:var(--muted);
+  background:#fbfcfa;
+  font-size:11px;
 }
 
 #imagePreviewBox{
@@ -1136,55 +1202,35 @@ textarea.form-control{
           Product Images
         </div>
 
-        <div class="form-grid">
+        <div class="form-group full-width">
 
-          <div class="form-group full-width">
+          <label>
+            Select Uploaded Product Images
+            <span class="required">*</span>
+          </label>
 
-            <label for="imageUrls">
-              Product Image URLs
-            </label>
+          <p class="image-help">
+            The product's current images are already selected. Select or
+            unselect images uploaded under the PRODUCT module.
+          </p>
 
-            <textarea
-              id="imageUrls"
-              class="form-control"
-              placeholder="Enter one image URL per line"
-            ></textarea>
+          <div id="uploadedImagesBox">
 
-            <p class="image-help">
-              Existing relative backend paths and full image URLs are supported.
-            </p>
-
-          </div>
-
-          <div class="form-group full-width">
-
-            <label>Image Preview</label>
-
-            <div id="imagePreviewBox">
-              Existing product images will appear here.
+            <div class="image-message">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Loading product images...
             </div>
 
           </div>
 
-          <div class="form-group full-width">
+        </div>
 
-            <label for="productImage">
-              Select Replacement Image
-            </label>
+        <div class="form-group full-width">
 
-            <input
-              type="file"
-              id="productImage"
-              class="form-control file-input"
-              accept="image/*"
-              onchange="previewImage(event)"
-            >
+          <label>Selected Image Preview</label>
 
-            <p class="image-help">
-              The selected local file is previewed only. Your current update API
-              submits image URLs as JSON.
-            </p>
-
+          <div id="imagePreviewBox">
+            Selected product images will appear here.
           </div>
 
         </div>
@@ -1223,14 +1269,27 @@ textarea.form-control{
 </div>
 
 <script>
-
 const API_BASE_URL = "http://localhost:8085";
 
+let selectedImageUrls = [];
+let currentProduct = null;
+
 window.onload = async function(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    showAlert("Please login as admin first.", "error");
+
+    setTimeout(function(){
+      window.location.href = "../frontend/login.html";
+    }, 900);
+
+    return;
+  }
+
   await loadManufacturers();
   await loadProduct();
-  document.getElementById("imageUrls")
-.addEventListener("input", previewImagesFromUrls);
+  await loadProductImages();
 };
 
 function getProductId(){
@@ -1240,206 +1299,479 @@ function getProductId(){
 
 async function loadManufacturers(){
   const token = localStorage.getItem("token");
+  const select = document.getElementById("manufacturer");
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/manufacturers/getAll`, {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + token
+    const response = await fetch(
+      `${API_BASE_URL}/api/manufacturers/getAll`,
+      {
+        method:"GET",
+        headers:{
+          "Authorization":"Bearer " + token
+        }
       }
-    });
+    );
 
-    const result = await response.json();
+    const text = await response.text();
 
-    if(result.success){
-      const select = document.getElementById("manufacturer");
-      select.innerHTML = `<option value="">Select Manufacturer</option>`;
+    if(!response.ok){
+      throw new Error(text || "Unable to load manufacturers.");
+    }
 
+    const result = text ? JSON.parse(text) : null;
+
+    select.innerHTML =
+      `<option value="">Select Manufacturer</option>`;
+
+    if(result?.success && Array.isArray(result.data)){
       result.data.forEach(item => {
-        select.innerHTML += `
-          <option value="${item.type}">
-            ${item.name} (${item.type})
-          </option>
-        `;
+        const manufacturerValue =
+          item.name ||
+          item.type ||
+          "";
+
+        const manufacturerLabel =
+          item.name && item.type
+            ? `${item.name} (${item.type})`
+            : item.name ||
+              item.type ||
+              "Manufacturer";
+
+        select.insertAdjacentHTML(
+          "beforeend",
+          `
+            <option value="${escapeHtml(manufacturerValue)}">
+              ${escapeHtml(manufacturerLabel)}
+            </option>
+          `
+        );
       });
     }
+
   }catch(error){
-    console.log(error);
+    console.error(error);
+
+    showAlert(
+      error.message ||
+      "Unable to load manufacturers.",
+      "error"
+    );
   }
 }
 
 async function loadProduct(){
+  const token = localStorage.getItem("token");
   const productId = getProductId();
 
   if(!productId){
     showAlert("Product ID is missing.", "error");
-    window.location.href = "admin-products.html";
-    return;
-  }
 
-  try{
-    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
-      method: "GET"
-    });
-
-    const result = await response.json();
-
-    if(result.success){
-      const product = result.data;
-
-      document.getElementById("productId").value = product.id;
-      document.getElementById("productNo").value = product.productCode || "";
-      document.getElementById("name").value = product.productName || product.name || "";
-      document.getElementById("description").value = product.description || "";
-      document.getElementById("price").value = product.price || "";
-      document.getElementById("stock").value = product.stock || "";
-      document.getElementById("netQty").value = product.netQty || "";
-      document.getElementById("indication").value = product.indication || "";
-      document.getElementById("category").value = product.category || "";
-
-      if(product.manufacturer){
-        document.getElementById("manufacturer").value = product.manufacturer;
-      }
-
-      if(product.expiryDate){
-        document.getElementById("expiryDate").value = product.expiryDate.substring(0, 7);
-      }
-
-      if(product.imageUrls){
-        const urls = Array.isArray(product.imageUrls)
-          ? product.imageUrls
-          : String(product.imageUrls).split(",");
-
-        document.getElementById("imageUrls").value =
-          urls.map(url => String(url).trim()).filter(Boolean).join("\n");
-
-        previewImagesFromUrls();
-      }
-
-    }else{
-      showAlert(result.message || "Product not found.", "error");
+    setTimeout(function(){
       window.location.href = "admin-products.html";
-    }
+    }, 900);
 
-  }catch(error){
-    console.log(error);
-    showAlert("Backend not connected.", "error");
-  }
-}
-function previewImagesFromUrls(){
-
-    const previewBox = document.getElementById("imagePreviewBox");
-
-    previewBox.innerHTML = "";
-
-    const urls = document.getElementById("imageUrls").value
-        .split("\n")
-        .map(x => x.trim())
-        .filter(x => x !== "");
-
-    urls.forEach(url=>{
-
-        const img=document.createElement("img");
-
-        img.src = getImageUrl(url);
-
-        img.className = "preview-img";
-
-        img.onerror = function(){
-          this.src = "https://via.placeholder.com/120?text=Product";
-        };
-
-        previewBox.appendChild(img);
-
-    });
-
-}
-
-
-document.getElementById("editProductForm").addEventListener("submit", async function(e){
-  e.preventDefault();
-
-  const token = localStorage.getItem("token");
-  const productId = document.getElementById("productId").value;
-  const imageFile = document.getElementById("productImage").files[0];
-
-  if(!token){
-    showAlert("Please login as admin first.", "error");
-    window.location.href = "../frontend/login.html";
     return;
   }
-
-  const updatedProduct = {
-    productName: document.getElementById("name").value.trim(),
-    category: document.getElementById("category").value,
-    description: document.getElementById("description").value.trim(),
-    price: Number(document.getElementById("price").value),
-    stock: Number(document.getElementById("stock").value),
-    productCode: document.getElementById("productNo").value.trim(),
-    netQty: document.getElementById("netQty").value.trim(),
-    indication: document.getElementById("indication").value.trim(),
-    dosageForm: "Liquid",
-    manufacturer: document.getElementById("manufacturer").value,
-    expiryDate: document.getElementById("expiryDate").value + "-01",
-    imageUrls: document.getElementById("imageUrls").value
-    .split("\n")
-    .map(url => url.trim())
-    .filter(url => url !== "")
-    .join(","),
-    lowStockLimit: 5
-  };
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify(updatedProduct)
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/products/${productId}`,
+      {
+        method:"GET",
+        headers:{
+          "Authorization":"Bearer " + token
+        }
+      }
+    );
 
-    const result = await response.json();
+    const text = await response.text();
 
-    if(result.success){
-      document.getElementById("message").style.color = "green";
-      document.getElementById("message").innerText = "Product updated successfully!";
-
-      setTimeout(() => {
-        window.location.href = "admin-products.html";
-      }, 1000);
-    }else{
-      document.getElementById("message").style.color = "red";
-      document.getElementById("message").innerText = result.message || "Update failed";
+    if(!response.ok){
+      throw new Error(text || "Failed to load product.");
     }
 
+    const result = text ? JSON.parse(text) : null;
+
+    if(!result?.success || !result.data){
+      throw new Error(result?.message || "Product not found.");
+    }
+
+    currentProduct = result.data;
+    const product = currentProduct;
+
+    document.getElementById("productId").value =
+      product.id || "";
+
+    document.getElementById("productNo").value =
+      product.productCode || "";
+
+    document.getElementById("name").value =
+      product.productName ||
+      product.name ||
+      "";
+
+    document.getElementById("description").value =
+      product.description || "";
+
+    document.getElementById("price").value =
+      product.price ?? "";
+
+    document.getElementById("stock").value =
+      product.stock ?? "";
+
+    document.getElementById("netQty").value =
+      product.netQty || "";
+
+    document.getElementById("indication").value =
+      product.indication || "";
+
+    document.getElementById("category").value =
+      product.category || "";
+
+    const manufacturerValue =
+      product.manufacturerName ||
+      product.manufacturer ||
+      "";
+
+    document.getElementById("manufacturer").value =
+      manufacturerValue;
+
+    if(product.expiryDate){
+      document.getElementById("expiryDate").value =
+        String(product.expiryDate).substring(0,7);
+    }
+
+    selectedImageUrls = normalizeImageUrls(
+      product.imageUrls ||
+      product.imageUrl ||
+      []
+    );
+
+    renderSelectedImagePreview();
+
   }catch(error){
-    console.log(error);
-    document.getElementById("message").style.color = "red";
-    document.getElementById("message").innerText = "Backend not connected or admin token invalid";
+    console.error(error);
+
+    showAlert(
+      error.message ||
+      "Unable to load product.",
+      "error"
+    );
   }
-});
+}
 
-function previewImage(event){
-  const file = event.target.files[0];
+async function loadProductImages(){
+  const token = localStorage.getItem("token");
+  const box = document.getElementById("uploadedImagesBox");
 
-  if(!file){
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/api/images/module/PRODUCT`,
+      {
+        method:"GET",
+        headers:{
+          "Authorization":"Bearer " + token
+        }
+      }
+    );
+
+    const text = await response.text();
+
+    if(!response.ok){
+      throw new Error(
+        text ||
+        `Unable to load product images. Status: ${response.status}`
+      );
+    }
+
+    const result = text ? JSON.parse(text) : null;
+
+    box.innerHTML = "";
+
+    if(
+      !result?.success ||
+      !Array.isArray(result.data) ||
+      result.data.length === 0
+    ){
+      box.innerHTML = `
+        <div class="image-message">
+          No PRODUCT images have been uploaded.
+        </div>
+      `;
+      return;
+    }
+
+    result.data.forEach(image => {
+      const fileUrl = String(image.fileUrl || "").trim();
+
+      if(!fileUrl){
+        return;
+      }
+
+      const checked =
+        selectedImageUrls.includes(fileUrl);
+
+      box.insertAdjacentHTML(
+        "beforeend",
+        `
+          <label
+            class="image-select-card ${checked ? "selected" : ""}"
+            id="imageCard${Number(image.id)}"
+          >
+            <img
+              src="${escapeHtml(getImageUrl(fileUrl))}"
+              alt="${escapeHtml(image.fileName || "Product image")}"
+              onerror="this.src='https://via.placeholder.com/145x110?text=Product'"
+            >
+
+            <div class="image-card-footer">
+
+              <span>
+                ${escapeHtml(image.fileName || "Product image")}
+              </span>
+
+              <input
+                type="checkbox"
+                value="${escapeHtml(fileUrl)}"
+                ${checked ? "checked" : ""}
+                onchange="toggleImageSelection(this)"
+              >
+
+            </div>
+
+          </label>
+        `
+      );
+    });
+
+    renderSelectedImagePreview();
+
+  }catch(error){
+    console.error(error);
+
+    box.innerHTML = `
+      <div class="image-message" style="color:#c74747;">
+        ${escapeHtml(error.message || "Error loading product images.")}
+      </div>
+    `;
+  }
+}
+
+function toggleImageSelection(checkbox){
+  const imageUrl = String(checkbox.value || "").trim();
+  const card = checkbox.closest(".image-select-card");
+
+  if(checkbox.checked){
+    if(!selectedImageUrls.includes(imageUrl)){
+      selectedImageUrls.push(imageUrl);
+    }
+
+    card?.classList.add("selected");
+
+  }else{
+    selectedImageUrls =
+      selectedImageUrls.filter(
+        url => url !== imageUrl
+      );
+
+    card?.classList.remove("selected");
+  }
+
+  renderSelectedImagePreview();
+}
+
+function renderSelectedImagePreview(){
+  const box = document.getElementById("imagePreviewBox");
+
+  if(selectedImageUrls.length === 0){
+    box.innerHTML =
+      "No product images selected.";
     return;
   }
 
-  const reader = new FileReader();
+  box.innerHTML = "";
 
-  reader.onload = function(loadEvent){
-    const previewBox = document.getElementById("imagePreviewBox");
+  selectedImageUrls.forEach(url => {
+    box.insertAdjacentHTML(
+      "beforeend",
+      `
+        <img
+          src="${escapeHtml(getImageUrl(url))}"
+          class="preview-img"
+          alt="Selected product image"
+          onerror="this.src='https://via.placeholder.com/120?text=Product'"
+        >
+      `
+    );
+  });
+}
 
-    const image = document.createElement("img");
-    image.src = loadEvent.target.result;
-    image.className = "preview-img";
+document
+  .getElementById("editProductForm")
+  .addEventListener(
+    "submit",
+    async function(event){
+      event.preventDefault();
 
-    previewBox.prepend(image);
-  };
+      const token = localStorage.getItem("token");
+      const productId =
+        document.getElementById("productId").value;
 
-  reader.readAsDataURL(file);
+      if(!token){
+        showAlert(
+          "Please login as admin first.",
+          "error"
+        );
+        return;
+      }
+
+      if(selectedImageUrls.length === 0){
+        showAlert(
+          "Please select at least one product image.",
+          "error"
+        );
+        return;
+      }
+
+      const expiryMonth =
+        document.getElementById("expiryDate").value;
+
+      const updatedProduct = {
+        productName:
+          document.getElementById("name").value.trim(),
+
+        category:
+          document.getElementById("category").value,
+
+        description:
+          document.getElementById("description").value.trim(),
+
+        price:
+          Number(document.getElementById("price").value),
+
+        stock:
+          Number(document.getElementById("stock").value),
+
+        productCode:
+          document.getElementById("productNo").value.trim(),
+
+        netQty:
+          document.getElementById("netQty").value.trim(),
+
+        indication:
+          document.getElementById("indication").value.trim(),
+
+        dosageForm:
+          currentProduct?.dosageForm ||
+          "Liquid",
+
+        manufacturerName:
+          document.getElementById("manufacturer").value,
+
+        expiryDate:
+          expiryMonth
+            ? expiryMonth + "-01"
+            : null,
+
+        imageUrls:
+          selectedImageUrls,
+
+        lowStockLimit:
+          currentProduct?.lowStockLimit ??
+          5
+      };
+
+      try{
+        const response = await fetch(
+          `${API_BASE_URL}/api/products/${productId}`,
+          {
+            method:"PUT",
+            headers:{
+              "Content-Type":"application/json",
+              "Authorization":"Bearer " + token
+            },
+            body:JSON.stringify(updatedProduct)
+          }
+        );
+
+        const text = await response.text();
+
+        if(!response.ok){
+          throw new Error(
+            text ||
+            `Product update failed. Status: ${response.status}`
+          );
+        }
+
+        const result = text ? JSON.parse(text) : null;
+
+        if(!result?.success){
+          throw new Error(
+            result?.message ||
+            "Product update failed."
+          );
+        }
+
+        document.getElementById("message").style.color =
+          "green";
+
+        document.getElementById("message").textContent =
+          result.message ||
+          "Product updated successfully!";
+
+        showAlert(
+          result.message ||
+          "Product updated successfully.",
+          "success"
+        );
+
+        setTimeout(function(){
+          window.location.href =
+            "admin-products.html";
+        },1000);
+
+      }catch(error){
+        console.error(error);
+
+        document.getElementById("message").style.color =
+          "red";
+
+        document.getElementById("message").textContent =
+          error.message ||
+          "Product update failed.";
+
+        showAlert(
+          error.message ||
+          "Product update failed.",
+          "error"
+        );
+      }
+    }
+  );
+
+function normalizeImageUrls(value){
+  if(Array.isArray(value)){
+    return [
+      ...new Set(
+        value
+          .map(url => String(url).trim())
+          .filter(Boolean)
+      )
+    ];
+  }
+
+  if(typeof value === "string"){
+    return [
+      ...new Set(
+        value
+          .split(",")
+          .map(url => url.trim())
+          .filter(Boolean)
+      )
+    ];
+  }
+
+  return [];
 }
 
 function getImageUrl(url){
@@ -1464,14 +1796,37 @@ function getImageUrl(url){
   return API_BASE_URL + "/" + value;
 }
 
+function escapeHtml(value){
+  if(value === null || value === undefined){
+    return "";
+  }
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
 function toggleSidebar(){
-  document.getElementById("adminSidebar").classList.toggle("open");
-  document.getElementById("sidebarOverlay").classList.toggle("show");
+  document
+    .getElementById("adminSidebar")
+    .classList.toggle("open");
+
+  document
+    .getElementById("sidebarOverlay")
+    .classList.toggle("show");
 }
 
 function closeSidebar(){
-  document.getElementById("adminSidebar").classList.remove("open");
-  document.getElementById("sidebarOverlay").classList.remove("show");
+  document
+    .getElementById("adminSidebar")
+    .classList.remove("open");
+
+  document
+    .getElementById("sidebarOverlay")
+    .classList.remove("show");
 }
 
 function logoutAdmin(){
@@ -1480,20 +1835,27 @@ function logoutAdmin(){
   localStorage.removeItem("role");
   localStorage.removeItem("userId");
 
-  window.location.href = "../frontend/login.html";
+  window.location.href =
+    "../frontend/login.html";
 }
 
-function showAlert(message, type){
-  const box = document.getElementById("pageAlert");
-  const icon = document.getElementById("alertIcon");
-  const text = document.getElementById("alertMessage");
+function showAlert(message,type){
+  const box =
+    document.getElementById("pageAlert");
+
+  const icon =
+    document.getElementById("alertIcon");
+
+  const text =
+    document.getElementById("alertMessage");
 
   if(!box || !icon || !text){
     return;
   }
 
   text.textContent = message;
-  box.className = `page-alert show ${type}`;
+  box.className =
+    `page-alert show ${type}`;
 
   icon.className =
     type === "success"
@@ -1502,13 +1864,15 @@ function showAlert(message, type){
         ? "fa-solid fa-circle-exclamation"
         : "fa-solid fa-circle-info";
 
-  clearTimeout(window.editProductAlertTimer);
+  clearTimeout(
+    window.editProductAlertTimer
+  );
 
-  window.editProductAlertTimer = setTimeout(function(){
-    box.classList.remove("show");
-  }, 4000);
+  window.editProductAlertTimer =
+    setTimeout(function(){
+      box.classList.remove("show");
+    },4000);
 }
-
 </script>
 
 </body>

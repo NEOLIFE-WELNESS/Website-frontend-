@@ -113,7 +113,7 @@
     .login-nav a{
       color:white;
       text-decoration:none;
-      font-size:14px;
+      font-size:12px;
       font-weight:800;
     }
 
@@ -449,6 +449,54 @@
         align-items:flex-start;
       }
     }
+    @media(max-width:1100px) and (min-width:701px){
+
+  .home-glass-header{
+    padding:8px 18px !important;
+    column-gap:12px !important;
+  }
+
+  .home-logo-img{
+    width:46px !important;
+    height:46px !important;
+  }
+
+  .home-logo-text{
+    font-size:15px !important;
+  }
+
+  .home-logo-subtitle{
+    font-size:9px !important;
+  }
+
+  .home-header-right{
+    gap:9px !important;
+  }
+
+  .home-navbar{
+    gap:11px !important;
+  }
+
+  .home-navbar > a,
+  .home-category-btn{
+    font-size:11px !important;
+    padding:6px 0 !important;
+  }
+
+  .home-login-btn,
+  .home-register-btn,
+  .logout-btn{
+    min-height:37px !important;
+    padding:7px 11px !important;
+    font-size:11px !important;
+  }
+
+  .profile-icon{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+  }
+}
   </style>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>

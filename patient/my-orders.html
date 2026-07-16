@@ -3,319 +3,2072 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>My Orders - Neolife Wellness Center</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif}
-body{background:#f1f3f6}
-.container{max-width:1200px;margin:auto;padding:30px 20px}
-.heading{font-size:30px;color:#123524;margin-bottom:25px}
-.order-card{background:white;border-radius:15px;padding:20px;margin-bottom:20px;box-shadow:0 5px 15px rgba(0,0,0,.1)}
-.order-top{display:flex;justify-content:space-between;gap:20px}
-.product-info h3{color:#123524;margin-bottom:10px}
-.product-info p{color:#666;margin:6px 0}
-.status{color:green;font-weight:bold}
-.items{margin-top:15px;background:#f8f8f8;padding:12px;border-radius:10px}
-.item-row{padding:8px 0;border-bottom:1px solid #ddd}
-.item-row:last-child{border-bottom:none}
-.right{display:flex;flex-direction:column;gap:12px}
-.btn{padding:12px 18px;border:none;border-radius:30px;cursor:pointer;font-weight:600}
-.view-btn{background:#123524;color:white}
-.track-btn{background:#d4af37;color:white}
-.cancel-btn{background:#c62828;color:white}
-.empty{text-align:center;color:#777;background:white;padding:40px;border-radius:15px}
-@media(max-width:900px){.order-top{flex-direction:column}.right{width:100%}.btn{width:100%}}
-.glass-header{
-    width: 90%;
-    position: fixed;
-    top: 25px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
+:root{
+  --dark-green:#143f2a;
+  --green:#245f3c;
+  --soft-green:#eef5ef;
+  --gold:#c89a12;
+  --gold-dark:#9d7400;
+  --cream:#fbf8ef;
+  --white:#ffffff;
+  --text:#183b2a;
+  --muted:#6d746f;
+  --border:#e8e2d4;
+  --danger:#c54343;
+  --danger-light:#fff0f0;
+  --success:#287146;
+  --success-light:#edf8f0;
+  --warning:#b97912;
+  --warning-light:#fff7e7;
+  --info:#356c8c;
+  --info-light:#edf6fb;
+}
 
-    padding: 18px 35px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+html{
+  scroll-behavior:smooth;
+}
 
-    border-radius: 18px;
+body{
+  min-height:100vh;
+  padding-top:79px;
+  overflow-x:hidden;
+  color:var(--text);
+  background:var(--cream);
+  font-family:"Segoe UI",Arial,sans-serif;
+}
 
-    background: rgba(10,45,20,0.78);
+button,
+input,
+select{
+  font:inherit;
+}
 
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+button{
+  cursor:pointer;
+}
 
-    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+/* HEADER */
+
+.site-header{
+  width:100%;
+  height:80px;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:2000;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:9px 25px 9px 18px;
+  background:rgba(255,255,255,.97);
+  border-bottom:2px solid var(--dark-green);
+  box-shadow:0 4px 16px rgba(20,63,42,.07);
+  backdrop-filter:blur(12px);
+}
+
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.logo-img{
+  width:52px;
+  height:52px;
+  object-fit:cover;
+  border-radius:50%;
+  border:2px solid #d4af37;
+}
+
+.logo-details{
+  display:flex;
+  flex-direction:column;
+}
+
+.logo-text{
+  color:var(--dark-green);
+  font-size:16px;
+  font-weight:800;
+  line-height:1.2;
+}
+
+.logo-subtitle{
+  margin-top:4px;
+  color:var(--gold-dark);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+}
+
+.desktop-nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  margin-left:auto;
+}
+
+.desktop-nav a{
+  position:relative;
+  color:#315342;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+  transition:.2s;
+}
+
+.desktop-nav a::after{
+  content:"";
+  width:0;
+  height:2px;
+  position:absolute;
+  left:0;
+  bottom:-8px;
+  background:var(--gold);
+  transition:.25s;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active{
+  color:var(--gold-dark);
+}
+
+.desktop-nav a:hover::after,
+.desktop-nav a.active::after{
+  width:100%;
 }
 
 .header-actions{
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
 }
 
 .profile-icon{
-    width: 50px;
-    height: 50px;
-
-    border-radius: 50%;
-    border: 2px solid #d4af37;
-
-    background: #123524;
-    color: white;
-
-    text-decoration: none;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 22px;
-    font-weight: 700;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--white);
+  background:linear-gradient(145deg,#d9b92d,#aa7d00);
+  box-shadow:0 4px 11px rgba(157,116,0,.24);
+  font-size:20px;
+  font-weight:800;
 }
 
-.profile-icon:hover{
-    background: #d4af37;
-    color: #123524;
+.menu-button{
+  width:42px;
+  height:42px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  border-radius:10px;
+  color:var(--white);
+  background:var(--dark-green);
+  font-size:20px;
+}
+
+.mobile-menu{
+  width:min(310px,86vw);
+  height:100vh;
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:3000;
+  padding:25px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  color:var(--white);
+  background:linear-gradient(180deg,#123824,#1e5134);
+  box-shadow:-12px 0 34px rgba(0,0,0,.22);
+  transform:translateX(105%);
+  transition:.3s ease;
+}
+
+.mobile-menu.open{
+  transform:translateX(0);
+}
+
+.mobile-menu-header{
+  margin-bottom:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.mobile-menu-header strong{
+  font-size:18px;
+}
+
+.mobile-menu-close{
+  width:38px;
+  height:38px;
+  border:none;
+  border-radius:9px;
+  color:var(--dark-green);
+  background:var(--white);
+}
+
+.mobile-menu a{
+  padding:12px 13px;
+  border-radius:10px;
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  font-weight:700;
+}
+
+.mobile-menu a:hover,
+.mobile-menu a.active{
+  color:var(--dark-green);
+  background:var(--white);
+}
+
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:2500;
+  display:none;
+  background:rgba(13,36,24,.55);
+}
+
+.menu-overlay.show{
+  display:block;
+}
+
+/* HERO */
+
+.orders-hero{
+  min-height:260px;
+  padding:48px 24px;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:var(--white);
+  background:
+    linear-gradient(rgba(13,45,28,.78),rgba(13,45,28,.78)),
+    url("../assets/services-hero.jpg") center/cover no-repeat;
+}
+
+.orders-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 30%,rgba(255,255,255,.08),transparent 28%),
+    radial-gradient(circle at 80% 70%,rgba(200,154,18,.14),transparent 30%);
+}
+
+.hero-content{
+  max-width:760px;
+  position:relative;
+  z-index:2;
+}
+
+.hero-kicker{
+  margin-bottom:10px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#f5d870;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+}
+
+.hero-content h1{
+  margin-bottom:12px;
+  font-size:46px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+.hero-content p{
+  color:rgba(255,255,255,.86);
+  font-size:14px;
+  line-height:1.7;
+}
+
+/* MAIN */
+
+.orders-section{
+  max-width:1180px;
+  margin:0 auto;
+  padding:55px 22px 70px;
+}
+
+.section-heading{
+  margin-bottom:26px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.section-heading h2{
+  margin-bottom:7px;
+  color:var(--dark-green);
+  font-size:31px;
+  font-weight:900;
+}
+
+.section-heading p{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.order-count{
+  padding:9px 14px;
+  border-radius:22px;
+  color:var(--dark-green);
+  background:var(--soft-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+.orders-list{
+  display:grid;
+  gap:20px;
+}
+
+.order-card{
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:var(--white);
+  box-shadow:0 12px 30px rgba(20,63,42,.08);
+}
+
+.order-card-header{
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  border-bottom:1px solid var(--border);
+  background:#fffdfa;
+}
+
+.order-number{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.order-icon{
+  width:43px;
+  height:43px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  color:var(--gold-dark);
+  background:#fff7df;
+  font-size:17px;
+}
+
+.order-number h3{
+  margin-bottom:4px;
+  color:var(--dark-green);
+  font-size:17px;
+}
+
+.order-number p{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  border-radius:22px;
+  font-size:10px;
+  font-weight:800;
+  text-transform:capitalize;
+}
+
+.status-pending{
+  color:#8a6200;
+  background:var(--warning-light);
+}
+
+.status-paid,
+.status-confirmed,
+.status-packed{
+  color:var(--info);
+  background:var(--info-light);
+}
+
+.status-shipped,
+.status-out-for-delivery{
+  color:#76548f;
+  background:#f5effb;
+}
+
+.status-delivered{
+  color:var(--success);
+  background:var(--success-light);
+}
+
+.status-cancelled,
+.status-failed{
+  color:var(--danger);
+  background:var(--danger-light);
+}
+
+.order-card-body{
+  padding:20px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 220px;
+  gap:22px;
+}
+
+.order-meta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.meta-box{
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fbfcfa;
+}
+
+.meta-box span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+
+.meta-box strong{
+  color:var(--dark-green);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.address-box{
+  margin-bottom:18px;
+  padding:14px;
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  border-radius:12px;
+  color:#4e5b53;
+  background:var(--soft-green);
+  font-size:11px;
+  line-height:1.6;
+}
+
+.address-box i{
+  margin-top:2px;
+  color:var(--gold-dark);
+}
+
+.items{
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:13px;
+}
+
+.items-title{
+  padding:11px 14px;
+  color:var(--dark-green);
+  background:#f8faf7;
+  border-bottom:1px solid var(--border);
+  font-size:11px;
+  font-weight:800;
+}
+
+.item-row{
+  padding:13px 14px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:15px;
+  border-bottom:1px solid #edf0ed;
+}
+
+.item-row:last-child{
+  border-bottom:none;
+}
+
+.item-row strong{
+  display:block;
+  margin-bottom:4px;
+  color:var(--dark-green);
+  font-size:12px;
+}
+
+.item-row small{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.item-subtotal{
+  color:var(--dark-green);
+  font-size:12px;
+  font-weight:800;
+}
+
+.order-actions{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.order-actions .btn{
+  min-height:44px;
+  padding:11px 15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:none;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.view-btn{
+  color:var(--white);
+  background:var(--dark-green);
+}
+
+.track-btn{
+  color:var(--gold-dark);
+  border:1px solid #ead695 !important;
+  background:#fff7df;
+}
+
+.cancel-btn{
+  color:var(--danger);
+  border:1px solid #f1caca !important;
+  background:var(--danger-light);
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+}
+
+.empty,
+.loading-box{
+  padding:55px 25px;
+  text-align:center;
+  border:1px solid var(--border);
+  border-radius:20px;
+  color:var(--muted);
+  background:var(--white);
+  box-shadow:0 12px 30px rgba(20,63,42,.07);
+}
+
+.empty i,
+.loading-box i{
+  display:block;
+  margin-bottom:15px;
+  color:var(--gold);
+  font-size:36px;
+}
+
+.empty h3{
+  margin-bottom:7px;
+  color:var(--dark-green);
+  font-size:20px;
+}
+
+.shop-btn{
+  margin-top:18px;
+  padding:11px 17px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:11px;
+  color:var(--white);
+  background:var(--dark-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+/* MODAL */
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(13,36,24,.65);
+  backdrop-filter:blur(5px);
+}
+
+.modal-content{
+  width:100%;
+  max-width:680px;
+  max-height:90vh;
+  overflow-y:auto;
+  border-radius:20px;
+  background:var(--white);
+  box-shadow:0 25px 70px rgba(0,0,0,.28);
+}
+
+.modal-header{
+  padding:19px 21px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+
+.modal-header h2{
+  color:var(--dark-green);
+  font-size:20px;
+}
+
+.modal-close{
+  width:36px;
+  height:36px;
+  border:none;
+  border-radius:50%;
+  color:var(--dark-green);
+  background:var(--soft-green);
+}
+
+.modal-body{
+  padding:21px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.detail-card{
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:#fbfcfa;
+}
+
+.detail-card.full{
+  grid-column:1/-1;
+}
+
+.detail-card span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.detail-card strong{
+  color:var(--dark-green);
+  font-size:11px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+
+/* FOOTER */
+
+.site-footer{
+  padding:24px 20px;
+  text-align:center;
+  color:rgba(255,255,255,.88);
+  background:var(--dark-green);
+  font-size:12px;
+}
+
+.whatsapp-float{
+  width:50px;
+  height:50px;
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:1800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--white);
+  background:#1fc75a;
+  box-shadow:0 7px 20px rgba(31,199,90,.34);
+  font-size:23px;
+}
+
+/* ALERT */
+
+.page-alert{
+  width:min(390px,calc(100% - 30px));
+  padding:14px 16px;
+  position:fixed;
+  top:94px;
+  right:18px;
+  z-index:6000;
+  display:none;
+  align-items:flex-start;
+  gap:10px;
+  border-radius:12px;
+  color:var(--white);
+  box-shadow:0 14px 35px rgba(0,0,0,.2);
+}
+
+.page-alert.show{
+  display:flex;
+}
+
+.page-alert.success{
+  background:var(--success);
+}
+
+.page-alert.error{
+  background:var(--danger);
+}
+
+.page-alert.info{
+  background:var(--info);
+}
+
+@media(max-width:1050px){
+  .desktop-nav{
+    gap:11px;
+  }
+
+  .desktop-nav a{
+    font-size:14px;
+  }
+}
+
+@media(max-width:900px){
+  body{
+    padding-top:78px;
+  }
+
+  .desktop-nav{
+    display:none;
+  }
+
+  .menu-button{
+    display:flex;
+  }
+
+  .order-card-body{
+    grid-template-columns:1fr;
+  }
+
+  .order-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:700px){
+  .site-header{
+    padding:9px 13px;
+  }
+
+  .logo-text{
+    font-size:14px;
+  }
+
+  .logo-subtitle{
+    font-size:8px;
+  }
+
+  .logo-img{
+    width:47px;
+    height:47px;
+  }
+
+  .orders-hero{
+    min-height:225px;
+    padding:38px 18px;
+  }
+
+  .hero-content h1{
+    font-size:36px;
+  }
+
+  .orders-section{
+    padding:42px 14px 58px;
+  }
+
+  .section-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .order-card-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .order-meta{
+    grid-template-columns:1fr;
+  }
+
+  .order-actions{
+    grid-template-columns:1fr;
+  }
+
+  .modal-body{
+    grid-template-columns:1fr;
+  }
+
+  .detail-card.full{
+    grid-column:auto;
+  }
+}
+@media(max-width:1100px) and (min-width:701px){
+
+  .home-glass-header{
+    padding:8px 18px !important;
+    column-gap:12px !important;
+  }
+
+  .home-logo-img{
+    width:46px !important;
+    height:46px !important;
+  }
+
+  .home-logo-text{
+    font-size:15px !important;
+  }
+
+  .home-logo-subtitle{
+    font-size:9px !important;
+  }
+
+  .home-header-right{
+    gap:9px !important;
+  }
+
+  .home-navbar{
+    gap:11px !important;
+  }
+
+  .home-navbar > a,
+  .home-category-btn{
+    font-size:11px !important;
+    padding:6px 0 !important;
+  }
+
+  .home-login-btn,
+  .home-register-btn,
+  .logout-btn{
+    min-height:37px !important;
+    padding:7px 11px !important;
+    font-size:11px !important;
+  }
+
+  .profile-icon{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+  }
 }
 </style>
 </head>
-<header class="glass-header">
 
-    <div class="logo-container">
-        <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
-
-        <div class="logo-details">
-            <span class="logo-text">Neolife Wellness Center</span>
-            <span class="logo-subtitle">Ayush Wellness Center</span>
-        </div>
-    </div>
-
-    <input type="checkbox" id="menu-toggle">
-
-    <div class="header-actions">
-
-        <label for="menu-toggle" class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </label>
-
-        <a href="profile.html" class="profile-icon" id="profileIcon">
-            A
-        </a>
-
-    </div>
-
-    <nav class="side-menu">
-        <a href="homepage.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="services.html">Therapies</a>
-        <a href="services.html">Beauty &amp; Cosmetics</a>
-        <a href="products.html">Products</a>
-        <a href="consultation.html">Consultation</a>
-        <a href="blog.html">Blogs</a>
-        <a href="contact.html">Contact</a>
-    </nav>
-
-</header>
 <body>
 
-<div class="container">
-  <h1 class="heading">My Orders</h1>
-  <div id="ordersContainer"></div>
+<div class="page-alert" id="pageAlert">
+  <i class="fa-solid fa-circle-info" id="alertIcon"></i>
+  <div id="alertMessage"></div>
+</div>
+
+<div
+  class="menu-overlay"
+  id="menuOverlay"
+  onclick="closeMobileMenu()"
+></div>
+
+<header class="site-header">
+
+  <a href="homepage.html" class="logo-container">
+
+    <img
+      src="../assets/main_logo.jpeg"
+      alt="Neolife Logo"
+      class="logo-img"
+    >
+
+    <div class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
+    </div>
+
+  </a>
+
+  <nav class="desktop-nav">
+
+    <a href="homepage.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Therapies</a>
+    <a href="services.html#beauty">Beauty &amp; Cosmetics</a>
+    <a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a>
+    <a href="blog.html">Blogs</a>
+    <a href="contact.html">Contact</a>
+
+  </nav>
+
+  <div class="header-actions">
+
+    <a
+      href="profile.html"
+      class="profile-icon"
+      id="profileIcon"
+      title="Profile"
+    >
+      <i class="fa-solid fa-user"></i>
+    </a>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openMobileMenu()"
+      aria-label="Open menu"
+    >
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+  </div>
+
+</header>
+
+<nav class="mobile-menu" id="mobileMenu">
+
+  <div class="mobile-menu-header">
+
+    <strong>Neolife Menu</strong>
+
+    <button
+      type="button"
+      class="mobile-menu-close"
+      onclick="closeMobileMenu()"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+  <a href="homepage.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Therapies</a>
+  <a href="services.html#beauty">Beauty &amp; Cosmetics</a>
+  <a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a>
+  <a href="blog.html">Blogs</a>
+  <a href="contact.html">Contact</a>
+  <a href="my-orders.html" class="active">My Orders</a>
+  <a href="profile.html">Profile</a>
+
+</nav>
+
+<section class="orders-hero">
+
+  <div class="hero-content">
+
+    <span class="hero-kicker">
+      <i class="fa-solid fa-box-open"></i>
+      Your Wellness Purchases
+    </span>
+
+    <h1>My Orders</h1>
+
+    <p>
+      View your product purchases, payment details, delivery status,
+      shipping address and ordered items in one place.
+    </p>
+
+  </div>
+
+</section>
+
+<main class="orders-section">
+
+  <div class="section-heading">
+
+    <div>
+      <h2>Your Order History</h2>
+      <p>Track every order from placement to delivery.</p>
+    </div>
+
+    <span class="order-count" id="orderCount">
+      0 Orders
+    </span>
+
+  </div>
+
+  <div id="ordersContainer" class="orders-list">
+
+    <div class="loading-box">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Loading your orders...
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  © 2026 Neolife Wellness Center. All Rights Reserved.
+</footer>
+
+<a
+  href="https://wa.me/919243351631"
+  class="whatsapp-float"
+  target="_blank"
+  aria-label="Chat on WhatsApp"
+>
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+
+<div class="modal" id="orderModal">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h2>Order Details</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        onclick="closeOrderModal()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="detail-card">
+        <span>Order Number</span>
+        <strong id="modalOrderNumber">-</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Status</span>
+        <strong id="modalStatus">-</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Order Date</span>
+        <strong id="modalDate">-</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Total Amount</span>
+        <strong id="modalAmount">-</strong>
+      </div>
+
+      <div class="detail-card full">
+        <span>Shipping Address</span>
+        <strong id="modalAddress">-</strong>
+      </div>
+
+      <div class="detail-card full">
+        <span>Products</span>
+        <strong id="modalItems">-</strong>
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL =
+  "http://localhost:8085";
+
 let orders = [];
 
-window.onload = loadMyOrders;
+window.onload =
+  function(){
+    loadProfileIcon();
+    loadMyOrders();
+  };
 
 async function loadMyOrders(){
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token");
+
+  const container =
+    document.getElementById(
+      "ordersContainer"
+    );
 
   if(!token){
-    alert("Please login first");
-    window.location.href = "login.html";
+    showAlert(
+      "Please login to view your orders.",
+      "error"
+    );
+
+    setTimeout(function(){
+      window.location.href =
+        "login.html";
+    },1000);
+
     return;
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/orders/getAll`, {
-    method: "GET",
-    headers: {
-      "Authorization": "Bearer " + token
+  try{
+    /*
+      For patient order history, use your user-specific endpoint
+      when available, for example:
+      GET /api/orders/getMyOrders
+
+      The current code keeps your existing endpoint.
+    */
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/orders/getAll`,
+        {
+          method:"GET",
+
+          headers:{
+            "Authorization":
+              "Bearer " + token
+          }
+        }
+      );
+
+    const text =
+      await response.text();
+
+    if(!response.ok){
+      throw new Error(
+        text ||
+        `Failed to load orders. Status: ${response.status}`
+      );
     }
-  });
 
-  const result = await response.json();
+    const result =
+      text
+        ? JSON.parse(text)
+        : null;
 
-  if(result.success){
-    orders = (result.data || []).sort((a,b) => b.id - a.id);
-    displayOrders();
-  }else{
-    document.getElementById("ordersContainer").innerHTML =
-      `<p class="empty">${result.message || "No orders found"}</p>`;
+    if(
+      result &&
+      result.success
+    ){
+      orders =
+        Array.isArray(result.data)
+          ? result.data.sort(
+              (a,b) =>
+                Number(b.id) -
+                Number(a.id)
+            )
+          : [];
+
+      displayOrders();
+
+    }else{
+      orders = [];
+
+      displayOrders();
+
+      showAlert(
+        result?.message ||
+        "No orders found.",
+        "info"
+      );
+    }
+
+  }catch(error){
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="empty">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <h3>Unable to load orders</h3>
+        <p>
+          ${escapeHtml(
+            error.message ||
+            "Please try again later."
+          )}
+        </p>
+      </div>
+    `;
+
+    setText(
+      "orderCount",
+      "0 Orders"
+    );
+
+    showAlert(
+      error.message ||
+      "Unable to load orders.",
+      "error"
+    );
   }
 }
 
 function displayOrders(){
-  const container = document.getElementById("ordersContainer");
+  const container =
+    document.getElementById(
+      "ordersContainer"
+    );
 
-  if(!orders || orders.length === 0){
-    container.innerHTML = `<p class="empty">No orders found.</p>`;
+  setText(
+    "orderCount",
+    `${orders.length} Order${
+      orders.length === 1
+        ? ""
+        : "s"
+    }`
+  );
+
+  if(
+    !orders ||
+    orders.length === 0
+  ){
+    container.innerHTML = `
+      <div class="empty">
+        <i class="fa-solid fa-box-open"></i>
+        <h3>No orders yet</h3>
+        <p>
+          Products you purchase will appear here.
+        </p>
+        <a
+          href="products.html"
+          class="shop-btn"
+        >
+          <i class="fa-solid fa-bag-shopping"></i>
+          Browse Products
+        </a>
+      </div>
+    `;
+
     return;
   }
 
   container.innerHTML = "";
 
-  orders.forEach(order => {
-    let itemsHtml = "";
+  orders.forEach(
+    function(order){
+      const items =
+        Array.isArray(order.items)
+          ? order.items
+          : [];
 
-    if(order.items && order.items.length > 0){
-      order.items.forEach(item => {
-        itemsHtml += `
-          <div class="item-row">
-            <b>${item.productName}</b><br>
-            Qty: ${item.quantity} | Price: ₹${item.price} | Subtotal: ₹${item.subtotal}
-          </div>
-        `;
-      });
-    }else{
-      itemsHtml = `<p>No items found.</p>`;
-    }
+      const itemsHtml =
+        items.length > 0
+          ? items.map(
+              function(item){
+                return `
+                  <div class="item-row">
 
-    container.innerHTML += `
-      <div class="order-card">
-        <div class="order-top">
-          <div class="product-info">
-            <h3>Order No: ${order.orderNumber}</h3>
-            <p><b>Order ID:</b> ${order.id}</p>
-            <p><b>Amount:</b> ₹${order.totalAmount}</p>
-            <p><b>Address:</b> ${order.shippingAddress || "-"}</p>
-            <p><b>Date:</b> ${formatDate(order.orderDate)}</p>
-            <p class="status">${order.status}</p>
+                    <div>
+                      <strong>
+                        ${escapeHtml(
+                          item.productName ||
+                          "Product"
+                        )}
+                      </strong>
 
-            <div class="items">
-              ${itemsHtml}
+                      <small>
+                        Qty:
+                        ${Number(
+                          item.quantity ||
+                          0
+                        )}
+                        · Price:
+                        ${formatCurrency(
+                          item.price
+                        )}
+                      </small>
+                    </div>
+
+                    <span class="item-subtotal">
+                      ${formatCurrency(
+                        item.subtotal
+                      )}
+                    </span>
+
+                  </div>
+                `;
+              }
+            ).join("")
+          : `
+              <div class="item-row">
+                <div>
+                  <strong>No items available</strong>
+                  <small>
+                    Product details are not available for this order.
+                  </small>
+                </div>
+              </div>
+            `;
+
+      const status =
+        String(
+          order.status ||
+          "PENDING"
+        );
+
+      container.insertAdjacentHTML(
+        "beforeend",
+        `
+        <article class="order-card">
+
+          <div class="order-card-header">
+
+            <div class="order-number">
+
+              <div class="order-icon">
+                <i class="fa-solid fa-box"></i>
+              </div>
+
+              <div>
+                <h3>
+                  Order
+                  #${escapeHtml(
+                    order.orderNumber ||
+                    order.id
+                  )}
+                </h3>
+
+                <p>
+                  Placed on
+                  ${escapeHtml(
+                    formatDate(
+                      order.orderDate
+                    )
+                  )}
+                </p>
+              </div>
+
             </div>
+
+            <span
+              class="status-badge ${getStatusClass(
+                status
+              )}"
+            >
+              <i class="${getStatusIcon(
+                status
+              )}"></i>
+              ${escapeHtml(
+                formatStatus(status)
+              )}
+            </span>
+
           </div>
 
-          <div class="right">
-            <button class="btn view-btn" onclick="viewOrder(${order.id})">
-              <i class="fa-solid fa-eye"></i> View Details
-            </button>
+          <div class="order-card-body">
 
-            <button class="btn track-btn" onclick="trackOrder(${order.id})">
-              <i class="fa-solid fa-truck"></i> Track Order
-            </button>
+            <div>
 
-            ${
-              order.status !== "CANCELLED"
-              ? `<button class="btn cancel-btn" onclick="cancelOrder(${order.id})">
-                   Cancel Order
-                 </button>`
-              : ""
-            }
+              <div class="order-meta">
+
+                <div class="meta-box">
+                  <span>Order ID</span>
+                  <strong>
+                    ${escapeHtml(
+                      order.id
+                    )}
+                  </strong>
+                </div>
+
+                <div class="meta-box">
+                  <span>Total Amount</span>
+                  <strong>
+                    ${formatCurrency(
+                      order.totalAmount
+                    )}
+                  </strong>
+                </div>
+
+                <div class="meta-box">
+                  <span>Total Items</span>
+                  <strong>
+                    ${getTotalQuantity(
+                      items
+                    )}
+                  </strong>
+                </div>
+
+              </div>
+
+              <div class="address-box">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>
+                  ${escapeHtml(
+                    order.shippingAddress ||
+                    "Shipping address not available"
+                  )}
+                </span>
+              </div>
+
+              <div class="items">
+
+                <div class="items-title">
+                  Ordered Products
+                </div>
+
+                ${itemsHtml}
+
+              </div>
+
+            </div>
+
+            <div class="order-actions">
+
+              <button
+                type="button"
+                class="btn view-btn"
+                onclick="viewOrder(${Number(
+                  order.id
+                )})"
+              >
+                <i class="fa-solid fa-eye"></i>
+                View Details
+              </button>
+
+              <button
+                type="button"
+                class="btn track-btn"
+                onclick="trackOrder(${Number(
+                  order.id
+                )})"
+              >
+                <i class="fa-solid fa-truck-fast"></i>
+                Track Order
+              </button>
+
+              ${
+                canCancelOrder(status)
+                  ? `
+                    <button
+                      type="button"
+                      class="btn cancel-btn"
+                      onclick="cancelOrder(${Number(
+                        order.id
+                      )})"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                      Cancel Order
+                    </button>
+                  `
+                  : ""
+              }
+
+            </div>
+
           </div>
-        </div>
-      </div>
-    `;
-  });
-}
 
-function formatDate(date){
-  if(!date) return "-";
-  return new Date(date).toLocaleString("en-IN");
-}
-
-function viewOrder(id){
-  const order = orders.find(o => o.id === id);
-  alert(
-    "Order No: " + order.orderNumber +
-    "\\nStatus: " + order.status +
-    "\\nAmount: ₹" + order.totalAmount +
-    "\\nAddress: " + order.shippingAddress
+        </article>
+        `
+      );
+    }
   );
 }
 
+function viewOrder(id){
+  const order =
+    orders.find(
+      item =>
+        Number(item.id) ===
+        Number(id)
+    );
+
+  if(!order){
+    showAlert(
+      "Order not found.",
+      "error"
+    );
+
+    return;
+  }
+
+  const items =
+    Array.isArray(order.items)
+      ? order.items
+      : [];
+
+  const itemText =
+    items.length > 0
+      ? items.map(
+          item =>
+            `${item.productName || "Product"} (Qty: ${item.quantity || 0}, ${formatCurrency(item.subtotal)})`
+        ).join(", ")
+      : "No items available";
+
+  setText(
+    "modalOrderNumber",
+    order.orderNumber ||
+    order.id ||
+    "-"
+  );
+
+  setText(
+    "modalStatus",
+    formatStatus(
+      order.status
+    )
+  );
+
+  setText(
+    "modalDate",
+    formatDate(
+      order.orderDate
+    )
+  );
+
+  setText(
+    "modalAmount",
+    formatCurrency(
+      order.totalAmount
+    )
+  );
+
+  setText(
+    "modalAddress",
+    order.shippingAddress ||
+    "-"
+  );
+
+  setText(
+    "modalItems",
+    itemText
+  );
+
+  document.getElementById(
+    "orderModal"
+  ).style.display =
+    "flex";
+}
+
+function closeOrderModal(){
+  document.getElementById(
+    "orderModal"
+  ).style.display =
+    "none";
+}
+
 async function trackOrder(id){
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/api/orders/${id}/track`, {
-    method: "GET",
-    headers: {
-      "Authorization": "Bearer " + token
+  try{
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/orders/${id}/track`,
+        {
+          method:"GET",
+
+          headers:{
+            "Authorization":
+              "Bearer " + token
+          }
+        }
+      );
+
+    const text =
+      await response.text();
+
+    const result =
+      text
+        ? JSON.parse(text)
+        : null;
+
+    if(
+      response.ok &&
+      result?.success
+    ){
+      if(
+        result.data?.trackingUrl
+      ){
+        window.open(
+          result.data.trackingUrl,
+          "_blank"
+        );
+
+        return;
+      }
+
+      showAlert(
+        result.message ||
+        "Tracking information is available.",
+        "success"
+      );
+
+    }else{
+      showAlert(
+        result?.message ||
+        "Shipment has not been created yet.",
+        "info"
+      );
     }
-  });
 
-  const result = await response.json();
+  }catch(error){
+    console.error(error);
 
-  if(result.success){
-    alert(result.message || "Tracking available");
-  }else{
-    alert(result.message || "Shipment not created yet");
+    showAlert(
+      "Unable to load tracking details.",
+      "error"
+    );
   }
 }
 
 async function cancelOrder(id){
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token");
 
-  if(!confirm("Are you sure you want to cancel this order?")){
+  if(
+    !confirm(
+      "Are you sure you want to cancel this order?"
+    )
+  ){
     return;
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/orders/${id}/cancel`, {
-    method: "PUT",
-    headers: {
-      "Authorization": "Bearer " + token
+  try{
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/orders/${id}/cancel`,
+        {
+          method:"PUT",
+
+          headers:{
+            "Authorization":
+              "Bearer " + token
+          }
+        }
+      );
+
+    const text =
+      await response.text();
+
+    const result =
+      text
+        ? JSON.parse(text)
+        : null;
+
+    if(
+      response.ok &&
+      result?.success
+    ){
+      showAlert(
+        result.message ||
+        "Order cancelled successfully.",
+        "success"
+      );
+
+      loadMyOrders();
+
+    }else{
+      showAlert(
+        result?.message ||
+        "Failed to cancel order.",
+        "error"
+      );
     }
-  });
 
-  const result = await response.json();
+  }catch(error){
+    console.error(error);
 
-  if(result.success){
-    alert(result.message || "Order cancelled");
-    loadMyOrders();
-  }else{
-    alert(result.message || "Failed to cancel order");
+    showAlert(
+      "Unable to cancel order.",
+      "error"
+    );
   }
 }
+
 async function loadProfileIcon(){
+  const icon =
+    document.getElementById(
+      "profileIcon"
+    );
 
-    const icon = document.getElementById("profileIcon");
-    const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem(
+      "token"
+    );
 
-    if(!token){
-        icon.innerHTML = '<i class="fa-solid fa-user"></i>';
-        return;
-    }
+  if(!token){
+    icon.innerHTML =
+      '<i class="fa-solid fa-user"></i>';
 
-    try{
+    icon.href =
+      "login.html";
 
-        const response = await fetch("http://localhost:8085/api/users/getProfile",{
-            headers:{
-                "Authorization":"Bearer " + token
-            }
-        });
+    return;
+  }
 
-        const result = await response.json();
-
-        if(result.success){
-            icon.innerText = result.data.name.charAt(0).toUpperCase();
-        }else{
-            icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+  try{
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/users/getProfile`,
+        {
+          headers:{
+            "Authorization":
+              "Bearer " + token
+          }
         }
+      );
 
-    }catch(e){
-        icon.innerHTML = '<i class="fa-solid fa-user"></i>';
+    const result =
+      await response.json();
+
+    if(
+      result.success &&
+      result.data?.name
+    ){
+      icon.textContent =
+        result.data.name
+          .charAt(0)
+          .toUpperCase();
+
+    }else{
+      icon.innerHTML =
+        '<i class="fa-solid fa-user"></i>';
     }
+
+  }catch(error){
+    icon.innerHTML =
+      '<i class="fa-solid fa-user"></i>';
+  }
 }
 
-loadProfileIcon();
+function canCancelOrder(status){
+  const normalized =
+    String(status || "")
+      .toUpperCase();
+
+  return ![
+    "CANCELLED",
+    "DELIVERED",
+    "SHIPPED",
+    "OUT_FOR_DELIVERY"
+  ].includes(normalized);
+}
+
+function getTotalQuantity(items){
+  return items.reduce(
+    (
+      total,
+      item
+    ) =>
+      total +
+      Number(
+        item.quantity ||
+        0
+      ),
+    0
+  );
+}
+
+function getStatusClass(status){
+  const value =
+    String(status || "")
+      .toLowerCase()
+      .replaceAll("_","-");
+
+  if(
+    value.includes("delivered")
+  ){
+    return "status-delivered";
+  }
+
+  if(
+    value.includes("out-for-delivery")
+  ){
+    return "status-out-for-delivery";
+  }
+
+  if(
+    value.includes("shipped")
+  ){
+    return "status-shipped";
+  }
+
+  if(
+    value.includes("packed")
+  ){
+    return "status-packed";
+  }
+
+  if(
+    value.includes("paid") ||
+    value.includes("confirmed")
+  ){
+    return "status-paid";
+  }
+
+  if(
+    value.includes("cancel") ||
+    value.includes("fail")
+  ){
+    return "status-cancelled";
+  }
+
+  return "status-pending";
+}
+
+function getStatusIcon(status){
+  const value =
+    String(status || "")
+      .toUpperCase();
+
+  if(
+    value.includes("DELIVERED")
+  ){
+    return "fa-solid fa-circle-check";
+  }
+
+  if(
+    value.includes("SHIPPED") ||
+    value.includes("OUT_FOR_DELIVERY")
+  ){
+    return "fa-solid fa-truck-fast";
+  }
+
+  if(
+    value.includes("CANCEL") ||
+    value.includes("FAIL")
+  ){
+    return "fa-solid fa-circle-xmark";
+  }
+
+  if(
+    value.includes("PAID") ||
+    value.includes("CONFIRMED")
+  ){
+    return "fa-solid fa-credit-card";
+  }
+
+  return "fa-solid fa-clock";
+}
+
+function formatStatus(value){
+  return String(
+    value ||
+    "Pending"
+  )
+  .replaceAll("_"," ")
+  .toLowerCase()
+  .replace(
+    /\b\w/g,
+    character =>
+      character.toUpperCase()
+  );
+}
+
+function formatDate(value){
+  if(!value){
+    return "-";
+  }
+
+  const date =
+    new Date(value);
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  ){
+    return String(value);
+  }
+
+  return date.toLocaleString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit"
+    }
+  );
+}
+
+function formatCurrency(value){
+  return "₹" +
+    Number(
+      value ||
+      0
+    ).toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits:0,
+        maximumFractionDigits:2
+      }
+    );
+}
+
+function openMobileMenu(){
+  document.getElementById(
+    "mobileMenu"
+  ).classList.add(
+    "open"
+  );
+
+  document.getElementById(
+    "menuOverlay"
+  ).classList.add(
+    "show"
+  );
+}
+
+function closeMobileMenu(){
+  document.getElementById(
+    "mobileMenu"
+  ).classList.remove(
+    "open"
+  );
+
+  document.getElementById(
+    "menuOverlay"
+  ).classList.remove(
+    "show"
+  );
+}
+
+function showAlert(
+  message,
+  type
+){
+  const box =
+    document.getElementById(
+      "pageAlert"
+    );
+
+  const icon =
+    document.getElementById(
+      "alertIcon"
+    );
+
+  const text =
+    document.getElementById(
+      "alertMessage"
+    );
+
+  if(
+    !box ||
+    !icon ||
+    !text
+  ){
+    return;
+  }
+
+  text.textContent =
+    message;
+
+  box.className =
+    `page-alert show ${type}`;
+
+  icon.className =
+    type === "success"
+      ? "fa-solid fa-circle-check"
+      : type === "error"
+        ? "fa-solid fa-circle-exclamation"
+        : "fa-solid fa-circle-info";
+
+  clearTimeout(
+    window.ordersAlertTimer
+  );
+
+  window.ordersAlertTimer =
+    setTimeout(
+      function(){
+        box.classList.remove(
+          "show"
+        );
+      },
+      4000
+    );
+}
+
+function setText(
+  id,
+  value
+){
+  const element =
+    document.getElementById(id);
+
+  if(element){
+    element.textContent =
+      value;
+  }
+}
+
+function escapeHtml(value){
+  if(
+    value === null ||
+    value === undefined
+  ){
+    return "";
+  }
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+window.addEventListener(
+  "click",
+  function(event){
+    const modal =
+      document.getElementById(
+        "orderModal"
+      );
+
+    if(
+      event.target === modal
+    ){
+      closeOrderModal();
+    }
+  }
+);
 </script>
 
 </body>

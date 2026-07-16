@@ -22,7 +22,7 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     >
 
-    <link rel="stylesheet" href="../css/style.css">
+   
 
     <style>
 
@@ -138,7 +138,7 @@
     color:#163b28;
 
     text-decoration:none;
-    font-size:13px;
+    font-size:12px;
     font-weight:800;
 
     white-space:nowrap;
@@ -202,26 +202,157 @@
         0 8px 18px rgba(174,125,0,.25);
 }
 
-.mobile-menu-button{
-    display:none;
+/* MOBILE DRAWER OVERLAY */
 
-    width:42px;
-    height:42px;
+.mobile-menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1998;
 
-    margin-left:10px;
+  display:none;
 
-    border:none;
-    border-radius:9px;
-
-    background:#153d29;
-    color:#ffffff;
-
-    font-size:19px;
-    cursor:pointer;
+  background:rgba(5,30,18,.55);
+  backdrop-filter:blur(2px);
 }
 
+.mobile-menu-overlay.show{
+  display:block;
+}
+
+
+/* RIGHT-SIDE MOBILE MENU */
+
 .mobile-navigation{
+  width:min(310px,86vw);
+  height:100vh;
+
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:1999;
+
+  padding:24px 20px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  background:linear-gradient(
+    180deg,
+    #123824,
+    #1e5134
+  );
+
+  box-shadow:-12px 0 34px rgba(0,0,0,.22);
+
+  transform:translateX(105%);
+  transition:transform .3s ease;
+
+  overflow-y:auto;
+}
+
+.mobile-navigation.open{
+  transform:translateX(0);
+}
+
+
+/* MOBILE MENU HEADER */
+
+.mobile-navigation-header{
+  margin-bottom:14px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  color:white;
+}
+
+.mobile-navigation-header strong{
+  font-size:18px;
+}
+
+.mobile-navigation-close{
+  width:38px;
+  height:38px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:none;
+  border-radius:9px;
+
+  color:#123824;
+  background:white;
+
+  font-size:18px;
+  cursor:pointer;
+}
+
+
+/* MOBILE MENU LINKS */
+
+.mobile-navigation a{
+  padding:13px 14px;
+
+  display:block;
+
+  border-radius:10px;
+
+  color:rgba(255,255,255,.88);
+
+  font-size:14px;
+  font-weight:700;
+
+  text-decoration:none;
+
+  transition:.2s ease;
+}
+
+.mobile-navigation a:hover,
+.mobile-navigation a.active{
+  color:#123824;
+  background:white;
+}
+
+
+/* MOBILE MENU BUTTON */
+
+.mobile-menu-button{
+  width:42px;
+  height:42px;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  margin-left:10px;
+
+  border:none;
+  border-radius:9px;
+
+  color:white;
+  background:#153d29;
+
+  font-size:19px;
+  cursor:pointer;
+}
+
+
+@media(max-width:900px){
+
+  .desktop-navigation{
     display:none;
+  }
+
+  .mobile-menu-button{
+    display:flex;
+  }
+
+  .profile-icon{
+    margin-left:auto;
+  }
 }
 
 @media(max-width:1100px){
@@ -662,6 +793,33 @@
 
             line-height:1.7;
         }
+        .mobile-menu{
+  position:fixed;
+  top:0;
+  right:0;
+  width:300px;
+  height:100vh;
+  background:#123524;
+  transform:translateX(105%);
+  transition:.3s ease;
+  z-index:3000;
+}
+
+.mobile-menu.open{
+  transform:translateX(0);
+}
+
+.menu-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:2500;
+}
+
+.menu-overlay.show{
+  display:block;
+}
 
         /* MOBILE */
 
@@ -687,7 +845,54 @@
                 gap:25px;
             }
         }
+@media(max-width:1100px) and (min-width:701px){
 
+  .home-glass-header{
+    padding:8px 18px !important;
+    column-gap:12px !important;
+  }
+
+  .home-logo-img{
+    width:46px !important;
+    height:46px !important;
+  }
+
+  .home-logo-text{
+    font-size:15px !important;
+  }
+
+  .home-logo-subtitle{
+    font-size:9px !important;
+  }
+
+  .home-header-right{
+    gap:9px !important;
+  }
+
+  .home-navbar{
+    gap:11px !important;
+  }
+
+  .home-navbar > a,
+  .home-category-btn{
+    font-size:11px !important;
+    padding:6px 0 !important;
+  }
+
+  .home-login-btn,
+  .home-register-btn,
+  .logout-btn{
+    min-height:37px !important;
+    padding:7px 11px !important;
+    font-size:11px !important;
+  }
+
+  .profile-icon{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+  }
+}
     </style>
 
 </head>
@@ -761,16 +966,67 @@
 
 </header>
 
-<nav class="mobile-navigation" id="mobileNavigation">
+<div
+  class="mobile-menu-overlay"
+  id="mobileMenuOverlay"
+  onclick="closeMobileMenu()"
+></div>
 
-  <a href="homepage.html">Home</a>
-  <a href="about.html">About</a>
-  <a href="services.html">Therapies</a>
-  <a href="services.html#beauty">Beauty &amp; Cosmetics</a>
-  <a href="products.html">Products</a>
-  <a href="consultation.html">Consultation</a>
-  <a href="blog.html">Blogs</a>
-  <a href="contact.html">Contact</a>
+<nav
+  class="mobile-navigation"
+  id="mobileNavigation"
+>
+
+  <div class="mobile-navigation-header">
+
+    <strong>Neolife Menu</strong>
+
+    <button
+      type="button"
+      class="mobile-navigation-close"
+      onclick="closeMobileMenu()"
+      aria-label="Close menu"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+  <a href="homepage.html">
+    Home
+  </a>
+
+  <a href="about.html">
+    About
+  </a>
+
+  <a href="services.html">
+    Therapies
+  </a>
+
+  <a href="services.html#beauty">
+    Beauty &amp; Cosmetics
+  </a>
+
+  <a href="products.html">
+    Products
+  </a>
+
+  <a href="consultation.html" class="active">
+    Consultation
+  </a>
+
+  <a href="blog.html">
+    Blogs
+  </a>
+
+  <a href="contact.html">
+    Contact
+  </a>
+
+  <a href="profile.html">
+    Profile
+  </a>
 
 </nav>
 
@@ -1217,7 +1473,69 @@
             window.location.href =
                 "therapy-booking.html";
         }
+function toggleMobileMenu(){
 
+  const menu =
+    document.getElementById(
+      "mobileNavigation"
+    );
+
+  const overlay =
+    document.getElementById(
+      "mobileMenuOverlay"
+    );
+
+  const icon =
+    document.getElementById(
+      "mobileMenuIcon"
+    );
+
+  menu.classList.toggle("open");
+  overlay.classList.toggle("show");
+
+  if(menu.classList.contains("open")){
+    icon.className =
+      "fa-solid fa-xmark";
+
+    document.body.style.overflow =
+      "hidden";
+
+  }else{
+    icon.className =
+      "fa-solid fa-bars";
+
+    document.body.style.overflow =
+      "";
+  }
+}
+
+
+function closeMobileMenu(){
+
+  const menu =
+    document.getElementById(
+      "mobileNavigation"
+    );
+
+  const overlay =
+    document.getElementById(
+      "mobileMenuOverlay"
+    );
+
+  const icon =
+    document.getElementById(
+      "mobileMenuIcon"
+    );
+
+  menu.classList.remove("open");
+  overlay.classList.remove("show");
+
+  icon.className =
+    "fa-solid fa-bars";
+
+  document.body.style.overflow =
+    "";
+}
     </script>
 
 </body>

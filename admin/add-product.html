@@ -1357,7 +1357,7 @@ document.getElementById("productForm").addEventListener("submit", async function
     manufacturerName: document.getElementById("manufacturer").value,
     manufacturingDate: new Date().toISOString().split("T")[0],
     expiryDate: document.getElementById("expiryDate").value + "-01",
-    imageUrls: selectedImageUrls.join(",")
+    imageUrls: selectedImageUrls
   };
 
   try{
