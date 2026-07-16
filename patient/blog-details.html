@@ -236,9 +236,7 @@
       cursor: pointer;
     }
 
-    .mobile-navigation {
-      display: none;
-    }
+   
 
     /* =========================
        PAGE HERO
@@ -527,6 +525,112 @@
       color: rgba(255, 255, 255, 0.8);
       font-size: 14px;
     }
+    .mobile-menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1998;
+
+  opacity:0;
+  visibility:hidden;
+
+  background:rgba(5,30,18,.58);
+  backdrop-filter:blur(2px);
+
+  transition:.3s ease;
+}
+
+.mobile-menu-overlay.show{
+  opacity:1;
+  visibility:visible;
+}
+
+.mobile-navigation{
+  width:min(310px,86vw);
+  height:100vh;
+
+  position:fixed;
+  top:0;
+  right:0;
+  left:auto;
+  z-index:1999;
+
+  padding:24px 20px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  overflow-y:auto;
+
+  background:linear-gradient(
+    180deg,
+    #123824,
+    #1e5134
+  );
+
+  box-shadow:-12px 0 34px rgba(0,0,0,.22);
+
+  transform:translateX(105%);
+  transition:transform .3s ease;
+}
+
+.mobile-navigation.open{
+  transform:translateX(0);
+}
+
+.mobile-navigation-header{
+  margin-bottom:14px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  color:white;
+}
+
+.mobile-navigation-header strong{
+  font-size:18px;
+}
+
+.mobile-navigation-close{
+  width:38px;
+  height:38px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:none;
+  border-radius:9px;
+
+  color:#123824;
+  background:white;
+
+  font-size:18px;
+  cursor:pointer;
+}
+
+.mobile-navigation a{
+  width:100%;
+  padding:13px 14px;
+
+  display:block;
+
+  border-radius:10px;
+
+  color:rgba(255,255,255,.88);
+  background:transparent;
+
+  text-decoration:none;
+  font-size:14px;
+  font-weight:700;
+}
+
+.mobile-navigation a:hover,
+.mobile-navigation a.active{
+  color:#123824;
+  background:white;
+}
 
     /* =========================
        RESPONSIVE
@@ -589,54 +693,9 @@
         margin-left: auto;
       }
 
-      .mobile-navigation {
-        width: 100%;
-
-        position: fixed;
-        top: 78px;
-        left: 0;
-        z-index: 999;
-
-        display: flex;
-        flex-direction: column;
-
-        max-height: 0;
-        overflow: hidden;
-
-        padding: 0 18px;
-
-        background: #ffffff;
-
-        box-shadow:
-          0 15px 28px rgba(0, 0, 0, 0.12);
-
-        transition:
-          max-height 0.35s ease,
-          padding 0.35s ease;
-      }
-
-      .mobile-navigation.open {
-        max-height: 600px;
-
-        padding-top: 12px;
-        padding-bottom: 20px;
-      }
-
-      .mobile-navigation a {
-        padding: 14px 8px;
-
-        color: #153d29;
-
-        border-bottom: 1px solid #eeeeee;
-
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      .mobile-navigation a:hover {
-        color: #a87800;
-      }
+      
+      
+     
 
       .details-hero h1 {
         font-size: 37px;
@@ -851,29 +910,43 @@
 
   </header>
 
-  <!-- MOBILE NAVIGATION -->
+ <div
+  class="mobile-menu-overlay"
+  id="mobileMenuOverlay"
+  onclick="closeMobileMenu()"
+></div>
 
-  <nav
-    class="mobile-navigation"
-    id="mobileNavigation"
-  >
-    <a href="homepage.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="services.html">Therapies</a>
+<nav
+  class="mobile-navigation"
+  id="mobileNavigation"
+>
 
-    <a href="services.html#beauty">
-      Beauty &amp; Cosmetics
-    </a>
+  <div class="mobile-navigation-header">
 
-    <a href="products.html">Products</a>
+    <strong>Neolife Menu</strong>
 
-    <a href="consultation.html">
-      Consultation
-    </a>
+    <button
+      type="button"
+      class="mobile-navigation-close"
+      onclick="closeMobileMenu()"
+      aria-label="Close menu"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
 
-    <a href="blog.html">Blogs</a>
-    <a href="contact.html">Contact</a>
-  </nav>
+  </div>
+
+  <a href="homepage.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Therapies</a>
+  <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+  <a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a>
+  <a href="blog.html" class="active">Blogs</a>
+  <a href="contact.html">Contact</a>
+  <a href="profile.html">Profile</a>
+
+</nav>
 
   <!-- PAGE HERO -->
 
@@ -1322,28 +1395,53 @@
       }
     }
 
-    function toggleMobileMenu() {
-      const menu =
-        document.getElementById(
-          "mobileNavigation"
-        );
+    function toggleMobileMenu(){
 
-      const icon =
-        document.getElementById(
-          "mobileMenuIcon"
-        );
+  const menu =
+    document.getElementById("mobileNavigation");
 
-      menu.classList.toggle("open");
+  const overlay =
+    document.getElementById("mobileMenuOverlay");
 
-      if (menu.classList.contains("open")) {
-        icon.classList.remove("fa-bars");
-        icon.classList.add("fa-xmark");
-      } else {
-        icon.classList.remove("fa-xmark");
-        icon.classList.add("fa-bars");
-      }
-    }
+  const icon =
+    document.getElementById("mobileMenuIcon");
 
+  menu.classList.toggle("open");
+  overlay.classList.toggle("show");
+
+  const isOpen =
+    menu.classList.contains("open");
+
+  if(icon){
+    icon.className = isOpen
+      ? "fa-solid fa-xmark"
+      : "fa-solid fa-bars";
+  }
+
+  document.body.style.overflow =
+    isOpen ? "hidden" : "";
+}
+
+function closeMobileMenu(){
+
+  const menu =
+    document.getElementById("mobileNavigation");
+
+  const overlay =
+    document.getElementById("mobileMenuOverlay");
+
+  const icon =
+    document.getElementById("mobileMenuIcon");
+
+  menu.classList.remove("open");
+  overlay.classList.remove("show");
+
+  if(icon){
+    icon.className = "fa-solid fa-bars";
+  }
+
+  document.body.style.overflow = "";
+}
     document.addEventListener(
       "click",
       function (event) {

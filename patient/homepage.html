@@ -1123,82 +1123,140 @@
       height:34px;
     }
 
-   
+   .mobile-menu-button{
+    display:none;
+
+    width:45px;
+    height:45px;
+
+    border:none;
+    border-radius:12px;
+
+    background:var(--green-dark);
+    color:#fff;
+
+    cursor:pointer;
+    font-size:18px;
+}
+
+.mobile-overlay{
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    opacity:0;
+    visibility:hidden;
+
+    transition:.3s;
+
+    z-index:9998;
+}
+
+.mobile-overlay.show{
+    opacity:1;
+    visibility:visible;
+}
+
+.mobile-menu{
+    position:fixed;
+
+    top:0;
+    right:0;
+
+    width:320px;
+    height:100vh;
+
+    padding:25px;
+
+    background:linear-gradient(
+        180deg,
+        #123524,
+        #1f5c39
+    );
+
+    transform:translateX(100%);
+    transition:.35s;
+
+    z-index:9999;
+
+    overflow-y:auto;
+}
+
+.mobile-menu.open{
+    transform:translateX(0);
+}
+
+.mobile-menu-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:30px;
+}
+
+.mobile-menu-top h2{
+    color:white;
+}
+
+.mobile-menu-top button{
+    width:40px;
+    height:40px;
+
+    border:none;
+    border-radius:10px;
+
+    background:white;
+
+    cursor:pointer;
+}
+
+.mobile-menu a{
+    display:block;
+
+    padding:14px 16px;
+
+    margin-bottom:12px;
+
+    border-radius:12px;
+
+    color:white;
+    font-weight:700;
+}
+
+.mobile-menu a:hover{
+    background:rgba(255,255,255,.12);
+}
     @media(max-width:700px){
-      .home-glass-header{
-        top:9px;
-        width:95%;
-        padding:10px 13px;
-      }
 
-      .home-logo-text{
-        font-size:14px;
-      }
-
-      .home-logo-subtitle{
+    .home-navbar{
         display:none;
-      }
-
-      .home-auth-buttons #authLinks,
-      #logoutBox{
-        display:none !important;
-      }
-
-      .hero-content{
-        left:5%;
-        right:5%;
-      }
-
-      .hero-content p{
-        font-size:16px;
-      }
-
-      .trust-strip{
-        margin-top:-20px;
-      }
-
-      .trust-grid,
-      .therapy-grid,
-      .why-grid{
-        grid-template-columns:1fr;
-      }
-
-      .offer-banner{
-        flex-direction:column;
-        align-items:flex-start;
-        padding:30px 24px;
-      }
-
-      .offer-discount{
-        white-space:normal;
-      }
-
-      .beauty-list{
-        grid-template-columns:1fr;
-      }
-
-      .beauty-image img{
-        height:370px;
-      }
-
-      .client-review-header{
-        align-items:flex-start;
-        flex-direction:column;
-      }
-
-      .footer-container{
-        grid-template-columns:1fr;
-      }
-
-      .doctor-brand-card{
-        flex-basis:270px;
-      }
-
-      .scroll-btn{
-        display:none;
-      }
     }
-  </style>
+
+    .mobile-menu-button{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .home-auth-buttons #authLinks,
+    #logoutBox{
+        display:none !important;
+    }
+
+    .home-glass-header{
+        padding:10px 15px;
+    }
+
+    .home-logo-text{
+        font-size:14px;
+    }
+
+    .home-logo-subtitle{
+        display:none;
+    }
+}
+</style>
 </head>
 
 <body>
@@ -1347,7 +1405,12 @@
         </button>
 
       </span>
-
+<button
+    class="mobile-menu-button"
+    onclick="toggleMobileMenu()"
+>
+    <i class="fa-solid fa-bars"></i>
+</button>
       <a
         href="profile.html"
         class="profile-icon"
@@ -1361,7 +1424,35 @@
   </div>
 
 </header>
+<div class="mobile-overlay"
+     id="mobileOverlay"
+     onclick="closeMobileMenu()">
+</div>
 
+<div class="mobile-menu" id="mobileMenu">
+
+    <div class="mobile-menu-top">
+
+        <h2>Neolife Menu</h2>
+
+        <button onclick="closeMobileMenu()">
+            ✕
+        </button>
+
+    </div>
+
+    <a href="homepage.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Therapies</a>
+    <a href="beauty-cosmetics.html">Beauty & Cosmetics</a>
+    <a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a>
+    <a href="blog.html">Blogs</a>
+    <a href="contact.html">Contact</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+
+</div>
 <main>
 
   <section class="hero-slider" id="home">
@@ -2118,7 +2209,27 @@ function nextReviews(){
 
   showReview(currentReviewIndex);
 }
+function toggleMobileMenu(){
 
+    document
+        .getElementById("mobileMenu")
+        .classList.toggle("open");
+
+    document
+        .getElementById("mobileOverlay")
+        .classList.toggle("show");
+}
+
+function closeMobileMenu(){
+
+    document
+        .getElementById("mobileMenu")
+        .classList.remove("open");
+
+    document
+        .getElementById("mobileOverlay")
+        .classList.remove("show");
+}
 /* Profile */
 async function loadProfileIcon(){
   const icon = document.getElementById("profileIcon");
