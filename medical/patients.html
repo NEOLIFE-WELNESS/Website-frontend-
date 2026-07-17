@@ -88,31 +88,33 @@
         /* SIDEBAR */
 
         .staff-sidebar {
-            width: var(--sidebar-width);
-            min-height: 100vh;
+    width: var(--sidebar-width);
+    height: 100vh;
 
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
 
-            display: flex;
-            flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-            color: var(--white);
+    overflow: hidden;
 
-            background:
-                linear-gradient(
-                    180deg,
-                    #123824,
-                    #1e5134
-                );
+    color: var(--white);
 
-            box-shadow:
-                8px 0 30px rgba(18, 56, 36, 0.14);
+    background:
+        linear-gradient(
+            180deg,
+            #123824,
+            #1e5134
+        );
 
-            transition: transform 0.3s ease;
-        }
+    box-shadow:
+        8px 0 30px rgba(18, 56, 36, 0.14);
+
+    transition: transform 0.3s ease;
+}
 
         .staff-brand {
             min-height: 104px;
@@ -140,6 +142,7 @@
 
         .staff-brand h2 {
             margin-bottom: 5px;
+
             font-size: 18px;
             font-weight: 800;
         }
@@ -154,10 +157,28 @@
         }
 
         .staff-menu {
-            flex: 1;
-            padding: 20px 13px;
-            overflow-y: auto;
-        }
+    flex: 1;
+    padding: 20px 13px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff transparent;
+}
+
+.staff-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.staff-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.staff-menu::-webkit-scrollbar-thumb {
+    background: #ffffff;
+    border-radius: 10px;
+}
 
         .menu-label {
             display: block;
@@ -236,12 +257,15 @@
 
             font-size: 14px;
             font-weight: 800;
+
+            transition: 0.25s;
         }
 
         .sidebar-logout:hover {
             color: var(--dark-green);
             background: var(--white);
         }
+
 
         /* MAIN */
 

@@ -90,31 +90,33 @@
         ========================== */
 
         .doctor-sidebar {
-            width: var(--sidebar-width);
-            min-height: 100vh;
+    width: var(--sidebar-width);
+    height: 100vh;
 
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
 
-            display: flex;
-            flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-            color: var(--white);
+    overflow: hidden;
 
-            background:
-                linear-gradient(
-                    180deg,
-                    #123824,
-                    #1e5134
-                );
+    color: var(--white);
 
-            box-shadow:
-                8px 0 30px rgba(18, 56, 36, 0.14);
+    background:
+        linear-gradient(
+            180deg,
+            #123824,
+            #1e5134
+        );
 
-            transition: transform 0.3s ease;
-        }
+    box-shadow:
+        8px 0 30px rgba(18, 56, 36, 0.14);
+
+    transition: transform 0.3s ease;
+}
 
         .doctor-brand {
             min-height: 104px;
@@ -157,12 +159,27 @@
         }
 
         .doctor-menu {
-            flex: 1;
-            padding: 20px 13px;
+    flex: 1;
+    padding: 20px 13px;
 
-            overflow-y: auto;
-        }
+    overflow-y: auto;
+    overflow-x: hidden;
 
+    scrollbar-width: thin;
+    scrollbar-color: #fcfcfc transparent;
+}
+.doctor-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.doctor-menu::-webkit-scrollbar-thumb {
+    background: #c99a16;
+    border-radius: 10px;
+}
+
+.doctor-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
         .menu-label {
             display: block;
 
@@ -2191,126 +2208,126 @@
            AUTHENTICATION
         ========================== */
 
-        function requireDoctorLogin() {
-            const token = getDoctorToken();
+        // function requireDoctorLogin() {
+        //     const token = getDoctorToken();
 
-            if (!token) {
-                window.location.href =
-                    "doctor-login.html";
+        //     if (!token) {
+        //         window.location.href =
+        //             "doctor-login.html";
 
-                return;
-            }
+        //         return;
+        //     }
 
-            const role =
-                localStorage.getItem("role");
+        //     const role =
+        //         localStorage.getItem("role");
 
-            if (
-                role &&
-                role !== "DOCTOR"
-            ) {
-                showAlert(
-                    "Only doctors can access this portal.",
-                    "error"
-                );
+        //     if (
+        //         role &&
+        //         role !== "DOCTOR"
+        //     ) {
+        //         showAlert(
+        //             "Only doctors can access this portal.",
+        //             "error"
+        //         );
 
-                setTimeout(function () {
-                    window.location.href =
-                        "../pages/homepage.html";
-                }, 1200);
-            }
-        }
+        //         setTimeout(function () {
+        //             window.location.href =
+        //                 "../pages/homepage.html";
+        //         }, 1200);
+        //     }
+        // }
 
-        async function doctorApiRequest(
-            endpoint,
-            options = {}
-        ) {
-            const token = getDoctorToken();
+        // async function doctorApiRequest(
+        //     endpoint,
+        //     options = {}
+        // ) {
+        //     const token = getDoctorToken();
 
-            if (!token) {
-                window.location.href =
-                    "doctor-login.html";
+        //     if (!token) {
+        //         window.location.href =
+        //             "doctor-login.html";
 
-                throw new Error(
-                    "Doctor login required."
-                );
-            }
+        //         throw new Error(
+        //             "Doctor login required."
+        //         );
+        //     }
 
-            const headers = {
-                ...(options.headers || {})
-            };
+        //     const headers = {
+        //         ...(options.headers || {})
+        //     };
 
-            if (
-                options.body &&
-                !(options.body instanceof FormData)
-            ) {
-                headers["Content-Type"] =
-                    "application/json";
-            }
+        //     if (
+        //         options.body &&
+        //         !(options.body instanceof FormData)
+        //     ) {
+        //         headers["Content-Type"] =
+        //             "application/json";
+        //     }
 
-            headers.Authorization =
-                "Bearer " + token;
+        //     headers.Authorization =
+        //         "Bearer " + token;
 
-            const response = await fetch(
-                API_BASE_URL + endpoint,
-                {
-                    ...options,
-                    headers
-                }
-            );
+        //     const response = await fetch(
+        //         API_BASE_URL + endpoint,
+        //         {
+        //             ...options,
+        //             headers
+        //         }
+        //     );
 
-            let result = null;
+        //     let result = null;
 
-            try {
-                result = await response.json();
-            } catch (error) {
-                result = {
-                    success: false,
-                    message:
-                        "Invalid response from server."
-                };
-            }
+        //     try {
+        //         result = await response.json();
+        //     } catch (error) {
+        //         result = {
+        //             success: false,
+        //             message:
+        //                 "Invalid response from server."
+        //         };
+        //     }
 
-            if (
-                response.status === 401 ||
-                response.status === 403
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Doctor session expired."
-                );
-            }
+        //     if (
+        //         response.status === 401 ||
+        //         response.status === 403
+        //     ) {
+        //         throw new Error(
+        //             result.message ||
+        //             "Doctor session expired."
+        //         );
+        //     }
 
-            if (
-                !response.ok ||
-                result.success === false
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Request failed."
-                );
-            }
+        //     if (
+        //         !response.ok ||
+        //         result.success === false
+        //     ) {
+        //         throw new Error(
+        //             result.message ||
+        //             "Request failed."
+        //         );
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
 
-        function doctorLogout() {
-            localStorage.removeItem("doctorToken");
-            localStorage.removeItem(
-                "doctorRefreshToken"
-            );
+        // function doctorLogout() {
+        //     localStorage.removeItem("doctorToken");
+        //     localStorage.removeItem(
+        //         "doctorRefreshToken"
+        //     );
 
-            localStorage.removeItem("token");
-            localStorage.removeItem(
-                "refreshToken"
-            );
+        //     localStorage.removeItem("token");
+        //     localStorage.removeItem(
+        //         "refreshToken"
+        //     );
 
-            localStorage.removeItem("doctorId");
-            localStorage.removeItem("role");
-            localStorage.removeItem("userId");
+        //     localStorage.removeItem("doctorId");
+        //     localStorage.removeItem("role");
+        //     localStorage.removeItem("userId");
 
-            window.location.href =
-                "doctor-login.html";
-        }
+        //     window.location.href =
+        //         "doctor-login.html";
+        // }
 
         /* =========================
            DOCTOR PROFILE

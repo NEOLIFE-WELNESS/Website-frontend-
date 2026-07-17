@@ -103,33 +103,33 @@
         ========================== */
 
         .staff-sidebar {
-            width: var(--sidebar-width);
-            min-height: 100vh;
+    width: var(--sidebar-width);
+    height: 100vh;
 
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
 
-            display: flex;
-            flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-            color: var(--white);
+    overflow: hidden;
 
-            background:
-                linear-gradient(
-                    180deg,
-                    #123824,
-                    #1e5134
-                );
+    color: var(--white);
 
-            box-shadow:
-                8px 0 30px
-                rgba(18, 56, 36, 0.14);
+    background:
+        linear-gradient(
+            180deg,
+            #123824,
+            #1e5134
+        );
 
-            transition:
-                transform 0.3s ease;
-        }
+    box-shadow:
+        8px 0 30px rgba(18, 56, 36, 0.14);
+
+    transition: transform 0.3s ease;
+}
 
         .staff-brand {
             min-height: 104px;
@@ -140,8 +140,7 @@
             gap: 13px;
 
             border-bottom:
-                1px solid
-                rgba(255, 255, 255, 0.12);
+                1px solid rgba(255, 255, 255, 0.12);
         }
 
         .staff-brand img {
@@ -169,29 +168,43 @@
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 1.3px;
-
             text-transform: uppercase;
         }
 
         .staff-menu {
-            flex: 1;
-            padding: 20px 13px;
+    flex: 1;
+    padding: 20px 13px;
 
-            overflow-y: auto;
-        }
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff transparent;
+}
+
+.staff-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.staff-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.staff-menu::-webkit-scrollbar-thumb {
+    background: #ffffff;
+    border-radius: 10px;
+}
 
         .menu-label {
             display: block;
 
             margin: 9px 12px 10px;
 
-            color:
-                rgba(255, 255, 255, 0.48);
+            color: rgba(255, 255, 255, 0.48);
 
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 1.4px;
-
             text-transform: uppercase;
         }
 
@@ -206,8 +219,7 @@
 
             border-radius: 12px;
 
-            color:
-                rgba(255, 255, 255, 0.82);
+            color: rgba(255, 255, 255, 0.82);
 
             font-size: 14px;
             font-weight: 700;
@@ -218,7 +230,6 @@
         .staff-menu a i {
             width: 21px;
             text-align: center;
-
             font-size: 17px;
         }
 
@@ -238,8 +249,7 @@
             padding: 17px 13px;
 
             border-top:
-                1px solid
-                rgba(255, 255, 255, 0.12);
+                1px solid rgba(255, 255, 255, 0.12);
         }
 
         .sidebar-logout {
@@ -253,23 +263,24 @@
             gap: 10px;
 
             border:
-                1px solid
-                rgba(255, 255, 255, 0.20);
+                1px solid rgba(255, 255, 255, 0.20);
 
             border-radius: 12px;
 
             color: var(--white);
-            background:
-                rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.08);
 
             font-size: 14px;
             font-weight: 800;
+
+            transition: 0.25s;
         }
 
         .sidebar-logout:hover {
             color: var(--dark-green);
             background: var(--white);
         }
+
 
         /* =========================
            MAIN / TOPBAR
