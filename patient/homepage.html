@@ -251,11 +251,31 @@
   white-space:nowrap;
 }
     .home-login-btn{
-      color:var(--green-dark);
-      border:1px solid var(--green-dark);
-      background:white;
-    }
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    white-space: nowrap;
+    cursor: pointer;
+
+    color: var(--green-dark);
+    border: 1px solid var(--green-dark);
+    background: white;
+}
+
+.home-login-btn:hover{
+    color: white;
+    background: linear-gradient(
+        135deg,
+        var(--green-dark),
+        var(--green)
+    );
+}
     .home-register-btn{
       color:white;
       border:none;
@@ -785,99 +805,396 @@
       box-shadow:0 10px 24px rgba(154,113,0,.22);
     }
 
-    /* Doctors – all doctors */
-    .doctors-showcase{
-      padding:90px 0;
-      background:white;
+    /* =========================
+   DOCTORS SECTION
+========================= */
+
+.doctors-showcase {
+    padding: 85px 0 70px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #f8f7f1,
+            #f1eadc
+        );
+}
+
+.doctors-heading {
+    width: min(1180px, 90%);
+    margin: 0 auto 45px;
+
+    text-align: center;
+}
+
+.doctors-heading h2 {
+    margin: 0 0 12px;
+
+    color: var(--green-dark);
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(34px, 4vw, 50px);
+    font-weight: 500;
+}
+
+.doctors-heading h2 span {
+    color: var(--gold-dark);
+}
+
+.doctors-heading p {
+    max-width: 760px;
+    margin: auto;
+
+    color: var(--muted);
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* Main slider container */
+
+.doctors-container {
+    width: min(1280px, 96%);
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Slider window */
+
+.doctors-slider {
+    width: calc(100% - 110px);
+    overflow: hidden;
+}
+
+/* Moving track */
+
+.doctors-wrapper {
+    display: flex;
+
+    transition:
+        transform 0.8s ease-in-out;
+}
+
+/* One complete group */
+
+.doctor-slide {
+    min-width: 100%;
+
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 22px;
+
+    align-items: stretch;
+}
+
+/* Doctor card */
+
+.doctor-brand-card {
+    min-width: 0;
+    min-height: 330px;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.58);
+
+    border:
+        1px solid rgba(189, 138, 0, 0.35);
+
+    box-shadow:
+        0 12px 28px rgba(18, 53, 36, 0.08);
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.doctor-brand-card:hover {
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 18px 38px rgba(18, 53, 36, 0.14);
+}
+
+/* Circular image area */
+
+.doctor-brand-card img {
+    width: 145px;
+    height: 145px;
+
+    margin: 22px auto 10px;
+
+    object-fit: cover;
+    object-position: top center;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(18, 53, 36, 0.20);
+
+    background: #edf2eb;
+}
+
+/* Card text */
+
+.doctor-info {
+    flex: 1;
+
+    padding: 5px 18px 22px;
+
+    text-align: center;
+}
+
+.doctor-info h3 {
+    min-height: 54px;
+    margin: 0 0 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--green-dark);
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.doctor-info p {
+    margin: 0 0 7px;
+
+    color: var(--gold-dark);
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.doctor-info span {
+    display: block;
+
+    min-height: 42px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Arrow buttons */
+
+.scroll-btn {
+    width: 42px;
+    height: 42px;
+
+    flex: 0 0 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    color: var(--green-dark);
+    background: white;
+
+    box-shadow:
+        0 8px 20px rgba(18, 53, 36, 0.16);
+
+    font-size: 15px;
+
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        color 0.3s ease;
+}
+
+.scroll-btn:hover {
+    color: white;
+    background: var(--green-dark);
+
+    transform: scale(1.08);
+}
+
+/* Slider dots */
+
+.doctor-dots {
+    margin-top: 30px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.doctor-dot {
+    width: 8px;
+    height: 8px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #ccbda9;
+
+    transition: 0.3s ease;
+}
+
+.doctor-dot.active {
+    width: 23px;
+
+    border-radius: 20px;
+
+    background: var(--green-dark);
+}
+.meet-doctors-action {
+    margin-top: 28px;
+
+    display: flex;
+    justify-content: center;
+}
+
+.meet-doctors-btn {
+    min-height: 48px;
+    padding: 12px 25px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    border-radius: 30px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--green-dark),
+            var(--green)
+        );
+
+    box-shadow:
+        0 12px 28px rgba(18, 53, 36, 0.20);
+
+    font-size: 13px;
+    font-weight: 800;
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        background 0.3s ease;
+}
+
+.meet-doctors-btn:hover {
+    transform: translateY(-3px);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold),
+            var(--gold-dark)
+        );
+
+    box-shadow:
+        0 16px 34px rgba(154, 113, 0, 0.24);
+}
+
+.meet-doctors-btn i {
+    transition: transform 0.3s ease;
+}
+
+.meet-doctors-btn:hover i {
+    transform: translateX(4px);
+}
+/* Medium desktop: still show four */
+
+@media (max-width: 1100px) {
+
+    .doctors-container {
+        width: 98%;
+        gap: 8px;
     }
 
-    .doctors-heading{
-      width:min(1180px,90%);
-      margin:0 auto 30px;
-      text-align:center;
+    .doctors-slider {
+        width: calc(100% - 90px);
     }
 
-    .doctors-heading h2{
-      color:var(--green-dark);
-      font-size:clamp(30px,4vw,46px);
-      margin:0;
+    .doctor-slide {
+        gap: 14px;
     }
 
-    .doctors-heading span{
-      color:var(--gold);
+    .doctor-brand-card img {
+        width: 125px;
+        height: 125px;
     }
 
-    .doctors-container{
-      width:min(1240px,94%);
-      margin:auto;
-      display:flex;
-      align-items:center;
-      gap:15px;
+    .doctor-info h3 {
+        font-size: 17px;
+    }
+}
+
+/* Tablet: show two */
+
+@media (max-width: 800px) {
+
+    .doctor-slide {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
-    .doctors-scroll{
-      display:flex;
-      gap:22px;
-      overflow-x:auto;
-      scroll-behavior:smooth;
-      padding:8px 4px 22px;
-      scrollbar-width:thin;
-      flex:1;
+    .doctor-brand-card {
+        min-height: 320px;
+    }
+}
+
+/* Mobile: show one */
+
+@media (max-width: 520px) {
+
+    .doctors-showcase {
+        padding: 65px 0;
     }
 
-    .doctor-brand-card{
-      flex:0 0 300px;
-      border-radius:24px;
-      overflow:hidden;
-      background:white;
-      border:1px solid rgba(212,175,55,.23);
-      box-shadow:0 14px 35px rgba(18,53,36,.09);
+    .doctors-container {
+        width: 96%;
+        gap: 7px;
     }
 
-    .doctor-brand-card:hover{
-      transform:translateY(-7px);
-      box-shadow:var(--shadow);
+    .doctors-slider {
+        width: calc(100% - 78px);
     }
 
-    .doctor-brand-card img{
-      width:100%;
-      height:320px;
-      object-fit:cover;
-      background:#edf2eb;
+    .doctor-slide {
+        grid-template-columns: 1fr;
     }
 
-    .doctor-info{
-      padding:21px;
+    .doctor-brand-card img {
+        width: 145px;
+        height: 145px;
     }
 
-    .doctor-info h3{
-      color:var(--green-dark);
-      margin:0 0 5px;
-      font-size:19px;
-    }
+    .scroll-btn {
+        width: 34px;
+        height: 34px;
 
-    .doctor-info p{
-      color:var(--gold-dark);
-      font-weight:800;
-      margin:0 0 5px;
-    }
+        flex-basis: 34px;
 
-    .doctor-info span{
-      color:var(--muted);
-      font-size:14px;
+        font-size: 12px;
     }
-
-    .scroll-btn{
-      flex:0 0 44px;
-      width:44px;
-      height:44px;
-      border:none;
-      border-radius:50%;
-      color:white;
-      background:linear-gradient(135deg,var(--green-dark),var(--green));
-      cursor:pointer;
-      box-shadow:0 8px 18px rgba(18,53,36,.2);
-    }
+}
 
     /* Why choose */
     .why-section{
@@ -1688,151 +2005,263 @@
 
   </section>
 
-  <section class="landing-section beauty-section">
-
-    <div class="beauty-layout">
-
-      <div class="beauty-image">
-        <img src="../assets/facial.png" alt="Beauty and cosmetic treatment">
-
-        <div class="beauty-badge">
-          Beauty with professional care
-        </div>
-      </div>
-
-      <div class="beauty-copy">
-        <span class="offer-label">Beauty & Cosmetics</span>
-
-        <h2>Enhance Your Natural Beauty</h2>
-
-        <p>
-          Personalized treatments designed to improve skin appearance,
-          eyebrow shape, lip tone, scalp health and overall confidence.
-        </p>
-
-        <div class="beauty-list">
-          <div><i class="fa-solid fa-check"></i> Facial treatments</div>
-          <div><i class="fa-solid fa-check"></i> Hair therapy</div>
-          <div><i class="fa-solid fa-check"></i> Dark lip correction</div>
-          <div><i class="fa-solid fa-check"></i> Eyebrow correction</div>
-          <div><i class="fa-solid fa-check"></i> Pedicure</div>
-          <div><i class="fa-solid fa-check"></i> Personalized care</div>
-        </div>
-
-        <a href="beauty-cosmetics.html" class="primary-btn">
-          Explore Beauty Treatments
-        </a>
-      </div>
-
-    </div>
-
-  </section>
-
   <section class="doctors-showcase">
 
     <div class="doctors-heading">
-      <h2>Meet All <span>Our Doctors</span></h2>
-      <p>Experienced professionals supporting your complete wellness journey.</p>
+
+        <h2>
+            Meet All <span>Our Doctors</span>
+        </h2>
+
+        <p>
+            Experienced professionals supporting your complete wellness journey.
+        </p>
+
     </div>
 
     <div class="doctors-container">
 
-      <button class="scroll-btn left-btn" onclick="scrollDoctors(-350)">❮</button>
+        <button
+            type="button"
+            class="scroll-btn left-btn"
+            onclick="changeDoctorSlide(-1)"
+            aria-label="Previous doctors"
+        >
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
 
-      <div class="doctors-scroll" id="doctorsScroll">
+        <div class="doctors-slider">
 
-        <div class="doctor-brand-card">
-          <img src="../assets/Dr-murali.png" alt="Dr. N. G. Muraleedhara">
-          <div class="doctor-info">
-            <h3>Dr. N. G. Muraleedhara</h3>
-            <p>BAMS</p>
-            <span>Ayurveda & Panchakarma Consultant</span>
-          </div>
+            <div
+                class="doctors-wrapper"
+                id="doctorsWrapper"
+            >
+
+                <!-- PAGE 1 -->
+
+                <div class="doctor-slide">
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-murali.png"
+                            alt="Dr. N. G. Muraleedhara"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>
+                                Dr. N. G. Muraleedhara
+                            </h3>
+
+                            <p>BAMS</p>
+
+                            <span>
+                                Ayurveda &amp; Panchakarma Consultant
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-adithi.png"
+                            alt="Dr. Aditi"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>Dr. Aditi</h3>
+
+                            <p>BNYS</p>
+
+                            <span>
+                                Yoga &amp; Naturopathy Consultant
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-sibgath.jpg"
+                            alt="Dr. Sibagath Ulla Sharieff R"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>
+                                Dr. Sibagath Ulla Sharieff R
+                            </h3>
+
+                            <p>BAMS, MD(Ayu)</p>
+
+                            <span>
+                                Ayurveda Consultant
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-vijay.png"
+                            alt="Dr. Vijay B. Negalur"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>
+                                Dr. Vijay B. Negalur
+                            </h3>
+
+                            <p>MD(Ayu), PhD</p>
+
+                            <span>
+                                Lifestyle Wellness Expert
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <!-- PAGE 2 -->
+
+                <div class="doctor-slide">
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-shalmali.png"
+                            alt="Dr. Shalmali B B"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>
+                                Dr. Shalmali B B
+                            </h3>
+
+                            <p>MD(Ayu), BAMS</p>
+
+                            <span>
+                                Rasa Shastra &amp; Bhaishajya Kalpana
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-rajesh.png"
+                            alt="Dr. G Rajesh Rao"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>
+                                Dr. G Rajesh Rao
+                            </h3>
+
+                            <p>BAMS</p>
+
+                            <span>
+                                Vidwan
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                    <!-- Duplicate cards keep the second page full -->
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-gajendar.avif"
+                            alt="Dr. Gajendar"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>
+                                Dr. N. G. Muraleedhara
+                            </h3>
+
+                            <p>BAMS</p>
+
+                            <span>
+                                Ayurveda &amp; Panchakarma Consultant
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                    <article class="doctor-brand-card">
+
+                        <img
+                            src="../assets/Dr-adithi.png"
+                            alt="Dr. Aditi"
+                        >
+
+                        <div class="doctor-info">
+
+                            <h3>Dr. Aditi</h3>
+
+                            <p>BNYS</p>
+
+                            <span>
+                                Yoga &amp; Naturopathy Consultant
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="doctor-brand-card">
-          <img src="../assets/Dr-adithi.png" alt="Dr. Aditi">
-          <div class="doctor-info">
-            <h3>Dr. Aditi</h3>
-            <p>BNYS</p>
-            <span>Yoga & Naturopathy Consultant</span>
-          </div>
-        </div>
-
-        <div class="doctor-brand-card">
-          <img src="../assets/Dr-sibgath.jpg" alt="Dr. Sibagath Ulla Sharieff R">
-          <div class="doctor-info">
-            <h3>Dr. Sibagath Ulla Sharieff R</h3>
-            <p>BAMS, MD(Ayu)</p>
-            <span>Ayurveda Consultant</span>
-          </div>
-        </div>
-
-        <div class="doctor-brand-card">
-          <img src="../assets/Dr-vijay.png" alt="Dr. Vijay B. Negalur">
-          <div class="doctor-info">
-            <h3>Dr. Vijay B. Negalur</h3>
-            <p>MD(Ayu), PhD</p>
-            <span>Lifestyle Wellness Expert</span>
-          </div>
-        </div>
-
-        <div class="doctor-brand-card">
-          <img src="../assets/Dr-shalmali.png" alt="Dr. Shalmali B B">
-          <div class="doctor-info">
-            <h3>Dr. Shalmali B B</h3>
-            <p>MD(Ayu), BAMS</p>
-            <span>Rasa Shastra & Bhaishajya Kalpana</span>
-          </div>
-        </div>
-
-        <div class="doctor-brand-card">
-          <img src="../assets/Dr-rajesh.png" alt="Dr. G Rajesh Rao">
-          <div class="doctor-info">
-            <h3>Dr. G Rajesh Rao</h3>
-            <p>BAMS</p>
-            <span>Vidwan</span>
-          </div>
-        </div>
-
-      </div>
-
-      <button class="scroll-btn right-btn" onclick="scrollDoctors(350)">❯</button>
+        <button
+            type="button"
+            class="scroll-btn right-btn"
+            onclick="changeDoctorSlide(1)"
+            aria-label="Next doctors"
+        >
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
 
     </div>
 
-  </section>
+    <div
+        class="doctor-dots"
+        id="doctorDots"
+    ></div>
+<div class="meet-doctors-action">
 
-  <section class="landing-section why-section">
+    <a
+        href="doctors.html"
+        class="meet-doctors-btn"
+    >
+        Meet Our Doctors
+        <i class="fa-solid fa-arrow-right"></i>
+    </a>
 
-    <div class="section-heading">
-      <span>Why choose us</span>
-      <h2>Professional Care with a Holistic Approach</h2>
-    </div>
-
-    <div class="why-grid">
-
-      <article class="why-card">
-        <i class="fa-solid fa-leaf"></i>
-        <h3>Natural Ayurveda</h3>
-        <p>Traditional Ayurvedic care supporting everyday wellness and healthy living.</p>
-      </article>
-
-      <article class="why-card">
-        <i class="fa-solid fa-user-doctor"></i>
-        <h3>Expert Consultation</h3>
-        <p>Professional guidance based on your health condition and wellness goals.</p>
-      </article>
-
-      <article class="why-card">
-        <i class="fa-solid fa-truck-fast"></i>
-        <h3>Trusted Products</h3>
-        <p>Order wellness products and receive them conveniently at your doorstep.</p>
-      </article>
-
-    </div>
-
-  </section>
+</div>
+</section>
 
   <!-- Review section retained in the same format as the original homepage -->
   <section class="client-reviews-section" id="clinicReviewsSection">
@@ -1959,13 +2388,7 @@ if(slides.length > 1){
   }, 4500);
 }
 
-/* Doctors */
-function scrollDoctors(distance){
-  document.getElementById("doctorsScroll").scrollBy({
-    left:distance,
-    behavior:"smooth"
-  });
-}
+
 
 /* Offers */
 let offers = [];
@@ -2399,6 +2822,134 @@ document.addEventListener("DOMContentLoaded", function(){
   loadProfileIcon();
   checkLoginStatus();
 });
+/* =========================
+   DOCTORS SLIDER
+========================= */
+
+let currentDoctorSlide = 0;
+let doctorAutoSlide;
+
+const doctorsWrapper =
+    document.getElementById("doctorsWrapper");
+
+const doctorSlides =
+    document.querySelectorAll(".doctor-slide");
+
+const doctorDotsContainer =
+    document.getElementById("doctorDots");
+
+function createDoctorDots() {
+
+    if (
+        !doctorDotsContainer ||
+        !doctorSlides.length
+    ) {
+        return;
+    }
+
+    doctorDotsContainer.innerHTML = "";
+
+    doctorSlides.forEach(
+        function (_, index) {
+
+            const dot =
+                document.createElement("button");
+
+            dot.type = "button";
+
+            dot.className =
+                index === 0
+                    ? "doctor-dot active"
+                    : "doctor-dot";
+
+            dot.setAttribute(
+                "aria-label",
+                `Show doctor group ${index + 1}`
+            );
+
+            dot.addEventListener(
+                "click",
+                function () {
+                    showDoctorSlide(index);
+                    restartDoctorAutoSlide();
+                }
+            );
+
+            doctorDotsContainer.appendChild(dot);
+        }
+    );
+}
+
+function showDoctorSlide(index) {
+
+    if (
+        !doctorsWrapper ||
+        !doctorSlides.length
+    ) {
+        return;
+    }
+
+    if (index >= doctorSlides.length) {
+        currentDoctorSlide = 0;
+
+    } else if (index < 0) {
+        currentDoctorSlide =
+            doctorSlides.length - 1;
+
+    } else {
+        currentDoctorSlide = index;
+    }
+
+    doctorsWrapper.style.transform =
+        `translateX(-${currentDoctorSlide * 100}%)`;
+
+    document
+        .querySelectorAll(".doctor-dot")
+        .forEach(
+            function (dot, dotIndex) {
+                dot.classList.toggle(
+                    "active",
+                    dotIndex === currentDoctorSlide
+                );
+            }
+        );
+}
+
+function changeDoctorSlide(direction) {
+
+    showDoctorSlide(
+        currentDoctorSlide + direction
+    );
+
+    restartDoctorAutoSlide();
+}
+
+function startDoctorAutoSlide() {
+
+    clearInterval(doctorAutoSlide);
+
+    if (doctorSlides.length <= 1) {
+        return;
+    }
+
+    doctorAutoSlide =
+        setInterval(
+            function () {
+                showDoctorSlide(
+                    currentDoctorSlide + 1
+                );
+            },
+            5000
+        );
+}
+
+function restartDoctorAutoSlide() {
+    startDoctorAutoSlide();
+}
+
+createDoctorDots();
+showDoctorSlide(0);
+startDoctorAutoSlide();
 </script>
 
 </body>

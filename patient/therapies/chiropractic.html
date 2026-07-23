@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chiropractic Therapy | Neolife Wellness Center</title>
+<link rel="icon" type="image/jpeg" href="../../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{
+  --green-dark:#123524;
+  --green:#2f6b3f;
+  --green-soft:#e9f2e8;
+  --gold:#d4af37;
+  --gold-dark:#9a7100;
+  --cream:#f8f7f1;
+  --white:#ffffff;
+  --text:#26382d;
+  --muted:#65716a;
+  --shadow:0 18px 48px rgba(18,53,36,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--text);line-height:1.75}
+a{text-decoration:none}
+img,video{display:block;max-width:100%}
+.glass-header{
+  position:fixed;inset:0 0 auto 0;min-height:82px;padding:10px 32px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(212,175,55,.25);
+  box-shadow:0 8px 25px rgba(0,0,0,.10);z-index:9999
+}
+.logo-container{display:flex;align-items:center;gap:12px}
+.logo-img{width:55px;height:55px;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}
+.logo-details{display:flex;flex-direction:column;line-height:1.2}
+.logo-text{color:var(--green-dark);font-size:18px;font-weight:800;white-space:nowrap}
+.logo-subtitle{margin-top:5px;color:var(--gold-dark);font-size:12px;font-weight:700;letter-spacing:1.3px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:22px}
+.main-nav{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.main-nav a{color:var(--green-dark);font-size:12px;font-weight:800}
+.main-nav a:hover,.main-nav a.active{color:var(--gold-dark)}
+.profile-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:white;background:linear-gradient(135deg,var(--gold),var(--gold-dark))}
+.mobile-menu-button{display:none;width:44px;height:44px;border:0;border-radius:12px;background:var(--green-dark);color:white;font-size:18px}
+.mobile-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:.3s;z-index:9998}
+.mobile-menu-overlay.show{opacity:1;visibility:visible}
+.mobile-navigation{
+  position:fixed;top:0;right:0;width:300px;height:100vh;padding:24px;
+  background:linear-gradient(180deg,#123524,#1e5134);
+  transform:translateX(100%);transition:.3s;z-index:9999;overflow:auto
+}
+.mobile-navigation.open{transform:translateX(0)}
+.mobile-navigation-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;color:white}
+.mobile-navigation-close{width:38px;height:38px;border:0;border-radius:10px;background:white}
+.mobile-navigation a{display:block;padding:14px;margin-bottom:10px;border-radius:12px;color:white;font-weight:700}
+.mobile-navigation a:hover{background:rgba(255,255,255,.12)}
+.therapy-hero{
+  min-height:600px;padding:150px 20px 80px;display:flex;align-items:center;
+  position:relative;overflow:hidden;color:white;
+  background:
+    linear-gradient(90deg,rgba(8,44,25,.93),rgba(8,44,25,.48)),
+    var(--hero-image) center/cover no-repeat;
+}
+.therapy-hero::after{content:"";position:absolute;width:470px;height:470px;right:-150px;bottom:-230px;border-radius:50%;background:rgba(212,175,55,.16)}
+.hero-inner{position:relative;z-index:2;width:min(1160px,92%);margin:auto}
+.eyebrow{display:inline-flex;padding:8px 15px;border-radius:30px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#f6df88;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.therapy-hero h1{max-width:850px;margin:24px 0 14px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,7vw,78px);line-height:1.05;font-weight:500}
+.therapy-hero p{max-width:760px;color:#edf5ef;font-size:18px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+.primary-btn,.secondary-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:48px;padding:12px 23px;border-radius:30px;font-weight:800;transition:.3s
+}
+.primary-btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:white}
+.secondary-btn{border:1px solid rgba(255,255,255,.7);color:white;background:rgba(255,255,255,.08)}
+.primary-btn:hover,.secondary-btn:hover{transform:translateY(-3px)}
+.page-section{padding:82px 20px}
+.page-section.alt{background:#f0ecdf}
+.section-inner{width:min(1160px,92%);margin:auto}
+.section-kicker{color:var(--gold-dark);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.section-title{margin:8px 0 18px;color:var(--green-dark);font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,4vw,48px);font-weight:500;line-height:1.2}
+.lead{max-width:900px;color:var(--muted);font-size:17px}
+.video-shell{margin-top:32px;padding:12px;border-radius:24px;background:white;border:1px solid rgba(212,175,55,.27);box-shadow:var(--shadow)}
+.video-shell video{width:100%;max-height:560px;border-radius:16px;background:#0b1c12}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:34px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:34px}
+.info-card{
+  height:100%;padding:27px;border-radius:20px;background:white;
+  border:1px solid rgba(212,175,55,.22);box-shadow:0 12px 32px rgba(18,53,36,.08)
+}
+.info-card .icon{width:50px;height:50px;display:grid;place-items:center;margin-bottom:16px;border-radius:14px;background:var(--green-soft);color:var(--green-dark);font-size:21px}
+.info-card h3{margin-bottom:9px;color:var(--green-dark);font-family:Georgia,"Times New Roman",serif;font-size:23px;font-weight:500}
+.info-card p{color:var(--muted);font-size:14px}
+.clean-list{list-style:none;display:grid;gap:11px;margin-top:18px}
+.clean-list li{position:relative;padding-left:27px;color:#4d5e54}
+.clean-list li::before{content:"✓";position:absolute;left:0;top:0;color:var(--gold-dark);font-weight:900}
+.numbered{counter-reset:item;display:grid;gap:18px;margin-top:32px}
+.numbered article{counter-increment:item;position:relative;padding:24px 24px 24px 78px;border-radius:18px;background:white;border:1px solid rgba(212,175,55,.22)}
+.numbered article::before{content:counter(item);position:absolute;left:22px;top:22px;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:var(--green-dark);color:white;font-weight:800}
+.numbered h3{color:var(--green-dark);margin-bottom:6px}
+.numbered p{color:var(--muted)}
+.highlight-box{margin-top:35px;padding:32px;border-radius:24px;background:linear-gradient(135deg,var(--green-dark),var(--green));color:white}
+.highlight-box h3{font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:500;margin-bottom:12px}
+.highlight-box p{color:#edf5ef}
+.cta{padding:78px 20px;background:linear-gradient(135deg,#123524,#285f39);color:white;text-align:center}
+.cta-inner{width:min(850px,92%);margin:auto}
+.cta h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,5vw,54px);font-weight:500}
+.cta p{margin:14px auto 25px;max-width:700px;color:#e9f3eb}
+.footer{padding:30px 20px;text-align:center;background:#0d2a1c;color:#dbe8df;font-size:13px}
+.whatsapp{position:fixed;right:22px;bottom:22px;width:58px;height:58px;display:grid;place-items:center;border-radius:50%;background:#25d366;box-shadow:0 12px 25px rgba(0,0,0,.25);z-index:999}
+.whatsapp img{width:34px;height:34px}
+@media(max-width:950px){
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .main-nav{display:none}.mobile-menu-button{display:grid;place-items:center}
+}
+@media(max-width:700px){
+  .glass-header{padding:12px 16px}.logo-img{width:48px;height:48px}.logo-text{font-size:15px}.logo-subtitle{font-size:10px}
+  .therapy-hero{min-height:570px;padding-top:125px}.therapy-hero h1{font-size:43px}.therapy-hero p{font-size:16px}
+  .page-section{padding:60px 16px}.grid-2,.grid-3{grid-template-columns:1fr}
+  .info-card{padding:22px}.numbered article{padding:22px 20px 22px 68px}
+}
+</style>
+</head>
+<body>
+
+<header class="glass-header">
+  <a class="logo-container" href="../homepage.html">
+    <img src="../../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
+    <span class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
+    </span>
+  </a>
+  <div class="header-right">
+    <nav class="main-nav">
+      <a href="../homepage.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../services.html" class="active">Therapies</a>
+      <a href="../beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+      <a href="../products.html">Products</a>
+      <a href="../consultation.html">Consultation</a>
+      <a href="../blog.html">Blogs</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+    <button class="mobile-menu-button" onclick="toggleMobileMenu()" aria-label="Open menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <a href="../profile.html" class="profile-icon"><i class="fa-solid fa-user"></i></a>
+  </div>
+</header>
+<div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+<nav class="mobile-navigation" id="mobileNavigation">
+  <div class="mobile-navigation-header">
+    <strong>Neolife Menu</strong>
+    <button class="mobile-navigation-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <a href="../homepage.html">Home</a>
+  <a href="../about.html">About</a>
+  <a href="../services.html">Therapies</a>
+  <a href="../beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+  <a href="../products.html">Products</a>
+  <a href="../consultation.html">Consultation</a>
+  <a href="../blog.html">Blogs</a>
+  <a href="../contact.html">Contact</a>
+  <a href="../profile.html">Profile</a>
+</nav>
+
+<section class="therapy-hero" style="--hero-image:url('../../assets/chiropractic.jpg')">
+  <div class="hero-inner">
+    <span class="eyebrow">Neolife Wellness Therapy</span>
+    <h1>Chiropractic Therapy</h1>
+    <p>Natural Care for Better Movement, Alignment, and Comfort</p>
+    <div class="hero-actions">
+      <a href="../consultation.html" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Book Appointment</a>
+      <a href="../contact.html" class="secondary-btn"><i class="fa-solid fa-phone"></i> Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="section-inner">
+    <span class="section-kicker">Therapy Overview</span>
+    <h2 class="section-title">Watch and Understand the Therapy</h2>
+    <p class="lead">This video area is ready for your therapy video. Place the MP4 file in your assets folder using the filename shown in the source code.</p>
+    <div class="video-shell">
+      <video controls preload="metadata" poster="../../assets/chiropractic.jpg">
+        <source src="../../assets/chiropractic.mp4" type="video/mp4">
+        Your browser does not support HTML video.
+      </video>
+    </div>
+  </div>
+</section>
+
+
+<section class="page-section alt">
+  <div class="section-inner">
+    <span class="section-kicker">Chiropractic Therapy</span>
+    <h2 class="section-title">Natural Care for Better Movement, Alignment, and Comfort</h2>
+    <p class="lead">Discover a gentle, non-invasive approach focused on spinal health, posture, mobility, and overall physical well-being.</p>
+
+    <div class="grid-2">
+      <article class="info-card">
+        <div class="icon"><i class="fa-solid fa-spine"></i></div>
+        <h3>What Is Chiropractic Therapy?</h3>
+        <p>Chiropractic therapy is a natural and non-invasive system of care that focuses on the relationship between the spine, joints, muscles, nerves, posture, and overall body movement.</p>
+        <p style="margin-top:12px">The goal is to identify movement restrictions, postural imbalance, and musculoskeletal stress that may contribute to pain, stiffness, reduced mobility, and physical discomfort.</p>
+      </article>
+      <article class="info-card">
+        <h3>The Philosophy Behind Chiropractic Care</h3>
+        <p>Chiropractic care recognises that the spine and musculoskeletal system play an important role in posture, movement, balance, and daily comfort. When joints or surrounding muscles become restricted or strained, it may affect mobility and create discomfort.</p>
+        <p style="margin-top:12px">Care is planned according to the patient’s symptoms, physical condition, posture, medical history, and movement patterns.</p>
+      </article>
+    </div>
+
+    <div class="grid-3">
+      <article class="info-card">
+          <div class="icon"><i class="fa-solid fa-person-arrow-up-from-line"></i></div>
+          <h3>Spinal Alignment</h3>
+          <p>Focuses on improving spinal movement, posture, and body alignment through carefully selected manual techniques.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-bone"></i></div>
+          <h3>Joint Mobility</h3>
+          <p>Supports smoother joint movement and helps reduce stiffness caused by physical strain, poor posture, or limited activity.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-person-rays"></i></div>
+          <h3>Muscle Relaxation</h3>
+          <p>Helps reduce muscular tension and supports better coordination between muscles, joints, and the nervous system.</p>
+        </article>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="section-inner">
+    <span class="section-kicker">Common Concerns</span>
+    <h2 class="section-title">Concerns Supported by Chiropractic Care</h2>
+    <div class="grid-2">
+      <article class="info-card">
+        <ul class="clean-list"><li>Back pain</li><li>Neck pain</li><li>Shoulder stiffness</li><li>Postural imbalance</li><li>Joint stiffness</li><li>Muscular tension</li><li>Reduced spinal mobility</li><li>Discomfort related to prolonged sitting</li><li>Work-related physical strain</li><li>General movement and flexibility concerns</li></ul>
+      </article>
+      <article class="info-card">
+        <h3>Potential Benefits</h3>
+        <ul class="clean-list"><li>Supports improved posture and body alignment</li><li>May help reduce stiffness and muscular tension</li><li>Supports better joint and spinal mobility</li><li>Encourages smoother, more comfortable movement</li><li>May help improve flexibility and physical balance</li><li>Supports recovery from everyday physical strain</li><li>Promotes body awareness and preventive care</li><li>May support improved quality of daily activities</li></ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="page-section alt">
+  <div class="section-inner">
+    <span class="section-kicker">Manual Care</span>
+    <h2 class="section-title">Core Chiropractic Techniques</h2>
+    <div class="grid-3">
+      <article class="info-card">
+          <div class="icon"><i class="fa-solid fa-hands"></i></div>
+          <h3>Spinal Manipulation</h3>
+          <p>Controlled manual movements may be used to improve mobility in restricted spinal joints and support better alignment and movement.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>
+          <h3>Joint Mobilisation</h3>
+          <p>Gentle, repetitive movements may be used to improve the flexibility and function of stiff joints.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-hand"></i></div>
+          <h3>Soft Tissue Techniques</h3>
+          <p>Selected techniques may help relax tight muscles, reduce physical tension, and improve local circulation.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-person-walking-arrow-right"></i></div>
+          <h3>Posture Correction</h3>
+          <p>Guidance may be provided to improve sitting, standing, sleeping, and working posture to reduce repeated strain.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-person-running"></i></div>
+          <h3>Stretching and Movement Guidance</h3>
+          <p>Personalized exercises and stretches may be recommended to support flexibility, strength, balance, and long-term mobility.</p>
+        </article>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="section-inner">
+    <span class="section-kicker">Your Session</span>
+    <h2 class="section-title">What Happens During a Chiropractic Session?</h2>
+    <div class="numbered">
+      <article><h3>Health Assessment</h3><p>The practitioner discusses your symptoms, lifestyle, physical activity, health history, and current concerns.</p></article>
+      <article><h3>Posture and Movement Check</h3><p>Posture, flexibility, joint movement, and areas of physical tension may be assessed.</p></article>
+      <article><h3>Personalized Care</h3><p>Suitable manual techniques, mobilisation, stretching, and lifestyle guidance are selected according to individual needs.</p></article>
+      <article><h3>Follow-Up Guidance</h3><p>Patients may receive advice on posture, stretching, physical activity, and preventive care.</p></article>
+    </div>
+
+    <div class="grid-2">
+      <article class="info-card">
+        <h3>Chiropractic Care and Lifestyle</h3>
+        <ul class="clean-list"><li>Regular stretching</li><li>Posture correction</li><li>Safe strengthening exercises</li><li>Ergonomic workplace adjustments</li><li>Healthy sleeping positions</li><li>Balanced physical activity</li><li>Weight and lifestyle management</li><li>Stress reduction practices</li></ul>
+      </article>
+      <article class="info-card">
+        <h3>Who Should Consult Before Treatment?</h3>
+        <p>Patients with fractures, severe osteoporosis, recent surgery, spinal infection, advanced neurological symptoms, cancer affecting bones, or serious medical conditions should inform the practitioner and obtain appropriate medical evaluation before treatment.</p>
+        <p style="margin-top:12px"><strong>Urgent medical care:</strong> Seek immediate care for severe pain, loss of sensation, sudden weakness, difficulty walking, loss of bladder or bowel control, or symptoms following major trauma.</p>
+      </article>
+    </div>
+
+    <div class="highlight-box">
+      <h3>Chiropractic Therapy at Neolife Wellness Center</h3>
+      <p>At Neolife Wellness Center, chiropractic care is provided as part of a holistic approach to mobility, posture, pain management, and physical wellness. Each consultation begins with an individual assessment. Chiropractic therapy may also be combined with Ayurveda, Yoga, Naturopathy, Acupuncture, lifestyle counselling, and other suitable wellness therapies where appropriate.</p>
+    </div>
+  </div>
+</section>
+
+
+<section class="cta">
+  <div class="cta-inner">
+    <h2>Improve Your Movement and Comfort</h2>
+    <p>Book a personalized chiropractic consultation at Neolife Wellness Center and take the next step toward better posture, mobility, and physical well-being.</p>
+    <a href="../consultation.html" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Book Appointment</a>
+  </div>
+</section>
+
+<footer class="footer">© Neolife Wellness Center, Udupi. All rights reserved.</footer>
+<a class="whatsapp" href="https://wa.me/919481489866" target="_blank" aria-label="WhatsApp">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<script>
+function toggleMobileMenu(){
+  document.getElementById("mobileNavigation").classList.toggle("open");
+  document.getElementById("mobileMenuOverlay").classList.toggle("show");
+}
+function closeMobileMenu(){
+  document.getElementById("mobileNavigation").classList.remove("open");
+  document.getElementById("mobileMenuOverlay").classList.remove("show");
+}
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") closeMobileMenu();
+});
+</script>
+
+</body>
+</html>

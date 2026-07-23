@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yoga and Naturopathy | Neolife Wellness Center</title>
+<link rel="icon" type="image/jpeg" href="../../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{
+  --green-dark:#123524;
+  --green:#2f6b3f;
+  --green-soft:#e9f2e8;
+  --gold:#d4af37;
+  --gold-dark:#9a7100;
+  --cream:#f8f7f1;
+  --white:#ffffff;
+  --text:#26382d;
+  --muted:#65716a;
+  --shadow:0 18px 48px rgba(18,53,36,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--text);line-height:1.75}
+a{text-decoration:none}
+img,video{display:block;max-width:100%}
+.glass-header{
+  position:fixed;inset:0 0 auto 0;min-height:82px;padding:10px 32px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(212,175,55,.25);
+  box-shadow:0 8px 25px rgba(0,0,0,.10);z-index:9999
+}
+.logo-container{display:flex;align-items:center;gap:12px}
+.logo-img{width:55px;height:55px;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}
+.logo-details{display:flex;flex-direction:column;line-height:1.2}
+.logo-text{color:var(--green-dark);font-size:18px;font-weight:800;white-space:nowrap}
+.logo-subtitle{margin-top:5px;color:var(--gold-dark);font-size:12px;font-weight:700;letter-spacing:1.3px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:22px}
+.main-nav{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.main-nav a{color:var(--green-dark);font-size:12px;font-weight:800}
+.main-nav a:hover,.main-nav a.active{color:var(--gold-dark)}
+.profile-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:white;background:linear-gradient(135deg,var(--gold),var(--gold-dark))}
+.mobile-menu-button{display:none;width:44px;height:44px;border:0;border-radius:12px;background:var(--green-dark);color:white;font-size:18px}
+.mobile-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:.3s;z-index:9998}
+.mobile-menu-overlay.show{opacity:1;visibility:visible}
+.mobile-navigation{
+  position:fixed;top:0;right:0;width:300px;height:100vh;padding:24px;
+  background:linear-gradient(180deg,#123524,#1e5134);
+  transform:translateX(100%);transition:.3s;z-index:9999;overflow:auto
+}
+.mobile-navigation.open{transform:translateX(0)}
+.mobile-navigation-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;color:white}
+.mobile-navigation-close{width:38px;height:38px;border:0;border-radius:10px;background:white}
+.mobile-navigation a{display:block;padding:14px;margin-bottom:10px;border-radius:12px;color:white;font-weight:700}
+.mobile-navigation a:hover{background:rgba(255,255,255,.12)}
+.therapy-hero{
+  min-height:600px;padding:150px 20px 80px;display:flex;align-items:center;
+  position:relative;overflow:hidden;color:white;
+  background:
+    linear-gradient(90deg,rgba(8,44,25,.93),rgba(8,44,25,.48)),
+    var(--hero-image) center/cover no-repeat;
+}
+.therapy-hero::after{content:"";position:absolute;width:470px;height:470px;right:-150px;bottom:-230px;border-radius:50%;background:rgba(212,175,55,.16)}
+.hero-inner{position:relative;z-index:2;width:min(1160px,92%);margin:auto}
+.eyebrow{display:inline-flex;padding:8px 15px;border-radius:30px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#f6df88;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.therapy-hero h1{max-width:850px;margin:24px 0 14px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,7vw,78px);line-height:1.05;font-weight:500}
+.therapy-hero p{max-width:760px;color:#edf5ef;font-size:18px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+.primary-btn,.secondary-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:48px;padding:12px 23px;border-radius:30px;font-weight:800;transition:.3s
+}
+.primary-btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:white}
+.secondary-btn{border:1px solid rgba(255,255,255,.7);color:white;background:rgba(255,255,255,.08)}
+.primary-btn:hover,.secondary-btn:hover{transform:translateY(-3px)}
+.page-section{padding:82px 20px}
+.page-section.alt{background:#f0ecdf}
+.section-inner{width:min(1160px,92%);margin:auto}
+.section-kicker{color:var(--gold-dark);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.section-title{margin:8px 0 18px;color:var(--green-dark);font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,4vw,48px);font-weight:500;line-height:1.2}
+.lead{max-width:900px;color:var(--muted);font-size:17px}
+.video-shell{margin-top:32px;padding:12px;border-radius:24px;background:white;border:1px solid rgba(212,175,55,.27);box-shadow:var(--shadow)}
+.video-shell video{width:100%;max-height:560px;border-radius:16px;background:#0b1c12}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:34px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:34px}
+.info-card{
+  height:100%;padding:27px;border-radius:20px;background:white;
+  border:1px solid rgba(212,175,55,.22);box-shadow:0 12px 32px rgba(18,53,36,.08)
+}
+.info-card .icon{width:50px;height:50px;display:grid;place-items:center;margin-bottom:16px;border-radius:14px;background:var(--green-soft);color:var(--green-dark);font-size:21px}
+.info-card h3{margin-bottom:9px;color:var(--green-dark);font-family:Georgia,"Times New Roman",serif;font-size:23px;font-weight:500}
+.info-card p{color:var(--muted);font-size:14px}
+.clean-list{list-style:none;display:grid;gap:11px;margin-top:18px}
+.clean-list li{position:relative;padding-left:27px;color:#4d5e54}
+.clean-list li::before{content:"✓";position:absolute;left:0;top:0;color:var(--gold-dark);font-weight:900}
+.numbered{counter-reset:item;display:grid;gap:18px;margin-top:32px}
+.numbered article{counter-increment:item;position:relative;padding:24px 24px 24px 78px;border-radius:18px;background:white;border:1px solid rgba(212,175,55,.22)}
+.numbered article::before{content:counter(item);position:absolute;left:22px;top:22px;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:var(--green-dark);color:white;font-weight:800}
+.numbered h3{color:var(--green-dark);margin-bottom:6px}
+.numbered p{color:var(--muted)}
+.highlight-box{margin-top:35px;padding:32px;border-radius:24px;background:linear-gradient(135deg,var(--green-dark),var(--green));color:white}
+.highlight-box h3{font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:500;margin-bottom:12px}
+.highlight-box p{color:#edf5ef}
+.cta{padding:78px 20px;background:linear-gradient(135deg,#123524,#285f39);color:white;text-align:center}
+.cta-inner{width:min(850px,92%);margin:auto}
+.cta h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,5vw,54px);font-weight:500}
+.cta p{margin:14px auto 25px;max-width:700px;color:#e9f3eb}
+.footer{padding:30px 20px;text-align:center;background:#0d2a1c;color:#dbe8df;font-size:13px}
+.whatsapp{position:fixed;right:22px;bottom:22px;width:58px;height:58px;display:grid;place-items:center;border-radius:50%;background:#25d366;box-shadow:0 12px 25px rgba(0,0,0,.25);z-index:999}
+.whatsapp img{width:34px;height:34px}
+@media(max-width:950px){
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .main-nav{display:none}.mobile-menu-button{display:grid;place-items:center}
+}
+@media(max-width:700px){
+  .glass-header{padding:12px 16px}.logo-img{width:48px;height:48px}.logo-text{font-size:15px}.logo-subtitle{font-size:10px}
+  .therapy-hero{min-height:570px;padding-top:125px}.therapy-hero h1{font-size:43px}.therapy-hero p{font-size:16px}
+  .page-section{padding:60px 16px}.grid-2,.grid-3{grid-template-columns:1fr}
+  .info-card{padding:22px}.numbered article{padding:22px 20px 22px 68px}
+}
+</style>
+</head>
+<body>
+
+<header class="glass-header">
+  <a class="logo-container" href="../homepage.html">
+    <img src="../../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
+    <span class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
+    </span>
+  </a>
+  <div class="header-right">
+    <nav class="main-nav">
+      <a href="../homepage.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../services.html" class="active">Therapies</a>
+      <a href="../beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+      <a href="../products.html">Products</a>
+      <a href="../consultation.html">Consultation</a>
+      <a href="../blog.html">Blogs</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+    <button class="mobile-menu-button" onclick="toggleMobileMenu()" aria-label="Open menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <a href="../profile.html" class="profile-icon"><i class="fa-solid fa-user"></i></a>
+  </div>
+</header>
+<div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+<nav class="mobile-navigation" id="mobileNavigation">
+  <div class="mobile-navigation-header">
+    <strong>Neolife Menu</strong>
+    <button class="mobile-navigation-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <a href="../homepage.html">Home</a>
+  <a href="../about.html">About</a>
+  <a href="../services.html">Therapies</a>
+  <a href="../beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+  <a href="../products.html">Products</a>
+  <a href="../consultation.html">Consultation</a>
+  <a href="../blog.html">Blogs</a>
+  <a href="../contact.html">Contact</a>
+  <a href="../profile.html">Profile</a>
+</nav>
+
+<section class="therapy-hero" style="--hero-image:url('../../assets/yoga.jpg')">
+  <div class="hero-inner">
+    <span class="eyebrow">Neolife Wellness Therapy</span>
+    <h1>Yoga and Naturopathy</h1>
+    <p>Natural Healing for Body, Mind, and Soul</p>
+    <div class="hero-actions">
+      <a href="../consultation.html" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Book Appointment</a>
+      <a href="../contact.html" class="secondary-btn"><i class="fa-solid fa-phone"></i> Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="section-inner">
+    <span class="section-kicker">Therapy Overview</span>
+    <h2 class="section-title">Watch and Understand the Therapy</h2>
+    <p class="lead">This video area is ready for your therapy video. Place the MP4 file in your assets folder using the filename shown in the source code.</p>
+    <div class="video-shell">
+      <video controls preload="metadata" poster="../../assets/yoga.jpg">
+        <source src="../../assets/yoga-naturopathy.mp4" type="video/mp4">
+        Your browser does not support HTML video.
+      </video>
+    </div>
+  </div>
+</section>
+
+
+<section class="page-section alt">
+  <div class="section-inner">
+    <span class="section-kicker">Yoga and Naturopathy</span>
+    <h2 class="section-title">Natural Healing for Body, Mind, and Soul</h2>
+    <p class="lead">Discover the profound benefits of ancient wisdom combined with modern holistic health practices.</p>
+
+    <div class="grid-3">
+      <article class="info-card">
+          <div class="icon"><i class="fa-solid fa-om"></i></div>
+          <h3>Yoga's Eight Limbs</h3>
+          <p>Yoga aims to unite individual and universal consciousness through Ashtang Yoga's eight transformative steps.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-seedling"></i></div>
+          <h3>Naturopathy's Elemental Harmony</h3>
+          <p>Naturopathy encourages living in harmony with the five great elements: earth, water, fire, air, and ether.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-heart"></i></div>
+          <h3>Shared Holistic Philosophy</h3>
+          <p>Both systems emphasise prevention, self-healing, lifestyle balance, and connection with nature.</p>
+        </article>
+    </div>
+
+    <div class="highlight-box">
+      <h3>The Philosophy Behind the Healing</h3>
+      <p>Yoga and Naturopathy address physical, mental, and lifestyle-related concerns by aligning the body, mind, and environment for comprehensive wellness.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="section-inner">
+    <span class="section-kicker">Natural Therapies</span>
+    <h2 class="section-title">Core Naturopathic Treatments</h2>
+    <div class="grid-3">
+      <article class="info-card">
+          <div class="icon"><i class="fa-solid fa-water"></i></div>
+          <h3>Hydrotherapy</h3>
+          <p>Uses water in various forms such as baths, compresses, and steam to support circulation, relaxation, and natural healing.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-mountain"></i></div>
+          <h3>Mud Therapy</h3>
+          <p>Uses mineral-rich mud packs and baths to support detoxification, reduce inflammation, and promote healing.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-sun"></i></div>
+          <h3>Sun & Colour Therapy</h3>
+          <p>Harnesses natural sunlight and colour-based wellness methods to support immunity and mental well-being.</p>
+        </article>
+    </div>
+    <article class="info-card" style="margin-top:24px">
+      <h3>Other Therapies</h3>
+      <ul class="clean-list"><li>Massage therapy</li><li>Therapeutic fasting guidance</li><li>Acupuncture support</li><li>Integrated yoga therapy</li><li>Lifestyle counselling</li></ul>
+    </article>
+  </div>
+</section>
+
+<section class="page-section alt">
+  <div class="section-inner">
+    <span class="section-kicker">Yoga Practices</span>
+    <h2 class="section-title">Yoga Practices for Healing</h2>
+    <div class="grid-3">
+      <article class="info-card">
+          <div class="icon"><i class="fa-solid fa-person"></i></div>
+          <h3>Yogic Asanas</h3>
+          <p>Specific postures help improve strength, flexibility, balance, and internal organ function.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-lungs"></i></div>
+          <h3>Pranayama</h3>
+          <p>Controlled breathing techniques help regulate energy, calm the nervous system, and promote relaxation.</p>
+        </article>
+<article class="info-card">
+          <div class="icon"><i class="fa-solid fa-brain"></i></div>
+          <h3>Meditation & Dharana</h3>
+          <p>Meditation and concentration practices support mental clarity, stress reduction, and inner calm.</p>
+        </article>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="section-inner">
+    <span class="section-kicker">Clinical Wellness</span>
+    <h2 class="section-title">Modern Clinical Protocols</h2>
+    <p class="lead">Modern Yoga and Naturopathy care combines diet, hydrotherapy, yoga, and lifestyle counselling to support lifestyle disorder management and overall well-being.</p>
+    <div class="grid-2">
+      <article class="info-card">
+        <h3>Health Support</h3>
+        <ul class="clean-list"><li>Supports diabetes, hypertension, and obesity management</li><li>Encourages non-invasive wellness care</li><li>Combines traditional wisdom with practical lifestyle guidance</li></ul>
+      </article>
+      <article class="info-card">
+        <h3>The Role of Diet and Lifestyle</h3>
+        <p><strong>Naturopathic Diet</strong></p>
+        <ul class="clean-list"><li>Eliminative Diet: Supports detoxification.</li><li>Soothing Diet: Supports rejuvenation.</li><li>Constructive Diet: Supports nourishment and balance.</li></ul>
+        <p style="margin-top:18px"><strong>Lifestyle Adjustments</strong></p>
+        <ul class="clean-list"><li>Sleep hygiene</li><li>Stress management</li><li>Proper hydration</li><li>Mindful eating</li><li>Harmony with nature</li></ul>
+      </article>
+    </div>
+
+    <div class="highlight-box">
+      <h3>Yoga & Naturopathy at Neolife Wellness Center</h3>
+      <p>At Neolife Wellness Center, we offer personalized Yoga and Naturopathy guidance to support natural healing, preventive wellness, stress management, lifestyle correction, and long-term health.</p>
+    </div>
+  </div>
+</section>
+
+
+<section class="cta">
+  <div class="cta-inner">
+    <h2>Begin Your Wellness Journey</h2>
+    <p>Experience natural healing for body, mind, and soul through Yoga and Naturopathy at Neolife Wellness Center.</p>
+    <a href="../consultation.html" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Book Appointment</a>
+  </div>
+</section>
+
+<footer class="footer">© Neolife Wellness Center, Udupi. All rights reserved.</footer>
+<a class="whatsapp" href="https://wa.me/919481489866" target="_blank" aria-label="WhatsApp">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<script>
+function toggleMobileMenu(){
+  document.getElementById("mobileNavigation").classList.toggle("open");
+  document.getElementById("mobileMenuOverlay").classList.toggle("show");
+}
+function closeMobileMenu(){
+  document.getElementById("mobileNavigation").classList.remove("open");
+  document.getElementById("mobileMenuOverlay").classList.remove("show");
+}
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") closeMobileMenu();
+});
+</script>
+
+</body>
+</html>

@@ -231,99 +231,190 @@ img{
 /* ===== SERVICES ===== */
 .services-page{
   padding:90px 0;
-  background:var(--cream);
+  background:linear-gradient(180deg,var(--cream),#f2eee4);
 }
 
 .section-title{
   width:min(1180px,90%);
-  margin:0 auto 50px;
-
+  margin:0 auto 16px;
   text-align:center;
   color:var(--green-dark);
-  font-size:clamp(32px,4vw,46px);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(34px,4vw,50px);
   line-height:1.2;
-  font-weight:800;
+  font-weight:500;
+}
+
+.section-description{
+  width:min(760px,90%);
+  margin:0 auto 48px;
+  text-align:center;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.8;
+}
+
+.therapy-count{
+  width:min(1180px,90%);
+  margin:0 auto 24px;
+  color:var(--muted);
+  font-size:12px;
 }
 
 .therapy-grid{
   width:min(1180px,90%);
   margin:auto;
-
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:30px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:26px;
 }
 
 .therapy-card{
-  background:white;
-  border-radius:28px;
+  height:300px;
+  position:relative;
   overflow:hidden;
-
-  border:1px solid rgba(212,175,55,.25);
-  box-shadow:0 18px 40px rgba(18,53,36,.10);
-
-  transition:.35s;
+  border-radius:20px;
+  background:var(--green-dark);
+  border:1px solid rgba(212,175,55,.28);
+  box-shadow:0 15px 35px rgba(18,53,36,.12);
+  cursor:pointer;
+  transition:transform .35s ease,box-shadow .35s ease;
 }
 
 .therapy-card:hover{
-  transform:translateY(-8px);
-  box-shadow:0 25px 50px rgba(18,53,36,.18);
+  transform:translateY(-7px);
+  box-shadow:0 24px 48px rgba(18,53,36,.20);
 }
 
 .therapy-card img{
   width:100%;
-  height:280px;
+  height:100%;
   object-fit:cover;
-  background:#edf2eb;
+  transition:transform .65s ease,filter .4s ease;
 }
 
-.therapy-content{
+.therapy-card:hover img{
+  transform:scale(1.08);
+  filter:brightness(.48) saturate(.9);
+}
+
+.therapy-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent 42%,rgba(7,34,20,.88) 100%);
+  pointer-events:none;
+  transition:opacity .35s ease;
+}
+
+.therapy-card:hover::after{
+  opacity:0;
+}
+
+.therapy-name{
+  position:absolute;
+  left:22px;
+  right:22px;
+  bottom:20px;
+  z-index:2;
+  margin:0;
+  color:white;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:23px;
+  font-weight:500;
+  line-height:1.25;
+  text-shadow:0 3px 10px rgba(0,0,0,.45);
+  transition:opacity .3s ease,transform .3s ease;
+}
+
+.therapy-card:hover .therapy-name{
+  opacity:0;
+  transform:translateY(15px);
+}
+
+.therapy-hover-content{
+  position:absolute;
+  inset:0;
+  z-index:3;
   padding:28px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:white;
+  background:linear-gradient(135deg,rgba(18,53,36,.91),rgba(47,107,63,.88));
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(18px);
+  transition:opacity .35s ease,visibility .35s ease,transform .35s ease;
 }
 
-.therapy-content h3{
+.therapy-card:hover .therapy-hover-content,
+.therapy-card:focus-within .therapy-hover-content{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+
+.therapy-hover-content h3{
+  margin:0 0 12px;
+  color:#f3d976;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:25px;
+  font-weight:500;
+}
+
+.therapy-hover-content p{
+  max-width:300px;
+  margin:0 0 21px;
+  color:rgba(255,255,255,.84);
+  font-size:13px;
+  line-height:1.7;
+}
+
+.therapy-view-button{
+  min-width:130px;
+  padding:11px 20px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:30px;
+  color:white;
+  background:rgba(255,255,255,.10);
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  backdrop-filter:blur(6px);
+  transition:background .3s ease,color .3s ease,transform .3s ease;
+}
+
+.therapy-view-button:hover{
   color:var(--green-dark);
-  font-size:28px;
-  margin-bottom:14px;
+  background:white;
+  transform:translateY(-2px);
 }
 
-.therapy-content p{
-  color:var(--muted);
-  line-height:1.8;
-}
-
-.therapy-content ul{
-  margin:20px 0;
-  padding-left:22px;
-}
-
-.therapy-content li{
-  margin-bottom:9px;
-  color:var(--green-dark);
-}
-
-.therapy-content strong{
-  color:var(--gold-dark);
+.therapy-card:focus-within{
+  outline:3px solid rgba(212,175,55,.40);
+  outline-offset:4px;
 }
 
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-
   margin-top:12px;
   padding:13px 24px;
-
   border:none;
   border-radius:40px;
-
   background:linear-gradient(135deg,var(--green-dark),var(--green));
   color:white;
-
   font-size:14px;
   font-weight:800;
   cursor:pointer;
-
   transition:.3s;
   box-shadow:0 10px 22px rgba(18,53,36,.18);
 }
@@ -331,6 +422,55 @@ img{
 .btn:hover{
   transform:translateY(-3px);
   background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+}
+
+@media(max-width:950px){
+  .therapy-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:620px){
+  .services-page{
+    padding:65px 0;
+  }
+
+  .therapy-grid{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+
+  .therapy-card{
+    height:280px;
+  }
+
+  .therapy-card .therapy-hover-content{
+    inset:auto 0 0 0;
+    min-height:135px;
+    padding:20px;
+    justify-content:flex-end;
+    opacity:1;
+    visibility:visible;
+    transform:none;
+    background:linear-gradient(180deg,transparent,rgba(18,53,36,.96));
+  }
+
+  .therapy-card .therapy-name{
+    display:none;
+  }
+
+  .therapy-hover-content h3{
+    margin-bottom:5px;
+    font-size:21px;
+  }
+
+  .therapy-hover-content p{
+    display:none;
+  }
+
+  .therapy-view-button{
+    padding:9px 17px;
+  }
 }
 
 /* ===== MODAL ===== */
@@ -723,104 +863,95 @@ img{
 </section>
 
 <section class="services-page">
-  <h2 class="section-title">Healing Services We Offer</h2>
+  <h2 class="section-title">Our Healing Therapies</h2>
+
+  <p class="section-description">
+    Explore personalized therapies designed to support natural healing,
+    relaxation, mobility and complete wellness.
+  </p>
+
+  <div class="therapy-count">5 therapies</div>
 
   <div class="therapy-grid">
 
-    <div class="therapy-card">
-      <img src="../assets/ayurvedapancha.png" alt="Ayurveda & Panchakarma">
-      <div class="therapy-content">
-        <h3>🌿 Ayurveda & Panchakarma</h3>
-        <p>Traditional Ayurvedic consultation and Panchakarma therapies for detoxification, rejuvenation and holistic wellness.</p>
-        <ul>
-          <li>Ayurvedic Consultation</li>
-          <li>Panchakarma Therapies</li>
-          <li>Detoxification</li>
-          <li>Lifestyle Guidance</li>
-        </ul>
-        <p><strong>Duration:</strong> As per treatment plan</p>
-        <button class="btn" onclick="openTherapy('ayurveda')">Learn More</button>
+    <article class="therapy-card">
+      <img src="../assets/ayurvedapancha.png" alt="Ayurveda and Panchakarma">
+      <h3 class="therapy-name">Ayurveda &amp; Panchakarma</h3>
+      <div class="therapy-hover-content">
+        <h3>Ayurveda &amp; Panchakarma</h3>
+        <p>Personalized Ayurvedic care, detoxification and rejuvenation therapies for complete wellness.</p>
+        <a href="therapies/ayurveda-panchakarma.html"
+           class="therapy-view-button">
+
+            View Details
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
       </div>
-    </div>
+    </article>
 
-    <div class="therapy-card">
-      <img src="../assets/accupunture.png" alt="Acupuncture">
-      <div class="therapy-content">
-        <h3>📍 Acupuncture</h3>
-        <p>Supportive therapy for pain management, stress relief and restoring body balance.</p>
-        <ul>
-          <li>Pain relief support</li>
-          <li>Stress management</li>
-          <li>Body energy balance</li>
-        </ul>
-        <p><strong>Duration:</strong> 30–45 minutes</p>
-        <button class="btn" onclick="openTherapy('acupuncture')">Learn More</button>
+    <article class="therapy-card">
+      <img src="../assets/accupunture.png" alt="Acupuncture therapy">
+      <h3 class="therapy-name">Acupuncture</h3>
+      <div class="therapy-hover-content">
+        <h3>Acupuncture</h3>
+        <p>Supportive therapy for pain relief, stress reduction, circulation and restoring body balance.</p>
+        <a href="therapies/acupuncture.html"
+           class="therapy-view-button">
+
+            View Details
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
       </div>
-    </div>
+    </article>
 
-    <div class="therapy-card">
-      <img src="../assets/yoga.jpg" alt="Yoga">
-      <div class="therapy-content">
-        <h3>🧘 Yoga</h3>
-        <p>Yoga sessions for flexibility, strength, breathing, stress relief and mental peace.</p>
-        <ul>
-          <li>Improves flexibility</li>
-          <li>Supports mental calmness</li>
-          <li>Better breathing and balance</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openTherapy('yoga')">Learn More</button>
+    <article class="therapy-card">
+    <img src="../assets/yoga.jpg"
+         alt="Yoga and Naturopathy">
+
+    <h3 class="therapy-name">
+        Yoga & Naturopathy
+    </h3>
+
+    <div class="therapy-hover-content">
+
+        <h3>Yoga & Naturopathy</h3>
+
+        <p>
+            Natural healing practices combining yoga,
+            hydrotherapy, breathing techniques and
+            holistic wellness guidance.
+        </p>
+
+        <a href="therapies/yoga-naturopathy.html"
+           class="therapy-view-button">
+
+            View Details
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+    </div>
+</article>
+
+    
+
+    <article class="therapy-card">
+      <img src="../assets/chiropractic.jpg" alt="Chiropractic therapy">
+      <h3 class="therapy-name">Chiropractic Therapy</h3>
+      <div class="therapy-hover-content">
+        <h3>Chiropractic Therapy</h3>
+        <p>Manual care supporting spinal alignment, posture, joint mobility and natural pain management.</p>
+        <a href="therapies/chiropractic.html"
+           class="therapy-view-button">
+
+            View Details
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
       </div>
-    </div>
-
-    <div class="therapy-card">
-      <img src="../assets/naturopathy.png" alt="Naturopathy">
-      <div class="therapy-content">
-        <h3>🌱 Naturopathy</h3>
-        <p>Natural healing through diet, lifestyle, hydrotherapy, yoga and drug-free wellness practices.</p>
-        <ul>
-          <li>Natural lifestyle care</li>
-          <li>Diet and wellness planning</li>
-          <li>Hydrotherapy and natural support</li>
-        </ul>
-        <p><strong>Duration:</strong> 30–45 minutes</p>
-        <button class="btn" onclick="openTherapy('naturopathy')">Learn More</button>
-      </div>
-    </div>
-
-    <div class="therapy-card">
-  <img src="../assets/chiropractic.jpg" alt="Chiropractic Therapy">
-
-  <div class="therapy-content">
-
-    <h3>🦴 Chiropractic Therapy</h3>
-
-    <p>
-      Chiropractic care focuses on improving spinal alignment,
-      posture, joint mobility and nervous system function through
-      safe, non-surgical manual techniques.
-    </p>
-
-    <ul>
-      <li>Back and neck pain support</li>
-      <li>Improves posture and spinal mobility</li>
-      <li>Reduces muscle stiffness</li>
-      <li>Supports joint movement</li>
-    </ul>
-
-    <p>
-      <strong>Duration:</strong> 30–45 minutes
-    </p>
-
-    <button
-      class="btn"
-      onclick="openTherapy('chiropractic')"
-    >
-      Learn More
-    </button>
-
-  </div>
-</div>
+    </article>
 
   </div>
 </section>

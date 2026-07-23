@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Doctors - Neolife Wellness Center</title>
+
+  <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <style>
+    :root{
+      --green-dark:#123524;
+      --green:#2f6b3f;
+      --green-mid:#397a4b;
+      --green-light:#e9f2e8;
+      --gold:#d4af37;
+      --gold-dark:#9a7100;
+      --cream:#f8f7f1;
+      --cream-deep:#eee8dc;
+      --white:#ffffff;
+      --text:#26382d;
+      --muted:#6f7f76;
+      --border:rgba(212,175,55,.28);
+      --shadow:0 20px 50px rgba(18,53,36,.12);
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      min-height:100vh;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:var(--cream);
+      line-height:1.7;
+    }
+
+    a{
+      text-decoration:none;
+      color:inherit;
+    }
+
+    button,
+    input,
+    select,
+    textarea{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    img{
+      display:block;
+      max-width:100%;
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .glass-header{
+      min-height:82px;
+      padding:10px 32px;
+
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:9999;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+
+      background:rgba(255,255,255,.96);
+      backdrop-filter:blur(16px);
+
+      border-bottom:1px solid var(--border);
+      box-shadow:0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .logo-container{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-shrink:0;
+    }
+
+    .logo-img{
+      width:55px;
+      height:55px;
+      object-fit:cover;
+      border-radius:50%;
+      border:2px solid var(--gold);
+    }
+
+    .logo-details{
+      display:flex;
+      flex-direction:column;
+      line-height:1.2;
+    }
+
+    .logo-text{
+      color:var(--green-dark);
+      font-size:18px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .logo-subtitle{
+      margin-top:5px;
+      color:var(--gold-dark);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:1.2px;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:20px;
+    }
+
+    .main-nav{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      white-space:nowrap;
+    }
+
+    .main-nav a{
+      color:var(--green-dark);
+      font-size:12px;
+      font-weight:800;
+      transition:.3s ease;
+    }
+
+    .main-nav a:hover,
+    .main-nav a.active{
+      color:var(--gold-dark);
+    }
+
+    .consultation-btn{
+      min-height:42px;
+      padding:10px 18px;
+
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+
+      border-radius:30px;
+      color:white;
+      background:linear-gradient(135deg,var(--green-dark),var(--green));
+      font-size:12px;
+      font-weight:800;
+      box-shadow:0 10px 22px rgba(18,53,36,.18);
+      transition:.3s ease;
+    }
+
+    .consultation-btn:hover{
+      transform:translateY(-2px);
+      background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+    }
+
+    .mobile-menu-button{
+      display:none;
+      width:44px;
+      height:44px;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:11px;
+      color:white;
+      background:var(--green-dark);
+      font-size:18px;
+    }
+
+    .mobile-menu-overlay{
+      position:fixed;
+      inset:0;
+      z-index:9998;
+      opacity:0;
+      visibility:hidden;
+      background:rgba(5,30,18,.58);
+      backdrop-filter:blur(2px);
+      transition:.3s ease;
+    }
+
+    .mobile-menu-overlay.show{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .mobile-navigation{
+      width:min(310px,86vw);
+      height:100vh;
+      padding:24px 20px;
+
+      position:fixed;
+      top:0;
+      right:0;
+      z-index:9999;
+
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      overflow-y:auto;
+
+      color:white;
+      background:linear-gradient(180deg,#123824,#1e5134);
+      box-shadow:-12px 0 34px rgba(0,0,0,.22);
+
+      transform:translateX(105%);
+      transition:transform .3s ease;
+    }
+
+    .mobile-navigation.open{
+      transform:translateX(0);
+    }
+
+    .mobile-navigation-header{
+      margin-bottom:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .mobile-navigation-close{
+      width:38px;
+      height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:9px;
+      color:var(--green-dark);
+      background:white;
+    }
+
+    .mobile-navigation a{
+      padding:13px 14px;
+      border-radius:10px;
+      color:rgba(255,255,255,.88);
+      font-size:14px;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .mobile-navigation a:hover,
+    .mobile-navigation a.active{
+      color:var(--green-dark);
+      background:white;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .doctors-hero{
+      padding:145px 20px 70px;
+      text-align:center;
+      background:
+        radial-gradient(circle at top right,rgba(212,175,55,.10),transparent 26%),
+        linear-gradient(180deg,#fbfaf6,var(--cream));
+    }
+
+    .doctors-hero .eyebrow{
+      display:inline-block;
+      margin-bottom:10px;
+      color:var(--gold-dark);
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:2px;
+      text-transform:uppercase;
+    }
+
+    .doctors-hero h1{
+      margin-bottom:14px;
+      color:var(--green-dark);
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(38px,5vw,58px);
+      font-weight:500;
+      line-height:1.15;
+    }
+
+    .doctors-hero p{
+      max-width:760px;
+      margin:auto;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.8;
+    }
+
+    /* =========================
+       DOCTOR ROWS
+    ========================== */
+
+    .doctors-page{
+      overflow:hidden;
+      background:var(--cream);
+    }
+
+    .doctor-row{
+      min-height:560px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      border-top:1px solid rgba(18,53,36,.08);
+    }
+
+    .doctor-row:first-child{
+      border-top:none;
+    }
+
+    .doctor-row.reverse .doctor-visual{
+      order:2;
+    }
+
+    .doctor-row.reverse .doctor-copy{
+      order:1;
+    }
+
+    .doctor-visual{
+      min-height:560px;
+      padding:70px 40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--cream-deep);
+    }
+
+    .doctor-photo-wrap{
+      width:min(340px,78%);
+      position:relative;
+    }
+
+    .doctor-photo-wrap::after{
+      content:"";
+      position:absolute;
+      left:18px;
+      right:-18px;
+      bottom:-18px;
+      height:100%;
+      z-index:0;
+      border-radius:12px;
+      background:rgba(18,53,36,.24);
+    }
+
+    .doctor-photo-wrap img{
+      width:100%;
+      height:400px;
+      object-fit:cover;
+      object-position:top center;
+      position:relative;
+      z-index:1;
+      border-radius:12px;
+      box-shadow:0 20px 45px rgba(18,53,36,.13);
+    }
+
+    .doctor-copy{
+      min-height:560px;
+      padding:70px 55px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      background:#fbfaf6;
+    }
+
+    .doctor-category{
+      margin-bottom:12px;
+      color:var(--gold-dark);
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:2.5px;
+      text-transform:uppercase;
+    }
+
+    .doctor-copy h2{
+      margin-bottom:10px;
+      color:var(--green-dark);
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(34px,4vw,48px);
+      font-weight:500;
+      line-height:1.15;
+    }
+
+    .doctor-qualification{
+      margin-bottom:16px;
+      color:var(--gold-dark);
+      font-size:13px;
+      font-weight:800;
+      line-height:1.6;
+    }
+
+    .doctor-summary{
+      max-width:650px;
+      margin-bottom:20px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.85;
+    }
+
+    .doctor-tags{
+      margin-bottom:24px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:9px;
+    }
+
+    .doctor-tags span{
+      padding:7px 11px;
+      border-radius:6px;
+      color:var(--green-dark);
+      background:#eef2e9;
+      border:1px solid rgba(18,53,36,.12);
+      font-size:10px;
+      font-weight:700;
+    }
+
+    .view-profile-btn{
+      width:max-content;
+      padding:0 0 5px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:none;
+      border-bottom:1px solid var(--gold-dark);
+      color:var(--green-dark);
+      background:transparent;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      transition:.3s ease;
+    }
+
+    .view-profile-btn:hover{
+      color:var(--gold-dark);
+      transform:translateX(3px);
+    }
+
+    /* =========================
+       DOCTOR MODAL
+    ========================== */
+
+    .doctor-modal{
+      position:fixed;
+      inset:0;
+      z-index:12000;
+
+      padding:22px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+
+      background:rgba(5,25,14,.76);
+      backdrop-filter:blur(7px);
+    }
+
+    .doctor-modal.show{
+      display:flex;
+    }
+
+    .doctor-modal-box{
+      width:min(980px,100%);
+      max-height:92vh;
+      overflow-y:auto;
+      position:relative;
+      padding:38px;
+      border-radius:24px;
+      background:
+        radial-gradient(circle at top right,rgba(212,175,55,.08),transparent 24%),
+        white;
+      border:1px solid var(--border);
+      box-shadow:0 30px 75px rgba(0,0,0,.30);
+      scrollbar-width:thin;
+      scrollbar-color:var(--green-dark) transparent;
+    }
+
+    .doctor-modal-box::-webkit-scrollbar{
+      width:7px;
+    }
+
+    .doctor-modal-box::-webkit-scrollbar-thumb{
+      border-radius:20px;
+      background:var(--green-dark);
+    }
+
+    .doctor-modal-close{
+      width:42px;
+      height:42px;
+      position:absolute;
+      top:18px;
+      right:18px;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:50%;
+      color:var(--green-dark);
+      background:var(--green-light);
+      font-size:18px;
+    }
+
+    .modal-doctor-head{
+      margin-bottom:28px;
+      padding-right:55px;
+      display:grid;
+      grid-template-columns:150px 1fr;
+      gap:24px;
+      align-items:center;
+    }
+
+    .modal-doctor-head img{
+      width:150px;
+      height:170px;
+      object-fit:cover;
+      object-position:top center;
+      border-radius:14px;
+      border:2px solid var(--gold);
+      box-shadow:0 14px 32px rgba(18,53,36,.15);
+    }
+
+    .modal-doctor-head h2{
+      margin-bottom:8px;
+      color:var(--green-dark);
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:32px;
+      font-weight:500;
+    }
+
+    .modal-doctor-head .modal-qualification{
+      margin-bottom:9px;
+      color:var(--gold-dark);
+      font-size:14px;
+      font-weight:800;
+    }
+
+    .modal-doctor-head .modal-intro{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.75;
+    }
+
+    .modal-book-btn{
+      margin-top:15px;
+      padding:11px 19px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius:30px;
+      color:white;
+      background:linear-gradient(135deg,var(--green-dark),var(--green));
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .modal-section{
+      margin-top:24px;
+      padding-top:20px;
+      border-top:1px solid rgba(18,53,36,.10);
+    }
+
+    .modal-section h3{
+      margin-bottom:12px;
+      color:var(--green-dark);
+      font-size:18px;
+    }
+
+    .modal-section p{
+      color:#56635c;
+      font-size:13px;
+      line-height:1.85;
+    }
+
+    .details-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .detail-item{
+      padding:15px;
+      border-radius:14px;
+      background:#f7faf5;
+      border:1px solid rgba(212,175,55,.23);
+    }
+
+    .detail-item span{
+      display:block;
+      margin-bottom:4px;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+    }
+
+    .detail-item strong{
+      color:var(--green-dark);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .clean-list{
+      padding-left:20px;
+    }
+
+    .clean-list li{
+      margin-bottom:8px;
+      color:#56635c;
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .contact-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .contact-card{
+      padding:15px;
+      border-radius:14px;
+      background:#f7faf5;
+      border:1px solid rgba(18,53,36,.10);
+    }
+
+    .contact-card i{
+      margin-right:8px;
+      color:var(--gold-dark);
+    }
+
+    .contact-card span{
+      color:#56635c;
+      font-size:13px;
+      line-height:1.6;
+      word-break:break-word;
+    }
+
+    .whatsapp{
+      width:58px;
+      height:58px;
+      position:fixed;
+      right:22px;
+      bottom:22px;
+      z-index:9000;
+      display:grid;
+      place-items:center;
+      border-radius:50%;
+      color:white;
+      background:#25d366;
+      box-shadow:0 12px 25px rgba(0,0,0,.25);
+      font-size:28px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media(max-width:1100px){
+      .glass-header{
+        padding:9px 18px;
+      }
+
+      .main-nav{
+        gap:12px;
+      }
+
+      .main-nav a{
+        font-size:11px;
+      }
+
+      .doctor-copy{
+        padding:55px 38px;
+      }
+    }
+
+    @media(max-width:850px){
+      .main-nav,
+      .consultation-btn{
+        display:none;
+      }
+
+      .mobile-menu-button{
+        display:flex;
+      }
+
+      .doctor-row,
+      .doctor-row.reverse{
+        grid-template-columns:1fr;
+      }
+
+      .doctor-row.reverse .doctor-visual,
+      .doctor-row.reverse .doctor-copy{
+        order:initial;
+      }
+
+      .doctor-visual{
+        min-height:430px;
+        padding:55px 25px;
+      }
+
+      .doctor-copy{
+        min-height:auto;
+        padding:48px 32px 55px;
+      }
+
+      .doctor-photo-wrap{
+        width:min(320px,72%);
+      }
+
+      .doctor-photo-wrap img{
+        height:360px;
+      }
+    }
+
+    @media(max-width:650px){
+      .glass-header{
+        min-height:76px;
+        padding:9px 13px;
+      }
+
+      .logo-img{
+        width:48px;
+        height:48px;
+      }
+
+      .logo-text{
+        font-size:14px;
+      }
+
+      .logo-subtitle{
+        font-size:9px;
+      }
+
+      .doctors-hero{
+        padding:125px 18px 55px;
+      }
+
+      .doctors-hero h1{
+        font-size:38px;
+      }
+
+      .doctor-visual{
+        min-height:390px;
+        padding:45px 18px;
+      }
+
+      .doctor-photo-wrap{
+        width:min(280px,80%);
+      }
+
+      .doctor-photo-wrap img{
+        height:330px;
+      }
+
+      .doctor-copy{
+        padding:42px 24px 50px;
+      }
+
+      .doctor-copy h2{
+        font-size:34px;
+      }
+
+      .modal-doctor-head{
+        grid-template-columns:1fr;
+        padding-right:0;
+        text-align:center;
+      }
+
+      .modal-doctor-head img{
+        margin:auto;
+      }
+
+      .doctor-modal-box{
+        padding:30px 18px;
+      }
+
+      .details-grid,
+      .contact-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="glass-header">
+  <div class="logo-container">
+    <img src="../assets/main_logo.jpeg" alt="Neolife Logo" class="logo-img">
+
+    <div class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <nav class="main-nav">
+      <a href="homepage.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="doctors.html" class="active">Doctors</a>
+      <a href="services.html">Therapies</a>
+      <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+      <a href="products.html">Products</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+    <a href="consultation.html" class="consultation-btn">
+      <i class="fa-solid fa-calendar-check"></i>
+      Book Consultation
+    </a>
+
+    <button type="button" class="mobile-menu-button" onclick="toggleMobileMenu()" aria-label="Open menu">
+      <i class="fa-solid fa-bars" id="mobileMenuIcon"></i>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+
+<nav class="mobile-navigation" id="mobileNavigation">
+  <div class="mobile-navigation-header">
+    <strong>Neolife Menu</strong>
+
+    <button type="button" class="mobile-navigation-close" onclick="closeMobileMenu()" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <a href="homepage.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="doctors.html" class="active">Doctors</a>
+  <a href="services.html">Therapies</a>
+  <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+  <a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a>
+  <a href="contact.html">Contact</a>
+</nav>
+
+<section class="doctors-hero">
+  <span class="eyebrow">Resident Doctors &amp; Wellness Experts</span>
+  <h1>Our Core Wellness Team</h1>
+  <p>
+    Meet our experienced doctors and wellness consultants dedicated to natural healing,
+    preventive care and complete mind-body wellness.
+  </p>
+</section>
+
+<main class="doctors-page" id="doctorsContainer"></main>
+
+<div class="doctor-modal" id="doctorModal" onclick="closeDoctorModalOutside(event)">
+  <div class="doctor-modal-box">
+    <button type="button" class="doctor-modal-close" onclick="closeDoctorModal()" aria-label="Close doctor profile">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div id="doctorModalContent"></div>
+  </div>
+</div>
+
+<a class="whatsapp" href="https://wa.me/919481489866" target="_blank" aria-label="WhatsApp">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+
+<script>
+  const doctors = [
+    {
+      key: "muraleedhara",
+      category: "Yoga & Naturopathy Consultant",
+      name: "Dr. N. G. Muraleedhara",
+      qualification: "BNYS, PGDYN, MSc (Yoga)",
+      role: "Yoga & Naturopathy Consultant",
+      image: "../assets/Dr-murali.png",
+      summary: "Dedicated to holistic healing through Ayurveda, Panchakarma, Yoga, Naturopathy and Acupuncture. With years of experience in natural healthcare, Dr. Muraleedhara helps patients achieve long-term wellness by addressing the root cause of illness.",
+      tags: ["Panchakarma", "Yoga", "Acupuncture", "Wellness"],
+      intro: "Dedicated to holistic healing through Ayurveda, Panchakarma, Yoga, Naturopathy and Acupuncture. With years of experience in natural healthcare, Dr. Muraleedhara helps patients achieve long-term wellness by addressing the root cause of illness.",
+      about: "Dr. N. G. Muraleedhara is an experienced wellness consultant specializing in Panchakarma, Yoga, Naturopathy, Acupuncture and lifestyle-based healing. His approach focuses on natural treatment, preventive healthcare and complete mind-body wellness.",
+      professionalDetails: [
+        ["Qualification", "BNYS, PGDYN, MSc (Yoga)"],
+        ["Experience", "15+ Years"],
+        ["Specialization", "Chiropractic, Dorn Therapy, Acupuncture"],
+        ["Consultation", "Ayurveda, Yoga & Naturopathy"]
+      ],
+      specializations: [
+        "Panchakarma Therapy",
+        "Ayurvedic Consultation",
+        "Acupuncture Therapy",
+        "Yoga Therapy",
+        "Naturopathy Treatment",
+        "Lifestyle & Wellness Counseling",
+        "Chiropractic Therapy"
+      ],
+      expertise: "Diabetes Management, Arthritis, Back Pain, Stress Management, Digestive Disorders, Weight Management, Women's Health, Skin Disorders and Preventive Healthcare.",
+      phone: "+91 94814 89866",
+      email: "neelavar.murli@gmail.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "Closed"
+    },
+    {
+      key: "aditi",
+      category: "Yoga & Naturopathy Consultant",
+      name: "Dr. Aditi",
+      qualification: "BNYS",
+      role: "Yoga & Naturopathy Consultant",
+      image: "../assets/Dr-adithi.png",
+      summary: "Dedicated to promoting natural healing, preventive healthcare, lifestyle correction, yoga therapy and holistic wellness.",
+      tags: ["Yoga", "Naturopathy", "Diet Guidance", "Lifestyle"],
+      intro: "Dedicated to promoting natural healing, preventive healthcare, lifestyle correction, yoga therapy and holistic wellness.",
+      about: "Dr. Aditi is a qualified Yoga and Naturopathy practitioner registered under the Karnataka Ayurvedic and Unani Practitioners Board. She focuses on natural healing methods, lifestyle management, diet guidance, yoga therapy and wellness consultation.",
+      professionalDetails: [
+        ["Qualification", "BNYS"],
+        ["Specialization", "Naturopathy & Yoga"],
+        ["Registration", "Karnataka Ayurvedic and Unani Practitioners Board"],
+        ["Consultation", "Natural healing and preventive care"]
+      ],
+      specializations: [
+        "Yoga Therapy",
+        "Naturopathy Consultation",
+        "Lifestyle Disease Management",
+        "Diet and Wellness Guidance",
+        "Stress Management",
+        "Preventive Health Care"
+      ],
+      expertise: "General wellness consultation, weight management, diabetes and lifestyle guidance, digestive health support, stress, sleep and anxiety management, and natural therapy guidance.",
+      phone: "+91 91481 05485",
+      email: "adithi248@gmail.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "Closed"
+    },
+    {
+      key: "shalmali",
+      category: "Ayurvedic Physician",
+      name: "Dr. Shalmali B B",
+      qualification: "BAMS, MD (Ayu)",
+      role: "Rasa Shastra & Bhaishajya Kalpana Specialist",
+      image: "../assets/Dr-shalmali.png",
+      summary: "Specialist in Rasa Shastra and Bhaishajya Kalpana. Dedicated to Ayurvedic pharmaceutics, research, academics and holistic clinical practice.",
+      tags: ["Ayurveda", "Pharmaceutics", "Research", "Clinical Care"],
+      intro: "Specialist in Rasa Shastra and Bhaishajya Kalpana. Dedicated to Ayurvedic pharmaceutics, research, academics and holistic clinical practice.",
+      about: "Dr. Shalmali B B is an Ayurvedic physician with BAMS and MD (Ayu) qualifications. She specializes in Rasa Shastra and Bhaishajya Kalpana and has a keen interest in Ayurvedic medicines, research, academics and clinical practice.",
+      professionalDetails: [
+        ["Qualification", "BAMS, MD (Ayu)"],
+        ["MD College", "Muniyal College of Ayurveda & Medicine"],
+        ["BAMS College", "S.D.M College of Ayurveda & Medicine"],
+        ["Specialization", "Rasa Shastra and Bhaishajya Kalpana"]
+      ],
+      specializations: [
+        "Ayurvedic Consultation",
+        "Ayurvedic Pharmaceutics",
+        "Rasa Shastra",
+        "Bhaishajya Kalpana",
+        "Preventive Healthcare",
+        "Lifestyle Disease Management",
+        "Research and Academics"
+      ],
+      expertise: "Ayurvedic medicines, traditional formulations, preventive care, lifestyle management, research and academic guidance.",
+      phone: "+91 99027 76670",
+      email: "shalmalibb19@gmail.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "Closed"
+    },
+    {
+      key: "sibgath",
+      category: "Senior Ayurvedic Physician",
+      name: "Dr. Sibgath Ulla Sharieff R",
+      qualification: "BAMS, MD (Ayu)",
+      role: "Professor and Anatomy Specialist",
+      image: "../assets/Dr-sibgath.jpg",
+      summary: "Senior Ayurvedic Physician, Professor and Anatomy Specialist with over 17 years of experience in clinical practice, academics and healthcare administration.",
+      tags: ["Ayurveda", "Anatomy", "Lifestyle", "Nutrition"],
+      intro: "Senior Ayurvedic Physician, Professor and Anatomy Specialist with over 17 years of experience in clinical practice, academics and healthcare administration. Dedicated to ethical patient care and holistic wellness.",
+      about: "Dr. Sibgath Ulla Sharieff R is a highly experienced Ayurvedic physician and Professor of Anatomy. He has served in various reputed institutions and is currently associated with Neolife Wellness Centre, Udupi. His expertise includes Ayurvedic consultation, anatomy education, lifestyle medicine, yoga, meditation, nutrition and healthcare management.",
+      professionalDetails: [
+        ["Qualification", "BAMS, MD (Ayu)"],
+        ["Experience", "17+ Years"],
+        ["BAMS College", "Kurunji Venkatramana Ayurvedic Medical College"],
+        ["MD College", "SDM College of Ayurveda & Hospital, Udupi"]
+      ],
+      specializations: [
+        "Ayurvedic Consultation",
+        "Panchakarma Therapy",
+        "Lifestyle Disease Management",
+        "Yoga and Meditation",
+        "Nutrition and Wellness Guidance"
+      ],
+      expertise: "Ayurvedic medicine, anatomy education, lifestyle disease management, yoga, meditation, nutrition and healthcare administration.",
+      phone: "+91 9916290915",
+      alternatePhone: "+91 9535229103",
+      email: "dr.sibgath@gmail.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "Closed"
+    },
+    {
+      key: "gajender",
+      category: "Naturopathic Physician",
+      name: "Dr. Gajender Kumar",
+      qualification: "Doctor of Naturopathy",
+      role: "Wellness & Spiritual Consultant | Astrologer",
+      image: "../assets/Dr-gajendar.avif",
+      summary: "A distinguished Naturopathic and Integrative Wellness Consultant with nearly two decades of clinical, advisory and teaching experience.",
+      tags: ["Naturopathy", "Detox", "Acupressure", "Meditation"],
+      intro: "Dr. Gajender Kumar is a distinguished Naturopathic and Integrative Wellness Consultant with nearly two decades of clinical, advisory and teaching experience. He combines Ayurveda, Naturopathy, Acupressure, Lifestyle Medicine and holistic healing to provide personalized, root-cause based healthcare.",
+      about: "Dr. Gajender Kumar has nearly 20 years of experience in Naturopathy, Ayurveda and Integrative Wellness. He is recognized for individualized Prakruti-based treatment, detoxification programs, preventive healthcare and holistic lifestyle management.",
+      professionalDetails: [
+        ["Qualification", "Doctor of Naturopathy"],
+        ["Experience", "20+ Years"],
+        ["Specialization", "Naturopathy & Integrative Wellness"],
+        ["Consultation", "Ayurveda, Naturopathy, Lifestyle Medicine"]
+      ],
+      specializations: [
+        "Naturopathy",
+        "Ayurvedic Medicine",
+        "Diet & Lifestyle Management",
+        "Detoxification Programs",
+        "Acupressure Therapy",
+        "Mud Therapy",
+        "Hydrotherapy",
+        "Colour Therapy",
+        "Aroma Therapy",
+        "Reiki & Energy Healing",
+        "Nadi Pariksha",
+        "Pranayama & Meditation",
+        "Medical Astrology"
+      ],
+      expertise: "Doctor of Naturopathy, advanced Ayurveda and lifestyle medicine training, meditation and Pranayama practice, teaching and international wellness mentoring.",
+      phone: "+91 7455 050 007",
+      email: "gajenderkumarsingh1970@gmail.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "By Prior Appointment"
+    },
+    {
+      key: "vijay",
+      category: "Lifestyle Wellness Expert",
+      name: "Dr. Vijay B. Negalur",
+      qualification: "MD (Ayu), PhD",
+      role: "Lifestyle Wellness Expert",
+      image: "../assets/Dr-vijay.png",
+      summary: "Experienced Ayurvedic physician focused on lifestyle disorders, preventive healthcare and long-term wellness planning.",
+      tags: ["Ayurveda", "Lifestyle", "Prevention", "Wellness"],
+      intro: "Sample profile details added temporarily. Replace them later with the doctor's verified information.",
+      about: "Dr. Vijay B. Negalur is presented here as an Ayurvedic lifestyle wellness expert supporting preventive healthcare, lifestyle correction and personalized wellness planning. These are sample details and should be replaced when the final profile information is available.",
+      professionalDetails: [
+        ["Qualification", "MD (Ayu), PhD"],
+        ["Experience", "15+ Years (Sample)"],
+        ["Specialization", "Lifestyle Wellness"],
+        ["Consultation", "Ayurveda and Preventive Care"]
+      ],
+      specializations: [
+        "Lifestyle Disease Management",
+        "Ayurvedic Consultation",
+        "Preventive Healthcare",
+        "Diet and Lifestyle Guidance",
+        "Stress Management"
+      ],
+      expertise: "Sample expertise: diabetes support, weight management, hypertension, stress management and preventive wellness.",
+      phone: "+91 90000 00001",
+      email: "vijay.sample@neolifeayush.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "Closed"
+    },
+    {
+      key: "rajesh",
+      category: "Ayurvedic Physician",
+      name: "Dr. G Rajesh Rao",
+      qualification: "BAMS",
+      role: "Ayurveda Consultant",
+      image: "../assets/Dr-rajesh.png",
+      summary: "Ayurvedic wellness professional supporting traditional care, preventive health and personalized consultation.",
+      tags: ["Ayurveda", "Consultation", "Wellness", "Prevention"],
+      intro: "Sample profile details added temporarily. Replace them later with the doctor's verified information.",
+      about: "Dr. G Rajesh Rao is presented here as an Ayurvedic wellness professional supporting personalized consultation, preventive healthcare and traditional wellness guidance. These are sample details and should be replaced when the final profile information is available.",
+      professionalDetails: [
+        ["Qualification", "BAMS"],
+        ["Experience", "12+ Years (Sample)"],
+        ["Specialization", "Ayurvedic Consultation"],
+        ["Consultation", "General Ayurveda and Wellness"]
+      ],
+      specializations: [
+        "Ayurvedic Consultation",
+        "Preventive Healthcare",
+        "Digestive Wellness",
+        "Joint and Muscle Care",
+        "Lifestyle Counseling"
+      ],
+      expertise: "Sample expertise: general Ayurvedic consultation, digestive disorders, joint discomfort, preventive care and lifestyle guidance.",
+      phone: "+91 90000 00002",
+      email: "rajesh.sample@neolifeayush.com",
+      workingDays: "Monday – Saturday",
+      timing: "9:00 AM – 6:00 PM",
+      sunday: "Closed"
+    }
+  ];
+
+  function escapeHtml(value){
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function renderDoctors(){
+    const container = document.getElementById("doctorsContainer");
+
+    container.innerHTML = doctors.map((doctor, index) => `
+      <section class="doctor-row ${index % 2 === 1 ? "reverse" : ""}">
+        <div class="doctor-visual">
+          <div class="doctor-photo-wrap">
+            <img
+              src="${doctor.image}"
+              alt="${escapeHtml(doctor.name)}"
+              onerror="this.src='../assets/main_logo.jpeg'"
+            >
+          </div>
+        </div>
+
+        <div class="doctor-copy">
+          <div class="doctor-category">${escapeHtml(doctor.category)}</div>
+
+          <h2>${escapeHtml(doctor.name)}</h2>
+
+          <div class="doctor-qualification">
+            ${escapeHtml(doctor.qualification)} | ${escapeHtml(doctor.role)}
+          </div>
+
+          <p class="doctor-summary">${escapeHtml(doctor.summary)}</p>
+
+          <div class="doctor-tags">
+            ${doctor.tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("")}
+          </div>
+
+          <button
+            type="button"
+            class="view-profile-btn"
+            onclick="openDoctorProfile('${doctor.key}')"
+          >
+            View Full Profile
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+    `).join("");
+  }
+
+  function renderDetailGrid(items){
+    return items.map(([label, value]) => `
+      <div class="detail-item">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+      </div>
+    `).join("");
+  }
+
+  function openDoctorProfile(key){
+    const doctor = doctors.find(item => item.key === key);
+
+    if(!doctor){
+      return;
+    }
+
+    const alternatePhone = doctor.alternatePhone
+      ? `
+        <div class="contact-card">
+          <i class="fa-solid fa-phone-volume"></i>
+          <span>${escapeHtml(doctor.alternatePhone)}</span>
+        </div>
+      `
+      : "";
+
+    document.getElementById("doctorModalContent").innerHTML = `
+      <div class="modal-doctor-head">
+        <img
+          src="${doctor.image}"
+          alt="${escapeHtml(doctor.name)}"
+          onerror="this.src='../assets/main_logo.jpeg'"
+        >
+
+        <div>
+          <h2>${escapeHtml(doctor.name)}</h2>
+
+          <div class="modal-qualification">
+            ${escapeHtml(doctor.qualification)} | ${escapeHtml(doctor.role)}
+          </div>
+
+          <p class="modal-intro">${escapeHtml(doctor.intro)}</p>
+
+          <a href="consultation.html" class="modal-book-btn">
+            <i class="fa-solid fa-calendar-check"></i>
+            Book Online Consultation
+          </a>
+        </div>
+      </div>
+
+      <section class="modal-section">
+        <h3>About Doctor</h3>
+        <p>${escapeHtml(doctor.about)}</p>
+      </section>
+
+      <section class="modal-section">
+        <h3>Professional Details</h3>
+        <div class="details-grid">
+          ${renderDetailGrid(doctor.professionalDetails)}
+        </div>
+      </section>
+
+      <section class="modal-section">
+        <h3>Specializations</h3>
+        <ul class="clean-list">
+          ${doctor.specializations.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </section>
+
+      <section class="modal-section">
+        <h3>Areas of Expertise</h3>
+        <p>${escapeHtml(doctor.expertise)}</p>
+      </section>
+
+      <section class="modal-section">
+        <h3>Contact Information</h3>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <i class="fa-solid fa-phone"></i>
+            <span>${escapeHtml(doctor.phone)}</span>
+          </div>
+
+          ${alternatePhone}
+
+          <div class="contact-card">
+            <i class="fa-solid fa-envelope"></i>
+            <span>${escapeHtml(doctor.email)}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="modal-section">
+        <h3>Consultation Timings</h3>
+
+        <div class="details-grid">
+          ${renderDetailGrid([
+            ["Working Days", doctor.workingDays],
+            ["Time", doctor.timing],
+            ["Sunday", doctor.sunday]
+          ])}
+        </div>
+      </section>
+    `;
+
+    document.getElementById("doctorModal").classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeDoctorModal(){
+    document.getElementById("doctorModal").classList.remove("show");
+    document.body.style.overflow = "";
+  }
+
+  function closeDoctorModalOutside(event){
+    if(event.target.id === "doctorModal"){
+      closeDoctorModal();
+    }
+  }
+
+  function toggleMobileMenu(){
+    const menu = document.getElementById("mobileNavigation");
+    const overlay = document.getElementById("mobileMenuOverlay");
+    const icon = document.getElementById("mobileMenuIcon");
+
+    menu.classList.toggle("open");
+    overlay.classList.toggle("show");
+
+    if(menu.classList.contains("open")){
+      icon.className = "fa-solid fa-xmark";
+      document.body.style.overflow = "hidden";
+    }else{
+      icon.className = "fa-solid fa-bars";
+      document.body.style.overflow = "";
+    }
+  }
+
+  function closeMobileMenu(){
+    document.getElementById("mobileNavigation").classList.remove("open");
+    document.getElementById("mobileMenuOverlay").classList.remove("show");
+    document.getElementById("mobileMenuIcon").className = "fa-solid fa-bars";
+    document.body.style.overflow = "";
+  }
+
+  document.addEventListener("keydown", event => {
+    if(event.key === "Escape"){
+      closeDoctorModal();
+      closeMobileMenu();
+    }
+  });
+
+  renderDoctors();
+</script>
+
+</body>
+</html>
