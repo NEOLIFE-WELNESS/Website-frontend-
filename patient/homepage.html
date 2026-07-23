@@ -1160,7 +1160,7 @@
     }
 }
 
-/* Mobile: show one */
+/* Mobile: show two */
 
 @media (max-width: 520px) {
 
@@ -1178,13 +1178,44 @@
     }
 
     .doctor-slide {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .doctor-brand-card img {
         width: 145px;
         height: 145px;
     }
+
+    .doctor-brand-card {
+        min-height: 300px;
+    }
+
+    .doctor-brand-card img {
+        width: 112px;
+        height: 112px;
+        margin-top: 18px;
+    }
+
+    .doctor-info {
+        padding: 4px 10px 18px;
+    }
+
+    .doctor-info h3 {
+        min-height: 58px;
+        font-size: 16px;
+        line-height: 1.25;
+    }
+
+    .doctor-info p {
+        font-size: 12px;
+    }
+
+    .doctor-info span {
+        min-height: 54px;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
 
     .scroll-btn {
         width: 34px;
@@ -2823,79 +2854,125 @@ document.addEventListener("DOMContentLoaded", function(){
   checkLoginStatus();
 });
 /* =========================
-   DOCTORS SLIDER
+   RESPONSIVE DOCTORS SLIDER
+   Desktop: 4 doctors per slide
+   Mobile/Tablet: 2 doctors per slide
 ========================= */
 
 let currentDoctorSlide = 0;
-let doctorAutoSlide;
+let doctorAutoSlide = null;
+let doctorResizeTimer = null;
+let doctorsPerSlide = 4;
 
 const doctorsWrapper =
     document.getElementById("doctorsWrapper");
 
-const doctorSlides =
-    document.querySelectorAll(".doctor-slide");
-
 const doctorDotsContainer =
     document.getElementById("doctorDots");
 
-function createDoctorDots() {
+/*
+ * Save the original doctor cards once.
+ * The cards are then regrouped into slides depending on screen width.
+ */
+const originalDoctorCards = doctorsWrapper
+    ? Array.from(
+        doctorsWrapper.querySelectorAll(".doctor-brand-card")
+      ).map(function(card) {
+        return card.cloneNode(true);
+      })
+    : [];
 
-    if (
-        !doctorDotsContainer ||
-        !doctorSlides.length
+function getDoctorsPerSlide() {
+    return window.innerWidth <= 800 ? 2 : 4;
+}
+
+function getDoctorSlides() {
+    if (!doctorsWrapper) {
+        return [];
+    }
+
+    return Array.from(
+        doctorsWrapper.querySelectorAll(".doctor-slide")
+    );
+}
+
+function buildDoctorSlides() {
+    if (!doctorsWrapper || !originalDoctorCards.length) {
+        return;
+    }
+
+    doctorsPerSlide = getDoctorsPerSlide();
+    doctorsWrapper.innerHTML = "";
+
+    for (
+        let index = 0;
+        index < originalDoctorCards.length;
+        index += doctorsPerSlide
     ) {
+        const slide = document.createElement("div");
+        slide.className = "doctor-slide";
+
+        const group = originalDoctorCards.slice(
+            index,
+            index + doctorsPerSlide
+        );
+
+        group.forEach(function(card) {
+            slide.appendChild(card.cloneNode(true));
+        });
+
+        doctorsWrapper.appendChild(slide);
+    }
+
+    currentDoctorSlide = 0;
+    createDoctorDots();
+    showDoctorSlide(0);
+    startDoctorAutoSlide();
+}
+
+function createDoctorDots() {
+    const doctorSlides = getDoctorSlides();
+
+    if (!doctorDotsContainer || !doctorSlides.length) {
         return;
     }
 
     doctorDotsContainer.innerHTML = "";
 
-    doctorSlides.forEach(
-        function (_, index) {
+    doctorSlides.forEach(function(_, index) {
+        const dot = document.createElement("button");
 
-            const dot =
-                document.createElement("button");
+        dot.type = "button";
+        dot.className =
+            index === currentDoctorSlide
+                ? "doctor-dot active"
+                : "doctor-dot";
 
-            dot.type = "button";
+        dot.setAttribute(
+            "aria-label",
+            `Show doctor group ${index + 1}`
+        );
 
-            dot.className =
-                index === 0
-                    ? "doctor-dot active"
-                    : "doctor-dot";
+        dot.addEventListener("click", function() {
+            showDoctorSlide(index);
+            restartDoctorAutoSlide();
+        });
 
-            dot.setAttribute(
-                "aria-label",
-                `Show doctor group ${index + 1}`
-            );
-
-            dot.addEventListener(
-                "click",
-                function () {
-                    showDoctorSlide(index);
-                    restartDoctorAutoSlide();
-                }
-            );
-
-            doctorDotsContainer.appendChild(dot);
-        }
-    );
+        doctorDotsContainer.appendChild(dot);
+    });
 }
 
 function showDoctorSlide(index) {
+    const doctorSlides = getDoctorSlides();
 
-    if (
-        !doctorsWrapper ||
-        !doctorSlides.length
-    ) {
+    if (!doctorsWrapper || !doctorSlides.length) {
         return;
     }
 
     if (index >= doctorSlides.length) {
         currentDoctorSlide = 0;
-
     } else if (index < 0) {
-        currentDoctorSlide =
-            doctorSlides.length - 1;
-
+        currentDoctorSlide = doctorSlides.length - 1;
     } else {
         currentDoctorSlide = index;
     }
@@ -2903,53 +2980,59 @@ function showDoctorSlide(index) {
     doctorsWrapper.style.transform =
         `translateX(-${currentDoctorSlide * 100}%)`;
 
-    document
-        .querySelectorAll(".doctor-dot")
-        .forEach(
-            function (dot, dotIndex) {
+    if (doctorDotsContainer) {
+        doctorDotsContainer
+            .querySelectorAll(".doctor-dot")
+            .forEach(function(dot, dotIndex) {
                 dot.classList.toggle(
                     "active",
                     dotIndex === currentDoctorSlide
                 );
-            }
-        );
+            });
+    }
 }
 
 function changeDoctorSlide(direction) {
-
-    showDoctorSlide(
-        currentDoctorSlide + direction
-    );
-
+    showDoctorSlide(currentDoctorSlide + direction);
     restartDoctorAutoSlide();
 }
 
 function startDoctorAutoSlide() {
-
     clearInterval(doctorAutoSlide);
+
+    const doctorSlides = getDoctorSlides();
 
     if (doctorSlides.length <= 1) {
         return;
     }
 
-    doctorAutoSlide =
-        setInterval(
-            function () {
-                showDoctorSlide(
-                    currentDoctorSlide + 1
-                );
-            },
-            5000
-        );
+    doctorAutoSlide = setInterval(function() {
+        showDoctorSlide(currentDoctorSlide + 1);
+    }, 5000);
 }
 
 function restartDoctorAutoSlide() {
     startDoctorAutoSlide();
 }
 
-createDoctorDots();
-showDoctorSlide(0);
-startDoctorAutoSlide();
+/*
+ * Rebuild only when crossing between:
+ * - desktop: 4 cards
+ * - mobile/tablet: 2 cards
+ */
+window.addEventListener("resize", function() {
+    clearTimeout(doctorResizeTimer);
+
+    doctorResizeTimer = setTimeout(function() {
+        const newDoctorsPerSlide = getDoctorsPerSlide();
+
+        if (newDoctorsPerSlide !== doctorsPerSlide) {
+            buildDoctorSlides();
+        }
+    }, 180);
+});
+
+buildDoctorSlides();
 </script>
 
 </body>

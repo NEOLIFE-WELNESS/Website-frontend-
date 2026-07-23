@@ -230,112 +230,190 @@ img{
 /* ===== PAGE ===== */
 .services-page{
   padding:90px 0;
-  background:
-    radial-gradient(circle at top right,rgba(212,175,55,.07),transparent 24%),
-    var(--cream);
+  background:linear-gradient(180deg,var(--cream),#f2eee4);
 }
 
 .section-title{
   width:min(1180px,90%);
-  margin:0 auto 50px;
+  margin:0 auto 16px;
   text-align:center;
   color:var(--green-dark);
-  font-size:clamp(32px,4vw,46px);
-  font-weight:800;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(34px,4vw,50px);
   line-height:1.2;
+  font-weight:500;
+}
+
+.section-description{
+  width:min(760px,90%);
+  margin:0 auto 48px;
+  text-align:center;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.8;
+}
+
+.beauty-count{
+  width:min(1180px,90%);
+  margin:0 auto 24px;
+  color:var(--muted);
+  font-size:12px;
 }
 
 .therapy-grid{
   width:min(1180px,90%);
   margin:auto;
-
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:30px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:26px;
 }
 
 .therapy-card{
-  background:white;
-  border-radius:28px;
-  overflow:hidden;
-
-  border:1px solid rgba(212,175,55,.24);
-  box-shadow:0 18px 42px rgba(18,53,36,.10);
-
-  transition:.35s;
+  height:300px;
   position:relative;
-}
-
-.therapy-card::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:5px;
-  background:linear-gradient(90deg,var(--green-dark),var(--gold));
-  z-index:2;
+  overflow:hidden;
+  border-radius:20px;
+  background:var(--green-dark);
+  border:1px solid rgba(212,175,55,.28);
+  box-shadow:0 15px 35px rgba(18,53,36,.12);
+  cursor:pointer;
+  transition:transform .35s ease,box-shadow .35s ease;
 }
 
 .therapy-card:hover{
-  transform:translateY(-9px);
-  box-shadow:0 28px 55px rgba(18,53,36,.17);
+  transform:translateY(-7px);
+  box-shadow:0 24px 48px rgba(18,53,36,.20);
 }
 
 .therapy-card img{
   width:100%;
-  height:285px;
+  height:100%;
   object-fit:cover;
-  background:#edf2eb;
+  transition:transform .65s ease,filter .4s ease;
 }
 
-.therapy-content{
+.therapy-card:hover img{
+  transform:scale(1.08);
+  filter:brightness(.48) saturate(.9);
+}
+
+.therapy-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent 42%,rgba(7,34,20,.88) 100%);
+  pointer-events:none;
+  transition:opacity .35s ease;
+}
+
+.therapy-card:hover::after{
+  opacity:0;
+}
+
+.therapy-name{
+  position:absolute;
+  left:22px;
+  right:22px;
+  bottom:20px;
+  z-index:2;
+  margin:0;
+  color:white;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:23px;
+  font-weight:500;
+  line-height:1.25;
+  text-shadow:0 3px 10px rgba(0,0,0,.45);
+  transition:opacity .3s ease,transform .3s ease;
+}
+
+.therapy-card:hover .therapy-name{
+  opacity:0;
+  transform:translateY(15px);
+}
+
+.therapy-hover-content{
+  position:absolute;
+  inset:0;
+  z-index:3;
   padding:28px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:white;
+  background:linear-gradient(135deg,rgba(18,53,36,.91),rgba(47,107,63,.88));
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(18px);
+  transition:opacity .35s ease,visibility .35s ease,transform .35s ease;
 }
 
-.therapy-content h3{
+.therapy-card:hover .therapy-hover-content,
+.therapy-card:focus-within .therapy-hover-content{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+
+.therapy-hover-content h3{
+  margin:0 0 12px;
+  color:#f3d976;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:25px;
+  font-weight:500;
+}
+
+.therapy-hover-content p{
+  max-width:300px;
+  margin:0 0 21px;
+  color:rgba(255,255,255,.84);
+  font-size:13px;
+  line-height:1.7;
+}
+
+.therapy-view-button{
+  min-width:130px;
+  padding:11px 20px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:30px;
+  color:white;
+  background:rgba(255,255,255,.10);
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  backdrop-filter:blur(6px);
+  transition:background .3s ease,color .3s ease,transform .3s ease;
+}
+
+.therapy-view-button:hover{
   color:var(--green-dark);
-  font-size:27px;
-  margin-bottom:14px;
+  background:white;
+  transform:translateY(-2px);
 }
 
-.therapy-content p{
-  color:var(--muted);
-  line-height:1.8;
-}
-
-.therapy-content ul{
-  margin:20px 0;
-  padding-left:22px;
-}
-
-.therapy-content li{
-  margin-bottom:9px;
-  color:var(--green-dark);
-}
-
-.therapy-content strong{
-  color:var(--gold-dark);
+.therapy-card:focus-within{
+  outline:3px solid rgba(212,175,55,.40);
+  outline-offset:4px;
 }
 
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-
   margin-top:12px;
   padding:13px 24px;
-
   border:none;
   border-radius:40px;
-
   background:linear-gradient(135deg,var(--green-dark),var(--green));
   color:white;
-
   font-size:14px;
   font-weight:800;
   cursor:pointer;
-
   transition:.3s;
   box-shadow:0 10px 22px rgba(18,53,36,.18);
 }
@@ -343,6 +421,55 @@ img{
 .btn:hover{
   transform:translateY(-3px);
   background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+}
+
+@media(max-width:950px){
+  .therapy-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:620px){
+  .services-page{
+    padding:65px 0;
+  }
+
+  .therapy-grid{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+
+  .therapy-card{
+    height:280px;
+  }
+
+  .therapy-card .therapy-hover-content{
+    inset:auto 0 0 0;
+    min-height:135px;
+    padding:20px;
+    justify-content:flex-end;
+    opacity:1;
+    visibility:visible;
+    transform:none;
+    background:linear-gradient(180deg,transparent,rgba(18,53,36,.96));
+  }
+
+  .therapy-card .therapy-name{
+    display:none;
+  }
+
+  .therapy-hover-content h3{
+    margin-bottom:5px;
+    font-size:21px;
+  }
+
+  .therapy-hover-content p{
+    display:none;
+  }
+
+  .therapy-view-button{
+    padding:9px 17px;
+  }
 }
 
 /* ===== MODAL ===== */
@@ -645,22 +772,9 @@ img{
 }
 
 @media(max-width:900px){
-  .therapy-grid{
-    grid-template-columns:1fr;
-  }
-
-  .header-right{
-    overflow-x:auto;
-  }
-
-  .main-nav{
-    overflow-x:auto;
-    scrollbar-width:none;
-  }
-
-  .main-nav::-webkit-scrollbar{
-    display:none;
-  }
+  .header-right{ overflow-x:auto; }
+  .main-nav{ overflow-x:auto; scrollbar-width:none; }
+  .main-nav::-webkit-scrollbar{ display:none; }
 }
 @media(max-width:700px){
 
@@ -718,14 +832,6 @@ img{
 
   .services-hero h1{
     margin-top:45px;
-  }
-
-  .therapy-grid{
-    grid-template-columns:1fr;
-  }
-
-  .therapy-card img{
-    height:230px;
   }
 
   .modal{
@@ -875,89 +981,96 @@ img{
 </section>
 
 <section class="services-page">
-  <h2 class="section-title">Beauty & Cosmetic Treatments</h2>
+  <h2 class="section-title">Beauty &amp; Cosmetic Treatments</h2>
+
+  <p class="section-description">
+    Explore professional beauty, hair, lip, eyebrow and foot-care treatments
+    designed to enhance confidence, wellness and natural appearance.
+  </p>
+
+  <div class="beauty-count">5 treatments</div>
 
   <div class="therapy-grid">
 
-    <div class="therapy-card">
+    <article class="therapy-card">
       <img src="../assets/facial.png" alt="Facial Treatment">
-      <div class="therapy-content">
-        <h3>💆 Facial Treatment</h3>
+      <h3 class="therapy-name">Facial Treatment</h3>
+
+      <div class="therapy-hover-content">
+        <h3>Facial Treatment</h3>
         <p>Professional facials for glowing, healthy and rejuvenated skin.</p>
-        <ul>
-          <li>Glow Facial</li>
-          <li>Anti-Aging Facial</li>
-          <li>Acne Facial</li>
-          <li>Skin Rejuvenation</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openBeauty('facial')">Learn More</button>
-      </div>
-    </div>
 
-    <div class="therapy-card">
+        <button type="button"
+                class="therapy-view-button"
+                onclick="openBeauty('facial')">
+          View Details <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </article>
+
+    <article class="therapy-card">
       <img src="../assets/hair-treatment.png" alt="Hair Treatment">
-      <div class="therapy-content">
-        <h3>💇 Hair Treatment</h3>
-        <p>Natural hair care therapies for hair growth, hair fall control and scalp nourishment.</p>
-        <ul>
-          <li>Hair Growth Therapy</li>
-          <li>Hair Fall Control</li>
-          <li>Scalp Detox</li>
-          <li>Hair Nourishment</li>
-        </ul>
-        <p><strong>Duration:</strong> 60–90 minutes</p>
-        <button class="btn" onclick="openBeauty('hair')">Learn More</button>
-      </div>
-    </div>
+      <h3 class="therapy-name">Hair Treatment</h3>
 
-    <div class="therapy-card">
-      <img src="../assets/lip.png" alt="Lip Correction">
-      <div class="therapy-content">
-        <h3>💋 Lip Correction</h3>
-        <p>Treatment for dark lips, pigmentation and natural lip brightening.</p>
-        <ul>
-          <li>Dark Lip Correction</li>
-          <li>Lip Pigmentation Care</li>
-          <li>Lip Hydration</li>
-          <li>Natural Lip Brightening</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openBeauty('lip')">Learn More</button>
-      </div>
-    </div>
+      <div class="therapy-hover-content">
+        <h3>Hair Treatment</h3>
+        <p>Natural hair care therapies for growth, scalp nourishment and hair-fall support.</p>
 
-    <div class="therapy-card">
+        <button type="button"
+                class="therapy-view-button"
+                onclick="openBeauty('hair')">
+          View Details <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </article>
+
+    <article class="therapy-card">
+      <img src="../assets/lip.png" alt="Dark Lip Correction">
+      <h3 class="therapy-name">Dark Lip Correction</h3>
+
+      <div class="therapy-hover-content">
+        <h3>Dark Lip Correction</h3>
+        <p>Care for pigmentation, hydration, smoothness and naturally brighter-looking lips.</p>
+
+        <button type="button"
+                class="therapy-view-button"
+                onclick="openBeauty('lip')">
+          View Details <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </article>
+
+    <article class="therapy-card">
       <img src="../assets/eyebrow.png" alt="Eyebrow Correction">
-      <div class="therapy-content">
-        <h3>👁️ Eyebrow Correction</h3>
-        <p>Eyebrow enhancement for fuller, shaped and natural-looking brows.</p>
-        <ul>
-          <li>Microblading</li>
-          <li>Ombre Brows</li>
-          <li>Combination Brows</li>
-          <li>Eyebrow Reconstruction</li>
-        </ul>
-        <p><strong>Duration:</strong> 90–120 minutes</p>
-        <button class="btn" onclick="openBeauty('eyebrow')">Learn More</button>
-      </div>
-    </div>
+      <h3 class="therapy-name">Eyebrow Correction</h3>
 
-    <div class="therapy-card">
-      <img src="../assets/pedicure.png" alt="Pedicure">
-      <div class="therapy-content">
-        <h3>🦶 Pedicure</h3>
-        <p>Complete foot care with cleansing, nail care, exfoliation and massage.</p>
-        <ul>
-          <li>Foot Cleansing</li>
-          <li>Nail Trimming</li>
-          <li>Exfoliation</li>
-          <li>Foot Massage</li>
-        </ul>
-        <p><strong>Duration:</strong> 45–60 minutes</p>
-        <button class="btn" onclick="openBeauty('pedicure')">Learn More</button>
+      <div class="therapy-hover-content">
+        <h3>Eyebrow Correction</h3>
+        <p>Microblading, ombre and combination brows for fuller, shaped and natural-looking eyebrows.</p>
+
+        <button type="button"
+                class="therapy-view-button"
+                onclick="openBeauty('eyebrow')">
+          View Details <i class="fa-solid fa-arrow-right"></i>
+        </button>
       </div>
-    </div>
+    </article>
+
+    <article class="therapy-card">
+      <img src="../assets/pedicure.png" alt="Pedicure Treatment">
+      <h3 class="therapy-name">Pedicure</h3>
+
+      <div class="therapy-hover-content">
+        <h3>Pedicure</h3>
+        <p>Complete foot care with cleansing, nail care, exfoliation, massage and moisturising.</p>
+
+        <button type="button"
+                class="therapy-view-button"
+                onclick="openBeauty('pedicure')">
+          View Details <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </article>
 
   </div>
 </section>
