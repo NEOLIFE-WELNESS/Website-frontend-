@@ -1602,20 +1602,16 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
-
-                <a href="add-patient.html">
-                    <i class="fa-solid fa-user-plus"></i>
-                    Add Walk-in Patient
+                <a href="doctor-availability.html">
+                    <i class="fa-solid fa-users"></i>
+                    Manage Availability
                 </a>
 
                 <span class="menu-label">
                     Clinical
                 </span>
 
-                <a href="prescription-pad.html">
-                    <i class="fa-solid fa-prescription-bottle-medical"></i>
-                    Prescription Pad
-                </a>
+                
 
                 <a href="doctor-appointments.html">
                     <i class="fa-solid fa-clipboard-list"></i>
@@ -1718,8 +1714,8 @@
                                 Doctor
                             </strong>
 
-                            <span>
-                                Medical Consultant
+                            <span id="doctorTopbarRole">
+                                Doctor
                             </span>
 
                         </div>
@@ -1948,6 +1944,51 @@
                     </section>
 
                 </div>
+
+                <!-- UPCOMING SCHEDULE -->
+
+                <section
+                    class="dashboard-panel"
+                    style="margin-bottom:26px"
+                >
+                    <div class="panel-header">
+
+                        <div class="panel-title">
+                            <h2>Upcoming Schedule</h2>
+
+                            <p>
+                                Your next confirmed and pending appointments
+                                and consultations.
+                            </p>
+                        </div>
+
+                        <a
+                            href="appointment-calendar.html"
+                            class="view-all-link"
+                        >
+                            View Calendar
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                    <div class="panel-body">
+
+                        <div
+                            class="appointment-list"
+                            id="upcomingScheduleList"
+                        >
+                            <div class="panel-message">
+
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+
+                                Loading upcoming schedule...
+
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
 
                 <!-- BOTTOM GRID -->
 
@@ -2198,6 +2239,7 @@
                 loadDoctorProfile();
                 loadDashboardSummary();
                 loadTodayAppointments();
+                loadUpcomingSchedule();
                 loadOnlineRequests();
                 loadRecentPatients();
                 loadRecentTransactions();
@@ -2208,126 +2250,97 @@
            AUTHENTICATION
         ========================== */
 
-        // function requireDoctorLogin() {
-        //     const token = getDoctorToken();
+        function requireDoctorLogin() {
+            const token = getDoctorToken();
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "doctor-login.html";
+            if (!token) {
+                window.location.href = "../patient/login.html";
+                return;
+            }
 
-        //         return;
-        //     }
+            const role = (localStorage.getItem("role") || "").toUpperCase();
+            const profileCompleted =
+                localStorage.getItem("profileCompleted") === "true";
 
-        //     const role =
-        //         localStorage.getItem("role");
+            if (role !== "DOCTOR") {
+                alert("Only doctors can access this portal.");
+                window.location.href = "../patient/login.html";
+                return;
+            }
 
-        //     if (
-        //         role &&
-        //         role !== "DOCTOR"
-        //     ) {
-        //         showAlert(
-        //             "Only doctors can access this portal.",
-        //             "error"
-        //         );
+            if (!profileCompleted) {
+                window.location.href = "doctor-profile.html";
+            }
+        }
 
-        //         setTimeout(function () {
-        //             window.location.href =
-        //                 "../pages/homepage.html";
-        //         }, 1200);
-        //     }
-        // }
+        async function doctorApiRequest(endpoint, options = {}) {
+            const token = getDoctorToken();
 
-        // async function doctorApiRequest(
-        //     endpoint,
-        //     options = {}
-        // ) {
-        //     const token = getDoctorToken();
+            if (!token) {
+                window.location.href = "../patient/login.html";
+                throw new Error("Doctor login required.");
+            }
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "doctor-login.html";
+            const headers = {
+                "Accept": "application/json",
+                ...(options.headers || {})
+            };
 
-        //         throw new Error(
-        //             "Doctor login required."
-        //         );
-        //     }
+            if (options.body && !(options.body instanceof FormData)) {
+                headers["Content-Type"] = "application/json";
+            }
 
-        //     const headers = {
-        //         ...(options.headers || {})
-        //     };
+            headers.Authorization = "Bearer " + token;
 
-        //     if (
-        //         options.body &&
-        //         !(options.body instanceof FormData)
-        //     ) {
-        //         headers["Content-Type"] =
-        //             "application/json";
-        //     }
+            const response = await fetch(API_BASE_URL + endpoint, {
+                ...options,
+                headers
+            });
 
-        //     headers.Authorization =
-        //         "Bearer " + token;
+            let result = null;
+            try {
+                result = await response.json();
+            } catch (error) {
+                result = {
+                    success: false,
+                    message: `Invalid response from server (${response.status}).`
+                };
+            }
 
-        //     const response = await fetch(
-        //         API_BASE_URL + endpoint,
-        //         {
-        //             ...options,
-        //             headers
-        //         }
-        //     );
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem("doctorToken");
+                localStorage.removeItem("token");
+                localStorage.removeItem("refreshToken");
+                localStorage.removeItem("role");
+                localStorage.removeItem("profileCompleted");
+                localStorage.removeItem("isLoggedIn");
 
-        //     let result = null;
+                window.location.href = "../patient/login.html";
+                throw new Error(result.message || "Doctor session expired.");
+            }
 
-        //     try {
-        //         result = await response.json();
-        //     } catch (error) {
-        //         result = {
-        //             success: false,
-        //             message:
-        //                 "Invalid response from server."
-        //         };
-        //     }
+            if (!response.ok || result.success === false) {
+                throw new Error(result.message || "Request failed.");
+            }
 
-        //     if (
-        //         response.status === 401 ||
-        //         response.status === 403
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Doctor session expired."
-        //         );
-        //     }
+            return result;
+        }
 
-        //     if (
-        //         !response.ok ||
-        //         result.success === false
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Request failed."
-        //         );
-        //     }
+        function doctorLogout() {
+            localStorage.removeItem("doctorToken");
+            localStorage.removeItem("doctorRefreshToken");
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("doctorId");
+            localStorage.removeItem("doctorName");
+            localStorage.removeItem("role");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("email");
+            localStorage.removeItem("profileCompleted");
+            localStorage.removeItem("isLoggedIn");
 
-        //     return result;
-        // }
-
-        // function doctorLogout() {
-        //     localStorage.removeItem("doctorToken");
-        //     localStorage.removeItem(
-        //         "doctorRefreshToken"
-        //     );
-
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem(
-        //         "refreshToken"
-        //     );
-
-        //     localStorage.removeItem("doctorId");
-        //     localStorage.removeItem("role");
-        //     localStorage.removeItem("userId");
-
-        //     window.location.href =
-        //         "doctor-login.html";
-        // }
+            window.location.href = "../patient/login.html";
+        }
 
         /* =========================
            DOCTOR PROFILE
@@ -2352,6 +2365,21 @@
                     "Doctor";
 
                 updateDoctorName(name);
+
+                const roleLabel =
+                    String(doctor.role || "DOCTOR")
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, character =>
+                            character.toUpperCase()
+                        );
+
+                const roleElement =
+                    document.getElementById("doctorTopbarRole");
+
+                if (roleElement) {
+                    roleElement.textContent = roleLabel;
+                }
 
             } catch (error) {
                 console.error(
@@ -2387,6 +2415,8 @@
                 "doctorInitial"
             ).textContent =
                 cleanName.charAt(0).toUpperCase();
+
+            localStorage.setItem("doctorName", cleanName);
         }
 
         /* =========================
@@ -2397,7 +2427,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor/dashboard/summary"
+                        "/api/doctor-dashboard/summary"
                     );
 
                 const summary = result.data || {};
@@ -2472,7 +2502,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/appointments/doctor/today"
+                        "/api/doctor-dashboard/today"
                     );
 
                 const appointments =
@@ -2650,6 +2680,337 @@
         }
 
         /* =========================
+           UPCOMING SCHEDULE
+        ========================== */
+
+        async function loadUpcomingSchedule() {
+            const container =
+                document.getElementById(
+                    "upcomingScheduleList"
+                );
+
+            try {
+                const result =
+                    await doctorApiRequest(
+                        "/api/doctor-dashboard/upcoming"
+                    );
+
+                const data =
+                    result.data || {};
+
+                const appointments =
+                    Array.isArray(data.appointments)
+                        ? data.appointments
+                        : [];
+
+                const consultations =
+                    Array.isArray(data.consultations)
+                        ? data.consultations
+                        : [];
+
+                const upcomingItems = [
+                    ...appointments.map(
+                        function (appointment) {
+                            return {
+                                ...appointment,
+                                scheduleKind:
+                                    "APPOINTMENT"
+                            };
+                        }
+                    ),
+
+                    ...consultations.map(
+                        function (consultation) {
+                            return {
+                                ...consultation,
+                                scheduleKind:
+                                    "CONSULTATION"
+                            };
+                        }
+                    )
+                ].sort(compareUpcomingItems);
+
+                renderUpcomingSchedule(
+                    upcomingItems
+                );
+
+            } catch (error) {
+                console.error(
+                    "Upcoming schedule failed:",
+                    error
+                );
+
+                container.innerHTML = `
+                    <div class="panel-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        ${escapeHtml(
+                            error.message ||
+                            "Unable to load upcoming schedule."
+                        )}
+                    </div>
+                `;
+            }
+        }
+
+        function compareUpcomingItems(
+            first,
+            second
+        ) {
+            const firstDate =
+                getUpcomingDate(first);
+
+            const secondDate =
+                getUpcomingDate(second);
+
+            return (
+                firstDate.getTime() -
+                secondDate.getTime()
+            );
+        }
+
+        function getUpcomingDate(item) {
+            const dateValue =
+                item.appointmentDate ||
+                item.consultationDate ||
+                item.date ||
+                item.scheduledDate;
+
+            const timeValue =
+                item.startTime ||
+                item.appointmentTime ||
+                item.consultationTime ||
+                item.preferredTime ||
+                "00:00";
+
+            if (!dateValue) {
+                return new Date(
+                    "9999-12-31T23:59:59"
+                );
+            }
+
+            const normalizedTime =
+                String(timeValue)
+                    .substring(0, 8)
+                    .padEnd(8, ":00");
+
+            const date =
+                new Date(
+                    `${String(dateValue).substring(0, 10)}T${normalizedTime}`
+                );
+
+            return Number.isNaN(
+                date.getTime()
+            )
+                ? new Date(
+                    "9999-12-31T23:59:59"
+                )
+                : date;
+        }
+
+        function renderUpcomingSchedule(
+            items
+        ) {
+            const container =
+                document.getElementById(
+                    "upcomingScheduleList"
+                );
+
+            if (
+                !Array.isArray(items) ||
+                items.length === 0
+            ) {
+                container.innerHTML = `
+                    <div class="panel-message">
+                        <i class="fa-regular fa-calendar"></i>
+                        No upcoming appointments or consultations.
+                    </div>
+                `;
+
+                return;
+            }
+
+            container.innerHTML = "";
+
+            items
+                .slice(0, 8)
+                .forEach(function (item) {
+                    const id =
+                        item.id ||
+                        item.appointmentId ||
+                        item.consultationId;
+
+                    const scheduleKind =
+                        item.scheduleKind ||
+                        "APPOINTMENT";
+
+                    const patientName =
+                        item.patientName ||
+                        item.userName ||
+                        item.patient?.name ||
+                        "Patient";
+
+                    const dateValue =
+                        item.appointmentDate ||
+                        item.consultationDate ||
+                        item.date ||
+                        item.scheduledDate;
+
+                    const startTime =
+                        item.startTime ||
+                        item.appointmentTime ||
+                        item.consultationTime ||
+                        item.preferredTime;
+
+                    const endTime =
+                        item.endTime ||
+                        item.consultationEndTime;
+
+                    const mode =
+                        String(
+                            item.appointmentMode ||
+                            item.consultationMode ||
+                            item.mode ||
+                            (
+                                scheduleKind ===
+                                "CONSULTATION"
+                                    ? "ONLINE"
+                                    : "OFFLINE"
+                            )
+                        ).toUpperCase();
+
+                    const status =
+                        String(
+                            item.status ||
+                            "PENDING"
+                        ).replaceAll(
+                            "_",
+                            " "
+                        );
+
+                    const symptoms =
+                        item.symptoms ||
+                        item.reason ||
+                        item.patientConcern ||
+                        `${scheduleKind.toLowerCase()} · ${status}`;
+
+                    const timeRange =
+                        endTime
+                            ? `${formatTime(startTime)} - ${formatTime(endTime)}`
+                            : formatTime(startTime);
+
+                    container.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <article class="appointment-item">
+
+                            <div class="appointment-time">
+                                ${escapeHtml(timeRange)}
+                            </div>
+
+                            <div class="appointment-patient">
+
+                                <h3>
+                                    ${escapeHtml(patientName)}
+                                </h3>
+
+                                <p>
+                                    ${escapeHtml(
+                                        formatUpcomingDate(
+                                            dateValue
+                                        )
+                                    )}
+                                    ·
+                                    ${escapeHtml(symptoms)}
+                                </p>
+
+                            </div>
+
+                            <span
+                                class="appointment-type ${
+                                    mode === "ONLINE"
+                                        ? "type-online"
+                                        : "type-offline"
+                                }"
+                            >
+                                ${escapeHtml(mode)}
+                            </span>
+
+                            <button
+                                type="button"
+                                class="appointment-action"
+                                onclick="openUpcomingItem(
+                                    '${escapeHtml(
+                                        String(id || "")
+                                    )}',
+                                    '${escapeHtml(
+                                        scheduleKind
+                                    )}'
+                                )"
+                                title="View details"
+                            >
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+
+                        </article>
+                        `
+                    );
+                });
+        }
+
+        function formatUpcomingDate(
+            value
+        ) {
+            if (!value) {
+                return "Date not available";
+            }
+
+            const date =
+                new Date(
+                    `${String(value).substring(0, 10)}T00:00:00`
+                );
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+                return String(value);
+            }
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+                    weekday: "short",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
+        }
+
+        function openUpcomingItem(
+            id,
+            scheduleKind
+        ) {
+            if (!id) {
+                return;
+            }
+
+            if (
+                scheduleKind ===
+                "CONSULTATION"
+            ) {
+                window.location.href =
+                    `appointment-calendar.html?type=ONLINE&consultationId=${encodeURIComponent(id)}`;
+
+                return;
+            }
+
+            window.location.href =
+                `appointment-details.html?id=${encodeURIComponent(id)}`;
+        }
+
+        /* =========================
            ONLINE REQUESTS
         ========================== */
 
@@ -2657,7 +3018,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/consultations/doctor/pending"
+                        "/api/consultations/doctor/requests"
                     );
 
                 const requests =
@@ -3094,7 +3455,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor/patients/recent"
+                        "/api/doctor-dashboard/patients"
                     );
 
                 const patients =
@@ -3259,7 +3620,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor/transactions/recent"
+                        "/api/doctor-dashboard/transactions"
                     );
 
                 const transactions =

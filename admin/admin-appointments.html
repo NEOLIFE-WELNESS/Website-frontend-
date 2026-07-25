@@ -1254,6 +1254,8 @@ tbody tr:hover{
                         <option value="Confirmed">Confirmed</option>
                         <option value="Visited">Visited</option>
                         <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Rejected">Rejected</option>
                     </select>
 
                 </div>
@@ -1272,7 +1274,7 @@ tbody tr:hover{
                         <option value="">All Types</option>
                         <option value="Offline">Offline</option>
                         <option value="Online">Online</option>
-                        <option value="Therapy">Therapy</option>
+                        
                     </select>
 
                 </div>
@@ -1383,78 +1385,303 @@ tbody tr:hover{
 </div>
 
 <script>
-const appointments = [
-    {
-        id:"A001",
-        patient:"Ramesh",
-        phone:"9876543210",
-        age:45,
-        appointmentFor:"Ayurveda Consultation",
-        type:"Offline",
-        date:"25-06-2026",
-        time:"10:00 AM",
-        status:"Pending",
-        doctor:"Dr. N. G. Muraleedhara",
-        symptoms:"Joint pain and body stiffness",
-        paymentStatus:"Paid",
-        bookingFee:"₹50"
-    },
-    {
-        id:"A002",
-        patient:"Priya",
-        phone:"9123456789",
-        age:31,
-        appointmentFor:"Acupuncture",
-        type:"Therapy",
-        date:"25-06-2026",
-        time:"11:00 AM",
-        status:"Confirmed",
-        doctor:"Dr. N. G. Muraleedhara",
-        symptoms:"Neck pain and headache",
-        paymentStatus:"Paid",
-        bookingFee:"₹50"
-    },
-    {
-        id:"A003",
-        patient:"Anitha",
-        phone:"9988776655",
-        age:38,
-        appointmentFor:"Online Consultation",
-        type:"Online",
-        date:"26-06-2026",
-        time:"03:00 PM",
-        status:"Visited",
-        doctor:"Dr. Aditi",
-        symptoms:"Stress and sleep difficulty",
-        paymentStatus:"Paid",
-        bookingFee:"₹200"
-    },
-    {
-        id:"A004",
-        patient:"Suresh",
-        phone:"9876501234",
-        age:52,
-        appointmentFor:"Panchakarma",
-        type:"Therapy",
-        date:"27-06-2026",
-        time:"09:30 AM",
-        status:"Completed",
-        doctor:"Dr. N. G. Muraleedhara",
-        symptoms:"Body detox and fatigue",
-        paymentStatus:"Paid",
-        bookingFee:"₹50"
-    }
-];
+const API_BASE_URL = "http://localhost:8085";
 
-let filteredAppointments = [...appointments];
+let appointments = [];
+let filteredAppointments = [];
 
 document.addEventListener(
     "DOMContentLoaded",
     function(){
-        updateSummary();
-        renderAppointments();
+        requireAdminLogin();
+        loadAppointments();
     }
 );
+
+function getToken(){
+    return (
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("jwtToken") ||
+        ""
+    );
+}
+
+function requireAdminLogin(){
+    if(!getToken()){
+        window.location.href =
+            "../frontend/login.html";
+    }
+}
+
+async function apiRequest(
+    endpoint,
+    options = {}
+){
+    const token = getToken();
+
+    const headers = {
+        ...(options.headers || {})
+    };
+
+    if(
+        options.body &&
+        !(options.body instanceof FormData)
+    ){
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    if(token){
+        headers.Authorization =
+            `Bearer ${token}`;
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
+
+    const text = await response.text();
+
+    let result = {};
+
+    if(text){
+        try{
+            result = JSON.parse(text);
+        }catch(error){
+            result = {
+                success: response.ok,
+                message: text
+            };
+        }
+    }
+
+    if(
+        !response.ok ||
+        result.success === false
+    ){
+        throw new Error(
+            result.message ||
+            `Request failed. HTTP ${response.status}`
+        );
+    }
+
+    return result;
+}
+
+async function loadAppointments(){
+    showTableLoading();
+
+    try{
+        const result = await apiRequest(
+            "/api/appointments/admin/getAll"
+        );
+
+        const records =
+            extractAppointmentArray(result);
+
+        appointments =
+            records
+                .map(normalizeAppointment)
+                .filter(
+                    appointment =>
+                        appointment.id !== null
+                );
+
+        filteredAppointments = [
+            ...appointments
+        ];
+
+        updateSummary();
+        renderAppointments();
+
+    }catch(error){
+        console.error(
+            "Appointment loading failed:",
+            error
+        );
+
+        appointments = [];
+        filteredAppointments = [];
+
+        updateSummary();
+
+        const body =
+            document.getElementById(
+                "appointmentTable"
+            );
+
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="10"
+                    class="table-message"
+                >
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    ${escapeHtml(
+                        error.message ||
+                        "Appointments could not be loaded."
+                    )}
+                </td>
+            </tr>
+        `;
+
+        setText(
+            "resultCount",
+            "0 Appointments"
+        );
+    }
+}
+
+function extractAppointmentArray(result){
+    if(Array.isArray(result)){
+        return result;
+    }
+
+    if(Array.isArray(result?.data)){
+        return result.data;
+    }
+
+    if(Array.isArray(result?.data?.content)){
+        return result.data.content;
+    }
+
+    if(Array.isArray(result?.data?.appointments)){
+        return result.data.appointments;
+    }
+
+    if(Array.isArray(result?.appointments)){
+        return result.appointments;
+    }
+
+    return [];
+}
+
+function normalizeAppointment(item){
+    const status =
+        String(
+            item.status ||
+            item.appointmentStatus ||
+            "PENDING"
+        ).toUpperCase();
+
+    const type =
+        String(
+            item.appointmentMode ||
+            item.appointmentType ||
+            "OFFLINE"
+        ).toUpperCase();
+
+    return {
+        id:
+            item.id ??
+            item.appointmentId ??
+            null,
+
+        patientId:
+            item.patientId ??
+            null,
+
+        patient:
+            item.patientName ||
+            item.patient?.name ||
+            "Patient",
+
+        phone:
+            item.phoneNumber ||
+            item.patient?.phoneNumber ||
+            "-",
+
+        age:
+            item.age ??
+            item.patient?.age ??
+            "-",
+
+        gender:
+            item.gender ||
+            item.patient?.gender ||
+            "-",
+
+        appointmentFor:
+            item.doctorSpecialization ||
+            item.specialization ||
+            "Medical Consultation",
+
+        type:
+            toTitleCase(type),
+
+        date:
+            formatDisplayDate(
+                item.appointmentDate ||
+                item.date
+            ),
+
+        rawDate:
+            normalizeDate(
+                item.appointmentDate ||
+                item.date
+            ),
+
+        time:
+            formatTimeRange(
+                item.startTime ||
+                item.appointmentTime,
+                item.endTime
+            ),
+
+        startTime:
+            item.startTime ||
+            item.appointmentTime ||
+            null,
+
+        endTime:
+            item.endTime ||
+            null,
+
+        status:
+            normalizeStatus(status),
+
+        rawStatus:
+            status,
+
+        doctor:
+            item.doctorName ||
+            item.doctor?.name ||
+            "-",
+
+        symptoms:
+            item.symptoms ||
+            "General consultation",
+
+        pastMedicalHistory:
+            item.pastMedicalHistory ||
+            "-",
+
+        paymentStatus:
+            String(
+                item.paymentStatus ||
+                "PENDING"
+            ).toUpperCase(),
+
+        bookingFee:
+            formatMoney(
+                item.bookingFee ??
+                0
+            ),
+
+        cancellationReason:
+            item.cancellationReason ||
+            "-",
+
+        rescheduleReason:
+            item.rescheduleReason ||
+            "-"
+    };
+}
 
 function updateSummary(){
     setText(
@@ -1466,7 +1693,13 @@ function updateSummary(){
         "pendingAppointments",
         appointments.filter(
             appointment =>
-                appointment.status === "Pending"
+                [
+                    "PENDING",
+                    "PAYMENT_PENDING",
+                    "PENDING_DOCTOR_CONFIRMATION"
+                ].includes(
+                    appointment.rawStatus
+                )
         ).length
     );
 
@@ -1474,7 +1707,8 @@ function updateSummary(){
         "completedAppointments",
         appointments.filter(
             appointment =>
-                appointment.status === "Completed"
+                appointment.rawStatus ===
+                "COMPLETED"
         ).length
     );
 
@@ -1482,7 +1716,12 @@ function updateSummary(){
         "visitedAppointments",
         appointments.filter(
             appointment =>
-                appointment.status === "Visited"
+                [
+                    "VISITED",
+                    "CONFIRMED"
+                ].includes(
+                    appointment.rawStatus
+                )
         ).length
     );
 }
@@ -1514,8 +1753,12 @@ function applyFilters(){
                         .toLowerCase()
                         .includes(search) ||
                     appointment.phone
+                        .toLowerCase()
                         .includes(search) ||
-                    appointment.id
+                    String(appointment.id)
+                        .toLowerCase()
+                        .includes(search) ||
+                    appointment.doctor
                         .toLowerCase()
                         .includes(search);
 
@@ -1551,11 +1794,26 @@ function resetFilters(){
         "typeFilter"
     ).value = "";
 
-    filteredAppointments = [
-        ...appointments
-    ];
+    loadAppointments();
+}
 
-    renderAppointments();
+function showTableLoading(){
+    const body =
+        document.getElementById(
+            "appointmentTable"
+        );
+
+    body.innerHTML = `
+        <tr>
+            <td
+                colspan="10"
+                class="table-message"
+            >
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading appointments...
+            </td>
+        </tr>
+    `;
 }
 
 function renderAppointments(){
@@ -1595,23 +1853,30 @@ function renderAppointments(){
 
     filteredAppointments.forEach(
         function(appointment){
+            const canConfirm =
+                ![
+                    "CONFIRMED",
+                    "COMPLETED",
+                    "CANCELLED",
+                    "REJECTED"
+                ].includes(
+                    appointment.rawStatus
+                );
+
             body.insertAdjacentHTML(
                 "beforeend",
                 `
                 <tr>
-
                     <td>
                         <strong>
-                            ${escapeHtml(
+                            #${escapeHtml(
                                 appointment.id
                             )}
                         </strong>
                     </td>
 
                     <td>
-
                         <div class="patient-cell">
-
                             <span class="patient-avatar">
                                 ${escapeHtml(
                                     appointment.patient
@@ -1621,7 +1886,6 @@ function renderAppointments(){
                             </span>
 
                             <div>
-
                                 <strong>
                                     ${escapeHtml(
                                         appointment.patient
@@ -1633,11 +1897,8 @@ function renderAppointments(){
                                         appointment.phone
                                     )}
                                 </small>
-
                             </div>
-
                         </div>
-
                     </td>
 
                     <td>
@@ -1672,7 +1933,9 @@ function renderAppointments(){
 
                     <td>
                         <span
-                            class="status ${appointment.status.toLowerCase()}"
+                            class="status ${getStatusClass(
+                                appointment.rawStatus
+                            )}"
                         >
                             ${escapeHtml(
                                 appointment.status
@@ -1681,20 +1944,33 @@ function renderAppointments(){
                     </td>
 
                     <td>
-
-                        <select
-                            class="status-select"
-                            onchange="changeStatus('${appointment.id}', this.value)"
-                        >
-                            ${createStatusOptions(
-                                appointment.status
-                            )}
-                        </select>
-
+                        ${
+                            canConfirm
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="reset-btn"
+                                        onclick="confirmAppointment('${appointment.id}')"
+                                    >
+                                        <i class="fa-solid fa-check"></i>
+                                        Confirm
+                                    </button>
+                                `
+                                : `
+                                    <span
+                                        class="status ${getStatusClass(
+                                            appointment.rawStatus
+                                        )}"
+                                    >
+                                        ${escapeHtml(
+                                            appointment.status
+                                        )}
+                                    </span>
+                                `
+                        }
                     </td>
 
                     <td>
-
                         <button
                             type="button"
                             class="view-btn"
@@ -1703,9 +1979,7 @@ function renderAppointments(){
                         >
                             <i class="fa-solid fa-eye"></i>
                         </button>
-
                     </td>
-
                 </tr>
                 `
             );
@@ -1713,49 +1987,55 @@ function renderAppointments(){
     );
 }
 
-function createStatusOptions(
-    currentStatus
-){
-    return [
-        "Pending",
-        "Confirmed",
-        "Visited",
-        "Completed"
-    ].map(
-        status => `
-            <option
-                value="${status}"
-                ${
-                    status === currentStatus
-                        ? "selected"
-                        : ""
-                }
-            >
-                ${status}
-            </option>
-        `
-    ).join("");
-}
-
-function changeStatus(
-    appointmentId,
-    newStatus
+async function confirmAppointment(
+    appointmentId
 ){
     const appointment =
         appointments.find(
             item =>
-                item.id === appointmentId
+                String(item.id) ===
+                String(appointmentId)
         );
 
     if(!appointment){
         return;
     }
 
-    appointment.status =
-        newStatus;
+    const confirmed =
+        window.confirm(
+            `Confirm appointment #${appointmentId} for ${appointment.patient}?`
+        );
 
-    updateSummary();
-    applyFilters();
+    if(!confirmed){
+        return;
+    }
+
+    try{
+        const result = await apiRequest(
+            `/api/appointments/${appointmentId}/confirm`,
+            {
+                method: "PUT"
+            }
+        );
+
+        window.alert(
+            result.message ||
+            "Appointment confirmed successfully."
+        );
+
+        await loadAppointments();
+
+    }catch(error){
+        console.error(
+            "Appointment confirmation failed:",
+            error
+        );
+
+        window.alert(
+            error.message ||
+            "Appointment could not be confirmed."
+        );
+    }
 }
 
 function viewAppointment(
@@ -1764,7 +2044,8 @@ function viewAppointment(
     const appointment =
         appointments.find(
             item =>
-                item.id === appointmentId
+                String(item.id) ===
+                String(appointmentId)
         );
 
     if(!appointment){
@@ -1779,7 +2060,7 @@ function viewAppointment(
             <div class="detail-card">
                 <span>Appointment ID</span>
                 <strong>
-                    ${escapeHtml(
+                    #${escapeHtml(
                         appointment.id
                     )}
                 </strong>
@@ -1804,16 +2085,29 @@ function viewAppointment(
             </div>
 
             <div class="detail-card">
-                <span>Age</span>
+                <span>Age / Gender</span>
                 <strong>
                     ${escapeHtml(
                         appointment.age
+                    )}
+                    /
+                    ${escapeHtml(
+                        appointment.gender
                     )}
                 </strong>
             </div>
 
             <div class="detail-card">
-                <span>Appointment For</span>
+                <span>Doctor</span>
+                <strong>
+                    ${escapeHtml(
+                        appointment.doctor
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-card">
+                <span>Specialization</span>
                 <strong>
                     ${escapeHtml(
                         appointment.appointmentFor
@@ -1826,15 +2120,6 @@ function viewAppointment(
                 <strong>
                     ${escapeHtml(
                         appointment.type
-                    )}
-                </strong>
-            </div>
-
-            <div class="detail-card">
-                <span>Doctor</span>
-                <strong>
-                    ${escapeHtml(
-                        appointment.doctor
                     )}
                 </strong>
             </div>
@@ -1875,7 +2160,7 @@ function viewAppointment(
             </div>
 
             <div class="detail-card full-width">
-                <span>Symptoms / Notes</span>
+                <span>Symptoms</span>
                 <p>
                     ${escapeHtml(
                         appointment.symptoms
@@ -1883,6 +2168,29 @@ function viewAppointment(
                 </p>
             </div>
 
+            <div class="detail-card full-width">
+                <span>Past Medical History</span>
+                <p>
+                    ${escapeHtml(
+                        appointment.pastMedicalHistory
+                    )}
+                </p>
+            </div>
+
+            <div class="detail-card full-width">
+                <span>Cancellation / Reschedule Reason</span>
+                <p>
+                    Cancellation:
+                    ${escapeHtml(
+                        appointment.cancellationReason
+                    )}
+                    <br>
+                    Reschedule:
+                    ${escapeHtml(
+                        appointment.rescheduleReason
+                    )}
+                </p>
+            </div>
         </div>
     `;
 
@@ -1891,6 +2199,167 @@ function viewAppointment(
     ).classList.add(
         "show"
     );
+}
+
+function normalizeDate(value){
+    if(!value){
+        return null;
+    }
+
+    const text =
+        String(value).trim();
+
+    if(
+        /^\d{4}-\d{2}-\d{2}/.test(
+            text
+        )
+    ){
+        return text.substring(0, 10);
+    }
+
+    return null;
+}
+
+function formatDisplayDate(value){
+    const normalized =
+        normalizeDate(value);
+
+    if(!normalized){
+        return value || "-";
+    }
+
+    const [
+        year,
+        month,
+        day
+    ] = normalized.split("-");
+
+    return `${day}/${month}/${year}`;
+}
+
+function formatTimeRange(
+    startTime,
+    endTime
+){
+    if(!startTime){
+        return "-";
+    }
+
+    const start =
+        formatTime(startTime);
+
+    if(!endTime){
+        return start;
+    }
+
+    return (
+        `${start} - ` +
+        `${formatTime(endTime)}`
+    );
+}
+
+function formatTime(value){
+    if(!value){
+        return "-";
+    }
+
+    const parts =
+        String(value)
+            .substring(0, 5)
+            .split(":");
+
+    let hours =
+        Number(parts[0]);
+
+    const minutes =
+        parts[1] || "00";
+
+    const period =
+        hours >= 12
+            ? "PM"
+            : "AM";
+
+    hours =
+        hours % 12 || 12;
+
+    return (
+        `${hours}:` +
+        `${minutes} ` +
+        `${period}`
+    );
+}
+
+function normalizeStatus(status){
+    const map = {
+        PENDING: "Pending",
+        PAYMENT_PENDING: "Pending",
+        PENDING_DOCTOR_CONFIRMATION: "Pending",
+        CONFIRMED: "Confirmed",
+        VISITED: "Visited",
+        COMPLETED: "Completed",
+        CANCELLED: "Cancelled",
+        REJECTED: "Rejected",
+        NO_SHOW: "No Show"
+    };
+
+    return (
+        map[status] ||
+        toTitleCase(status)
+    );
+}
+
+function getStatusClass(status){
+    if(
+        [
+            "PENDING",
+            "PAYMENT_PENDING",
+            "PENDING_DOCTOR_CONFIRMATION"
+        ].includes(status)
+    ){
+        return "pending";
+    }
+
+    if(status === "CONFIRMED"){
+        return "confirmed";
+    }
+
+    if(status === "VISITED"){
+        return "visited";
+    }
+
+    if(status === "COMPLETED"){
+        return "completed";
+    }
+
+    return "pending";
+}
+
+function toTitleCase(value){
+    return String(value || "")
+        .toLowerCase()
+        .replace(
+            /(^|_|\s)\w/g,
+            function(match){
+                return match
+                    .replace("_", " ")
+                    .toUpperCase();
+            }
+        );
+}
+
+function formatMoney(value){
+    const amount =
+        Number(value || 0);
+
+    return new Intl.NumberFormat(
+        "en-IN",
+        {
+            style: "currency",
+            currency: "INR",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }
+    ).format(amount);
 }
 
 function closeAppointmentModal(){
@@ -1942,6 +2411,8 @@ function closeSidebar(){
 
 function logoutAdmin(){
     localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("jwtToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");

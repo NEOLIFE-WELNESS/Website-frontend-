@@ -394,7 +394,13 @@
     min-width:38px !important;
   }
 }
-  </style>
+  
+    .register-btn:disabled{opacity:.72;cursor:not-allowed;transform:none}
+    .form-message{display:none;margin:0 0 14px;padding:11px 13px;border-radius:10px;font-size:13px;font-weight:700}
+    .form-message.show{display:block}
+    .form-message.error{color:#8b1e16;background:#fde8e6;border:1px solid #efb7b2}
+    .form-message.success{color:#14532d;background:#e8f7ed;border:1px solid #b7dfc3}
+</style>
 </head>
 
 <body>
@@ -442,6 +448,8 @@
         <p>Create your account to access consultations and wellness services.</p>
 
         <form id="registerForm" onsubmit="return registerUser(event)">
+
+          <div id="registerMessage" class="form-message"></div>
 
           <div class="form-group">
             <input type="text"
@@ -533,81 +541,105 @@
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
+function showRegisterMessage(message,type="error"){
+  const box=document.getElementById("registerMessage");
+  box.textContent=message;
+  box.className=`form-message show ${type}`;
+}
+
+function clearRegisterMessage(){
+  const box=document.getElementById("registerMessage");
+  box.textContent="";
+  box.className="form-message";
+}
+
 async function registerUser(event){
   event.preventDefault();
+  clearRegisterMessage();
 
-  const name = document.getElementById("name").value.trim();
-  const phoneNumber = document.getElementById("phoneNumber").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const age = document.getElementById("age").value.trim();
-  const gender = document.getElementById("gender").value;
-  const password = document.getElementById("password").value.trim();
-  const confirmPassword =
-    document.getElementById("confirmPassword").value.trim();
+  const name=document.getElementById("name").value.trim();
+  const phoneNumber=document.getElementById("phoneNumber").value.trim();
+  const email=document.getElementById("email").value.trim();
+  const age=Number(document.getElementById("age").value);
+  const gender=document.getElementById("gender").value;
+  const password=document.getElementById("password").value;
+  const confirmPassword=document.getElementById("confirmPassword").value;
+  const button =
+    document.getElementById("registerButton") ||
+    event.submitter ||
+    document.querySelector("#registerForm button[type='submit']");
 
-  if(
-    !name ||
-    !phoneNumber ||
-    !email ||
-    !age ||
-    !gender ||
-    !password ||
-    !confirmPassword
-  ){
-    alert("Please fill all fields");
+  if(!name||!phoneNumber||!email||!age||!gender||!password||!confirmPassword){
+    showRegisterMessage("Please fill in all fields.");
     return false;
   }
 
-  if(phoneNumber.length !== 10){
-    alert("Phone number must be 10 digits");
+  if(!/^[0-9]{10}$/.test(phoneNumber)){
+    showRegisterMessage("Phone number must contain exactly 10 digits.");
     return false;
   }
 
-  if(password !== confirmPassword){
-    alert("Password and confirm password do not match");
+  if(age<1||age>120){
+    showRegisterMessage("Please enter a valid age.");
     return false;
+  }
+
+  if(password.length<8){
+    showRegisterMessage("Password must contain at least 8 characters.");
+    return false;
+  }
+
+  if(password!==confirmPassword){
+    showRegisterMessage("Password and confirm password do not match.");
+    return false;
+  }
+
+  if(button){
+    button.disabled=true;
+    button.textContent="Creating Account...";
   }
 
   try{
-    const response = await fetch(
-      `${API_BASE_URL}/api/auth/register`,
-      {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          name:name,
-          phoneNumber:phoneNumber,
-          email:email,
-          age:Number(age),
-          gender:gender,
-          password:password,
-          confirmPassword:confirmPassword
-        })
-      }
-    );
+    const response=await fetch(`${API_BASE_URL}/api/auth/register`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        name,
+        phoneNumber,
+        email,
+        age,
+        gender,
+        password,
+        confirmPassword
+      })
+    });
 
-    const result = await response.json();
+    const result=await response.json();
 
-    if(result.success === true){
-      alert("Registration successful. Please login.");
-      window.location.href = "login.html";
-    }else{
-      alert(result.message || "Registration failed");
+    if(!response.ok||!result.success){
+      showRegisterMessage(result.message||"Registration failed.");
+      return false;
     }
 
-  }catch(error){
-    alert(
-      "Backend not connected. Start Spring Boot backend on port 8085."
-    );
+    showRegisterMessage(result.message||"Registration successful. Redirecting to login...","success");
+    document.getElementById("registerForm").reset();
 
+    setTimeout(()=>{
+      window.location.href="login.html";
+    },900);
+
+  }catch(error){
     console.error(error);
+    showRegisterMessage("Unable to connect to backend. Make sure Spring Boot is running on port 8085.");
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent="Create Account";
+    }
   }
 
   return false;
 }
 </script>
-
 </body>
 </html>

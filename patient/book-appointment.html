@@ -507,61 +507,6 @@
             font-size:12px;
             font-weight:600;
         }
-
-        /* =========================
-           DEPARTMENT
-        ========================== */
-
-        .department-grid{
-            margin-bottom:38px;
-
-            display:grid;
-            grid-template-columns:repeat(5,1fr);
-            gap:15px;
-        }
-
-        .department-card{
-            min-height:120px;
-            padding:18px 12px;
-
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            gap:11px;
-
-            border:1px solid var(--border);
-            border-radius:17px;
-
-            background:#ffffff;
-            color:var(--dark-green);
-
-            text-align:center;
-            transition:.25s;
-        }
-
-        .department-card i{
-            color:var(--gold);
-            font-size:27px;
-        }
-
-        .department-card span{
-            font-size:13px;
-            font-weight:800;
-            line-height:1.4;
-        }
-
-        .department-card:hover,
-        .department-card.selected{
-            border-color:var(--gold);
-            background:#fff9e8;
-
-            transform:translateY(-3px);
-
-            box-shadow:
-                0 10px 24px rgba(157,117,0,.12);
-        }
-
         /* =========================
            DOCTORS
         ========================== */
@@ -763,10 +708,37 @@
 
         .slot-btn:disabled{
             cursor:not-allowed;
+            color:#8f9691;
+            border-color:#d8dcda;
+            background:#f1f2f1;
+            opacity:.78;
+            text-decoration:none;
+            transform:none;
+            box-shadow:none;
+        }
 
-            color:#a9afab;
-            background:#eff1ef;
-            text-decoration:line-through;
+        .slot-btn.booked-slot{
+            position:relative;
+            color:#8f9691;
+            border-color:#d8dcda;
+            background:#f1f2f1;
+        }
+
+        .slot-btn.booked-slot:hover{
+            color:#8f9691;
+            border-color:#d8dcda;
+            background:#f1f2f1;
+            transform:none;
+            box-shadow:none;
+        }
+
+        .slot-status{
+            display:block;
+            margin-top:4px;
+            color:var(--danger);
+            font-size:10px;
+            font-weight:800;
+            line-height:1.2;
         }
 
         .slot-loading{
@@ -1166,10 +1138,6 @@
                 margin-left:10px;
             }
 
-            .department-grid{
-                grid-template-columns:repeat(3,1fr);
-            }
-
             .slot-layout{
                 grid-template-columns:300px 1fr;
             }
@@ -1243,10 +1211,6 @@
                 font-size:25px;
             }
 
-            .department-grid{
-                grid-template-columns:repeat(2,1fr);
-            }
-
             .form-grid{
                 grid-template-columns:1fr;
             }
@@ -1298,15 +1262,6 @@
             .mobile-menu-button{
                 width:39px;
                 height:39px;
-            }
-
-            .department-grid{
-                grid-template-columns:1fr 1fr;
-                gap:10px;
-            }
-
-            .department-card{
-                min-height:105px;
             }
         }
 
@@ -1461,9 +1416,8 @@
             </h1>
 
             <p>
-                Choose a department, select your doctor,
-                pick an available time slot and complete
-                your appointment booking.
+                Select your doctor, choose an available time slot
+                and complete your clinic appointment booking.
             </p>
 
         </div>
@@ -1527,73 +1481,14 @@
 
                 <div class="step-heading">
 
-                    <h2>Select Department and Doctor</h2>
+                    <h2>Select Doctor</h2>
 
                     <p>
-                        Choose the department first, then select
-                        the doctor you want to consult.
+                        Choose the doctor you want to consult. Doctors are loaded directly from the Neolife system.
                     </p>
 
                 </div>
-
-                <div
-                    class="department-grid"
-                    id="departmentGrid"
-                >
-
-                    <button
-                        type="button"
-                        class="department-card"
-                        data-department="AYURVEDA"
-                        onclick="selectDepartment('AYURVEDA', this)"
-                    >
-                        <i class="fa-solid fa-leaf"></i>
-                        <span>Ayurveda</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="department-card"
-                        data-department="PANCHAKARMA"
-                        onclick="selectDepartment('PANCHAKARMA', this)"
-                    >
-                        <i class="fa-solid fa-spa"></i>
-                        <span>Panchakarma</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="department-card"
-                        data-department="ACUPUNCTURE"
-                        onclick="selectDepartment('ACUPUNCTURE', this)"
-                    >
-                        <i class="fa-solid fa-notes-medical"></i>
-                        <span>Acupuncture</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="department-card"
-                        data-department="YOGA_NATUROPATHY"
-                        onclick="selectDepartment('YOGA_NATUROPATHY', this)"
-                    >
-                        <i class="fa-solid fa-person-praying"></i>
-                        <span>Yoga &amp; Naturopathy</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="department-card"
-                        data-department="BEAUTY_COSMETICS"
-                        onclick="selectDepartment('BEAUTY_COSMETICS', this)"
-                    >
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span>Beauty &amp; Cosmetics</span>
-                    </button>
-
-                </div>
-
-                <h3 class="sub-heading">
+<h3 class="sub-heading">
                     Available Doctors
                 </h3>
 
@@ -1603,7 +1498,7 @@
                 >
 
                     <div class="empty-message">
-                        Select a department to view doctors.
+                        Loading doctors...
                     </div>
 
                 </div>
@@ -1826,24 +1721,7 @@
                             >
 
                         </div>
-
-                        <div class="form-group full-width">
-
-                            <label for="email">
-                                Email Address
-                                <span class="required">*</span>
-                            </label>
-
-                            <input
-                                type="email"
-                                id="email"
-                                class="form-control"
-                                placeholder="Enter email address"
-                            >
-
-                        </div>
-
-                        <div class="form-group full-width">
+<div class="form-group full-width">
 
                             <label for="symptoms">
                                 Symptoms
@@ -1871,22 +1749,7 @@
                             ></textarea>
 
                         </div>
-
-                        <div class="form-group full-width">
-
-                            <label for="currentMedication">
-                                Current Medication
-                            </label>
-
-                            <textarea
-                                id="currentMedication"
-                                class="form-control"
-                                placeholder="Mention any medicines currently being taken"
-                            ></textarea>
-
-                        </div>
-
-                    </div>
+</div>
 
                     <div class="step-actions">
 
@@ -1948,23 +1811,7 @@
                             </span>
 
                         </div>
-
-                        <div class="summary-row">
-
-                            <span class="summary-label">
-                                Department
-                            </span>
-
-                            <span
-                                class="summary-value"
-                                id="summaryDepartment"
-                            >
-                                -
-                            </span>
-
-                        </div>
-
-                        <div class="summary-row">
+<div class="summary-row">
 
                             <span class="summary-label">
                                 Doctor
@@ -2127,16 +1974,14 @@
         </p>
 
     </footer>
-
     <script>
-
         const API_BASE_URL = "http://localhost:8085";
 
         let currentStep = 1;
+        let doctors = [];
 
         const bookingData = {
             bookingType: "OFFLINE",
-            department: null,
             doctorId: null,
             doctorName: null,
             doctorSpecialization: null,
@@ -2144,254 +1989,170 @@
             availabilityId: null,
             appointmentDate: null,
             appointmentTime: null,
+            appointmentEndTime: null,
             fee: 50
         };
 
-        /*
-         * Temporary doctor data.
-         *
-         * You can remove this later and load doctors
-         * from your backend GET doctors API.
-         */
-        const localDoctors = [
+        document.addEventListener("DOMContentLoaded", async function(){
+            setMinimumDate();
+            await Promise.all([
+                loadDoctors(),
+                loadProfileIcon(),
+                loadPatientProfile()
+            ]);
+        });
 
-            {
-                id: 1,
-                name: "Dr. N. G. Muraleedhara",
-                qualification: "BAMS",
-                specialization:
-                    "Ayurveda & Panchakarma Consultant",
-                experience: "20+ Years Experience",
-                department: "AYURVEDA",
-                departments: [
-                    "AYURVEDA",
-                    "PANCHAKARMA",
-                    "ACUPUNCTURE"
-                ],
-                imageUrl:
-                    "../assets/Dr-murali.png"
-            },
+        function getToken(){
+            return localStorage.getItem("token");
+        }
 
-            {
-                id: 2,
-                name: "Dr. Aditi",
-                qualification: "BNYS",
-                specialization:
-                    "Yoga & Naturopathy Consultant",
-                experience: "Wellness Consultant",
-                department: "YOGA_NATUROPATHY",
-                departments: [
-                    "YOGA_NATUROPATHY"
-                ],
-                imageUrl:
-                    "../assets/Dr-adithi.png"
-            },
+        function authHeaders(includeJson = false){
+            const headers = { "Accept": "application/json" };
+            const token = getToken();
 
-            {
-                id: 3,
-                name: "Dr. Sibagath Ulla Sharieff R",
-                qualification: "BAMS, MD (Ayu)",
-                specialization: "Ayurveda Consultant",
-                experience: "Experienced Consultant",
-                department: "AYURVEDA",
-                departments: [
-                    "AYURVEDA",
-                    "PANCHAKARMA"
-                ],
-                imageUrl:
-                    "../assets/Dr-sibgath.jpg"
+            if(token){
+                headers.Authorization = `Bearer ${token}`;
             }
 
-        ];
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function(){
-
-                setMinimumDate();
-                loadProfileIcon();
-                loadPatientProfile();
+            if(includeJson){
+                headers["Content-Type"] = "application/json";
             }
-        );
+
+            return headers;
+        }
 
         function setMinimumDate(){
-
-            const dateInput =
-                document.getElementById("appointmentDate");
+            const dateInput = document.getElementById("appointmentDate");
+            if(!dateInput) return;
 
             const today = new Date();
-
             const year = today.getFullYear();
-
-            const month = String(
-                today.getMonth() + 1
-            ).padStart(2, "0");
-
-            const day = String(
-                today.getDate()
-            ).padStart(2, "0");
-
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const day = String(today.getDate()).padStart(2, "0");
             dateInput.min = `${year}-${month}-${day}`;
         }
 
-        function selectDepartment(
-            department,
-            selectedButton
-        ){
+        async function loadDoctors(){
+            const doctorGrid = document.getElementById("doctorGrid");
+            doctorGrid.innerHTML = `
+                <div class="empty-message">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Loading doctors...
+                </div>
+            `;
 
-            bookingData.department = department;
+            try{
+                const response = await fetch(
+                    `${API_BASE_URL}/api/doctors/getAll`,
+                    { headers: authHeaders() }
+                );
 
-            bookingData.doctorId = null;
-            bookingData.doctorName = null;
-            bookingData.doctorSpecialization = null;
-            bookingData.doctorImage = null;
+                const result = await readJsonResponse(response);
 
-            document
-                .querySelectorAll(".department-card")
-                .forEach(function(card){
-
-                    card.classList.remove("selected");
-                });
-
-            selectedButton.classList.add("selected");
-
-            displayDoctors(department);
-        }
-
-        function displayDoctors(department){
-
-            const doctorGrid =
-                document.getElementById("doctorGrid");
-
-            const doctors = localDoctors.filter(
-                function(doctor){
-
-                    return doctor.departments.includes(
-                        department
-                    );
+                if(!response.ok || result.success === false){
+                    throw new Error(result.message || "Unable to load doctors.");
                 }
-            );
 
-            if(doctors.length === 0){
+                doctors = Array.isArray(result.data)
+                    ? result.data.filter(doctor => doctor.active !== false)
+                    : [];
 
+                renderDoctors();
+            }catch(error){
+                console.error("Doctor loading failed:", error);
                 doctorGrid.innerHTML = `
                     <div class="empty-message">
-                        No doctors are currently available
-                        for this department.
+                        ${escapeHtml(error.message || "Unable to load doctors.")}
+                        <br><br>
+                        <button type="button" class="next-btn" onclick="loadDoctors()">
+                            Try Again
+                        </button>
                     </div>
                 `;
+                showAlert(error.message || "Unable to load doctors.", "error");
+            }
+        }
 
+        function renderDoctors(){
+            const doctorGrid = document.getElementById("doctorGrid");
+
+            if(doctors.length === 0){
+                doctorGrid.innerHTML = `
+                    <div class="empty-message">
+                        No active doctors are currently available.
+                    </div>
+                `;
                 return;
             }
 
-            doctorGrid.innerHTML = "";
+            doctorGrid.innerHTML = doctors.map(doctor => {
+                const image = doctor.imageUrl || doctor.profileImage || "../assets/main_logo.jpeg";
+                const experience = doctor.experience ?? doctor.experienceYears;
+                const experienceText = experience
+                    ? `${experience} ${String(experience).includes("Year") ? "" : "Years Experience"}`
+                    : "Experience not specified";
 
-            doctors.forEach(function(doctor){
-
-                doctorGrid.insertAdjacentHTML(
-                    "beforeend",
-                    `
+                return `
                     <article
                         class="doctor-card"
                         id="doctor-${doctor.id}"
                         onclick="selectDoctor(${doctor.id})"
+                        tabindex="0"
+                        role="button"
+                        onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); selectDoctor(${doctor.id}); }"
                     >
-
                         <img
-                            src="${doctor.imageUrl}"
-                            alt="${escapeHtml(doctor.name)}"
+                            src="${escapeHtml(image)}"
+                            alt="${escapeHtml(doctor.name || "Doctor")}" 
                             class="doctor-image"
                             onerror="this.src='../assets/main_logo.jpeg'"
                         >
 
                         <div class="doctor-info">
-
-                            <h3>
-                                ${escapeHtml(doctor.name)}
-                            </h3>
-
-                            <p>
-                                ${escapeHtml(doctor.qualification)}
-                            </p>
-
-                            <p>
-                                ${escapeHtml(doctor.specialization)}
-                            </p>
-
-                            <p>
-                                ${escapeHtml(doctor.experience)}
-                            </p>
-
+                            <h3>${escapeHtml(doctor.name || "Doctor")}</h3>
+                            <p>${escapeHtml(doctor.qualification || "Qualification not specified")}</p>
+                            <p>${escapeHtml(doctor.specialization || "Specialization not specified")}</p>
+                            <p>${escapeHtml(experienceText)}</p>
                         </div>
 
                         <div class="doctor-select-indicator">
-
                             <i class="fa-solid fa-check"></i>
-
                         </div>
-
                     </article>
-                    `
-                );
-            });
+                `;
+            }).join("");
         }
 
         function selectDoctor(doctorId){
+            const doctor = doctors.find(item => Number(item.id) === Number(doctorId));
+            if(!doctor) return;
 
-            const doctor = localDoctors.find(
-                function(item){
+            bookingData.doctorId = Number(doctor.id);
+            bookingData.doctorName = doctor.name || "Doctor";
+            bookingData.doctorSpecialization = doctor.specialization || "";
+            bookingData.doctorImage = doctor.imageUrl || doctor.profileImage || "../assets/main_logo.jpeg";
+            bookingData.appointmentDate = null;
+            bookingData.appointmentTime = null;
+            bookingData.appointmentEndTime = null;
+            bookingData.availabilityId = null;
 
-                    return item.id === doctorId;
-                }
-            );
+            document.querySelectorAll(".doctor-card").forEach(card => {
+                card.classList.remove("selected");
+            });
 
-            if(!doctor){
-                return;
-            }
+            document.getElementById(`doctor-${doctorId}`)?.classList.add("selected");
 
-            bookingData.doctorId = doctor.id;
-            bookingData.doctorName = doctor.name;
-            bookingData.doctorSpecialization =
-                doctor.specialization;
-            bookingData.doctorImage = doctor.imageUrl;
+            const dateInput = document.getElementById("appointmentDate");
+            if(dateInput) dateInput.value = "";
 
-            document
-                .querySelectorAll(".doctor-card")
-                .forEach(function(card){
-
-                    card.classList.remove("selected");
-                });
-
-            const selectedCard =
-                document.getElementById(
-                    `doctor-${doctorId}`
-                );
-
-            if(selectedCard){
-
-                selectedCard.classList.add("selected");
-            }
+            document.getElementById("slotGrid").innerHTML = `
+                <div class="slot-loading">Select an appointment date.</div>
+            `;
         }
 
         function goToStep2(){
-
-            if(!bookingData.department){
-
-                showAlert(
-                    "Please select a department.",
-                    "error"
-                );
-
-                return;
-            }
-
             if(!bookingData.doctorId){
-
-                showAlert(
-                    "Please select a doctor.",
-                    "error"
-                );
-
+                showAlert("Please select a doctor.", "error");
                 return;
             }
 
@@ -2400,369 +2161,353 @@
         }
 
         function displaySelectedDoctor(){
-
-            const box =
-                document.getElementById(
-                    "selectedDoctorBox"
-                );
-
+            const box = document.getElementById("selectedDoctorBox");
             box.innerHTML = `
                 <img
-                    src="${bookingData.doctorImage}"
+                    src="${escapeHtml(bookingData.doctorImage)}"
                     alt="${escapeHtml(bookingData.doctorName)}"
                     onerror="this.src='../assets/main_logo.jpeg'"
                 >
-
                 <div>
-
-                    <h3>
-                        ${escapeHtml(bookingData.doctorName)}
-                    </h3>
-
-                    <p>
-                        ${escapeHtml(
-                            bookingData.doctorSpecialization
-                        )}
-                    </p>
-
+                    <h3>${escapeHtml(bookingData.doctorName)}</h3>
+                    <p>${escapeHtml(bookingData.doctorSpecialization || "")}</p>
                 </div>
             `;
         }
 
         async function loadAvailableSlots(){
-
-            const date =
-                document.getElementById(
-                    "appointmentDate"
-                ).value;
-
-            const slotGrid =
-                document.getElementById("slotGrid");
+            const date = document.getElementById("appointmentDate").value;
+            const slotGrid = document.getElementById("slotGrid");
 
             bookingData.appointmentDate = date;
             bookingData.appointmentTime = null;
+            bookingData.appointmentEndTime = null;
             bookingData.availabilityId = null;
 
-            if(!date){
+            if(!bookingData.doctorId){
+                showAlert("Please select a doctor first.", "error");
+                showStep(1);
+                return;
+            }
 
+            if(!date){
                 slotGrid.innerHTML = `
                     <div class="slot-loading">
                         Select an appointment date.
                     </div>
                 `;
-
                 return;
             }
 
             slotGrid.innerHTML = `
                 <div class="slot-loading">
-
                     <i class="fa-solid fa-spinner fa-spin"></i>
-
                     Loading available slots...
-
                 </div>
             `;
 
             try{
+                const url =
+                    `${API_BASE_URL}/api/appointment-slots/available` +
+                    `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
+                    `&date=${encodeURIComponent(date)}` +
+                    `&type=OFFLINE`;
 
                 const response = await fetch(
-                    `${API_BASE_URL}/api/doctor-availability/doctor/${bookingData.doctorId}/date/${date}`
+                    url,
+                    {
+                        method: "GET",
+                        headers: authHeaders()
+                    }
                 );
 
-                if(!response.ok){
+                const result = await readJsonResponse(response);
 
+                if(!response.ok || result.success === false){
                     throw new Error(
-                        `HTTP error ${response.status}`
+                        result.message ||
+                        "Unable to load available slots."
                     );
                 }
 
-                const result = await response.json();
+                const slots = Array.isArray(result.data)
+                    ? result.data
+                    : [];
 
-                if(
-                    result.success &&
-                    Array.isArray(result.data)
-                ){
-
-                    renderSlots(result.data);
-                    return;
-                }
-
-                renderSlots([]);
+                renderSlots(slots);
 
             }catch(error){
+                console.error("Slot loading failed:", error);
 
-                console.error(
-                    "Slot loading failed:",
-                    error
-                );
-
-                /*
-                 * Temporary fallback slots.
-                 *
-                 * Remove this fallback after your
-                 * availability API is connected.
-                 */
-                const demoSlots = [
-                    {
-                        id: 101,
-                        startTime: "09:00",
-                        available: true
-                    },
-                    {
-                        id: 102,
-                        startTime: "09:30",
-                        available: true
-                    },
-                    {
-                        id: 103,
-                        startTime: "10:00",
-                        available: false
-                    },
-                    {
-                        id: 104,
-                        startTime: "10:30",
-                        available: true
-                    },
-                    {
-                        id: 105,
-                        startTime: "11:00",
-                        available: true
-                    },
-                    {
-                        id: 106,
-                        startTime: "11:30",
-                        available: true
-                    },
-                    {
-                        id: 107,
-                        startTime: "15:00",
-                        available: true
-                    },
-                    {
-                        id: 108,
-                        startTime: "15:30",
-                        available: true
-                    }
-                ];
-
-                renderSlots(demoSlots);
+                slotGrid.innerHTML = `
+                    <div class="slot-loading">
+                        ${escapeHtml(
+                            error.message ||
+                            "Unable to load available slots."
+                        )}
+                    </div>
+                `;
 
                 showAlert(
-                    "Availability API is not connected. Demo slots are shown.",
-                    "info"
+                    error.message ||
+                    "Unable to load available slots.",
+                    "error"
                 );
             }
         }
 
         function renderSlots(slots){
-
             const slotGrid =
                 document.getElementById("slotGrid");
 
-            if(!slots || slots.length === 0){
-
+            if(!Array.isArray(slots) || slots.length === 0){
                 slotGrid.innerHTML = `
                     <div class="slot-loading">
-                        No available slots found for
-                        the selected date.
+                        No appointment slots found for the selected date.
                     </div>
                 `;
-
                 return;
             }
 
-            slotGrid.innerHTML = "";
+            slotGrid.innerHTML = slots
+                .map(function(slot){
 
-            slots.forEach(function(slot){
+                    const startTime =
+                        slot.startTime ||
+                        slot.time ||
+                        slot.slotTime;
 
-                const available =
-                    slot.available !== false &&
-                    slot.booked !== true;
+                    const endTime =
+                        slot.endTime ||
+                        slot.toTime ||
+                        "";
 
-                const slotId =
-                    slot.id ||
-                    slot.availabilityId ||
-                    slot.slotId;
+                    if(!startTime){
+                        return "";
+                    }
 
-                const time =
-                    slot.startTime ||
-                    slot.time ||
-                    slot.slotTime;
+                    /*
+                     * Only an explicit false value means the slot is booked
+                     * or unavailable. This keeps compatibility if an older
+                     * response does not contain the available field.
+                     */
+                    const isAvailable =
+                        slot.available !== false;
 
-                const formattedTime =
-                    formatTime(time);
+                    const slotKey =
+                        `${bookingData.doctorId}-${bookingData.appointmentDate}-${startTime}`;
 
-                slotGrid.insertAdjacentHTML(
-                    "beforeend",
-                    `
-                    <button
-                        type="button"
-                        class="slot-btn"
-                        ${available ? "" : "disabled"}
-                        onclick="selectSlot(
-                            '${slotId}',
-                            '${escapeHtml(time)}',
+                    const clickHandler = isAvailable
+                        ? `onclick="selectSlot(
+                            '${escapeHtml(String(slotKey))}',
+                            '${escapeHtml(String(startTime))}',
+                            '${escapeHtml(String(endTime))}',
                             this
-                        )"
-                    >
-                        ${formattedTime}
-                    </button>
-                    `
-                );
-            });
+                        )"`
+                        : "";
+
+                    return `
+                        <button
+                            type="button"
+                            class="slot-btn ${isAvailable ? "" : "booked-slot"}"
+                            ${isAvailable ? "" : "disabled"}
+                            ${clickHandler}
+                            aria-disabled="${isAvailable ? "false" : "true"}"
+                            title="${
+                                isAvailable
+                                    ? "Select this appointment slot"
+                                    : "This slot is already booked"
+                            }"
+                        >
+                            <span>
+                                ${formatTime(startTime)}
+                                ${endTime ? ` - ${formatTime(endTime)}` : ""}
+                            </span>
+
+                            ${
+                                isAvailable
+                                    ? ""
+                                    : `<span class="slot-status">Booked</span>`
+                            }
+                        </button>
+                    `;
+                })
+                .join("");
+
+            if(!slotGrid.innerHTML.trim()){
+                slotGrid.innerHTML = `
+                    <div class="slot-loading">
+                        No valid slots were returned by the server.
+                    </div>
+                `;
+            }
         }
 
         function selectSlot(
             availabilityId,
-            time,
+            startTime,
+            endTime,
             selectedButton
         ){
-
-            bookingData.availabilityId =
-                availabilityId;
-
-            bookingData.appointmentTime = time;
+            bookingData.availabilityId = availabilityId;
+            bookingData.appointmentTime = startTime;
+            bookingData.appointmentEndTime = endTime || null;
 
             document
                 .querySelectorAll(".slot-btn")
                 .forEach(function(button){
-
                     button.classList.remove("selected");
                 });
 
             selectedButton.classList.add("selected");
         }
 
-        function goToStep3(){
+        async function verifySelectedSlotAvailability(){
+            if(
+                !bookingData.doctorId ||
+                !bookingData.appointmentDate ||
+                !bookingData.appointmentTime
+            ){
+                return false;
+            }
 
-            const date =
-                document.getElementById(
-                    "appointmentDate"
-                ).value;
+            try{
+                const url =
+                    `${API_BASE_URL}/api/appointment-slots/available` +
+                    `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
+                    `&date=${encodeURIComponent(bookingData.appointmentDate)}` +
+                    `&type=OFFLINE`;
 
-            if(!date){
+                const response = await fetch(
+                    url,
+                    {
+                        method: "GET",
+                        headers: authHeaders()
+                    }
+                );
 
+                const result =
+                    await readJsonResponse(response);
+
+                if(!response.ok || result.success === false){
+                    throw new Error(
+                        result.message ||
+                        "Unable to verify the selected slot."
+                    );
+                }
+
+                const slots =
+                    Array.isArray(result.data)
+                        ? result.data
+                        : [];
+
+                const selectedStart =
+                    String(bookingData.appointmentTime)
+                        .substring(0, 5);
+
+                const selectedSlot =
+                    slots.find(function(slot){
+                        const slotStart =
+                            String(
+                                slot.startTime ||
+                                slot.time ||
+                                slot.slotTime ||
+                                ""
+                            ).substring(0, 5);
+
+                        return slotStart === selectedStart;
+                    });
+
+                /*
+                 * This endpoint returns only currently available slots.
+                 * Therefore, if the selected time is no longer returned,
+                 * another patient has already booked it.
+                 */
+                if(
+                    !selectedSlot ||
+                    selectedSlot.available === false
+                ){
+                    bookingData.appointmentTime = null;
+                    bookingData.appointmentEndTime = null;
+                    bookingData.availabilityId = null;
+
+                    await loadAvailableSlots();
+                    showStep(2);
+
+                    showAlert(
+                        "This slot has just been booked by another patient. Please select another available time.",
+                        "error"
+                    );
+
+                    return false;
+                }
+
+                return true;
+
+            }catch(error){
                 showAlert(
-                    "Please select an appointment date.",
+                    error.message ||
+                    "Unable to verify the selected slot.",
                     "error"
                 );
 
+                return false;
+            }
+        }
+
+        async function goToStep3(){
+            const date = document.getElementById("appointmentDate").value;
+
+            if(!date){
+                showAlert("Please select an appointment date.", "error");
                 return;
             }
 
             if(!bookingData.appointmentTime){
+                showAlert("Please select an available time slot.", "error");
+                return;
+            }
 
-                showAlert(
-                    "Please select an available time slot.",
-                    "error"
-                );
+            const stillAvailable =
+                await verifySelectedSlotAvailability();
 
+            if(!stillAvailable){
                 return;
             }
 
             bookingData.appointmentDate = date;
-
             showStep(3);
         }
 
         function validatePatientForm(){
-
-            const patientName =
-                document.getElementById(
-                    "patientName"
-                ).value.trim();
-
-            const age =
-                document.getElementById(
-                    "age"
-                ).value.trim();
-
-            const gender =
-                document.getElementById(
-                    "gender"
-                ).value;
-
-            const phoneNumber =
-                document.getElementById(
-                    "phoneNumber"
-                ).value.trim();
-
-            const email =
-                document.getElementById(
-                    "email"
-                ).value.trim();
-
-            const symptoms =
-                document.getElementById(
-                    "symptoms"
-                ).value.trim();
+            const patientName = document.getElementById("patientName").value.trim();
+            const age = document.getElementById("age").value.trim();
+            const gender = document.getElementById("gender").value;
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
+            const symptoms = document.getElementById("symptoms").value.trim();
 
             if(!patientName){
-
-                showAlert(
-                    "Please enter the patient name.",
-                    "error"
-                );
-
+                showAlert("Please enter the patient name.", "error");
                 return false;
             }
 
-            if(
-                !age ||
-                Number(age) < 1 ||
-                Number(age) > 120
-            ){
-
-                showAlert(
-                    "Please enter a valid age.",
-                    "error"
-                );
-
+            if(!age || Number(age) < 1 || Number(age) > 120){
+                showAlert("Please enter a valid age.", "error");
                 return false;
             }
 
             if(!gender){
-
-                showAlert(
-                    "Please select gender.",
-                    "error"
-                );
-
+                showAlert("Please select gender.", "error");
                 return false;
             }
 
             if(!/^[6-9]\d{9}$/.test(phoneNumber)){
-
-                showAlert(
-                    "Please enter a valid 10-digit phone number.",
-                    "error"
-                );
-
-                return false;
-            }
-
-            if(
-                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-                    email
-                )
-            ){
-
-                showAlert(
-                    "Please enter a valid email address.",
-                    "error"
-                );
-
+                showAlert("Please enter a valid 10-digit Indian phone number.", "error");
                 return false;
             }
 
             if(!symptoms){
-
-                showAlert(
-                    "Please describe the patient's symptoms.",
-                    "error"
-                );
-
+                showAlert("Please describe the patient's symptoms.", "error");
                 return false;
             }
 
@@ -2770,638 +2515,285 @@
         }
 
         function goToStep4(){
-
-            if(!validatePatientForm()){
-                return;
-            }
-
+            if(!validatePatientForm()) return;
             updateBookingSummary();
             showStep(4);
         }
 
         function updateBookingSummary(){
+            document.getElementById("summaryDoctor").textContent =
+                bookingData.doctorSpecialization
+                    ? `${bookingData.doctorName} — ${bookingData.doctorSpecialization}`
+                    : bookingData.doctorName || "-";
 
-            document.getElementById(
-                "summaryDepartment"
-            ).textContent =
-                formatDepartment(
-                    bookingData.department
-                );
-
-            document.getElementById(
-                "summaryDoctor"
-            ).textContent =
-                bookingData.doctorName || "-";
-
-            document.getElementById(
-                "summaryDate"
-            ).textContent =
-                formatDate(
-                    bookingData.appointmentDate
-                );
-
-            document.getElementById(
-                "summaryTime"
-            ).textContent =
-                formatTime(
-                    bookingData.appointmentTime
-                );
-
-            document.getElementById(
-                "summaryPatient"
-            ).textContent =
-                document.getElementById(
-                    "patientName"
-                ).value.trim();
-
-            document.getElementById(
-                "summaryPhone"
-            ).textContent =
-                document.getElementById(
-                    "phoneNumber"
-                ).value.trim();
-
-            document.getElementById(
-                "summarySymptoms"
-            ).textContent =
-                document.getElementById(
-                    "symptoms"
-                ).value.trim();
+            document.getElementById("summaryDate").textContent = formatDate(bookingData.appointmentDate);
+            document.getElementById("summaryTime").textContent =
+                bookingData.appointmentEndTime
+                    ? `${formatTime(bookingData.appointmentTime)} - ${formatTime(bookingData.appointmentEndTime)}`
+                    : formatTime(bookingData.appointmentTime);
+            document.getElementById("summaryPatient").textContent = document.getElementById("patientName").value.trim();
+            document.getElementById("summaryPhone").textContent = document.getElementById("phoneNumber").value.trim();
+            document.getElementById("summarySymptoms").textContent = document.getElementById("symptoms").value.trim();
         }
 
         async function createAppointment(){
-
-            const token =
-                localStorage.getItem("token");
+            const token = getToken();
 
             if(!token){
-
-                showAlert(
-                    "Please log in before booking an appointment.",
-                    "error"
-                );
-
-                setTimeout(function(){
-
-                    window.location.href =
-                        "login.html";
-
-                }, 1300);
-
+                showAlert("Please log in before booking an appointment.", "error");
+                setTimeout(() => window.location.href = "login.html", 1200);
                 return;
             }
 
-            const payButton =
-                document.getElementById(
-                    "payButton"
-                );
+            if(!validatePatientForm() || !bookingData.doctorId || !bookingData.appointmentDate || !bookingData.appointmentTime){
+                showAlert("Please complete all appointment details.", "error");
+                return;
+            }
 
+            const payButton = document.getElementById("payButton");
             payButton.disabled = true;
-
             payButton.innerHTML = `
                 <i class="fa-solid fa-spinner fa-spin"></i>
                 Creating Appointment...
             `;
 
             const requestBody = {
-
-                doctorId:
-                    Number(bookingData.doctorId),
-
-                availabilityId:
-                    bookingData.availabilityId
-                        ? Number(
-                            bookingData.availabilityId
-                          )
-                        : null,
-
-                appointmentDate:
-                    bookingData.appointmentDate,
-
-                appointmentTime:
-                    bookingData.appointmentTime,
-
-                department:
-                    bookingData.department,
-
-                appointmentType:
-                    "OFFLINE",
-
-                patientName:
-                    document.getElementById(
-                        "patientName"
-                    ).value.trim(),
-
-                age:
-                    Number(
-                        document.getElementById(
-                            "age"
-                        ).value
-                    ),
-
-                gender:
-                    document.getElementById(
-                        "gender"
-                    ).value,
-
-                phoneNumber:
-                    document.getElementById(
-                        "phoneNumber"
-                    ).value.trim(),
-
-                email:
-                    document.getElementById(
-                        "email"
-                    ).value.trim(),
-
-                symptoms:
-                    document.getElementById(
-                        "symptoms"
-                    ).value.trim(),
-
-                pastHistory:
-                    document.getElementById(
-                        "pastHistory"
-                    ).value.trim(),
-
-                currentMedication:
-                    document.getElementById(
-                        "currentMedication"
-                    ).value.trim(),
-
-                bookingFee:50
-
+                doctorId: Number(bookingData.doctorId),
+                appointmentDate: bookingData.appointmentDate,
+                startTime: String(bookingData.appointmentTime).substring(0, 5),
+                appointmentMode: "OFFLINE",
+                patientName: document.getElementById("patientName").value.trim(),
+                phoneNumber: document.getElementById("phoneNumber").value.trim(),
+                age: Number(document.getElementById("age").value),
+                gender: document.getElementById("gender").value,
+                symptoms: document.getElementById("symptoms").value.trim(),
+                pastMedicalHistory: document.getElementById("pastHistory").value.trim()
             };
 
             try{
+                const stillAvailable =
+                    await verifySelectedSlotAvailability();
+
+                if(!stillAvailable){
+                    payButton.disabled = false;
+                    payButton.innerHTML = "Pay ₹50 and Confirm";
+                    return;
+                }
 
                 const response = await fetch(
                     `${API_BASE_URL}/api/appointments/book`,
                     {
-                        method:"POST",
-
-                        headers:{
-                            "Content-Type":
-                                "application/json",
-
-                            "Authorization":
-                                "Bearer " + token
-                        },
-
-                        body:JSON.stringify(
-                            requestBody
-                        )
+                        method: "POST",
+                        headers: authHeaders(true),
+                        body: JSON.stringify(requestBody)
                     }
                 );
 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
 
-                if(
-                    !response.ok ||
-                    !result.success
-                ){
-
-                    throw new Error(
-                        result.message ||
-                        "Unable to create appointment."
-                    );
+                if(!response.ok || result.success === false){
+                    throw new Error(result.message || "Unable to create appointment.");
                 }
 
-                sessionStorage.setItem(
-                    "pendingAppointment",
-                    JSON.stringify(result.data)
-                );
+                const appointment = result.data || {};
+                const appointmentId = appointment.id || appointment.appointmentId;
 
-                const appointmentId =
-                    result.data.id ||
-                    result.data.appointmentId;
+                if(!appointmentId){
+                    throw new Error("Appointment was created, but no appointment ID was returned.");
+                }
 
-                window.location.href =
-                    `booking-payment.html?type=OFFLINE&id=${appointmentId}`;
+                sessionStorage.setItem("pendingAppointment", JSON.stringify(appointment));
+                localStorage.setItem("pendingAppointmentId", String(appointmentId));
 
+                showAlert(result.message || "Appointment created successfully.", "success");
+
+                setTimeout(() => {
+                    window.location.href = `booking-payment.html?type=OFFLINE&id=${encodeURIComponent(appointmentId)}`;
+                }, 700);
             }catch(error){
-
-                console.error(
-                    "Appointment creation failed:",
-                    error
-                );
-
-                showAlert(
-                    error.message ||
-                    "Appointment could not be created.",
-                    "error"
-                );
-
+                console.error("Appointment creation failed:", error);
+                showAlert(error.message || "Appointment could not be created.", "error");
                 payButton.disabled = false;
-
-                payButton.textContent =
-                    "Pay ₹50 and Confirm";
+                payButton.textContent = "Pay ₹50 and Confirm";
             }
         }
 
         function showStep(stepNumber){
-
             currentStep = stepNumber;
 
-            document
-                .querySelectorAll(".booking-step")
-                .forEach(function(step){
+            document.querySelectorAll(".booking-step").forEach(step => {
+                step.classList.remove("active");
+            });
 
-                    step.classList.remove("active");
-                });
+            document.getElementById(`step${stepNumber}`).classList.add("active");
 
-            document.getElementById(
-                `step${stepNumber}`
-            ).classList.add("active");
+            document.querySelectorAll(".step-item").forEach(item => {
+                const indicator = Number(item.dataset.stepIndicator);
+                const circle = item.querySelector(".step-circle");
 
-            document
-                .querySelectorAll(".step-item")
-                .forEach(function(item){
+                item.classList.remove("active", "completed");
 
-                    const indicator =
-                        Number(
-                            item.dataset.stepIndicator
-                        );
+                if(indicator < stepNumber){
+                    item.classList.add("completed");
+                    circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+                }else{
+                    circle.textContent = indicator;
+                }
 
-                    item.classList.remove(
-                        "active",
-                        "completed"
-                    );
-
-                    if(indicator < stepNumber){
-
-                        item.classList.add("completed");
-
-                        item.querySelector(
-                            ".step-circle"
-                        ).innerHTML =
-                            '<i class="fa-solid fa-check"></i>';
-
-                    }else{
-
-                        item.querySelector(
-                            ".step-circle"
-                        ).textContent = indicator;
-                    }
-
-                    if(indicator === stepNumber){
-
-                        item.classList.add("active");
-                    }
-                });
+                if(indicator === stepNumber){
+                    item.classList.add("active");
+                }
+            });
 
             window.scrollTo({
-                top:
-                    document.querySelector(
-                        ".stepper-wrapper"
-                    ).offsetTop - 95,
-
-                behavior:"smooth"
+                top: document.querySelector(".stepper-wrapper").offsetTop - 95,
+                behavior: "smooth"
             });
         }
 
         async function loadPatientProfile(){
-
-            const token =
-                localStorage.getItem("token");
-
-            if(!token){
-                return;
-            }
+            const token = getToken();
+            if(!token) return;
 
             try{
-
                 const response = await fetch(
                     `${API_BASE_URL}/api/users/getProfile`,
-                    {
-                        headers:{
-                            "Authorization":
-                                "Bearer " + token
-                        }
-                    }
+                    { headers: authHeaders() }
                 );
 
-                if(!response.ok){
-                    return;
-                }
+                if(!response.ok) return;
 
-                const result = await response.json();
-
-                if(
-                    !result.success ||
-                    !result.data
-                ){
-                    return;
-                }
+                const result = await readJsonResponse(response);
+                if(!result.success || !result.data) return;
 
                 const user = result.data;
-
-                setInputValue(
-                    "patientName",
-                    user.name
-                );
-
-                setInputValue(
-                    "age",
-                    user.age
-                );
-
-                setInputValue(
-                    "gender",
-                    user.gender
-                );
-
-                setInputValue(
-                    "phoneNumber",
-                    user.phoneNumber ||
-                    user.phone
-                );
-
-                setInputValue(
-                    "email",
-                    user.email
-                );
-
+                setInputValue("patientName", user.name);
+                setInputValue("age", user.age);
+                setInputValue("gender", user.gender);
+                setInputValue("phoneNumber", user.phoneNumber || user.phone);
             }catch(error){
-
-                console.error(
-                    "Profile prefill failed:",
-                    error
-                );
+                console.error("Profile prefill failed:", error);
             }
         }
 
         function setInputValue(id, value){
-
-            if(
-                value === null ||
-                value === undefined
-            ){
-                return;
-            }
-
-            const input =
-                document.getElementById(id);
-
-            if(input){
-                input.value = value;
-            }
+            if(value === null || value === undefined) return;
+            const input = document.getElementById(id);
+            if(input) input.value = value;
         }
 
         async function loadProfileIcon(){
-
-            const icon =
-                document.getElementById(
-                    "profileIcon"
-                );
-
-            const token =
-                localStorage.getItem("token");
+            const icon = document.getElementById("profileIcon");
+            const token = getToken();
 
             if(!token){
-
-                icon.innerHTML =
-                    '<i class="fa-solid fa-user"></i>';
-
+                icon.innerHTML = '<i class="fa-solid fa-user"></i>';
                 icon.href = "login.html";
                 return;
             }
 
             try{
-
                 const response = await fetch(
                     `${API_BASE_URL}/api/users/getProfile`,
-                    {
-                        headers:{
-                            "Authorization":
-                                "Bearer " + token
-                        }
-                    }
+                    { headers: authHeaders() }
                 );
 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
 
-                if(
-                    result.success &&
-                    result.data &&
-                    result.data.name
-                ){
-
-                    icon.textContent =
-                        result.data.name
-                            .charAt(0)
-                            .toUpperCase();
-
+                if(result.success && result.data?.name){
+                    icon.textContent = result.data.name.charAt(0).toUpperCase();
                 }else{
-
-                    icon.innerHTML =
-                        '<i class="fa-solid fa-user"></i>';
+                    icon.innerHTML = '<i class="fa-solid fa-user"></i>';
                 }
-
             }catch(error){
-
-                icon.innerHTML =
-                    '<i class="fa-solid fa-user"></i>';
+                icon.innerHTML = '<i class="fa-solid fa-user"></i>';
             }
         }
 
-
         function toggleMobileMenu(){
+            const menu = document.getElementById("mobileNavigation");
+            const overlay = document.getElementById("mobileMenuOverlay");
+            const icon = document.getElementById("mobileMenuIcon");
 
-            const menu =
-                document.getElementById(
-                    "mobileNavigation"
-                );
-
-            const overlay =
-                document.getElementById(
-                    "mobileMenuOverlay"
-                );
-
-            const icon =
-                document.getElementById(
-                    "mobileMenuIcon"
-                );
-
-            if(!menu || !overlay){
-                return;
-            }
+            if(!menu || !overlay) return;
 
             menu.classList.toggle("open");
             overlay.classList.toggle("show");
 
-            const isOpen =
-                menu.classList.contains("open");
-
+            const isOpen = menu.classList.contains("open");
             if(icon){
-                icon.className = isOpen
-                    ? "fa-solid fa-xmark"
-                    : "fa-solid fa-bars";
+                icon.className = isOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars";
             }
-
-            document.body.style.overflow =
-                isOpen ? "hidden" : "";
+            document.body.style.overflow = isOpen ? "hidden" : "";
         }
 
         function closeMobileMenu(){
+            document.getElementById("mobileNavigation")?.classList.remove("open");
+            document.getElementById("mobileMenuOverlay")?.classList.remove("show");
 
-            const menu =
-                document.getElementById(
-                    "mobileNavigation"
-                );
-
-            const overlay =
-                document.getElementById(
-                    "mobileMenuOverlay"
-                );
-
-            const icon =
-                document.getElementById(
-                    "mobileMenuIcon"
-                );
-
-            if(menu){
-                menu.classList.remove("open");
-            }
-
-            if(overlay){
-                overlay.classList.remove("show");
-            }
-
-            if(icon){
-                icon.className =
-                    "fa-solid fa-bars";
-            }
-
+            const icon = document.getElementById("mobileMenuIcon");
+            if(icon) icon.className = "fa-solid fa-bars";
             document.body.style.overflow = "";
         }
 
-        function showAlert(message, type){
+        function showAlert(message, type = "info"){
+            const alertBox = document.getElementById("pageAlert");
+            const alertMessage = document.getElementById("alertMessage");
+            const alertIcon = document.getElementById("alertIcon");
 
-            const alertBox =
-                document.getElementById(
-                    "pageAlert"
-                );
-
-            const alertMessage =
-                document.getElementById(
-                    "alertMessage"
-                );
-
-            const alertIcon =
-                document.getElementById(
-                    "alertIcon"
-                );
-
-            alertBox.className =
-                `page-alert show ${type}`;
-
+            alertBox.className = `page-alert show ${type}`;
             alertMessage.textContent = message;
 
             if(type === "error"){
-
-                alertIcon.className =
-                    "fa-solid fa-circle-exclamation";
-
+                alertIcon.className = "fa-solid fa-circle-exclamation";
             }else if(type === "success"){
-
-                alertIcon.className =
-                    "fa-solid fa-circle-check";
-
+                alertIcon.className = "fa-solid fa-circle-check";
             }else{
-
-                alertIcon.className =
-                    "fa-solid fa-circle-info";
+                alertIcon.className = "fa-solid fa-circle-info";
             }
 
-            clearTimeout(
-                window.pageAlertTimer
-            );
-
-            window.pageAlertTimer =
-                setTimeout(function(){
-
-                    alertBox.classList.remove(
-                        "show"
-                    );
-
-                }, 4000);
+            clearTimeout(window.pageAlertTimer);
+            window.pageAlertTimer = setTimeout(() => {
+                alertBox.classList.remove("show");
+            }, 4500);
         }
 
-        function formatDepartment(value){
+        async function readJsonResponse(response){
+            const contentType = response.headers.get("content-type") || "";
+            if(contentType.includes("application/json")){
+                return response.json();
+            }
 
-            const departments = {
-
-                AYURVEDA:
-                    "Ayurveda",
-
-                PANCHAKARMA:
-                    "Panchakarma",
-
-                ACUPUNCTURE:
-                    "Acupuncture",
-
-                YOGA_NATUROPATHY:
-                    "Yoga & Naturopathy",
-
-                BEAUTY_COSMETICS:
-                    "Beauty & Cosmetics"
+            const text = await response.text();
+            return {
+                success: false,
+                message: text || `Request failed with status ${response.status}`
             };
-
-            return departments[value] || value || "-";
         }
 
         function formatDate(dateValue){
-
-            if(!dateValue){
-                return "-";
-            }
-
-            const date = new Date(
-                `${dateValue}T00:00:00`
-            );
-
-            return date.toLocaleDateString(
-                "en-IN",
-                {
-                    day:"2-digit",
-                    month:"long",
-                    year:"numeric"
-                }
-            );
+            if(!dateValue) return "-";
+            const date = new Date(`${dateValue}T00:00:00`);
+            return date.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            });
         }
 
         function formatTime(timeValue){
+            if(!timeValue) return "-";
 
-            if(!timeValue){
-                return "-";
-            }
-
-            const time =
-                String(timeValue).substring(0,5);
-
-            const parts = time.split(":");
-
-            let hour = Number(parts[0]);
-            const minute = parts[1];
-
-            const period =
-                hour >= 12 ? "PM" : "AM";
-
+            const time = String(timeValue).substring(0, 5);
+            const [hourPart, minute] = time.split(":");
+            let hour = Number(hourPart);
+            const period = hour >= 12 ? "PM" : "AM";
             hour = hour % 12 || 12;
-
             return `${hour}:${minute} ${period}`;
         }
 
         function escapeHtml(value){
-
-            if(
-                value === null ||
-                value === undefined
-            ){
-                return "";
-            }
-
+            if(value === null || value === undefined) return "";
             return String(value)
                 .replaceAll("&", "&amp;")
                 .replaceAll("<", "&lt;")
@@ -3409,8 +2801,6 @@
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
         }
-
     </script>
-
 </body>
 </html>

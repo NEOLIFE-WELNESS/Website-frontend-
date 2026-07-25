@@ -1925,57 +1925,97 @@ function formatPrice(
     );
 }
 
-async function deleteProduct(
-    id
-){
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this product?"
-        );
+async function deleteProduct(id) {
+    const confirmed = confirm(
+        "Are you sure you want to delete this product?"
+    );
 
-    if(!confirmed){
+    if (!confirmed) {
         return;
     }
 
-    /*
-    Enable this backend code later:
+    const token = localStorage.getItem("token");
 
-    const token =
-        localStorage.getItem("token");
+    if (!token) {
+        showAlert("Please login as admin first.", "error");
 
-    const response =
-        await fetch(
+        setTimeout(() => {
+            window.location.href = "../frontend/login.html";
+        }, 900);
+
+        return;
+    }
+
+    try {
+        const response = await fetch(
             `${API_BASE_URL}/api/products/remove/${id}`,
             {
-                method:"DELETE",
-
-                headers:{
-                    "Authorization":
-                        "Bearer " + token
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Bearer " + token
                 }
             }
         );
 
-    const result =
-        await response.json();
+        const text = await response.text();
 
-    if(
-        !response.ok ||
-        result.success === false
-    ){
-        throw new Error(
-            result.message ||
-            "Product could not be deleted."
+        let result = null;
+
+        try {
+            result = text ? JSON.parse(text) : null;
+        } catch (error) {
+            result = null;
+        }
+
+        if (response.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("role");
+            localStorage.removeItem("userId");
+
+            showAlert(
+                "Your session has expired. Please login again.",
+                "error"
+            );
+
+            setTimeout(() => {
+                window.location.href = "../frontend/login.html";
+            }, 900);
+
+            return;
+        }
+
+        if (response.status === 403) {
+            throw new Error(
+                result?.message ||
+                text ||
+                "Access denied. Only ADMIN can delete products."
+            );
+        }
+
+        if (!response.ok || result?.success === false) {
+            throw new Error(
+                result?.message ||
+                text ||
+                `Product deletion failed. Status: ${response.status}`
+            );
+        }
+
+        showAlert(
+            result?.message || "Product deleted successfully.",
+            "success"
+        );
+
+        await loadProducts();
+
+    } catch (error) {
+        console.error("Delete product error:", error);
+
+        showAlert(
+            error.message || "Unable to delete product.",
+            "error"
         );
     }
-
-    await loadProducts();
-    */
-
-    showAlert(
-        "Delete Product API can now be connected here.",
-        "info"
-    );
 }
 
 function toggleSidebar(){

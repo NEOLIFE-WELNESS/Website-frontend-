@@ -822,39 +822,49 @@ async function loadProfile(){
       }
     });
 
-    const result = await response.json();
-
-    if(result.success === true){
-      const user = result.data;
-
-      document.getElementById("profileName").innerText = user.name;
-      document.getElementById("profileEmail").innerText = user.email;
-      document.getElementById("profileAvatar").innerText =
-        user.name.charAt(0).toUpperCase();
-
-      if(document.getElementById("fullName")){
-        document.getElementById("fullName").value = user.name || "";
-        document.getElementById("email").value = user.email || "";
-        document.getElementById("phone").value = user.phoneNumber || "";
-        document.getElementById("age").value = user.age || "";
-        document.getElementById("gender").value = user.gender || "";
-      }
-
-      if(user.addresses && user.addresses.length > 0){
-        localStorage.setItem(
-          "addresses",
-          JSON.stringify(user.addresses)
-        );
-      }
-
-    }else{
-      alert(result.message || "Unable to load profile");
+    if(response.status === 401 || response.status === 403){
+      localStorage.clear();
+      alert("Your session has expired. Please login again.");
       window.location.href = "login.html";
+      return;
+    }
+
+    const result = await response.json().catch(() => ({}));
+
+    if(!response.ok || result.success !== true){
+      alert(result.message || "Unable to load profile");
+      return;
+    }
+
+    const user = result.data || {};
+    const userName = user.name || "Neolife User";
+    const userEmail = user.email || "";
+
+    document.getElementById("profileName").innerText = userName;
+    document.getElementById("profileEmail").innerText = userEmail;
+    document.getElementById("profileAvatar").innerText =
+      userName.charAt(0).toUpperCase();
+
+    const fullNameInput = document.getElementById("fullName");
+
+    if(fullNameInput){
+      fullNameInput.value = userName;
+      document.getElementById("email").value = userEmail;
+      document.getElementById("phone").value = user.phoneNumber || "";
+      document.getElementById("age").value = user.age ?? "";
+      document.getElementById("gender").value = user.gender || "";
+    }
+
+    localStorage.setItem("name", userName);
+    localStorage.setItem("email", userEmail);
+
+    if(Array.isArray(user.addresses)){
+      localStorage.setItem("addresses", JSON.stringify(user.addresses));
     }
 
   }catch(error){
-    alert("Backend not connected or token expired");
-    console.log(error);
+    console.error(error);
+    alert("Unable to load profile. Make sure the backend is running.");
   }
 }
 
@@ -867,77 +877,80 @@ async function saveProfile(){
     return;
   }
 
-  const profileData = {
-    name: document.getElementById("fullName").value.trim(),
-    email: document.getElementById("email").value.trim(),
-    phoneNumber: document.getElementById("phone").value.trim(),
-    age: Number(document.getElementById("age").value),
-    gender: document.getElementById("gender").value
-  };
+  const name = document.getElementById("fullName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const phoneNumber = document.getElementById("phone").value.trim();
+  const ageValue = document.getElementById("age").value;
+  const gender = document.getElementById("gender").value;
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/users/updateProfile`,
-    {
-      method:"PUT",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + token
-      },
-      body:JSON.stringify(profileData)
-    }
-  );
-
-  const result = await response.json();
-
-  if(result.success){
-    alert("Profile updated successfully");
-    
-function toggleMobileMenu(){
-  const menu = document.getElementById("mobileNavigation");
-  const overlay = document.getElementById("mobileMenuOverlay");
-  const icon = document.getElementById("mobileMenuIcon");
-
-  if(!menu || !overlay){
+  if(!name){
+    alert("Please enter your full name.");
     return;
   }
 
-  menu.classList.toggle("open");
-  overlay.classList.toggle("show");
-
-  const isOpen = menu.classList.contains("open");
-
-  if(icon){
-    icon.className = isOpen
-      ? "fa-solid fa-xmark"
-      : "fa-solid fa-bars";
+  if(!email){
+    alert("Please enter your email.");
+    return;
   }
 
-  document.body.style.overflow = isOpen ? "hidden" : "";
-}
-
-function closeMobileMenu(){
-  const menu = document.getElementById("mobileNavigation");
-  const overlay = document.getElementById("mobileMenuOverlay");
-  const icon = document.getElementById("mobileMenuIcon");
-
-  if(menu){
-    menu.classList.remove("open");
+  if(phoneNumber && !/^[0-9]{10}$/.test(phoneNumber)){
+    alert("Please enter a valid 10-digit phone number.");
+    return;
   }
 
-  if(overlay){
-    overlay.classList.remove("show");
+  const profileData = {
+    name,
+    email,
+    phoneNumber,
+    age: ageValue ? Number(ageValue) : null,
+    gender: gender || null
+  };
+
+  const saveButton = document.querySelector(".save-btn");
+
+  if(saveButton){
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
   }
 
-  if(icon){
-    icon.className = "fa-solid fa-bars";
-  }
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/api/users/updateProfile`,
+      {
+        method:"PUT",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token
+        },
+        body:JSON.stringify(profileData)
+      }
+    );
 
-  document.body.style.overflow = "";
-}
+    if(response.status === 401 || response.status === 403){
+      localStorage.clear();
+      alert("Your session has expired. Please login again.");
+      window.location.href = "login.html";
+      return;
+    }
 
-loadProfile();
-  }else{
-    alert(result.message || "Profile update failed");
+    const result = await response.json().catch(() => ({}));
+
+    if(!response.ok || !result.success){
+      alert(result.message || "Profile update failed");
+      return;
+    }
+
+    alert(result.message || "Profile updated successfully");
+    await loadProfile();
+
+  }catch(error){
+    console.error(error);
+    alert("Unable to update profile. Please check the backend connection.");
+  }finally{
+    if(saveButton){
+      saveButton.disabled = false;
+      saveButton.textContent = "Save Profile";
+    }
   }
 }
 
@@ -1337,7 +1350,17 @@ function clearAddressForm(){
 }
 
 function logout(){
-  localStorage.clear();
+  [
+    "token",
+    "refreshToken",
+    "userId",
+    "email",
+    "name",
+    "role",
+    "profileCompleted",
+    "isLoggedIn"
+  ].forEach(key => localStorage.removeItem(key));
+
   alert("Logged out successfully");
   window.location.href = "login.html";
 }
@@ -1414,7 +1437,7 @@ window.addEventListener("DOMContentLoaded",()=>{
     const buttons =
       document.querySelectorAll(".profile-menu button");
 
-    const addressBtn = buttons[2];
+    const addressBtn = buttons[3];
 
     showTab("address",addressBtn);
   }

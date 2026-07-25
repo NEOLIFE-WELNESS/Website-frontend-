@@ -1,4203 +1,719 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Prescription Pad - Neolife Doctor Portal</title>
-
-    <link
-        rel="icon"
-        type="image/jpeg"
-        href="../assets/main_logo.jpeg"
-    >
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    >
-
-    <style>
-        :root {
-            --dark-green: #153d29;
-            --green: #2d6844;
-            --green-light: #edf5ef;
-            --gold: #c99a16;
-            --gold-dark: #9b7200;
-            --cream: #f6f8f4;
-            --white: #ffffff;
-            --text: #173c29;
-            --muted: #6e7871;
-            --border: #dfe7e1;
-            --danger: #c74747;
-            --danger-light: #fff0f0;
-            --warning: #d88b18;
-            --warning-light: #fff6e8;
-            --success: #287146;
-            --success-light: #ebf7ef;
-            --info: #31708f;
-            --info-light: #edf6fb;
-            --sidebar-width: 270px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            min-height: 100vh;
-            font-family: Arial, Helvetica, sans-serif;
-            color: var(--text);
-            background: var(--cream);
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        a {
-            color: inherit;
-        }
-
-        .doctor-layout {
-            min-height: 100vh;
-            display: flex;
-        }
-
-        /* =========================
-           SIDEBAR
-        ========================== */
-
-        
-        .doctor-sidebar {
-    width: var(--sidebar-width);
-    height: 100vh;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-
-    display: flex;
-    flex-direction: column;
-
-    overflow: hidden;
-
-    color: var(--white);
-
-    background:
-        linear-gradient(
-            180deg,
-            #123824,
-            #1e5134
-        );
-
-    box-shadow:
-        8px 0 30px rgba(18, 56, 36, 0.14);
-
-    transition: transform 0.3s ease;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prescription Pad - Neolife Doctor Portal</title>
+<link rel="icon" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{
+  --dark:#153d29;--green:#2d6844;--light:#edf5ef;--gold:#c99a16;
+  --cream:#f6f8f4;--white:#fff;--text:#173c29;--muted:#6e7871;
+  --border:#dfe7e1;--danger:#c74747;--success:#287146;--info:#31708f;
+  --sidebar:260px
 }
-
-        .doctor-brand {
-            min-height: 104px;
-            padding: 20px 18px;
-
-            display: flex;
-            align-items: center;
-            gap: 13px;
-
-            border-bottom:
-                1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .doctor-brand img {
-            width: 58px;
-            height: 58px;
-
-            object-fit: cover;
-
-            border-radius: 50%;
-            border: 2px solid var(--gold);
-
-            background: var(--white);
-        }
-
-        .doctor-brand h2 {
-            margin-bottom: 5px;
-
-            font-size: 18px;
-            font-weight: 800;
-        }
-
-        .doctor-brand span {
-            color: #f2cf69;
-
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1.3px;
-            text-transform: uppercase;
-        }
-
-        .doctor-menu {
-    flex: 1;
-    padding: 20px 13px;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    scrollbar-width: thin;
-    scrollbar-color: #fcfcfc transparent;
-}
-.doctor-menu::-webkit-scrollbar {
-    width: 6px;
-}
-
-.doctor-menu::-webkit-scrollbar-thumb {
-    background: #c99a16;
-    border-radius: 10px;
-}
-
-.doctor-menu::-webkit-scrollbar-track {
-    background: transparent;
-}
-        .menu-label {
-            display: block;
-
-            margin: 8px 12px 10px;
-
-            color: rgba(255, 255, 255, 0.48);
-
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1.4px;
-            text-transform: uppercase;
-        }
-
-        .doctor-menu a {
-            min-height: 49px;
-            margin-bottom: 7px;
-            padding: 12px 14px;
-
-            display: flex;
-            align-items: center;
-            gap: 13px;
-
-            border-radius: 12px;
-
-            color: rgba(255, 255, 255, 0.82);
-
-            text-decoration: none;
-
-            font-size: 14px;
-            font-weight: 700;
-
-            transition: 0.25s;
-        }
-
-        .doctor-menu a i {
-            width: 21px;
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .doctor-menu a:hover,
-        .doctor-menu a.active {
-            color: var(--dark-green);
-            background: var(--white);
-
-            transform: translateX(3px);
-        }
-
-        .doctor-menu a.active i {
-            color: var(--gold);
-        }
-
-        .sidebar-footer {
-            padding: 17px 13px;
-
-            border-top:
-                1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .sidebar-logout {
-            width: 100%;
-            min-height: 46px;
-            padding: 11px 14px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-
-            border: 1px solid rgba(255, 255, 255, 0.20);
-            border-radius: 12px;
-
-            color: var(--white);
-            background: rgba(255, 255, 255, 0.08);
-
-            font-size: 14px;
-            font-weight: 800;
-
-            transition: 0.25s;
-        }
-
-        .sidebar-logout:hover {
-            color: var(--dark-green);
-            background: var(--white);
-        }
-
-
-        /* =========================
-           MAIN AND TOPBAR
-        ========================== */
-
-        .doctor-main {
-            width: calc(100% - var(--sidebar-width));
-            min-height: 100vh;
-            margin-left: var(--sidebar-width);
-        }
-
-        .doctor-topbar {
-            min-height: 86px;
-            padding: 15px 28px;
-
-            position: sticky;
-            top: 0;
-            z-index: 900;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-
-            background: rgba(255, 255, 255, 0.96);
-
-            border-bottom: 1px solid var(--border);
-
-            box-shadow:
-                0 4px 18px rgba(18, 56, 36, 0.06);
-
-            backdrop-filter: blur(14px);
-        }
-
-        .topbar-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .sidebar-toggle {
-            display: none;
-
-            width: 43px;
-            height: 43px;
-
-            align-items: center;
-            justify-content: center;
-
-            border: none;
-            border-radius: 11px;
-
-            color: var(--white);
-            background: var(--dark-green);
-
-            font-size: 18px;
-        }
-
-        .page-title h1 {
-            margin-bottom: 5px;
-
-            color: var(--dark-green);
-
-            font-size: 27px;
-            font-weight: 800;
-        }
-
-        .page-title p {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .doctor-profile-box {
-            padding: 6px 11px 6px 7px;
-
-            display: flex;
-            align-items: center;
-            gap: 10px;
-
-            border: 1px solid var(--border);
-            border-radius: 30px;
-
-            background: var(--white);
-        }
-
-        .doctor-avatar {
-            width: 39px;
-            height: 39px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 50%;
-
-            color: var(--white);
-
-            background:
-                linear-gradient(
-                    145deg,
-                    var(--gold),
-                    var(--gold-dark)
-                );
-
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .doctor-profile-text strong {
-            display: block;
-
-            margin-bottom: 2px;
-
-            color: var(--dark-green);
-            font-size: 13px;
-        }
-
-        .doctor-profile-text span {
-            color: var(--muted);
-            font-size: 10px;
-        }
-
-        /* =========================
-           CONTENT
-        ========================== */
-
-        .doctor-content {
-            padding: 28px;
-        }
-
-        .prescription-header-card {
-            margin-bottom: 22px;
-            padding: 24px 26px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-
-            border-radius: 20px;
-
-            color: var(--white);
-
-            background:
-                linear-gradient(
-                    120deg,
-                    var(--dark-green),
-                    #347650
-                );
-
-            box-shadow:
-                0 15px 35px rgba(21, 61, 41, 0.14);
-        }
-
-        .prescription-header-card h2 {
-            margin-bottom: 8px;
-            font-size: 26px;
-        }
-
-        .prescription-header-card p {
-            max-width: 690px;
-
-            color: rgba(255, 255, 255, 0.80);
-
-            font-size: 13px;
-            line-height: 1.7;
-        }
-
-        .prescription-header-icon {
-            width: 66px;
-            height: 66px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            flex-shrink: 0;
-
-            border-radius: 18px;
-
-            color: #ffe28b;
-            background: rgba(255, 255, 255, 0.10);
-
-            font-size: 28px;
-        }
-
-        /* =========================
-           SELECTORS
-        ========================== */
-
-        .selector-panel {
-            margin-bottom: 22px;
-            padding: 21px;
-
-            display: grid;
-            grid-template-columns:
-                minmax(230px, 1fr)
-                minmax(230px, 1fr)
-                auto;
-
-            gap: 15px;
-            align-items: end;
-
-            border: 1px solid var(--border);
-            border-radius: 18px;
-
-            background: var(--white);
-
-            box-shadow:
-                0 9px 25px rgba(21, 61, 41, 0.06);
-        }
-
-        .form-group {
-            min-width: 0;
-        }
-
-        .form-group label {
-            display: block;
-
-            margin-bottom: 8px;
-
-            color: var(--dark-green);
-
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .required {
-            color: var(--danger);
-        }
-
-        .form-control {
-            width: 100%;
-            min-height: 48px;
-
-            padding: 11px 14px;
-
-            border: 1px solid var(--border);
-            border-radius: 11px;
-
-            color: #354039;
-            background: var(--white);
-
-            outline: none;
-            transition: 0.2s;
-        }
-
-        .form-control:focus {
-            border-color: var(--gold);
-
-            box-shadow:
-                0 0 0 3px rgba(201, 154, 22, 0.12);
-        }
-
-        textarea.form-control {
-            min-height: 105px;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        .load-patient-button {
-            min-height: 48px;
-            padding: 11px 20px;
-
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-
-            border: none;
-            border-radius: 11px;
-
-            color: var(--white);
-            background: var(--dark-green);
-
-            font-size: 12px;
-            font-weight: 800;
-
-            transition: 0.22s;
-        }
-
-        .load-patient-button:hover {
-            background: var(--gold-dark);
-        }
-
-        /* =========================
-           PATIENT SUMMARY
-        ========================== */
-
-        .patient-summary {
-            margin-bottom: 22px;
-            padding: 21px;
-
-            display: grid;
-            grid-template-columns:
-                minmax(250px, 1fr)
-                repeat(4, minmax(120px, 0.55fr));
-
-            gap: 16px;
-
-            border: 1px solid #cfe0d3;
-            border-radius: 18px;
-
-            background: var(--green-light);
-        }
-
-        .patient-main-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .patient-avatar {
-            width: 58px;
-            height: 58px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            flex-shrink: 0;
-
-            border-radius: 50%;
-
-            color: var(--white);
-            background: var(--dark-green);
-
-            font-size: 21px;
-            font-weight: 800;
-        }
-
-        .patient-main-info h3 {
-            margin-bottom: 5px;
-
-            color: var(--dark-green);
-            font-size: 17px;
-        }
-
-        .patient-main-info p {
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        .summary-detail {
-            padding: 11px;
-
-            border-radius: 11px;
-
-            background: rgba(255, 255, 255, 0.67);
-        }
-
-        .summary-detail span {
-            display: block;
-
-            margin-bottom: 5px;
-
-            color: var(--muted);
-
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .summary-detail strong {
-            color: var(--dark-green);
-            font-size: 11px;
-        }
-
-        /* =========================
-           MAIN GRID
-        ========================== */
-
-        .prescription-layout {
-            display: grid;
-            grid-template-columns:
-                minmax(0, 1.45fr)
-                minmax(290px, 0.55fr);
-
-            gap: 22px;
-            align-items: start;
-        }
-
-        .prescription-main,
-        .prescription-side {
-            min-width: 0;
-
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-        }
-
-        .form-card {
-            overflow: hidden;
-
-            border: 1px solid var(--border);
-            border-radius: 19px;
-
-            background: var(--white);
-
-            box-shadow:
-                0 10px 28px rgba(21, 61, 41, 0.06);
-        }
-
-        .card-header {
-            padding: 17px 20px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-
-            border-bottom: 1px solid var(--border);
-
-            background: #fbfcfa;
-        }
-
-        .card-header-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            flex-shrink: 0;
-
-            border-radius: 11px;
-
-            color: var(--gold-dark);
-            background: #fff7df;
-
-            font-size: 16px;
-        }
-
-        .card-header h2 {
-            margin-bottom: 4px;
-
-            color: var(--dark-green);
-            font-size: 17px;
-        }
-
-        .card-header p {
-            color: var(--muted);
-            font-size: 10px;
-        }
-
-        .card-body {
-            padding: 21px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-
-            gap: 18px;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        /* =========================
-           PATIENT HISTORY BOXES
-        ========================== */
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .history-item {
-            padding: 13px;
-
-            border-left: 3px solid var(--green);
-            border-radius: 9px;
-
-            background: #f8faf7;
-        }
-
-        .history-item.warning {
-            border-left-color: var(--warning);
-            background: var(--warning-light);
-        }
-
-        .history-item.danger {
-            border-left-color: var(--danger);
-            background: var(--danger-light);
-        }
-
-        .history-item span {
-            display: block;
-
-            margin-bottom: 5px;
-
-            color: var(--muted);
-
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .history-item p {
-            color: var(--dark-green);
-
-            font-size: 11px;
-            line-height: 1.6;
-        }
-
-        /* =========================
-           MEDICINE TABLE
-        ========================== */
-
-        .add-medicine-button {
-            min-height: 39px;
-            padding: 9px 15px;
-
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-
-            border: none;
-            border-radius: 10px;
-
-            color: var(--white);
-            background: var(--dark-green);
-
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .medicine-table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .medicine-table {
-            width: 100%;
-            min-width: 1050px;
-
-            border-collapse: separate;
-            border-spacing: 0 11px;
-        }
-
-        .medicine-table th {
-            padding: 0 7px 7px;
-
-            color: var(--muted);
-
-            font-size: 9px;
-            font-weight: 800;
-            text-align: left;
-            text-transform: uppercase;
-        }
-
-        .medicine-table td {
-            padding: 7px;
-
-            background: #f9fbf8;
-        }
-
-        .medicine-table td:first-child {
-            border-radius: 11px 0 0 11px;
-        }
-
-        .medicine-table td:last-child {
-            border-radius: 0 11px 11px 0;
-        }
-
-        .medicine-table .form-control {
-            min-height: 42px;
-            padding: 9px 10px;
-
-            font-size: 11px;
-        }
-
-        .medicine-name-column {
-            min-width: 210px;
-        }
-
-        .dosage-column {
-            min-width: 120px;
-        }
-
-        .route-column,
-        .frequency-column,
-        .food-column {
-            min-width: 145px;
-        }
-
-        .duration-column {
-            min-width: 115px;
-        }
-
-        .medicine-notes-column {
-            min-width: 180px;
-        }
-
-        .remove-medicine-button {
-            width: 37px;
-            height: 37px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border: none;
-            border-radius: 9px;
-
-            color: var(--danger);
-            background: var(--danger-light);
-
-            transition: 0.2s;
-        }
-
-        .remove-medicine-button:hover {
-            color: var(--white);
-            background: var(--danger);
-        }
-
-        .medicine-empty-message {
-            padding: 28px;
-
-            text-align: center;
-
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        /* =========================
-           SWITCH
-        ========================== */
-
-        .cart-switch-box {
-            padding: 15px;
-
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 15px;
-
-            border: 1px solid #cfe0d3;
-            border-radius: 13px;
-
-            background: var(--green-light);
-        }
-
-        .cart-switch-box h3 {
-            margin-bottom: 5px;
-
-            color: var(--dark-green);
-            font-size: 13px;
-        }
-
-        .cart-switch-box p {
-            color: var(--muted);
-
-            font-size: 10px;
-            line-height: 1.55;
-        }
-
-        .switch {
-            width: 45px;
-            height: 24px;
-
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .switch input {
-            display: none;
-        }
-
-        .switch-slider {
-            position: absolute;
-            inset: 0;
-
-            border-radius: 20px;
-
-            background: #bfc9c1;
-
-            transition: 0.25s;
-        }
-
-        .switch-slider::before {
-            content: "";
-
-            width: 18px;
-            height: 18px;
-
-            position: absolute;
-            top: 3px;
-            left: 3px;
-
-            border-radius: 50%;
-
-            background: var(--white);
-
-            box-shadow:
-                0 2px 5px rgba(0, 0, 0, 0.18);
-
-            transition: 0.25s;
-        }
-
-        .switch input:checked +
-        .switch-slider {
-            background: var(--dark-green);
-        }
-
-        .switch input:checked +
-        .switch-slider::before {
-            transform: translateX(21px);
-        }
-
-        /* =========================
-           STATUS
-        ========================== */
-
-        .prescription-status-box {
-            padding: 16px;
-
-            border-radius: 13px;
-
-            color: var(--dark-green);
-            background: #fff8e7;
-
-            border: 1px solid #ebce7f;
-        }
-
-        .prescription-status-box span {
-            display: block;
-
-            margin-bottom: 6px;
-
-            color: #976500;
-
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .prescription-status-box strong {
-            font-size: 13px;
-        }
-
-        /* =========================
-           ACTIONS
-        ========================== */
-
-        .prescription-actions {
-            margin-top: 22px;
-            padding: 19px 21px;
-
-            position: sticky;
-            bottom: 0;
-            z-index: 200;
-
-            display: flex;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: 10px;
-
-            border: 1px solid var(--border);
-            border-radius: 16px;
-
-            background: rgba(255, 255, 255, 0.97);
-
-            box-shadow:
-                0 -5px 20px rgba(21, 61, 41, 0.07);
-
-            backdrop-filter: blur(10px);
-        }
-
-        .action-button {
-            min-height: 45px;
-            padding: 10px 19px;
-
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-
-            border-radius: 11px;
-
-            font-size: 11px;
-            font-weight: 800;
-
-            transition: 0.22s;
-        }
-
-        .cancel-button {
-            color: var(--dark-green);
-            border: 1px solid var(--border);
-            background: var(--white);
-        }
-
-        .draft-button {
-            color: #8c6400;
-            border: 1px solid #e5c76f;
-            background: #fff8e7;
-        }
-
-        .print-button {
-            color: var(--info);
-            border: 1px solid #b7d6e5;
-            background: var(--info-light);
-        }
-
-        .issue-button {
-            color: var(--white);
-            border: 1px solid var(--dark-green);
-            background: var(--dark-green);
-        }
-
-        .issue-button:hover {
-            border-color: var(--gold-dark);
-            background: var(--gold-dark);
-
-            transform: translateY(-2px);
-        }
-
-        .action-button:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* =========================
-           ALERT
-        ========================== */
-
-        .page-alert {
-            width:
-                min(
-                    390px,
-                    calc(100% - 35px)
-                );
-
-            padding: 15px 17px;
-
-            position: fixed;
-            top: 102px;
-            right: 22px;
-            z-index: 5000;
-
-            display: none;
-            align-items: flex-start;
-            gap: 11px;
-
-            border-radius: 13px;
-
-            color: var(--white);
-
-            box-shadow:
-                0 14px 35px rgba(0, 0, 0, 0.20);
-        }
-
-        .page-alert.show {
-            display: flex;
-        }
-
-        .page-alert.success {
-            background: var(--success);
-        }
-
-        .page-alert.error {
-            background: var(--danger);
-        }
-
-        .page-alert.info {
-            background: var(--info);
-        }
-
-        .alert-message {
-            flex: 1;
-
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .sidebar-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 950;
-
-            display: none;
-
-            background:
-                rgba(13, 36, 24, 0.58);
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
-
-        /* =========================
-           PRINT
-        ========================== */
-
-        .print-prescription {
-            display: none;
-        }
-
-        @media print {
-            body {
-                background: #ffffff;
-            }
-
-            .doctor-sidebar,
-            .doctor-topbar,
-            .prescription-header-card,
-            .selector-panel,
-            .prescription-layout,
-            .prescription-actions,
-            .page-alert {
-                display: none !important;
-            }
-
-            .doctor-main {
-                width: 100%;
-                margin: 0;
-            }
-
-            .doctor-content {
-                padding: 0;
-            }
-
-            .print-prescription {
-                display: block;
-                padding: 30px;
-            }
-
-            .print-header {
-                padding-bottom: 18px;
-                margin-bottom: 20px;
-
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-
-                border-bottom: 2px solid #153d29;
-            }
-
-            .print-brand {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
-
-            .print-brand img {
-                width: 70px;
-                height: 70px;
-
-                object-fit: cover;
-                border-radius: 50%;
-            }
-
-            .print-brand h1 {
-                color: #153d29;
-                font-size: 23px;
-            }
-
-            .print-brand p {
-                margin-top: 4px;
-                font-size: 12px;
-            }
-
-            .print-doctor-details {
-                text-align: right;
-                font-size: 11px;
-                line-height: 1.6;
-            }
-
-            .print-patient-grid {
-                margin-bottom: 20px;
-                padding: 15px;
-
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 10px;
-
-                border: 1px solid #cccccc;
-            }
-
-            .print-patient-grid div {
-                font-size: 11px;
-            }
-
-            .print-section {
-                margin-bottom: 20px;
-            }
-
-            .print-section h3 {
-                margin-bottom: 8px;
-                color: #153d29;
-                font-size: 14px;
-            }
-
-            .print-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .print-table th,
-            .print-table td {
-                padding: 8px;
-                border: 1px solid #cccccc;
-                font-size: 10px;
-                text-align: left;
-            }
-
-            .print-signature {
-                margin-top: 55px;
-                text-align: right;
-            }
-        }
-
-        /* =========================
-           RESPONSIVE
-        ========================== */
-
-        @media (max-width: 1150px) {
-            .patient-summary {
-                grid-template-columns:
-                    repeat(3, minmax(0, 1fr));
-            }
-
-            .patient-main-info {
-                grid-column: 1 / -1;
-            }
-
-            .prescription-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .doctor-sidebar {
-                transform: translateX(-100%);
-            }
-
-            .doctor-sidebar.open {
-                transform: translateX(0);
-            }
-
-            .doctor-main {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .sidebar-toggle {
-                display: flex;
-            }
-
-            .selector-panel {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .doctor-topbar {
-                padding: 13px 16px;
-            }
-
-            .doctor-content {
-                padding: 20px 14px;
-            }
-
-            .page-title h1 {
-                font-size: 21px;
-            }
-
-            .page-title p,
-            .doctor-profile-text {
-                display: none;
-            }
-
-            .prescription-header-card {
-                align-items: flex-start;
-                flex-direction: column-reverse;
-            }
-
-            .patient-summary {
-                grid-template-columns: 1fr;
-            }
-
-            .patient-main-info {
-                grid-column: auto;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-group.full-width {
-                grid-column: auto;
-            }
-
-            .card-body {
-                padding: 18px 15px;
-            }
-
-            .prescription-actions {
-                flex-direction: column-reverse;
-            }
-
-            .action-button {
-                width: 100%;
-            }
-        }
-    </style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+body{background:var(--cream);color:var(--text);min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.layout{display:flex;min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:linear-gradient(180deg,#123824,#1e5134);color:#fff;display:flex;flex-direction:column;z-index:1000}
+.brand{padding:20px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.12)}
+.brand img{width:54px;height:54px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+.brand h2{font-size:18px}.brand span{font-size:10px;color:#f2cf69;letter-spacing:1.2px;text-transform:uppercase}
+.menu{padding:18px 12px;overflow:auto;flex:1}
+.menu-label{display:block;margin:10px 12px;color:rgba(255,255,255,.48);font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
+.menu a{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.84);text-decoration:none;padding:12px 13px;border-radius:11px;margin-bottom:6px;font-size:13px;font-weight:700}
+.menu a:hover,.menu a.active{background:#fff;color:var(--dark)}
+.menu a i{width:20px;text-align:center}
+.sidebar-footer{padding:14px;border-top:1px solid rgba(255,255,255,.12)}
+.logout{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-weight:800}
+.main{width:calc(100% - var(--sidebar));margin-left:var(--sidebar);min-height:100vh}
+.topbar{position:sticky;top:0;z-index:900;min-height:82px;padding:14px 26px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:25px;color:var(--dark)}.topbar p{font-size:12px;color:var(--muted);margin-top:4px}
+.doctor-box{display:flex;align-items:center;gap:10px;border:1px solid var(--border);padding:6px 11px 6px 7px;border-radius:28px;background:#fff}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,var(--gold),#9b7200);color:#fff;font-weight:800}
+.doctor-box strong{display:block;font-size:13px}.doctor-box span{font-size:10px;color:var(--muted)}
+.content{padding:26px}
+.hero{background:linear-gradient(120deg,var(--dark),#347650);color:#fff;border-radius:20px;padding:24px 26px;display:flex;justify-content:space-between;gap:20px;margin-bottom:20px}
+.hero h2{font-size:25px;margin-bottom:7px}.hero p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.8)}
+.hero-icon{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:27px;color:#ffe28b}
+.alert{display:none;padding:13px 15px;border-radius:11px;margin-bottom:18px;font-size:13px;font-weight:700}
+.alert.show{display:block}.alert.error{background:#fff0f0;color:#9e3030;border:1px solid #edc1c1}.alert.success{background:#ebf7ef;color:#24653f;border:1px solid #c8e4d1}.alert.info{background:#edf6fb;color:#2d647f;border:1px solid #c8e0ec}
+.patient-card,.form-card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:0 8px 24px rgba(21,61,41,.06)}
+.patient-card{padding:20px;margin-bottom:20px}
+.patient-grid{display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:14px;align-items:center}
+.patient-main{display:flex;align-items:center;gap:13px}.patient-avatar{width:52px;height:52px;border-radius:50%;background:var(--dark);color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
+.patient-main h3{font-size:17px;margin-bottom:4px}.patient-main p{font-size:11px;color:var(--muted)}
+.info-box{padding:11px;border-radius:10px;background:var(--light)}.info-box span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-bottom:5px}.info-box strong{font-size:12px}
+.grid{display:grid;grid-template-columns:1.3fr .7fr;gap:20px}
+.form-card{overflow:hidden;margin-bottom:20px}
+.card-header{padding:17px 20px;border-bottom:1px solid var(--border);background:#fbfcfa;display:flex;align-items:center;justify-content:space-between}
+.card-header h2{font-size:17px}.card-header p{font-size:10px;color:var(--muted);margin-top:4px}
+.card-body{padding:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
+label{display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--dark)}
+.control{width:100%;min-height:45px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;outline:none;background:#fff}
+.control:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,154,22,.12)}
+textarea.control{min-height:100px;resize:vertical;line-height:1.5}
+.med-table-wrap{overflow-x:auto}.med-table{width:100%;min-width:850px;border-collapse:collapse}.med-table th,.med-table td{padding:10px;border-bottom:1px solid #edf0ed;text-align:left;font-size:11px;vertical-align:top}.med-table th{background:#f8faf7;color:var(--muted);font-size:9px;text-transform:uppercase}
+.icon-btn{width:34px;height:34px;border:0;border-radius:8px}.remove-btn{background:#fff0f0;color:var(--danger)}
+.add-btn,.primary-btn,.secondary-btn{border:0;border-radius:10px;padding:11px 16px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.add-btn,.primary-btn{background:var(--dark);color:#fff}.secondary-btn{background:var(--light);color:var(--dark)}
+.actions{display:flex;justify-content:flex-end;gap:10px;padding:18px 20px;border-top:1px solid var(--border)}
+.history-item{padding:12px;border-radius:10px;background:var(--light);margin-bottom:10px}.history-item span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-bottom:5px}.history-item p{font-size:11px;line-height:1.5}
+.status-pill{display:inline-flex;padding:6px 10px;border-radius:20px;font-size:10px;font-weight:800;background:#fff6e8;color:#946300}
+.mobile-toggle{display:none;width:42px;height:42px;border:0;border-radius:10px;background:var(--dark);color:#fff}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:950}
+@media(max-width:1050px){.grid{grid-template-columns:1fr}.patient-grid{grid-template-columns:1fr 1fr}.patient-main{grid-column:1/-1}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.3s}.sidebar.open{transform:translateX(0)}.overlay.show{display:block}.main{width:100%;margin-left:0}.mobile-toggle{display:grid;place-items:center}.topbar{padding:12px 15px}.content{padding:18px 14px}}
+@media(max-width:650px){.doctor-box>div:last-child{display:none}.hero{flex-direction:column-reverse}.patient-grid,.form-grid{grid-template-columns:1fr}.full,.patient-main{grid-column:auto}.actions{flex-direction:column-reverse}.actions button{width:100%}}
+</style>
 </head>
-
 <body>
-
-    <!-- ALERT -->
-
-    <div
-        class="page-alert"
-        id="pageAlert"
-    >
-        <i
-            class="fa-solid fa-circle-info"
-            id="alertIcon"
-        ></i>
-
-        <div
-            class="alert-message"
-            id="alertMessage"
-        ></div>
-    </div>
-
-    <!-- SIDEBAR OVERLAY -->
-
-    <div
-        class="sidebar-overlay"
-        id="sidebarOverlay"
-        onclick="closeSidebar()"
-    ></div>
-
-    <div class="doctor-layout">
-
-        <!-- SIDEBAR -->
-
-        <aside
-            class="doctor-sidebar"
-            id="doctorSidebar"
-        >
-
-            <div class="doctor-brand">
-
-                <img
-                    src="../assets/main_logo.jpeg"
-                    alt="Neolife Logo"
-                >
-
-                <div>
-                    <h2>Neolife</h2>
-                    <span>Doctor Portal</span>
-                </div>
-
-            </div>
-
-            <nav class="doctor-menu">
-
-                <span class="menu-label">
-                    Main
-                </span>
-
-                <a href="doctor-dashboard.html">
-                    <i class="fa-solid fa-chart-line"></i>
-                    Dashboard
-                </a>
-
-                <a href="patients.html">
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><img src="../assets/main_logo.jpeg"><div><h2>Neolife</h2><span>Doctor Portal</span></div></div>
+  <nav class="menu">
+    <span class="menu-label">Main</span>
+    <a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
+    <a href="patients.html"><i class="fa-solid fa-users"></i>Patients</a>
+    <a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
+    <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
-                    Patient Dashboard
+                    Manage Availability
                 </a>
-
-                <a href="appointment-calendar.html">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    Appointment Calendar
-                </a>
-
-                <a href="add-patient.html">
-                    <i class="fa-solid fa-user-plus"></i>
-                    Add Walk-in Patient
-                </a>
-
-                <span class="menu-label">
-                    Clinical
-                </span>
-
-                <a
-                    href="prescription-pad.html"
-                    class="active"
-                >
-                    <i class="fa-solid fa-prescription-bottle-medical"></i>
-                    Prescription Pad
-                </a>
-
-                <a href="doctor-appointments.html">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    Appointment Details
-                </a>
-
-                <a href="video-recordings.html">
-                    <i class="fa-solid fa-video"></i>
-                    Video Recordings
-                </a>
-
-                <span class="menu-label">
-                    Finance
-                </span>
-
-                <a href="transactions.html">
-                    <i class="fa-solid fa-indian-rupee-sign"></i>
-                    Transactions
-                </a>
-
-                <a href="doctor-profile.html">
-                    <i class="fa-solid fa-user-doctor"></i>
-                    My Profile
-                </a>
-
-            </nav>
-
-            <div class="sidebar-footer">
-
-                <button
-                    type="button"
-                    class="sidebar-logout"
-                    onclick="doctorLogout()"
-                >
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    Logout
-                </button>
-
-            </div>
-
-        </aside>
-
-        <!-- MAIN -->
-
-        <main class="doctor-main">
-
-            <!-- TOPBAR -->
-
-            <header class="doctor-topbar">
-
-                <div class="topbar-left">
-
-                    <button
-                        type="button"
-                        class="sidebar-toggle"
-                        onclick="toggleSidebar()"
-                    >
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-
-                    <div class="page-title">
-
-                        <h1>Prescription Pad</h1>
-
-                        <p>
-                            Create and issue patient prescriptions.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="topbar-actions">
-
-                    <div class="doctor-profile-box">
-
-                        <span
-                            class="doctor-avatar"
-                            id="doctorInitial"
-                        >
-                            D
-                        </span>
-
-                        <div class="doctor-profile-text">
-
-                            <strong id="doctorTopbarName">
-                                Doctor
-                            </strong>
-
-                            <span id="doctorSpecialization">
-                                Medical Consultant
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </header>
-
-            <!-- CONTENT -->
-
-            <section class="doctor-content">
-
-                <!-- PAGE HEADER -->
-
-                <div class="prescription-header-card">
-
-                    <div>
-
-                        <h2>
-                            Digital Prescription Workspace
-                        </h2>
-
-                        <p>
-                            Review patient information, record diagnosis,
-                            prescribe medicines and issue a complete digital
-                            prescription.
-                        </p>
-
-                    </div>
-
-                    <div class="prescription-header-icon">
-                        <i class="fa-solid fa-file-prescription"></i>
-                    </div>
-
-                </div>
-
-                <!-- PATIENT / APPOINTMENT SELECTOR -->
-
-                <section class="selector-panel">
-
-                    <div class="form-group">
-
-                        <label for="patientSelect">
-                            Select Patient
-                            <span class="required">*</span>
-                        </label>
-
-                        <select
-                            id="patientSelect"
-                            class="form-control"
-                            onchange="handlePatientSelection()"
-                        >
-                            <option value="">
-                                Select patient
-                            </option>
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="appointmentSelect">
-                            Select Appointment / Visit
-                        </label>
-
-                        <select
-                            id="appointmentSelect"
-                            class="form-control"
-                            onchange="handleAppointmentSelection()"
-                        >
-                            <option value="">
-                                Select appointment
-                            </option>
-                        </select>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="load-patient-button"
-                        onclick="loadSelectedPatientDetails()"
-                    >
-                        <i class="fa-solid fa-user-check"></i>
-                        Load Patient
-                    </button>
-
-                </section>
-
-                <!-- PATIENT SUMMARY -->
-
-                <section
-                    class="patient-summary"
-                    id="patientSummary"
-                >
-
-                    <div class="patient-main-info">
-
-                        <span
-                            class="patient-avatar"
-                            id="patientInitial"
-                        >
-                            P
-                        </span>
-
-                        <div>
-
-                            <h3 id="patientNameDisplay">
-                                Select a patient
-                            </h3>
-
-                            <p id="patientCodeDisplay">
-                                Patient details will appear here
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <div class="summary-detail">
-                        <span>Age / Gender</span>
-                        <strong id="patientAgeGender">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="summary-detail">
-                        <span>Phone</span>
-                        <strong id="patientPhone">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="summary-detail">
-                        <span>Visit Type</span>
-                        <strong id="patientVisitType">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="summary-detail">
-                        <span>Appointment</span>
-                        <strong id="appointmentCode">
-                            -
-                        </strong>
-                    </div>
-
-                </section>
-
-                <div class="prescription-layout">
-
-                    <!-- MAIN COLUMN -->
-
-                    <div class="prescription-main">
-
-                        <!-- CLINICAL DETAILS -->
-
-                        <section class="form-card">
-
-                            <div class="card-header">
-
-                                <div class="card-header-title">
-
-                                    <div class="card-icon">
-                                        <i class="fa-solid fa-stethoscope"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2>Clinical Assessment</h2>
-
-                                        <p>
-                                            Diagnosis and clinical observations.
-                                        </p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="card-body">
-
-                                <div class="form-grid">
-
-                                    <div class="form-group full-width">
-
-                                        <label for="chiefComplaint">
-                                            Chief Complaint
-                                        </label>
-
-                                        <textarea
-                                            id="chiefComplaint"
-                                            class="form-control"
-                                            placeholder="Patient’s main symptoms and reason for consultation"
-                                        ></textarea>
-
-                                    </div>
-
-                                    <div class="form-group full-width">
-
-                                        <label for="diagnosis">
-                                            Diagnosis
-                                            <span class="required">*</span>
-                                        </label>
-
-                                        <textarea
-                                            id="diagnosis"
-                                            class="form-control"
-                                            placeholder="Enter clinical diagnosis"
-                                        ></textarea>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="clinicalFindings">
-                                            Clinical Findings
-                                        </label>
-
-                                        <textarea
-                                            id="clinicalFindings"
-                                            class="form-control"
-                                            placeholder="Examination findings"
-                                        ></textarea>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="doctorNotes">
-                                            Doctor Notes
-                                        </label>
-
-                                        <textarea
-                                            id="doctorNotes"
-                                            class="form-control"
-                                            placeholder="Additional clinical notes"
-                                        ></textarea>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                        <!-- MEDICINES -->
-
-                        <section class="form-card">
-
-                            <div class="card-header">
-
-                                <div class="card-header-title">
-
-                                    <div class="card-icon">
-                                        <i class="fa-solid fa-pills"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2>Prescribed Medicines</h2>
-
-                                        <p>
-                                            Add medicine instructions and duration.
-                                        </p>
-                                    </div>
-
-                                </div>
-
-                                <button
-                                    type="button"
-                                    class="add-medicine-button"
-                                    onclick="addMedicineRow()"
-                                >
-                                    <i class="fa-solid fa-plus"></i>
-                                    Add Medicine
-                                </button>
-
-                            </div>
-
-                            <div class="card-body">
-
-                                <div class="medicine-table-wrapper">
-
-                                    <table class="medicine-table">
-
-                                        <thead>
-                                            <tr>
-                                                <th>Medicine</th>
-                                                <th>Dosage</th>
-                                                <th>Route</th>
-                                                <th>Frequency</th>
-                                                <th>Food Instruction</th>
-                                                <th>Duration</th>
-                                                <th>Notes</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody id="medicineTableBody"></tbody>
-
-                                    </table>
-
-                                </div>
-
-                                <div
-                                    class="medicine-empty-message"
-                                    id="medicineEmptyMessage"
-                                >
-                                    No medicines added. Click “Add Medicine”.
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                        <!-- ADDITIONAL ADVICE -->
-
-                        <section class="form-card">
-
-                            <div class="card-header">
-
-                                <div class="card-header-title">
-
-                                    <div class="card-icon">
-                                        <i class="fa-solid fa-clipboard-check"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2>Advice and Follow-up</h2>
-
-                                        <p>
-                                            Add investigations, diet advice and follow-up.
-                                        </p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="card-body">
-
-                                <div class="form-grid">
-
-                                    <div class="form-group">
-
-                                        <label for="investigations">
-                                            Recommended Investigations
-                                        </label>
-
-                                        <textarea
-                                            id="investigations"
-                                            class="form-control"
-                                            placeholder="Example: CBC, Blood Sugar, Thyroid Profile"
-                                        ></textarea>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="dietAdvice">
-                                            Diet Advice
-                                        </label>
-
-                                        <textarea
-                                            id="dietAdvice"
-                                            class="form-control"
-                                            placeholder="Enter dietary advice"
-                                        ></textarea>
-
-                                    </div>
-
-                                    <div class="form-group full-width">
-
-                                        <label for="lifestyleAdvice">
-                                            Lifestyle / Therapy Advice
-                                        </label>
-
-                                        <textarea
-                                            id="lifestyleAdvice"
-                                            class="form-control"
-                                            placeholder="Yoga, exercise, sleep, therapy or lifestyle recommendations"
-                                        ></textarea>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="followUpDate">
-                                            Follow-up Date
-                                        </label>
-
-                                        <input
-                                            type="date"
-                                            id="followUpDate"
-                                            class="form-control"
-                                        >
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="prescriptionValidity">
-                                            Prescription Validity
-                                        </label>
-
-                                        <select
-                                            id="prescriptionValidity"
-                                            class="form-control"
-                                        >
-                                            <option value="7">
-                                                7 Days
-                                            </option>
-
-                                            <option value="15">
-                                                15 Days
-                                            </option>
-
-                                            <option value="30" selected>
-                                                30 Days
-                                            </option>
-
-                                            <option value="60">
-                                                60 Days
-                                            </option>
-
-                                            <option value="90">
-                                                90 Days
-                                            </option>
-                                        </select>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                    </div>
-
-                    <!-- SIDE COLUMN -->
-
-                    <aside class="prescription-side">
-
-                        <!-- HISTORY -->
-
-                        <section class="form-card">
-
-                            <div class="card-header">
-
-                                <div class="card-header-title">
-
-                                    <div class="card-icon">
-                                        <i class="fa-solid fa-notes-medical"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2>Patient History</h2>
-
-                                        <p>Important patient information.</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="card-body">
-
-                                <div class="history-list">
-
-                                    <div class="history-item danger">
-
-                                        <span>Allergies</span>
-
-                                        <p id="patientAllergies">
-                                            Not available
-                                        </p>
-
-                                    </div>
-
-                                    <div class="history-item">
-
-                                        <span>Past Medical History</span>
-
-                                        <p id="patientMedicalHistory">
-                                            Not available
-                                        </p>
-
-                                    </div>
-
-                                    <div class="history-item warning">
-
-                                        <span>Current Medication</span>
-
-                                        <p id="patientCurrentMedication">
-                                            Not available
-                                        </p>
-
-                                    </div>
-
-                                    <div class="history-item">
-
-                                        <span>Previous Prescription</span>
-
-                                        <p id="previousPrescription">
-                                            No previous prescription available
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                        <!-- CART SETTINGS -->
-
-                        <section class="form-card">
-
-                            <div class="card-header">
-
-                                <div class="card-header-title">
-
-                                    <div class="card-icon">
-                                        <i class="fa-solid fa-cart-medical"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2>Medicine Cart</h2>
-
-                                        <p>Online consultation setting.</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="card-body">
-
-                                <div class="cart-switch-box">
-
-                                    <div>
-
-                                        <h3>
-                                            Add medicines to patient cart
-                                        </h3>
-
-                                        <p>
-                                            Prescribed products will be added to
-                                            the patient’s cart after the prescription
-                                            is issued.
-                                        </p>
-
-                                    </div>
-
-                                    <label class="switch">
-
-                                        <input
-                                            type="checkbox"
-                                            id="pushMedicinesToCart"
-                                            checked
-                                        >
-
-                                        <span class="switch-slider"></span>
-
-                                    </label>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                        <!-- STATUS -->
-
-                        <section class="form-card">
-
-                            <div class="card-header">
-
-                                <div class="card-header-title">
-
-                                    <div class="card-icon">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2>Prescription Status</h2>
-
-                                        <p>Current document state.</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="card-body">
-
-                                <div class="prescription-status-box">
-
-                                    <span>Status</span>
-
-                                    <strong id="prescriptionStatus">
-                                        New Prescription
-                                    </strong>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                    </aside>
-
-                </div>
-
-                <!-- ACTIONS -->
-
-                <div class="prescription-actions">
-
-                    <button
-                        type="button"
-                        class="action-button cancel-button"
-                        onclick="cancelPrescription()"
-                    >
-                        <i class="fa-solid fa-xmark"></i>
-                        Cancel
-                    </button>
-
-                    <button
-                        type="button"
-                        class="action-button draft-button"
-                        id="saveDraftButton"
-                        onclick="savePrescription('DRAFT')"
-                    >
-                        <i class="fa-solid fa-file-pen"></i>
-                        Save Draft
-                    </button>
-
-                    <button
-                        type="button"
-                        class="action-button print-button"
-                        onclick="printPrescription()"
-                    >
-                        <i class="fa-solid fa-print"></i>
-                        Print
-                    </button>
-
-                    <button
-                        type="button"
-                        class="action-button issue-button"
-                        id="issuePrescriptionButton"
-                        onclick="savePrescription('ISSUED')"
-                    >
-                        <i class="fa-solid fa-circle-check"></i>
-                        Save and Issue
-                    </button>
-
-                </div>
-
-                <!-- PRINT PRESCRIPTION -->
-
-                <section
-                    class="print-prescription"
-                    id="printPrescriptionArea"
-                >
-
-                    <div class="print-header">
-
-                        <div class="print-brand">
-
-                            <img
-                                src="../assets/main_logo.jpeg"
-                                alt="Neolife Logo"
-                            >
-
-                            <div>
-                                <h1>Neolife Wellness Center</h1>
-
-                                <p>
-                                    Ayurveda | Panchakarma | Yoga |
-                                    Naturopathy | Acupuncture
-                                </p>
-                            </div>
-
-                        </div>
-
-                        <div class="print-doctor-details">
-
-                            <strong id="printDoctorName">
-                                Doctor
-                            </strong>
-
-                            <div id="printDoctorQualification">
-                                Medical Consultant
-                            </div>
-
-                            <div>Udupi, Karnataka</div>
-
-                        </div>
-
-                    </div>
-
-                    <div
-                        class="print-patient-grid"
-                        id="printPatientDetails"
-                    ></div>
-
-                    <div class="print-section">
-
-                        <h3>Diagnosis</h3>
-
-                        <p id="printDiagnosis"></p>
-
-                    </div>
-
-                    <div class="print-section">
-
-                        <h3>Rx</h3>
-
-                        <table class="print-table">
-
-                            <thead>
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th>Dosage</th>
-                                    <th>Route</th>
-                                    <th>Frequency</th>
-                                    <th>Food</th>
-                                    <th>Duration</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="printMedicineBody"></tbody>
-
-                        </table>
-
-                    </div>
-
-                    <div class="print-section">
-
-                        <h3>Advice</h3>
-
-                        <p id="printAdvice"></p>
-
-                    </div>
-
-                    <div class="print-signature">
-
-                        <strong id="printSignatureName">
-                            Doctor
-                        </strong>
-
-                        <div>Doctor Signature</div>
-
-                    </div>
-
-                </section>
-
-            </section>
-
-        </main>
-
+    <span class="menu-label">Clinical</span>
+    
+    <a href="doctor-appointments.html"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
+    <a href="doctor-profile.html"><i class="fa-solid fa-user-doctor"></i>My Profile</a>
+  </nav>
+  <div class="sidebar-footer"><button class="logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div><h1>Prescription Pad</h1><p>Create and finalize a prescription for an appointment.</p></div>
+  </div>
+  <div class="doctor-box"><div class="avatar" id="doctorInitial">D</div><div><strong id="doctorName">Doctor</strong><span>Medical Consultant</span></div></div>
+</header>
+
+<section class="content">
+  <div class="hero"><div><h2>Digital Prescription</h2><p>The appointment and patient details are loaded automatically from the selected appointment.</p></div><div class="hero-icon"><i class="fa-solid fa-file-prescription"></i></div></div>
+  <div id="alertBox" class="alert"></div>
+
+  <section class="patient-card">
+    <div class="patient-grid">
+      <div class="patient-main"><div class="patient-avatar" id="patientInitial">P</div><div><h3 id="patientName">Loading patient...</h3><p id="patientPhone">-</p></div></div>
+      <div class="info-box"><span>Age / Gender</span><strong id="patientAgeGender">-</strong></div>
+      <div class="info-box"><span>Appointment</span><strong id="appointmentDate">-</strong></div>
+      <div class="info-box"><span>Time</span><strong id="appointmentTime">-</strong></div>
+      <div class="info-box"><span>Status</span><strong id="appointmentStatus">-</strong></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div>
+      <section class="form-card">
+        <div class="card-header"><div><h2>Clinical Notes</h2><p>Enter diagnosis and treatment advice.</p></div><span class="status-pill" id="draftStatus">Not created</span></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="full"><label>Symptoms</label><textarea id="symptoms" class="control" readonly></textarea></div>
+            <div class="full"><label>Past Medical History</label><textarea id="history" class="control" readonly></textarea></div>
+            <div class="full"><label>Diagnosis *</label><textarea id="diagnosis" class="control" placeholder="Enter diagnosis"></textarea></div>
+            <div class="full"><label>Advice *</label><textarea id="advice" class="control" placeholder="Enter diet, lifestyle, follow-up and treatment advice"></textarea></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="card-header"><div><h2>Medicines</h2><p>Add one or more prescribed medicines.</p></div><button class="add-btn" type="button" onclick="addMedicineRow()"><i class="fa-solid fa-plus"></i>Add Medicine</button></div>
+        <div class="card-body med-table-wrap">
+          <table class="med-table">
+            <thead><tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Days</th><th>Qty</th><th>Instructions</th><th></th></tr></thead>
+            <tbody id="medicineBody"></tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button class="secondary-btn" type="button" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i>Back</button>
+          <button class="secondary-btn" id="saveDraftBtn" type="button" onclick="savePrescriptionDraft()"><i class="fa-solid fa-floppy-disk"></i>Save Draft</button>
+          <button class="primary-btn" id="finalizeBtn" type="button" onclick="finalizePrescription()"><i class="fa-solid fa-circle-check"></i>Finalize Prescription</button>
+        </div>
+      </section>
     </div>
 
-    <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
-
-        let products = [];
-        let patients = [];
-        let appointments = [];
-
-        let selectedPatient = null;
-        let selectedAppointment = null;
-        let doctorProfile = null;
-
-        let medicineRowCounter = 0;
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                requireDoctorLogin();
-
-                setMinimumFollowUpDate();
-
-                loadDoctorProfile();
-                loadProducts();
-                loadPatients();
-
-                readUrlParameters();
-
-                addMedicineRow();
-            }
-        );
-
-        /* =========================
-           AUTH
-        ========================== */
-
-        function getDoctorToken() {
-            return (
-                localStorage.getItem("doctorToken") ||
-                localStorage.getItem("token")
-            );
-        }
-
-        function requireDoctorLogin() {
-            if (!getDoctorToken()) {
-                window.location.href =
-                    "doctor-login.html";
-            }
-        }
-
-        async function doctorApiRequest(
-            endpoint,
-            options = {}
-        ) {
-            const token =
-                getDoctorToken();
-
-            if (!token) {
-                window.location.href =
-                    "doctor-login.html";
-
-                throw new Error(
-                    "Doctor login required."
-                );
-            }
-
-            const headers = {
-                ...(options.headers || {})
-            };
-
-            if (
-                options.body &&
-                !(options.body instanceof FormData)
-            ) {
-                headers["Content-Type"] =
-                    "application/json";
-            }
-
-            headers.Authorization =
-                "Bearer " + token;
-
-            const response =
-                await fetch(
-                    API_BASE_URL + endpoint,
-                    {
-                        ...options,
-                        headers
-                    }
-                );
-
-            let result;
-
-            try {
-                result =
-                    await response.json();
-
-            } catch (error) {
-                result = {
-                    success: false,
-                    message:
-                        "Invalid server response."
-                };
-            }
-
-            if (
-                response.status === 401 ||
-                response.status === 403
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Doctor session expired."
-                );
-            }
-
-            if (
-                !response.ok ||
-                result.success === false
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Request failed."
-                );
-            }
-
-            return result;
-        }
-
-        function doctorLogout() {
-            localStorage.removeItem("doctorToken");
-            localStorage.removeItem(
-                "doctorRefreshToken"
-            );
-
-            localStorage.removeItem("token");
-            localStorage.removeItem(
-                "refreshToken"
-            );
-
-            localStorage.removeItem("role");
-            localStorage.removeItem("doctorId");
-            localStorage.removeItem("userId");
-
-            window.location.href =
-                "doctor-login.html";
-        }
-
-        /* =========================
-           URL PARAMETERS
-        ========================== */
-
-        function readUrlParameters() {
-            const params =
-                new URLSearchParams(
-                    window.location.search
-                );
-
-            const patientId =
-                params.get("patientId");
-
-            const appointmentId =
-                params.get("appointmentId");
-
-            if (patientId) {
-                waitForPatientsThenSelect(
-                    patientId,
-                    appointmentId
-                );
-            }
-        }
-
-        function waitForPatientsThenSelect(
-            patientId,
-            appointmentId
-        ) {
-            const timer =
-                setInterval(
-                    function () {
-                        if (
-                            patients.length === 0
-                        ) {
-                            return;
-                        }
-
-                        clearInterval(timer);
-
-                        document.getElementById(
-                            "patientSelect"
-                        ).value =
-                            String(patientId);
-
-                        handlePatientSelection();
-
-                        if (appointmentId) {
-                            const appointmentTimer =
-                                setInterval(
-                                    function () {
-                                        if (
-                                            appointments.length ===
-                                            0
-                                        ) {
-                                            return;
-                                        }
-
-                                        clearInterval(
-                                            appointmentTimer
-                                        );
-
-                                        document.getElementById(
-                                            "appointmentSelect"
-                                        ).value =
-                                            String(
-                                                appointmentId
-                                            );
-
-                                        handleAppointmentSelection();
-                                        loadSelectedPatientDetails();
-
-                                    },
-                                    100
-                                );
-                        } else {
-                            loadSelectedPatientDetails();
-                        }
-                    },
-                    100
-                );
-        }
-
-        /* =========================
-           DOCTOR PROFILE
-        ========================== */
-
-        async function loadDoctorProfile() {
-            try {
-                const result =
-                    await doctorApiRequest(
-                        "/api/users/getProfile"
-                    );
-
-                doctorProfile =
-                    result.data || {};
-
-                const name =
-                    doctorProfile.name ||
-                    doctorProfile.doctorName ||
-                    "Doctor";
-
-                const specialization =
-                    doctorProfile.specialization ||
-                    doctorProfile.qualification ||
-                    "Medical Consultant";
-
-                document.getElementById(
-                    "doctorTopbarName"
-                ).textContent = name;
-
-                document.getElementById(
-                    "doctorSpecialization"
-                ).textContent =
-                    specialization;
-
-                document.getElementById(
-                    "doctorInitial"
-                ).textContent =
-                    name.charAt(0).toUpperCase();
-
-            } catch (error) {
-                console.error(
-                    "Doctor profile failed:",
-                    error
-                );
-
-                doctorProfile = {
-                    name:
-                        localStorage.getItem(
-                            "doctorName"
-                        ) || "Doctor",
-
-                    specialization:
-                        "Medical Consultant"
-                };
-            }
-        }
-
-        /* =========================
-           PRODUCTS
-        ========================== */
-
-        async function loadProducts() {
-            try {
-                const result =
-                    await doctorApiRequest(
-                        "/api/products"
-                    );
-
-                products =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
-
-            } catch (error) {
-                console.error(
-                    "Product loading failed:",
-                    error
-                );
-
-                products = [
-                    {
-                        id: 1,
-                        name:
-                            "NeoPainil Capsule"
-                    },
-                    {
-                        id: 2,
-                        name:
-                            "Neodia Kashayam"
-                    },
-                    {
-                        id: 3,
-                        name:
-                            "Neo9 KH Syrup"
-                    },
-                    {
-                        id: 4,
-                        name:
-                            "Neoliv Liver Syrup"
-                    },
-                    {
-                        id: 5,
-                        name:
-                            "Nirgundi Taila"
-                    }
-                ];
-            }
-
-            refreshMedicineDropdowns();
-        }
-
-        /* =========================
-           PATIENTS
-        ========================== */
-
-        async function loadPatients() {
-            try {
-                const result =
-                    await doctorApiRequest(
-                        "/api/doctor/patients"
-                    );
-
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : Array.isArray(
-                            result.data?.content
-                          )
-                            ? result.data.content
-                            : [];
-
-                patients =
-                    data.map(
-                        normalizePatient
-                    );
-
-            } catch (error) {
-                console.error(
-                    "Patient loading failed:",
-                    error
-                );
-
-                patients =
-                    getDemoPatients();
-            }
-
-            renderPatientOptions();
-        }
-
-        function normalizePatient(patient) {
-            return {
-                id:
-                    patient.id ||
-                    patient.patientId ||
-                    patient.userId,
-
-                patientCode:
-                    patient.patientCode ||
-                    patient.patientNumber ||
-                    `NL-P-${
-                        patient.id ||
-                        patient.patientId
-                    }`,
-
-                name:
-                    patient.name ||
-                    patient.patientName ||
-                    "Patient",
-
-                age:
-                    patient.age || "-",
-
-                gender:
-                    String(
-                        patient.gender || "-"
-                    ).toUpperCase(),
-
-                phoneNumber:
-                    patient.phoneNumber ||
-                    patient.phone ||
-                    "-",
-
-                email:
-                    patient.email || "-",
-
-                allergies:
-                    patient.allergies ||
-                    "No known allergies",
-
-                pastMedicalHistory:
-                    patient.pastMedicalHistory ||
-                    patient.medicalHistory ||
-                    "Not available",
-
-                currentMedication:
-                    patient.currentMedication ||
-                    "Not available"
-            };
-        }
-
-        function getDemoPatients() {
-            return [
-                {
-                    id: 101,
-                    patientCode:
-                        "NL-P-101",
-                    name: "Nisha Rao",
-                    age: 30,
-                    gender: "FEMALE",
-                    phoneNumber:
-                        "9876543210",
-                    email:
-                        "nisha@example.com",
-                    allergies:
-                        "No known allergies",
-                    pastMedicalHistory:
-                        "Migraine and acidity",
-                    currentMedication:
-                        "No regular medication"
-                },
-                {
-                    id: 102,
-                    patientCode:
-                        "NL-P-102",
-                    name:
-                        "Raghavendra Bhat",
-                    age: 38,
-                    gender: "MALE",
-                    phoneNumber:
-                        "9876543211",
-                    email:
-                        "raghavendra@example.com",
-                    allergies:
-                        "Penicillin allergy",
-                    pastMedicalHistory:
-                        "Anxiety and headache",
-                    currentMedication:
-                        "Vitamin supplements"
-                }
-            ];
-        }
-
-        function renderPatientOptions() {
-            const select =
-                document.getElementById(
-                    "patientSelect"
-                );
-
-            select.innerHTML = `
-                <option value="">
-                    Select patient
-                </option>
-            `;
-
-            patients.forEach(
-                function (patient) {
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value =
-                        patient.id;
-
-                    option.textContent =
-                        `${patient.name} - ${patient.patientCode}`;
-
-                    select.appendChild(
-                        option
-                    );
-                }
-            );
-        }
-
-        function handlePatientSelection() {
-            const patientId =
-                document.getElementById(
-                    "patientSelect"
-                ).value;
-
-            selectedPatient =
-                patients.find(
-                    patient =>
-                        String(patient.id) ===
-                        String(patientId)
-                ) || null;
-
-            selectedAppointment = null;
-
-            resetAppointmentOptions();
-
-            if (!selectedPatient) {
-                clearPatientSummary();
-                return;
-            }
-
-            loadPatientAppointments(
-                selectedPatient.id
-            );
-        }
-
-        async function loadPatientAppointments(
-            patientId
-        ) {
-            try {
-                const result =
-                    await doctorApiRequest(
-                        `/api/doctor/appointments?patientId=${encodeURIComponent(patientId)}`
-                    );
-
-                appointments =
-                    Array.isArray(result.data)
-                        ? result.data.map(
-                            normalizeAppointment
-                        )
-                        : [];
-
-            } catch (error) {
-                console.error(
-                    "Appointment loading failed:",
-                    error
-                );
-
-                appointments = [
-                    {
-                        id: 501,
-                        appointmentCode:
-                            "APT-501",
-                        appointmentType:
-                            "OFFLINE",
-                        date:
-                            formatDateForInput(
-                                new Date()
-                            ),
-                        time: "10:30",
-                        symptoms:
-                            "General consultation",
-                        status:
-                            "CONFIRMED"
-                    }
-                ];
-            }
-
-            renderAppointmentOptions();
-        }
-
-        function normalizeAppointment(
-            appointment
-        ) {
-            return {
-                id:
-                    appointment.id ||
-                    appointment.appointmentId ||
-                    appointment.consultationId,
-
-                appointmentCode:
-                    appointment.appointmentCode ||
-                    appointment.appointmentNumber ||
-                    `APT-${
-                        appointment.id ||
-                        appointment.appointmentId
-                    }`,
-
-                appointmentType:
-                    String(
-                        appointment.appointmentType ||
-                        appointment.consultationType ||
-                        appointment.type ||
-                        "OFFLINE"
-                    ).toUpperCase(),
-
-                date:
-                    appointment.appointmentDate ||
-                    appointment.preferredDate ||
-                    appointment.consultationDate,
-
-                time:
-                    appointment.appointmentTime ||
-                    appointment.preferredTime ||
-                    appointment.consultationTime,
-
-                symptoms:
-                    appointment.symptoms ||
-                    appointment.healthConcern ||
-                    "",
-
-                status:
-                    String(
-                        appointment.status ||
-                        "CONFIRMED"
-                    ).toUpperCase()
-            };
-        }
-
-        function renderAppointmentOptions() {
-            const select =
-                document.getElementById(
-                    "appointmentSelect"
-                );
-
-            select.innerHTML = `
-                <option value="">
-                    Select appointment
-                </option>
-            `;
-
-            appointments.forEach(
-                function (appointment) {
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value =
-                        appointment.id;
-
-                    option.textContent =
-                        `${appointment.appointmentCode} - ` +
-                        `${formatStatus(
-                            appointment.appointmentType
-                        )} - ` +
-                        `${formatDate(
-                            appointment.date
-                        )}`;
-
-                    select.appendChild(
-                        option
-                    );
-                }
-            );
-        }
-
-        function resetAppointmentOptions() {
-            appointments = [];
-
-            document.getElementById(
-                "appointmentSelect"
-            ).innerHTML = `
-                <option value="">
-                    Select appointment
-                </option>
-            `;
-        }
-
-        function handleAppointmentSelection() {
-            const appointmentId =
-                document.getElementById(
-                    "appointmentSelect"
-                ).value;
-
-            selectedAppointment =
-                appointments.find(
-                    appointment =>
-                        String(
-                            appointment.id
-                        ) ===
-                        String(
-                            appointmentId
-                        )
-                ) || null;
-        }
-
-        async function loadSelectedPatientDetails() {
-            if (!selectedPatient) {
-                showAlert(
-                    "Please select a patient.",
-                    "error"
-                );
-
-                return;
-            }
-
-            updatePatientSummary();
-
-            if (
-                selectedAppointment &&
-                selectedAppointment.symptoms
-            ) {
-                document.getElementById(
-                    "chiefComplaint"
-                ).value =
-                    selectedAppointment.symptoms;
-            }
-
-            await loadPreviousPrescription(
-                selectedPatient.id
-            );
-        }
-
-        function updatePatientSummary() {
-            const name =
-                selectedPatient.name ||
-                "Patient";
-
-            document.getElementById(
-                "patientInitial"
-            ).textContent =
-                name.charAt(0).toUpperCase();
-
-            document.getElementById(
-                "patientNameDisplay"
-            ).textContent = name;
-
-            document.getElementById(
-                "patientCodeDisplay"
-            ).textContent =
-                selectedPatient.patientCode;
-
-            document.getElementById(
-                "patientAgeGender"
-            ).textContent =
-                `${selectedPatient.age} / ` +
-                `${formatStatus(
-                    selectedPatient.gender
-                )}`;
-
-            document.getElementById(
-                "patientPhone"
-            ).textContent =
-                selectedPatient.phoneNumber;
-
-            document.getElementById(
-                "patientVisitType"
-            ).textContent =
-                selectedAppointment
-                    ? formatStatus(
-                        selectedAppointment
-                            .appointmentType
-                      )
-                    : "Walk-in / General";
-
-            document.getElementById(
-                "appointmentCode"
-            ).textContent =
-                selectedAppointment
-                    ? selectedAppointment
-                        .appointmentCode
-                    : "-";
-
-            document.getElementById(
-                "patientAllergies"
-            ).textContent =
-                selectedPatient.allergies;
-
-            document.getElementById(
-                "patientMedicalHistory"
-            ).textContent =
-                selectedPatient
-                    .pastMedicalHistory;
-
-            document.getElementById(
-                "patientCurrentMedication"
-            ).textContent =
-                selectedPatient
-                    .currentMedication;
-        }
-
-        function clearPatientSummary() {
-            document.getElementById(
-                "patientInitial"
-            ).textContent = "P";
-
-            document.getElementById(
-                "patientNameDisplay"
-            ).textContent =
-                "Select a patient";
-
-            document.getElementById(
-                "patientCodeDisplay"
-            ).textContent =
-                "Patient details will appear here";
-
-            [
-                "patientAgeGender",
-                "patientPhone",
-                "patientVisitType",
-                "appointmentCode"
-            ].forEach(function (id) {
-                document.getElementById(
-                    id
-                ).textContent = "-";
-            });
-        }
-
-        async function loadPreviousPrescription(
-            patientId
-        ) {
-            try {
-                const result =
-                    await doctorApiRequest(
-                        `/api/prescriptions/patient/${encodeURIComponent(patientId)}/latest`
-                    );
-
-                const prescription =
-                    result.data;
-
-                if (!prescription) {
-                    return;
-                }
-
-                document.getElementById(
-                    "previousPrescription"
-                ).textContent =
-                    prescription.diagnosis ||
-                    "Previous prescription available";
-
-            } catch (error) {
-                document.getElementById(
-                    "previousPrescription"
-                ).textContent =
-                    "No previous prescription available";
-            }
-        }
-
-        /* =========================
-           MEDICINES
-        ========================== */
-
-        function addMedicineRow(
-            medicine = null
-        ) {
-            medicineRowCounter++;
-
-            const body =
-                document.getElementById(
-                    "medicineTableBody"
-                );
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-            row.dataset.rowId =
-                medicineRowCounter;
-
-            row.innerHTML = `
-                <td class="medicine-name-column">
-
-                    <select
-                        class="form-control medicine-product"
-                        onchange="handleMedicineProductChange(this)"
-                    >
-                        ${createMedicineOptions(
-                            medicine?.productId
-                        )}
-                    </select>
-
-                    <input
-                        type="text"
-                        class="form-control custom-medicine-name"
-                        placeholder="Or enter custom medicine"
-                        value="${escapeHtml(
-                            medicine?.medicineName || ""
-                        )}"
-                        style="margin-top:7px;"
-                    >
-
-                </td>
-
-                <td class="dosage-column">
-
-                    <input
-                        type="text"
-                        class="form-control medicine-dosage"
-                        placeholder="1 capsule"
-                        value="${escapeHtml(
-                            medicine?.dosage || ""
-                        )}"
-                    >
-
-                </td>
-
-                <td class="route-column">
-
-                    <select class="form-control medicine-route">
-
-                        <option value="ORAL">
-                            Oral
-                        </option>
-
-                        <option value="TOPICAL">
-                            Topical
-                        </option>
-
-                        <option value="NASAL">
-                            Nasal
-                        </option>
-
-                        <option value="EXTERNAL">
-                            External
-                        </option>
-
-                        <option value="OTHER">
-                            Other
-                        </option>
-
-                    </select>
-
-                </td>
-
-                <td class="frequency-column">
-
-                    <select class="form-control medicine-frequency">
-
-                        <option value="ONCE_DAILY">
-                            Once Daily
-                        </option>
-
-                        <option value="TWICE_DAILY">
-                            Twice Daily
-                        </option>
-
-                        <option value="THRICE_DAILY">
-                            Three Times Daily
-                        </option>
-
-                        <option value="MORNING_ONLY">
-                            Morning
-                        </option>
-
-                        <option value="NIGHT_ONLY">
-                            Night
-                        </option>
-
-                        <option value="MORNING_NIGHT">
-                            Morning + Night
-                        </option>
-
-                        <option value="AS_NEEDED">
-                            As Needed
-                        </option>
-
-                    </select>
-
-                </td>
-
-                <td class="food-column">
-
-                    <select class="form-control medicine-food">
-
-                        <option value="AFTER_FOOD">
-                            After Food
-                        </option>
-
-                        <option value="BEFORE_FOOD">
-                            Before Food
-                        </option>
-
-                        <option value="WITH_FOOD">
-                            With Food
-                        </option>
-
-                        <option value="EMPTY_STOMACH">
-                            Empty Stomach
-                        </option>
-
-                        <option value="NOT_APPLICABLE">
-                            Not Applicable
-                        </option>
-
-                    </select>
-
-                </td>
-
-                <td class="duration-column">
-
-                    <input
-                        type="text"
-                        class="form-control medicine-duration"
-                        placeholder="7 days"
-                        value="${escapeHtml(
-                            medicine?.duration || ""
-                        )}"
-                    >
-
-                </td>
-
-                <td class="medicine-notes-column">
-
-                    <input
-                        type="text"
-                        class="form-control medicine-notes"
-                        placeholder="Medicine notes"
-                        value="${escapeHtml(
-                            medicine?.notes || ""
-                        )}"
-                    >
-
-                </td>
-
-                <td>
-
-                    <button
-                        type="button"
-                        class="remove-medicine-button"
-                        onclick="removeMedicineRow(this)"
-                        title="Remove medicine"
-                    >
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-
-                </td>
-            `;
-
-            body.appendChild(row);
-
-            if (medicine) {
-                row.querySelector(
-                    ".medicine-route"
-                ).value =
-                    medicine.route ||
-                    "ORAL";
-
-                row.querySelector(
-                    ".medicine-frequency"
-                ).value =
-                    medicine.frequency ||
-                    "ONCE_DAILY";
-
-                row.querySelector(
-                    ".medicine-food"
-                ).value =
-                    medicine.foodInstruction ||
-                    "AFTER_FOOD";
-            }
-
-            updateMedicineEmptyMessage();
-        }
-
-        function createMedicineOptions(
-            selectedProductId = null
-        ) {
-            let options = `
-                <option value="">
-                    Select product
-                </option>
-            `;
-
-            products.forEach(
-                function (product) {
-                    const selected =
-                        String(product.id) ===
-                        String(
-                            selectedProductId
-                        )
-                            ? "selected"
-                            : "";
-
-                    options += `
-                        <option
-                            value="${escapeHtml(
-                                product.id
-                            )}"
-                            data-name="${escapeHtml(
-                                product.name
-                            )}"
-                            ${selected}
-                        >
-                            ${escapeHtml(
-                                product.name
-                            )}
-                        </option>
-                    `;
-                }
-            );
-
-            return options;
-        }
-
-        function refreshMedicineDropdowns() {
-            document
-                .querySelectorAll(
-                    ".medicine-product"
-                )
-                .forEach(
-                    function (select) {
-                        const currentValue =
-                            select.value;
-
-                        select.innerHTML =
-                            createMedicineOptions(
-                                currentValue
-                            );
-                    }
-                );
-        }
-
-        function handleMedicineProductChange(
-            select
-        ) {
-            const selectedOption =
-                select.options[
-                    select.selectedIndex
-                ];
-
-            const row =
-                select.closest("tr");
-
-            const customInput =
-                row.querySelector(
-                    ".custom-medicine-name"
-                );
-
-            if (
-                selectedOption &&
-                selectedOption.dataset.name
-            ) {
-                customInput.value =
-                    selectedOption.dataset.name;
-            }
-        }
-
-        function removeMedicineRow(button) {
-            button.closest("tr").remove();
-            updateMedicineEmptyMessage();
-        }
-
-        function updateMedicineEmptyMessage() {
-            const rowCount =
-                document.querySelectorAll(
-                    "#medicineTableBody tr"
-                ).length;
-
-            document.getElementById(
-                "medicineEmptyMessage"
-            ).style.display =
-                rowCount === 0
-                    ? "block"
-                    : "none";
-        }
-
-        function collectMedicines() {
-            const medicines = [];
-
-            document
-                .querySelectorAll(
-                    "#medicineTableBody tr"
-                )
-                .forEach(
-                    function (row) {
-                        const productSelect =
-                            row.querySelector(
-                                ".medicine-product"
-                            );
-
-                        const customName =
-                            row.querySelector(
-                                ".custom-medicine-name"
-                            ).value.trim();
-
-                        const selectedOption =
-                            productSelect.options[
-                                productSelect
-                                    .selectedIndex
-                            ];
-
-                        const medicineName =
-                            customName ||
-                            selectedOption
-                                ?.dataset.name ||
-                            "";
-
-                        const dosage =
-                            row.querySelector(
-                                ".medicine-dosage"
-                            ).value.trim();
-
-                        const duration =
-                            row.querySelector(
-                                ".medicine-duration"
-                            ).value.trim();
-
-                        if (
-                            !medicineName &&
-                            !dosage &&
-                            !duration
-                        ) {
-                            return;
-                        }
-
-                        medicines.push({
-                            productId:
-                                productSelect.value
-                                    ? Number(
-                                        productSelect.value
-                                      )
-                                    : null,
-
-                            medicineName:
-                                medicineName,
-
-                            dosage:
-                                dosage,
-
-                            route:
-                                row.querySelector(
-                                    ".medicine-route"
-                                ).value,
-
-                            frequency:
-                                row.querySelector(
-                                    ".medicine-frequency"
-                                ).value,
-
-                            foodInstruction:
-                                row.querySelector(
-                                    ".medicine-food"
-                                ).value,
-
-                            duration:
-                                duration,
-
-                            notes:
-                                row.querySelector(
-                                    ".medicine-notes"
-                                ).value.trim()
-                        });
-                    }
-                );
-
-            return medicines;
-        }
-
-        /* =========================
-           SAVE
-        ========================== */
-
-        function validatePrescription(
-            status
-        ) {
-            if (!selectedPatient) {
-                showAlert(
-                    "Please select and load a patient.",
-                    "error"
-                );
-
-                return false;
-            }
-
-            if (
-                status === "ISSUED" &&
-                !document.getElementById(
-                    "diagnosis"
-                ).value.trim()
-            ) {
-                showAlert(
-                    "Diagnosis is required before issuing the prescription.",
-                    "error"
-                );
-
-                document.getElementById(
-                    "diagnosis"
-                ).focus();
-
-                return false;
-            }
-
-            const medicines =
-                collectMedicines();
-
-            if (
-                status === "ISSUED" &&
-                medicines.length === 0
-            ) {
-                showAlert(
-                    "Add at least one medicine before issuing the prescription.",
-                    "error"
-                );
-
-                return false;
-            }
-
-            for (
-                const medicine of medicines
-            ) {
-                if (
-                    !medicine.medicineName ||
-                    !medicine.dosage ||
-                    !medicine.duration
-                ) {
-                    showAlert(
-                        "Medicine name, dosage and duration are required.",
-                        "error"
-                    );
-
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        async function savePrescription(
-            status
-        ) {
-            if (!validatePrescription(status)) {
-                return;
-            }
-
-            const button =
-                status === "DRAFT"
-                    ? document.getElementById(
-                        "saveDraftButton"
-                      )
-                    : document.getElementById(
-                        "issuePrescriptionButton"
-                      );
-
-            const originalHtml =
-                button.innerHTML;
-
-            button.disabled = true;
-
-            button.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                Saving...
-            `;
-
-            const requestBody = {
-                appointmentId:
-                    selectedAppointment
-                        ? Number(
-                            selectedAppointment.id
-                          )
-                        : null,
-
-                patientId:
-                    Number(
-                        selectedPatient.id
-                    ),
-
-                doctorId:
-                    doctorProfile?.id ||
-                    doctorProfile?.doctorId ||
-                    Number(
-                        localStorage.getItem(
-                            "doctorId"
-                        )
-                    ) ||
-                    null,
-
-                status:
-                    status,
-
-                consultationType:
-                    selectedAppointment
-                        ? selectedAppointment
-                            .appointmentType
-                        : "WALK_IN",
-
-                chiefComplaint:
-                    document.getElementById(
-                        "chiefComplaint"
-                    ).value.trim(),
-
-                diagnosis:
-                    document.getElementById(
-                        "diagnosis"
-                    ).value.trim(),
-
-                clinicalFindings:
-                    document.getElementById(
-                        "clinicalFindings"
-                    ).value.trim(),
-
-                doctorNotes:
-                    document.getElementById(
-                        "doctorNotes"
-                    ).value.trim(),
-
-                investigations:
-                    document.getElementById(
-                        "investigations"
-                    ).value.trim(),
-
-                dietAdvice:
-                    document.getElementById(
-                        "dietAdvice"
-                    ).value.trim(),
-
-                lifestyleAdvice:
-                    document.getElementById(
-                        "lifestyleAdvice"
-                    ).value.trim(),
-
-                followUpDate:
-                    document.getElementById(
-                        "followUpDate"
-                    ).value || null,
-
-                validityDays:
-                    Number(
-                        document.getElementById(
-                            "prescriptionValidity"
-                        ).value
-                    ),
-
-                pushMedicinesToCart:
-                    document.getElementById(
-                        "pushMedicinesToCart"
-                    ).checked,
-
-                medicines:
-                    collectMedicines()
-            };
-
-            try {
-                const result =
-                    await doctorApiRequest(
-                        "/api/prescriptions/create",
-                        {
-                            method: "POST",
-
-                            body:
-                                JSON.stringify(
-                                    requestBody
-                                )
-                        }
-                    );
-
-                document.getElementById(
-                    "prescriptionStatus"
-                ).textContent =
-                    status === "DRAFT"
-                        ? "Draft Saved"
-                        : "Prescription Issued";
-
-                showAlert(
-                    status === "DRAFT"
-                        ? "Prescription draft saved successfully."
-                        : "Prescription issued successfully.",
-                    "success"
-                );
-
-                const prescriptionId =
-                    result.data?.id ||
-                    result.data
-                        ?.prescriptionId;
-
-                if (
-                    status === "ISSUED" &&
-                    prescriptionId
-                ) {
-                    setTimeout(
-                        function () {
-                            window.location.href =
-                                `prescription-details.html?id=${encodeURIComponent(prescriptionId)}`;
-                        },
-                        1200
-                    );
-                }
-
-            } catch (error) {
-                console.error(
-                    "Prescription save failed:",
-                    error
-                );
-
-                showAlert(
-                    error.message ||
-                    "Prescription could not be saved.",
-                    "error"
-                );
-
-            } finally {
-                button.disabled = false;
-                button.innerHTML =
-                    originalHtml;
-            }
-        }
-
-        /* =========================
-           PRINT
-        ========================== */
-
-        function printPrescription() {
-            if (!selectedPatient) {
-                showAlert(
-                    "Please select a patient before printing.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const medicines =
-                collectMedicines();
-
-            document.getElementById(
-                "printDoctorName"
-            ).textContent =
-                doctorProfile?.name ||
-                doctorProfile?.doctorName ||
-                "Doctor";
-
-            document.getElementById(
-                "printSignatureName"
-            ).textContent =
-                doctorProfile?.name ||
-                doctorProfile?.doctorName ||
-                "Doctor";
-
-            document.getElementById(
-                "printDoctorQualification"
-            ).textContent =
-                doctorProfile?.qualification ||
-                doctorProfile?.specialization ||
-                "Medical Consultant";
-
-            document.getElementById(
-                "printPatientDetails"
-            ).innerHTML = `
-                <div>
-                    <strong>Name:</strong>
-                    ${escapeHtml(
-                        selectedPatient.name
-                    )}
-                </div>
-
-                <div>
-                    <strong>Patient ID:</strong>
-                    ${escapeHtml(
-                        selectedPatient.patientCode
-                    )}
-                </div>
-
-                <div>
-                    <strong>Age / Gender:</strong>
-                    ${escapeHtml(
-                        selectedPatient.age
-                    )}
-                    /
-                    ${escapeHtml(
-                        formatStatus(
-                            selectedPatient.gender
-                        )
-                    )}
-                </div>
-
-                <div>
-                    <strong>Date:</strong>
-                    ${escapeHtml(
-                        formatDate(
-                            formatDateForInput(
-                                new Date()
-                            )
-                        )
-                    )}
-                </div>
-            `;
-
-            document.getElementById(
-                "printDiagnosis"
-            ).textContent =
-                document.getElementById(
-                    "diagnosis"
-                ).value ||
-                "-";
-
-            const printBody =
-                document.getElementById(
-                    "printMedicineBody"
-                );
-
-            printBody.innerHTML = "";
-
-            medicines.forEach(
-                function (medicine) {
-                    printBody.insertAdjacentHTML(
-                        "beforeend",
-                        `
-                        <tr>
-                            <td>
-                                ${escapeHtml(
-                                    medicine.medicineName
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    medicine.dosage
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    formatStatus(
-                                        medicine.route
-                                    )
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    formatStatus(
-                                        medicine.frequency
-                                    )
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    formatStatus(
-                                        medicine.foodInstruction
-                                    )
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    medicine.duration
-                                )}
-                            </td>
-                        </tr>
-                        `
-                    );
-                }
-            );
-
-            const advice = [
-                document.getElementById(
-                    "dietAdvice"
-                ).value.trim(),
-
-                document.getElementById(
-                    "lifestyleAdvice"
-                ).value.trim(),
-
-                document.getElementById(
-                    "investigations"
-                ).value.trim()
-            ]
-                .filter(Boolean)
-                .join(" | ");
-
-            document.getElementById(
-                "printAdvice"
-            ).textContent =
-                advice || "-";
-
-            window.print();
-        }
-
-        /* =========================
-           OTHER ACTIONS
-        ========================== */
-
-        function cancelPrescription() {
-            const hasData =
-                document.getElementById(
-                    "diagnosis"
-                ).value.trim() ||
-                collectMedicines().length >
-                    0;
-
-            if (
-                hasData &&
-                !window.confirm(
-                    "Discard the current prescription?"
-                )
-            ) {
-                return;
-            }
-
-            window.location.href =
-                "doctor-dashboard.html";
-        }
-
-        function setMinimumFollowUpDate() {
-            document.getElementById(
-                "followUpDate"
-            ).min =
-                formatDateForInput(
-                    new Date()
-                );
-        }
-
-        /* =========================
-           SIDEBAR
-        ========================== */
-
-        function toggleSidebar() {
-            document.getElementById(
-                "doctorSidebar"
-            ).classList.toggle("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.toggle("show");
-        }
-
-        function closeSidebar() {
-            document.getElementById(
-                "doctorSidebar"
-            ).classList.remove("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.remove("show");
-        }
-
-        /* =========================
-           ALERT
-        ========================== */
-
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
-
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
-
-            document.getElementById(
-                "alertMessage"
-            ).textContent = message;
-
-            box.className =
-                `page-alert show ${type}`;
-
-            if (type === "success") {
-                icon.className =
-                    "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
-
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
-
-            clearTimeout(
-                window.alertTimer
-            );
-
-            window.alertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
-        }
-
-        /* =========================
-           FORMATTERS
-        ========================== */
-
-        function formatDate(value) {
-            if (!value) {
-                return "-";
-            }
-
-            const date =
-                new Date(
-                    String(value).includes(
-                        "T"
-                    )
-                        ? value
-                        : `${value}T00:00:00`
-                );
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return String(value);
-            }
-
-            return date.toLocaleDateString(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                }
-            );
-        }
-
-        function formatDateForInput(
-            date
-        ) {
-            const year =
-                date.getFullYear();
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            return `${year}-${month}-${day}`;
-        }
-
-        function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
-                );
-        }
-
-        function escapeHtml(value) {
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return "";
-            }
-
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
-        }
-    </script>
-
+    <aside>
+      <section class="form-card">
+        <div class="card-header"><div><h2>Appointment Information</h2><p>Loaded from backend.</p></div></div>
+        <div class="card-body">
+          <div class="history-item"><span>Doctor</span><p id="appointmentDoctor">-</p></div>
+          <div class="history-item"><span>Specialization</span><p id="appointmentSpecialization">-</p></div>
+          <div class="history-item"><span>Mode</span><p id="appointmentMode">-</p></div>
+          <div class="history-item"><span>Payment</span><p id="paymentStatus">-</p></div>
+        </div>
+      </section>
+      <section class="form-card">
+        <div class="card-header"><div><h2>Prescription Workflow</h2><p>Complete these steps.</p></div></div>
+        <div class="card-body">
+          <div class="history-item"><span>Step 1</span><p>Enter diagnosis and advice.</p></div>
+          <div class="history-item"><span>Step 2</span><p>Add medicines, then use Save Draft to create or update the prescription.</p></div>
+          <div class="history-item"><span>Step 3</span><p>Finalize the prescription after verifying all details.</p></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>
+</main>
+</div>
+
+<script>
+const API_BASE_URL="http://localhost:8085";
+let appointmentId=null;
+let patientId=null;
+let prescriptionId=null;
+let appointment=null;
+let products=[];
+let prescriptionFinalized=false;
+let savedMedicineKeys=new Set();
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  requireDoctor();
+  const params=new URLSearchParams(location.search);
+  appointmentId=params.get("appointmentId")||params.get("id");
+  patientId=params.get("patientId");
+  if(!appointmentId){
+    showAlert("Appointment ID is missing. Open this page from Appointment Details.","error");
+    disableFinalize();
+    return;
+  }
+  addMedicineRow();
+  await Promise.all([loadDoctorProfile(),loadProducts()]);
+  await loadAppointment();
+});
+
+function token(){return localStorage.getItem("token")||localStorage.getItem("doctorToken")}
+function requireDoctor(){
+  if(!token()){location.href="../patient/login.html";return}
+  if((localStorage.getItem("role")||"").toUpperCase()!=="DOCTOR"){location.href="../patient/login.html"}
+}
+async function api(endpoint,options={}){
+  const headers={"Accept":"application/json",...(options.headers||{})};
+  if(options.body && !(options.body instanceof FormData))headers["Content-Type"]="application/json";
+  headers.Authorization="Bearer "+token();
+  const response=await fetch(API_BASE_URL+endpoint,{...options,headers});
+  const text=await response.text();
+  let result={};
+  try{result=text?JSON.parse(text):{}}catch{result={success:false,message:text||`Server error (${response.status})`}}
+  if(response.status===401||response.status===403){logout();throw new Error("Session expired")}
+  if(!response.ok||result.success===false)throw new Error(result.message||"Request failed");
+  return result;
+}
+async function loadDoctorProfile(){
+  /*
+   * /api/users/getProfile may be restricted for the DOCTOR role in the
+   * current backend. Use stored login data first so this page does not fail.
+   */
+  const storedName =
+    localStorage.getItem("doctorName") ||
+    localStorage.getItem("userName") ||
+    localStorage.getItem("name");
+
+  let name = storedName || "Doctor";
+
+  const storedDoctor =
+    localStorage.getItem("doctor");
+
+  if(storedDoctor){
+    try{
+      const doctor = JSON.parse(storedDoctor);
+
+      name =
+        doctor.name ||
+        doctor.doctorName ||
+        doctor.user?.name ||
+        name;
+    }catch(error){
+      console.warn(
+        "Unable to read stored doctor profile:",
+        error
+      );
+    }
+  }
+
+  doctorName.textContent = name;
+  doctorInitial.textContent =
+    name.replace(/^Dr\.?\s*/i,"")
+        .charAt(0)
+        .toUpperCase() || "D";
+}
+async function loadProducts(){
+  try{
+    const r=await fetch(API_BASE_URL+"/api/products/getAll");
+    const j=await r.json();
+    products=Array.isArray(j.data)?j.data:[];
+    refreshProductOptions();
+  }catch(e){products=[]}
+}
+async function loadAppointment(){
+  try{
+    /*
+     * Do not call /api/appointments/{id}/get here.
+     * That endpoint is returning 403 for the logged-in doctor.
+     *
+     * The documented doctor endpoint returns only the appointments that
+     * belong to the authenticated doctor, so it is also safer.
+     */
+    const r = await api(
+      "/api/appointments/doctor/my-appointments"
+    );
+
+    const records = extractAppointmentArray(r);
+
+    appointment = records.find(
+      item =>
+        String(
+          item.id ??
+          item.appointmentId
+        ) === String(appointmentId)
+    );
+
+    if(!appointment){
+      throw new Error(
+        "This appointment was not found in the logged-in doctor's appointments."
+      );
+    }
+
+    patientId =
+      patientId ||
+      appointment.patientId ||
+      appointment.patient?.id ||
+      null;
+
+    renderAppointment();
+
+  }catch(e){
+    showAlert(
+      e.message ||
+      "Unable to load appointment.",
+      "error"
+    );
+
+    disableFinalize();
+  }
+}
+
+function extractAppointmentArray(result){
+  if(Array.isArray(result)){
+    return result;
+  }
+
+  if(Array.isArray(result?.data)){
+    return result.data;
+  }
+
+  if(Array.isArray(result?.data?.content)){
+    return result.data.content;
+  }
+
+  if(Array.isArray(result?.data?.appointments)){
+    return result.data.appointments;
+  }
+
+  if(Array.isArray(result?.appointments)){
+    return result.appointments;
+  }
+
+  return [];
+}
+function renderAppointment(){
+  const name=appointment.patientName||"Patient";
+  patientName.textContent=name;patientInitial.textContent=name.charAt(0).toUpperCase();
+  patientPhone.textContent=appointment.phoneNumber||"-";
+  patientAgeGender.textContent=`${appointment.age??"-"} / ${format(appointment.gender)}`;
+  appointmentDate.textContent=formatDate(appointment.appointmentDate);
+  appointmentTime.textContent=`${time(appointment.startTime)} - ${time(appointment.endTime)}`;
+  appointmentStatus.textContent=format(appointment.status);
+  appointmentDoctor.textContent=appointment.doctorName||"-";
+  appointmentSpecialization.textContent=appointment.doctorSpecialization||"-";
+  appointmentMode.textContent=format(appointment.appointmentMode);
+  paymentStatus.textContent=format(appointment.paymentStatus);
+  symptoms.value=appointment.symptoms||"";
+  history.value=appointment.pastMedicalHistory||"";
+}
+function addMedicineRow(){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td><select class="control product-select"><option value="">Custom medicine</option>${productOptions()}</select><input class="control custom-name" style="margin-top:6px" placeholder="Medicine name"></td>
+    <td><input class="control dosage" placeholder="e.g. 10 ml"></td>
+    <td><input class="control frequency" placeholder="e.g. Twice daily"></td>
+    <td><input class="control days" type="number" min="1" value="7"></td>
+    <td><input class="control qty" type="number" min="1" value="1"></td>
+    <td><input class="control instructions" placeholder="After food"></td>
+    <td><button class="icon-btn remove-btn" onclick="this.closest('tr').remove()"><i class="fa-solid fa-trash"></i></button></td>`;
+  tr.querySelector(".product-select").addEventListener("change",e=>{
+    const p=products.find(x=>String(x.id)===e.target.value);
+    if(p)tr.querySelector(".custom-name").value=p.productName||p.name||"";
+  });
+  medicineBody.appendChild(tr);
+}
+function productOptions(){return products.map(p=>`<option value="${p.id}">${escapeHtml(p.productName||p.name||"Product")}</option>`).join("")}
+function refreshProductOptions(){document.querySelectorAll(".product-select").forEach(s=>{const v=s.value;s.innerHTML='<option value="">Custom medicine</option>'+productOptions();s.value=v})}
+function collectMedicines(){
+  return [...medicineBody.querySelectorAll("tr")].map(tr=>{
+    const productId=tr.querySelector(".product-select").value;
+    return {
+      productId:productId?Number(productId):null,
+      medicineName:tr.querySelector(".custom-name").value.trim(),
+      dosage:tr.querySelector(".dosage").value.trim(),
+      frequency:tr.querySelector(".frequency").value.trim()||null,
+      durationDays:Number(tr.querySelector(".days").value||0),
+      quantity:Number(tr.querySelector(".qty").value||0),
+      instructions:tr.querySelector(".instructions").value.trim()||null
+    }
+  }).filter(m=>m.medicineName||m.productId);
+}
+async function ensureDraft(){
+  const diagnosisValue=diagnosis.value.trim();
+  const adviceValue=advice.value.trim();
+
+  if(!diagnosisValue||!adviceValue){
+    throw new Error("Enter diagnosis and advice first.");
+  }
+
+  if(prescriptionId){
+    await updatePrescriptionDetails();
+    return prescriptionId;
+  }
+
+  const requestBody={
+    appointmentId:Number(appointmentId),
+    diagnosis:diagnosisValue,
+    advice:adviceValue
+  };
+
+  const r=await api(
+    "/api/prescriptions/create",
+    {
+      method:"POST",
+      body:JSON.stringify(requestBody)
+    }
+  );
+
+  prescriptionId=r.data?.id;
+
+  if(!prescriptionId){
+    throw new Error(
+      "Prescription ID was not returned by the server."
+    );
+  }
+
+  draftStatus.textContent=
+    `DRAFT #${prescriptionId}`;
+
+  return prescriptionId;
+}
+
+async function updatePrescriptionDetails(){
+  if(!prescriptionId){
+    return;
+  }
+
+  const requestBody={
+    diagnosis:diagnosis.value.trim(),
+    advice:advice.value.trim()
+  };
+
+  const r=await api(
+    `/api/prescriptions/${prescriptionId}`,
+    {
+      method:"PUT",
+      body:JSON.stringify(requestBody)
+    }
+  );
+
+  if(r.data?.status){
+    draftStatus.textContent=
+      `${format(r.data.status)} #${prescriptionId}`;
+  }
+}
+
+function medicineKey(medicine){
+  return JSON.stringify({
+    productId:medicine.productId??null,
+    medicineName:medicine.medicineName,
+    dosage:medicine.dosage,
+    frequency:medicine.frequency??null,
+    durationDays:medicine.durationDays,
+    quantity:medicine.quantity,
+    instructions:medicine.instructions??null
+  });
+}
+
+function validateMedicines(medicines){
+  if(!medicines.length){
+    showAlert(
+      "Add at least one medicine.",
+      "error"
+    );
+    return false;
+  }
+
+  for(const medicine of medicines){
+    if(
+      !medicine.medicineName ||
+      !medicine.dosage ||
+      medicine.durationDays<1 ||
+      medicine.quantity<1
+    ){
+      showAlert(
+        "Every medicine needs name, dosage, days and quantity.",
+        "error"
+      );
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function saveMedicineItems(
+  prescriptionIdValue,
+  medicines
+){
+  for(const medicine of medicines){
+    const key=medicineKey(medicine);
+
+    if(savedMedicineKeys.has(key)){
+      continue;
+    }
+
+    const r=await api(
+      `/api/prescriptions/${prescriptionIdValue}/items`,
+      {
+        method:"POST",
+        body:JSON.stringify(medicine)
+      }
+    );
+
+    savedMedicineKeys.add(key);
+
+    if(Array.isArray(r.data?.items)){
+      savedMedicineKeys=new Set(
+        r.data.items.map(item=>medicineKey({
+          productId:item.productId??null,
+          medicineName:item.medicineName||"",
+          dosage:item.dosage||"",
+          frequency:item.frequency??null,
+          durationDays:Number(item.durationDays||0),
+          quantity:Number(item.quantity||0),
+          instructions:item.instructions??null
+        }))
+      );
+    }
+  }
+}
+
+async function savePrescriptionDraft(){
+  if(prescriptionFinalized){
+    showAlert(
+      "This prescription is already finalized.",
+      "info"
+    );
+    return;
+  }
+
+  if(!diagnosis.value.trim()){
+    showAlert(
+      "Diagnosis is required.",
+      "error"
+    );
+    diagnosis.focus();
+    return;
+  }
+
+  if(!advice.value.trim()){
+    showAlert(
+      "Advice is required.",
+      "error"
+    );
+    advice.focus();
+    return;
+  }
+
+  const medicines=collectMedicines();
+
+  if(!validateMedicines(medicines)){
+    return;
+  }
+
+  setBusy(true,"draft");
+
+  try{
+    const id=await ensureDraft();
+
+    await saveMedicineItems(
+      id,
+      medicines
+    );
+
+    await updatePrescriptionDetails();
+
+    draftStatus.textContent=
+      `DRAFT #${id}`;
+
+    showAlert(
+      "Prescription draft saved successfully.",
+      "success"
+    );
+
+  }catch(error){
+    showAlert(
+      error.message ||
+      "Unable to save prescription draft.",
+      "error"
+    );
+
+  }finally{
+    setBusy(false,"draft");
+  }
+}
+
+async function finalizePrescription(){
+  if(prescriptionFinalized){
+    return;
+  }
+
+  const medicines=collectMedicines();
+
+  if(!diagnosis.value.trim()){
+    showAlert(
+      "Diagnosis is required.",
+      "error"
+    );
+    diagnosis.focus();
+    return;
+  }
+
+  if(!advice.value.trim()){
+    showAlert(
+      "Advice is required.",
+      "error"
+    );
+    advice.focus();
+    return;
+  }
+
+  if(!validateMedicines(medicines)){
+    return;
+  }
+
+  setBusy(true,"finalize");
+
+  try{
+    const id=await ensureDraft();
+
+    await saveMedicineItems(
+      id,
+      medicines
+    );
+
+    await updatePrescriptionDetails();
+
+    const result=await api(
+      `/api/prescriptions/${id}/finalize`,
+      {
+        method:"PUT"
+      }
+    );
+
+    prescriptionFinalized=true;
+
+    draftStatus.textContent=
+      result.data?.status
+        ? format(result.data.status)
+        : "FINALIZED";
+
+    diagnosis.disabled=true;
+    advice.disabled=true;
+
+    medicineBody
+      .querySelectorAll(
+        "input,select,button"
+      )
+      .forEach(element=>{
+        element.disabled=true;
+      });
+
+    saveDraftBtn.disabled=true;
+    finalizeBtn.disabled=true;
+
+    showAlert(
+      result.message ||
+      "Prescription finalized successfully.",
+      "success"
+    );
+
+    setTimeout(
+      ()=>{
+        location.href=
+          `doctor-appointments.html?prescriptionCompleted=true&appointmentId=${encodeURIComponent(appointmentId)}`;
+      },
+      1200
+    );
+
+  }catch(error){
+    showAlert(
+      error.message ||
+      "Unable to finalize prescription.",
+      "error"
+    );
+
+  }finally{
+    if(!prescriptionFinalized){
+      setBusy(false,"finalize");
+    }
+  }
+}
+
+function setBusy(b,mode="finalize"){
+  finalizeBtn.disabled=b;
+  saveDraftBtn.disabled=b;
+
+  if(mode==="draft"){
+    saveDraftBtn.innerHTML=b
+      ? '<i class="fa-solid fa-spinner fa-spin"></i> Saving Draft...'
+      : '<i class="fa-solid fa-floppy-disk"></i> Save Draft';
+  }else{
+    finalizeBtn.innerHTML=b
+      ? '<i class="fa-solid fa-spinner fa-spin"></i> Finalizing...'
+      : '<i class="fa-solid fa-circle-check"></i> Finalize Prescription';
+  }
+
+  if(!b){
+    saveDraftBtn.innerHTML=
+      '<i class="fa-solid fa-floppy-disk"></i> Save Draft';
+
+    finalizeBtn.innerHTML=
+      '<i class="fa-solid fa-circle-check"></i> Finalize Prescription';
+  }
+}
+function disableFinalize(){
+  finalizeBtn.disabled=true;
+  saveDraftBtn.disabled=true;
+}
+function showAlert(msg,type="info"){alertBox.textContent=msg;alertBox.className=`alert show ${type}`;scrollTo({top:0,behavior:"smooth"})}
+function format(v){return v?String(v).replaceAll("_"," ").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):"-"}
+function formatDate(v){if(!v)return"-";const d=new Date(v+"T00:00:00");return isNaN(d)?v:d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}
+function time(v){return v?String(v).slice(0,5):"-"}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function goBack(){location.href="doctor-appointments.html"}
+function toggleSidebar(){sidebar.classList.toggle("open");overlay.classList.toggle("show")}
+function closeSidebar(){sidebar.classList.remove("open");overlay.classList.remove("show")}
+function logout(){["token","doctorToken","refreshToken","doctorRefreshToken","role","profileCompleted","isLoggedIn","userId"].forEach(k=>localStorage.removeItem(k));location.href="../patient/login.html"}
+</script>
 </body>
 </html>

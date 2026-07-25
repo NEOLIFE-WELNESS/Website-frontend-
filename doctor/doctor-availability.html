@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Availability - Neolife Wellness Center</title>
+
+  <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --dark-green: #153d29;
+      --green: #2f6b43;
+      --light-green: #edf5ef;
+      --gold: #c99b16;
+      --gold-dark: #9d7500;
+      --cream: #f7f8f3;
+      --white: #ffffff;
+      --text: #173c29;
+      --muted: #69736c;
+      --danger: #c94b4b;
+      --border: #dfe7e1;
+      --shadow: 0 18px 45px rgba(21, 61, 41, 0.11);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      padding-top: 78px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(201, 155, 22, 0.09), transparent 30%),
+        var(--cream);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .main-header {
+      width: 100%;
+      height: 78px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      background: #fff;
+      border-bottom: 2px solid var(--dark-green);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #d4af37;
+    }
+
+    .brand-name {
+      display: block;
+      color: var(--dark-green);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .brand-subtitle {
+      display: block;
+      margin-top: 4px;
+      color: #a87800;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dashboard-link,
+    .logout-btn {
+      min-height: 42px;
+      padding: 10px 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .dashboard-link {
+      color: var(--dark-green);
+      border: 1px solid #cfd9d1;
+      background: #fff;
+    }
+
+    .logout-btn {
+      color: #fff;
+      border: none;
+      background: var(--dark-green);
+    }
+
+    .page-hero {
+      padding: 58px 20px 92px;
+      text-align: center;
+      background: linear-gradient(110deg, #123824, #2e6b43);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 17px;
+      padding: 8px 16px;
+      border-radius: 25px;
+      color: #ffe18a;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .page-hero h1 {
+      color: #fff;
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.15;
+    }
+
+    .page-hero h1 span {
+      color: #e4b936;
+    }
+
+    .page-hero p {
+      max-width: 720px;
+      margin: 14px auto 0;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.7;
+    }
+
+    .page-container {
+      width: min(1180px, 92%);
+      margin: -52px auto 70px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .doctor-strip {
+      margin-bottom: 24px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .doctor-avatar {
+      width: 58px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 50%;
+      color: #fff;
+      background: linear-gradient(145deg, var(--gold), var(--gold-dark));
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .doctor-strip h3 {
+      color: var(--dark-green);
+      margin-bottom: 5px;
+    }
+
+    .doctor-strip p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 28px;
+      border: 1px solid rgba(21, 61, 41, 0.09);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-title {
+      margin-bottom: 7px;
+      color: var(--dark-green);
+      font-size: 24px;
+    }
+
+    .panel-subtitle {
+      margin-bottom: 25px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--dark-green);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .required {
+      color: var(--danger);
+    }
+
+    .form-control {
+      width: 100%;
+      min-height: 47px;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: #303832;
+      background: #fff;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 155, 22, 0.13);
+    }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-note {
+      margin: -5px 0 19px;
+      padding: 12px 13px;
+      border-radius: 10px;
+      color: #5f6d63;
+      background: var(--light-green);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .primary-btn,
+    .secondary-btn,
+    .icon-btn {
+      border: none;
+      transition: 0.2s;
+    }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 49px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border-radius: 11px;
+      color: #fff;
+      background: var(--dark-green);
+      font-weight: 800;
+    }
+
+    .primary-btn:hover {
+      background: var(--gold-dark);
+      transform: translateY(-1px);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      min-height: 45px;
+      margin-top: 10px;
+      border-radius: 11px;
+      color: var(--dark-green);
+      border: 1px solid #ccd7ce;
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .list-toolbar {
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .list-toolbar h2 {
+      color: var(--dark-green);
+      font-size: 24px;
+    }
+
+    .refresh-btn {
+      min-height: 40px;
+      padding: 9px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid #cfdbd2;
+      border-radius: 10px;
+      color: var(--dark-green);
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .slot-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .slot-card {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 15px;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #fbfcfa;
+    }
+
+    .slot-date {
+      margin-bottom: 7px;
+      color: var(--dark-green);
+      font-weight: 800;
+    }
+
+    .slot-time {
+      color: #5d6961;
+      font-size: 14px;
+    }
+
+    .slot-meta {
+      margin-top: 9px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .status-pill {
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .status-available {
+      color: #17623a;
+      background: #e5f5eb;
+    }
+
+    .status-booked {
+      color: #984040;
+      background: #fde9e9;
+    }
+
+    .status-inactive {
+      color: #6f706f;
+      background: #eceeed;
+    }
+
+    .slot-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 39px;
+      height: 39px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+    }
+
+    .edit-btn {
+      color: #765700;
+      background: #fff4d2;
+    }
+
+    .delete-btn {
+      color: #a33b3b;
+      background: #fde9e9;
+    }
+
+    .empty-state,
+    .loading-state {
+      padding: 45px 20px;
+      text-align: center;
+      border: 1px dashed #cfd8d1;
+      border-radius: 15px;
+      color: var(--muted);
+      background: #fafcf9;
+    }
+
+    .empty-state i,
+    .loading-state i {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--gold);
+      font-size: 30px;
+    }
+
+    .page-alert {
+      position: fixed;
+      top: 96px;
+      right: 22px;
+      z-index: 2500;
+      width: min(390px, calc(100% - 40px));
+      padding: 15px 17px;
+      display: none;
+      align-items: flex-start;
+      gap: 11px;
+      border-radius: 13px;
+      color: #fff;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.19);
+    }
+
+    .page-alert.show {
+      display: flex;
+    }
+
+    .page-alert.success {
+      background: #267044;
+    }
+
+    .page-alert.error {
+      background: #b94040;
+    }
+
+    .page-alert.info {
+      background: #2e617c;
+    }
+
+    .page-alert-message {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(8, 34, 21, 0.58);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(460px, 100%);
+      padding: 27px;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .modal-header h3 {
+      color: var(--dark-green);
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 9px;
+      color: var(--dark-green);
+      background: var(--light-green);
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .main-header {
+        padding: 0 12px;
+      }
+
+      .brand-name {
+        font-size: 15px;
+      }
+
+      .brand-subtitle {
+        font-size: 10px;
+      }
+
+      .dashboard-link span,
+      .logout-btn span {
+        display: none;
+      }
+
+      .dashboard-link,
+      .logout-btn {
+        width: 42px;
+        padding: 0;
+      }
+
+      .page-container {
+        width: 94%;
+      }
+
+      .panel {
+        padding: 22px 18px;
+      }
+
+      .time-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-card {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-actions {
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="main-header">
+    <a href="doctor-dashboard.html" class="header-logo">
+      <img src="../assets/main_logo.jpeg" alt="Neolife Logo"
+           onerror="this.style.display='none'" />
+      <div>
+        <span class="brand-name">Neolife Wellness Center</span>
+        <span class="brand-subtitle">Ayush Digital Care</span>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <a href="doctor-dashboard.html" class="dashboard-link">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <button type="button" class="logout-btn" onclick="logoutDoctor()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-alert" id="pageAlert">
+    <i class="fa-solid fa-circle-info" id="alertIcon"></i>
+    <div class="page-alert-message" id="alertMessage"></div>
+  </div>
+
+  <section class="page-hero">
+    <div class="hero-badge">
+      <i class="fa-solid fa-calendar-check"></i>
+      DOCTOR AVAILABILITY
+    </div>
+
+    <h1>Manage Your <span>Appointment Slots</span></h1>
+
+    <p>
+      Add the weekly days and time periods when patients can book appointments
+      with you. You can also edit or remove slots that are not already booked.
+    </p>
+  </section>
+
+  <main class="page-container">
+    <section class="doctor-strip">
+      <div class="doctor-avatar" id="doctorAvatar">D</div>
+
+      <div>
+        <h3 id="doctorName">Logged-in Doctor</h3>
+        <p id="doctorSpecialization">Manage your available appointment time slots</p>
+      </div>
+    </section>
+
+    <div class="main-grid">
+      <section class="panel">
+        <h2 class="panel-title">Add Availability</h2>
+        <p class="panel-subtitle">
+          Create a recurring weekly availability schedule by selecting a day, time range, slot duration and appointment mode.
+        </p>
+
+        <form id="availabilityForm">
+          <div class="form-group">
+            <label for="dayOfWeek">
+              Day of Week <span class="required">*</span>
+            </label>
+
+            <select id="dayOfWeek"
+                    class="form-control"
+                    required>
+              <option value="">Select day</option>
+              <option value="MONDAY">Monday</option>
+              <option value="TUESDAY">Tuesday</option>
+              <option value="WEDNESDAY">Wednesday</option>
+              <option value="THURSDAY">Thursday</option>
+              <option value="FRIDAY">Friday</option>
+              <option value="SATURDAY">Saturday</option>
+              <option value="SUNDAY">Sunday</option>
+            </select>
+          </div>
+
+          <div class="time-grid">
+            <div class="form-group">
+              <label for="startTime">
+                Start Time <span class="required">*</span>
+              </label>
+
+              <input type="time"
+                     id="startTime"
+                     class="form-control"
+                     required />
+            </div>
+
+            <div class="form-group">
+              <label for="endTime">
+                End Time <span class="required">*</span>
+              </label>
+
+              <input type="time"
+                     id="endTime"
+                     class="form-control"
+                     required />
+            </div>
+          </div>
+
+          <div class="time-grid">
+            <div class="form-group">
+              <label for="slotDurationMinutes">
+                Slot Duration <span class="required">*</span>
+              </label>
+
+              <select id="slotDurationMinutes"
+                      class="form-control"
+                      required>
+                <option value="">Select duration</option>
+                <option value="15">15 minutes</option>
+                <option value="20">20 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="appointmentMode">
+                Appointment Mode <span class="required">*</span>
+              </label>
+
+              <select id="appointmentMode"
+                      class="form-control"
+                      required>
+                <option value="OFFLINE">Offline</option>
+                <option value="ONLINE">Online</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="activeStatus">
+              Status <span class="required">*</span>
+            </label>
+
+            <select id="activeStatus"
+                    class="form-control"
+                    required>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+
+          <div class="form-note">
+            Example: Monday, 9:00 AM to 1:00 PM with 30-minute duration creates
+            recurring bookable slots for every Monday.
+          </div>
+
+          <button type="submit" class="primary-btn" id="createButton">
+            <i class="fa-solid fa-plus"></i>
+            Create Slot
+          </button>
+
+          <button type="button" class="secondary-btn" onclick="resetCreateForm()">
+            Clear
+          </button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="list-toolbar">
+          <h2>My Availability</h2>
+
+          <button type="button" class="refresh-btn" onclick="loadAvailability()">
+            <i class="fa-solid fa-rotate"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="slot-list" id="slotList">
+          <div class="loading-state">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Loading availability slots...
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Edit Availability Slot</h3>
+
+        <button type="button" class="modal-close" onclick="closeEditModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="editForm">
+        <input type="hidden" id="editSlotId" />
+
+        <div class="form-group">
+          <label for="editDayOfWeek">
+            Day of Week <span class="required">*</span>
+          </label>
+
+          <select id="editDayOfWeek"
+                  class="form-control"
+                  required>
+            <option value="MONDAY">Monday</option>
+            <option value="TUESDAY">Tuesday</option>
+            <option value="WEDNESDAY">Wednesday</option>
+            <option value="THURSDAY">Thursday</option>
+            <option value="FRIDAY">Friday</option>
+            <option value="SATURDAY">Saturday</option>
+            <option value="SUNDAY">Sunday</option>
+          </select>
+        </div>
+
+        <div class="time-grid">
+          <div class="form-group">
+            <label for="editStartTime">
+              Start Time <span class="required">*</span>
+            </label>
+
+            <input type="time"
+                   id="editStartTime"
+                   class="form-control"
+                   required />
+          </div>
+
+          <div class="form-group">
+            <label for="editEndTime">
+              End Time <span class="required">*</span>
+            </label>
+
+            <input type="time"
+                   id="editEndTime"
+                   class="form-control"
+                   required />
+          </div>
+        </div>
+
+        <div class="time-grid">
+          <div class="form-group">
+            <label for="editSlotDurationMinutes">
+              Slot Duration <span class="required">*</span>
+            </label>
+
+            <select id="editSlotDurationMinutes"
+                    class="form-control"
+                    required>
+              <option value="15">15 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editAppointmentMode">
+              Appointment Mode <span class="required">*</span>
+            </label>
+
+            <select id="editAppointmentMode"
+                    class="form-control"
+                    required>
+              <option value="OFFLINE">Offline</option>
+              <option value="ONLINE">Online</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editActiveStatus">
+            Status <span class="required">*</span>
+          </label>
+
+          <select id="editActiveStatus"
+                  class="form-control"
+                  required>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+
+        <button type="submit" class="primary-btn" id="updateButton">
+          <i class="fa-solid fa-floppy-disk"></i>
+          Update Slot
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = "http://localhost:8085";
+
+    /*
+     * Confirmed API endpoints:
+     *
+     * POST   /api/doctor-availability/create
+     * GET    /api/doctor-availability/doctor/{doctorId}
+     * PUT    /api/doctor-availability/update/{id}
+     * DELETE /api/doctor-availability/delete/{id}
+     */
+
+    let currentSlots = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+      protectDoctorPage();
+      loadDoctorHeader();
+      loadAvailability();
+
+      document
+        .getElementById("availabilityForm")
+        .addEventListener("submit", createAvailability);
+
+      document
+        .getElementById("editForm")
+        .addEventListener("submit", updateAvailability);
+    });
+
+    function getToken() {
+      return (
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("jwtToken") ||
+        sessionStorage.getItem("token") ||
+        ""
+      );
+    }
+
+    function getDoctorId() {
+      const directId =
+        localStorage.getItem("doctorId") ||
+        sessionStorage.getItem("doctorId");
+
+      if (directId) {
+        return Number(directId);
+      }
+
+      const possibleObjects = [
+        localStorage.getItem("doctor"),
+        localStorage.getItem("user"),
+        localStorage.getItem("profile"),
+        localStorage.getItem("loggedInUser")
+      ];
+
+      for (const value of possibleObjects) {
+        if (!value) continue;
+
+        try {
+          const object = JSON.parse(value);
+
+          const doctorId =
+            object.doctorId ??
+            object.doctor?.id ??
+            object.doctorProfile?.id ??
+            (String(object.role || "").toUpperCase() === "DOCTOR"
+              ? object.id
+              : null);
+
+          if (doctorId) {
+            return Number(doctorId);
+          }
+        } catch (error) {
+          console.warn("Unable to parse stored doctor data:", error);
+        }
+      }
+
+      return null;
+    }
+
+    function protectDoctorPage() {
+      const token = getToken();
+
+      if (!token) {
+        showAlert(
+          "Doctor login is required. Please login again.",
+          "error"
+        );
+
+        setTimeout(function () {
+          window.location.href = "login.html";
+        }, 1500);
+      }
+    }
+
+    function getAuthHeaders(includeJson = true) {
+      const headers = {};
+      const token = getToken();
+
+      if (includeJson) {
+        headers["Content-Type"] = "application/json";
+      }
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      return headers;
+    }
+
+    function loadDoctorHeader() {
+      let doctorName =
+        localStorage.getItem("doctorName") ||
+        localStorage.getItem("userName") ||
+        "Logged-in Doctor";
+
+      let specialization =
+        localStorage.getItem("doctorSpecialization") ||
+        "Manage your available appointment time slots";
+
+      const storedDoctor = localStorage.getItem("doctor");
+
+      if (storedDoctor) {
+        try {
+          const doctor = JSON.parse(storedDoctor);
+
+          doctorName =
+            doctor.name ||
+            doctor.doctorName ||
+            doctorName;
+
+          specialization =
+            doctor.specialization ||
+            doctor.qualification ||
+            specialization;
+        } catch (error) {
+          console.warn("Unable to read stored doctor profile:", error);
+        }
+      }
+
+      document.getElementById("doctorName").textContent = doctorName;
+      document.getElementById("doctorSpecialization").textContent =
+        specialization;
+
+      const firstLetter =
+        doctorName.replace(/^Dr\.?\s*/i, "").trim().charAt(0) || "D";
+
+      document.getElementById("doctorAvatar").textContent =
+        firstLetter.toUpperCase();
+    }
+
+    async function createAvailability(event) {
+      event.preventDefault();
+
+      let doctorId = getDoctorId();
+
+      if (!doctorId) {
+        doctorId = await resolveDoctorIdFromBackend();
+
+        if (doctorId) {
+          localStorage.setItem("doctorId", String(doctorId));
+        }
+      }
+
+      const dayOfWeek =
+        document.getElementById("dayOfWeek").value;
+
+      const startTime =
+        document.getElementById("startTime").value;
+
+      const endTime =
+        document.getElementById("endTime").value;
+
+      const slotDurationMinutes = Number(
+        document.getElementById("slotDurationMinutes").value
+      );
+
+      const appointmentMode =
+        document.getElementById("appointmentMode").value;
+
+      const active =
+        document.getElementById("activeStatus").value === "true";
+
+      if (!doctorId) {
+        showAlert(
+          "Doctor profile could not be identified.",
+          "error"
+        );
+        return;
+      }
+
+      if (
+        !validateAvailability(
+          dayOfWeek,
+          startTime,
+          endTime,
+          slotDurationMinutes,
+          appointmentMode
+        )
+      ) {
+        return;
+      }
+
+      const requestBody = {
+        doctorId: doctorId,
+        dayOfWeek: dayOfWeek,
+        startTime: startTime,
+        endTime: endTime,
+        slotDurationMinutes: slotDurationMinutes,
+        appointmentMode: appointmentMode,
+        active: active
+      };
+
+      const button =
+        document.getElementById("createButton");
+
+      setButtonLoading(
+        button,
+        true,
+        "Creating..."
+      );
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/doctor-availability/create`,
+          {
+            method: "POST",
+            headers: getAuthHeaders(true),
+            body: JSON.stringify(requestBody)
+          }
+        );
+
+        const result =
+          await readJsonResponse(response);
+
+        if (!response.ok || result.success === false) {
+          throw new Error(
+            result.message ||
+            `Unable to create availability. HTTP ${response.status}`
+          );
+        }
+
+        showAlert(
+          result.message ||
+          "Doctor availability created successfully.",
+          "success"
+        );
+
+        resetCreateForm();
+        await loadAvailability();
+
+      } catch (error) {
+        console.error(
+          "Create availability failed:",
+          error
+        );
+
+        showAlert(
+          error.message,
+          "error"
+        );
+
+      } finally {
+        setButtonLoading(
+          button,
+          false,
+          "Create Slot",
+          "fa-plus"
+        );
+      }
+    }
+
+    async function loadAvailability() {
+      const doctorId = getDoctorId();
+      const slotList = document.getElementById("slotList");
+
+      if (!doctorId) {
+        slotList.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-user-doctor"></i>
+            Doctor ID was not found.<br><br>
+            Save the logged-in doctor's ID as
+            <strong>localStorage.doctorId</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      slotList.innerHTML = `
+        <div class="loading-state">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Loading availability slots...
+        </div>
+      `;
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/doctor-availability/doctor/${doctorId}`,
+          {
+            method: "GET",
+            headers: getAuthHeaders(false)
+          }
+        );
+
+        const result = await readJsonResponse(response);
+
+        if (!response.ok || result.success === false) {
+          throw new Error(
+            result.message ||
+            `Unable to load availability. HTTP ${response.status}`
+          );
+        }
+
+        currentSlots = extractArray(result);
+        renderAvailability(currentSlots);
+
+      } catch (error) {
+        console.error("Load availability failed:", error);
+
+        slotList.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+      }
+    }
+
+    function extractArray(result) {
+      if (Array.isArray(result)) {
+        return result;
+      }
+
+      if (Array.isArray(result.data)) {
+        return result.data;
+      }
+
+      if (Array.isArray(result.data?.content)) {
+        return result.data.content;
+      }
+
+      if (Array.isArray(result.data?.slots)) {
+        return result.data.slots;
+      }
+
+      return [];
+    }
+
+    function renderAvailability(slots) {
+      const slotList = document.getElementById("slotList");
+
+      if (!slots.length) {
+        slotList.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            No availability slots have been created yet.
+          </div>
+        `;
+        return;
+      }
+
+      const sortedSlots = [...slots].sort(function (a, b) {
+        const dayOrder = {
+          MONDAY: 1,
+          TUESDAY: 2,
+          WEDNESDAY: 3,
+          THURSDAY: 4,
+          FRIDAY: 5,
+          SATURDAY: 6,
+          SUNDAY: 7
+        };
+
+        const firstDay =
+          dayOrder[getSlotDayOfWeek(a)] || 99;
+
+        const secondDay =
+          dayOrder[getSlotDayOfWeek(b)] || 99;
+
+        if (firstDay !== secondDay) {
+          return firstDay - secondDay;
+        }
+
+        return getSlotStartTime(a)
+          .localeCompare(getSlotStartTime(b));
+      });
+
+      slotList.innerHTML = sortedSlots
+        .map(function (slot) {
+          const id = getSlotId(slot);
+          const dayOfWeek = getSlotDayOfWeek(slot);
+          const startTime = getSlotStartTime(slot);
+          const endTime = getSlotEndTime(slot);
+          const duration = getSlotDuration(slot);
+          const mode = getSlotMode(slot);
+          const booked = isSlotBooked(slot);
+          const active = isSlotActive(slot);
+
+          let statusClass = "status-available";
+          let statusText = "Available";
+
+          if (booked) {
+            statusClass = "status-booked";
+            statusText = "Booked";
+          } else if (!active) {
+            statusClass = "status-inactive";
+            statusText = "Inactive";
+          }
+
+          return `
+            <article class="slot-card">
+              <div>
+                <div class="slot-date">
+                  <i class="fa-regular fa-calendar"></i>
+                  ${escapeHtml(formatDayName(dayOfWeek))}
+                </div>
+
+                <div class="slot-time">
+                  <i class="fa-regular fa-clock"></i>
+                  ${escapeHtml(formatDisplayTime(startTime))}
+                  -
+                  ${escapeHtml(formatDisplayTime(endTime))}
+                </div>
+
+                <div class="slot-meta">
+                  <span class="status-pill ${statusClass}">
+                    ${statusText}
+                  </span>
+
+                  <span class="status-pill status-inactive">
+                    ${escapeHtml(String(duration))} minutes
+                  </span>
+
+                  <span class="status-pill status-inactive">
+                    ${escapeHtml(formatMode(mode))}
+                  </span>
+                </div>
+              </div>
+
+              <div class="slot-actions">
+                <button type="button"
+                        class="icon-btn edit-btn"
+                        title="Edit slot"
+                        ${booked ? "disabled" : ""}
+                        onclick="openEditModal('${escapeJs(String(id))}')">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+
+                <button type="button"
+                        class="icon-btn delete-btn"
+                        title="Delete slot"
+                        ${booked ? "disabled" : ""}
+                        onclick="deleteAvailability('${escapeJs(String(id))}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function openEditModal(slotId) {
+      const slot = currentSlots.find(function (item) {
+        return String(getSlotId(item)) === String(slotId);
+      });
+
+      if (!slot) {
+        showAlert("Availability slot was not found.", "error");
+        return;
+      }
+
+      if (isSlotBooked(slot)) {
+        showAlert("A booked slot cannot be edited.", "error");
+        return;
+      }
+
+      document.getElementById("editSlotId").value =
+        getSlotId(slot);
+
+      document.getElementById("editDayOfWeek").value =
+        getSlotDayOfWeek(slot);
+
+      document.getElementById("editStartTime").value =
+        trimTime(getSlotStartTime(slot));
+
+      document.getElementById("editEndTime").value =
+        trimTime(getSlotEndTime(slot));
+
+      document.getElementById("editSlotDurationMinutes").value =
+        String(getSlotDuration(slot));
+
+      document.getElementById("editAppointmentMode").value =
+        getSlotMode(slot);
+
+      document.getElementById("editActiveStatus").value =
+        String(isSlotActive(slot));
+
+      document.getElementById("editModal").classList.add("show");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.remove("show");
+      document.getElementById("editForm").reset();
+    }
+
+    async function updateAvailability(event) {
+      event.preventDefault();
+
+      let doctorId = getDoctorId();
+
+      if (!doctorId) {
+        doctorId = await resolveDoctorIdFromBackend();
+
+        if (doctorId) {
+          localStorage.setItem("doctorId", String(doctorId));
+        }
+      }
+
+      const slotId =
+        document.getElementById("editSlotId").value;
+
+      const dayOfWeek =
+        document.getElementById("editDayOfWeek").value;
+
+      const startTime =
+        document.getElementById("editStartTime").value;
+
+      const endTime =
+        document.getElementById("editEndTime").value;
+
+      const slotDurationMinutes = Number(
+        document.getElementById("editSlotDurationMinutes").value
+      );
+
+      const appointmentMode =
+        document.getElementById("editAppointmentMode").value;
+
+      const active =
+        document.getElementById("editActiveStatus").value === "true";
+
+      if (
+        !validateAvailability(
+          dayOfWeek,
+          startTime,
+          endTime,
+          slotDurationMinutes,
+          appointmentMode
+        )
+      ) {
+        return;
+      }
+
+      const requestBody = {
+        doctorId: doctorId,
+        dayOfWeek: dayOfWeek,
+        startTime: startTime,
+        endTime: endTime,
+        slotDurationMinutes: slotDurationMinutes,
+        appointmentMode: appointmentMode,
+        active: active
+      };
+
+      const button =
+        document.getElementById("updateButton");
+
+      setButtonLoading(
+        button,
+        true,
+        "Updating..."
+      );
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/doctor-availability/update/${slotId}`,
+          {
+            method: "PUT",
+            headers: getAuthHeaders(true),
+            body: JSON.stringify(requestBody)
+          }
+        );
+
+        const result =
+          await readJsonResponse(response);
+
+        if (!response.ok || result.success === false) {
+          throw new Error(
+            result.message ||
+            `Unable to update availability. HTTP ${response.status}`
+          );
+        }
+
+        showAlert(
+          result.message ||
+          "Availability updated successfully.",
+          "success"
+        );
+
+        closeEditModal();
+        await loadAvailability();
+
+      } catch (error) {
+        console.error(
+          "Update availability failed:",
+          error
+        );
+
+        showAlert(
+          error.message,
+          "error"
+        );
+
+      } finally {
+        setButtonLoading(
+          button,
+          false,
+          "Update Slot",
+          "fa-floppy-disk"
+        );
+      }
+    }
+
+    async function deleteAvailability(slotId) {
+      const slot = currentSlots.find(function (item) {
+        return String(getSlotId(item)) === String(slotId);
+      });
+
+      if (slot && isSlotBooked(slot)) {
+        showAlert("A booked slot cannot be deleted.", "error");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this availability slot?"
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/doctor-availability/delete/${slotId}`,
+          {
+            method: "DELETE",
+            headers: getAuthHeaders(false)
+          }
+        );
+
+        const result = await readJsonResponse(response);
+
+        if (!response.ok || result.success === false) {
+          throw new Error(
+            result.message ||
+            `Unable to delete slot. HTTP ${response.status}`
+          );
+        }
+
+        showAlert(
+          result.message || "Availability slot deleted successfully.",
+          "success"
+        );
+
+        await loadAvailability();
+
+      } catch (error) {
+        console.error("Delete availability failed:", error);
+        showAlert(error.message, "error");
+      }
+    }
+
+    function validateAvailability(
+      dayOfWeek,
+      startTime,
+      endTime,
+      slotDurationMinutes,
+      appointmentMode
+    ) {
+      if (!dayOfWeek) {
+        showAlert(
+          "Please select a day of the week.",
+          "error"
+        );
+        return false;
+      }
+
+      if (!startTime || !endTime) {
+        showAlert(
+          "Please select start time and end time.",
+          "error"
+        );
+        return false;
+      }
+
+      if (startTime >= endTime) {
+        showAlert(
+          "End time must be later than start time.",
+          "error"
+        );
+        return false;
+      }
+
+      if (
+        !Number.isInteger(slotDurationMinutes) ||
+        slotDurationMinutes <= 0
+      ) {
+        showAlert(
+          "Please select a valid slot duration.",
+          "error"
+        );
+        return false;
+      }
+
+      const totalAvailableMinutes =
+        getMinutes(endTime) - getMinutes(startTime);
+
+      if (slotDurationMinutes > totalAvailableMinutes) {
+        showAlert(
+          "Slot duration cannot be longer than the availability period.",
+          "error"
+        );
+        return false;
+      }
+
+      if (!appointmentMode) {
+        showAlert(
+          "Please select an appointment mode.",
+          "error"
+        );
+        return false;
+      }
+
+      return true;
+    }
+
+    function getMinutes(time) {
+      const parts = String(time).split(":");
+
+      return (
+        Number(parts[0]) * 60 +
+        Number(parts[1])
+      );
+    }
+
+    function resetCreateForm() {
+      document
+        .getElementById("availabilityForm")
+        .reset();
+
+      document
+        .getElementById("appointmentMode")
+        .value = "OFFLINE";
+
+      document
+        .getElementById("activeStatus")
+        .value = "true";
+    }
+
+    function getSlotId(slot) {
+      return slot.id ?? slot.availabilityId ?? slot.slotId;
+    }
+
+    function getSlotDayOfWeek(slot) {
+      return (
+        slot.dayOfWeek ??
+        slot.day ??
+        ""
+      );
+    }
+
+    function getSlotDuration(slot) {
+      return (
+        slot.slotDurationMinutes ??
+        slot.durationMinutes ??
+        slot.slotDuration ??
+        0
+      );
+    }
+
+    function getSlotMode(slot) {
+      return (
+        slot.appointmentMode ??
+        slot.mode ??
+        "OFFLINE"
+      );
+    }
+
+    function getSlotStartTime(slot) {
+      return (
+        slot.startTime ??
+        slot.fromTime ??
+        slot.slotStartTime ??
+        ""
+      );
+    }
+
+    function getSlotEndTime(slot) {
+      return (
+        slot.endTime ??
+        slot.toTime ??
+        slot.slotEndTime ??
+        ""
+      );
+    }
+
+    function isSlotBooked(slot) {
+      return (
+        slot.booked === true ||
+        slot.isBooked === true ||
+        String(slot.status || "").toUpperCase() === "BOOKED"
+      );
+    }
+
+    function isSlotActive(slot) {
+      if (slot.active !== undefined) {
+        return slot.active !== false;
+      }
+
+      if (slot.isActive !== undefined) {
+        return slot.isActive !== false;
+      }
+
+      return true;
+    }
+
+    function normalizeTimeForApi(time) {
+      return time && time.length === 5 ? `${time}:00` : time;
+    }
+
+    function trimTime(time) {
+      return String(time || "").substring(0, 5);
+    }
+
+    function formatDayName(dayOfWeek) {
+      if (!dayOfWeek) {
+        return "-";
+      }
+
+      return String(dayOfWeek)
+        .toLowerCase()
+        .replace(/^./, function (letter) {
+          return letter.toUpperCase();
+        });
+    }
+
+    function formatMode(mode) {
+      return String(mode || "OFFLINE")
+        .toLowerCase()
+        .replace(/^./, function (letter) {
+          return letter.toUpperCase();
+        });
+    }
+
+    function formatDisplayDate(dateString) {
+      if (!dateString) return "-";
+
+      const parts = String(dateString).split("-");
+
+      if (parts.length !== 3) {
+        return dateString;
+      }
+
+      const date = new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+      );
+
+      return date.toLocaleDateString("en-IN", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function formatDisplayTime(timeString) {
+      if (!timeString) return "-";
+
+      const [hoursValue, minutesValue] =
+        String(timeString).split(":");
+
+      let hours = Number(hoursValue);
+      const minutes = minutesValue || "00";
+      const period = hours >= 12 ? "PM" : "AM";
+
+      hours = hours % 12 || 12;
+
+      return `${hours}:${minutes} ${period}`;
+    }
+
+    function formatDateForInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    async function readJsonResponse(response) {
+      const text = await response.text();
+
+      if (!text) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        return {
+          success: response.ok,
+          message: text
+        };
+      }
+    }
+
+    function setButtonLoading(button, loading, text, iconClass = "") {
+      button.disabled = loading;
+
+      if (loading) {
+        button.innerHTML = `
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          ${escapeHtml(text)}
+        `;
+      } else {
+        button.innerHTML = `
+          <i class="fa-solid ${iconClass}"></i>
+          ${escapeHtml(text)}
+        `;
+      }
+    }
+
+    function showAlert(message, type = "info") {
+      const alertBox = document.getElementById("pageAlert");
+      const alertMessage = document.getElementById("alertMessage");
+      const alertIcon = document.getElementById("alertIcon");
+
+      alertMessage.textContent = message;
+
+      alertBox.className = `page-alert show ${type}`;
+
+      if (type === "success") {
+        alertIcon.className = "fa-solid fa-circle-check";
+      } else if (type === "error") {
+        alertIcon.className = "fa-solid fa-circle-exclamation";
+      } else {
+        alertIcon.className = "fa-solid fa-circle-info";
+      }
+
+      window.clearTimeout(showAlert.timeoutId);
+
+      showAlert.timeoutId = window.setTimeout(function () {
+        alertBox.classList.remove("show");
+      }, 4200);
+    }
+
+    function logoutDoctor() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("jwtToken");
+      localStorage.removeItem("doctorId");
+      localStorage.removeItem("doctor");
+      sessionStorage.clear();
+
+      window.location.href = "login.html";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeJs(value) {
+      return String(value ?? "")
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'");
+    }
+
+    document
+      .getElementById("editModal")
+      .addEventListener("click", function (event) {
+        if (event.target === this) {
+          closeEditModal();
+        }
+      });
+  </script>
+</body>
+</html>

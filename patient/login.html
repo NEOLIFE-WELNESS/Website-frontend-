@@ -497,9 +497,14 @@
     min-width:38px !important;
   }
 }
-  </style>
+  
+    .login-btn:disabled{opacity:.72;cursor:not-allowed;transform:none}
+    .form-message{display:none;margin:0 0 14px;padding:11px 13px;border-radius:10px;font-size:13px;font-weight:700}
+    .form-message.show{display:block}
+    .form-message.error{color:#8b1e16;background:#fde8e6;border:1px solid #efb7b2}
+    .form-message.success{color:#14532d;background:#e8f7ed;border:1px solid #b7dfc3}
+</style>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -578,16 +583,26 @@
           <form id="emailLoginForm"
                 onsubmit="return emailLogin(event)">
 
+            <div id="loginMessage" class="form-message"></div>
+
             <div class="form-group">
-              <input type="email"
+              <input
+                     type="email"
                      id="email"
-                     placeholder="Email Address">
+                     placeholder="Email Address"
+                     autocomplete="email"
+                     required
+                   >
             </div>
 
             <div class="form-group">
-              <input type="password"
+              <input
+                     type="password"
                      id="password"
-                     placeholder="Password">
+                     placeholder="Password"
+                     autocomplete="current-password"
+                     required
+                   >
             </div>
 
             <div class="login-options">
@@ -599,7 +614,11 @@
               <a href="forgot-password.html">Forgot Password?</a>
             </div>
 
-            <button type="submit" class="login-btn">
+            <button
+              type="submit"
+              class="login-btn"
+              id="loginButton"
+            >
               Login
             </button>
 
@@ -666,160 +685,133 @@ function showPhoneLogin(){
   document.getElementById("emailTab").classList.remove("active");
 }
 
-async function emailLogin(event){
-    event.preventDefault();
+function showLoginMessage(message,type="error"){
+  const box=document.getElementById("loginMessage");
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if(email === "" || password === ""){
-        alert("Please enter email and password");
-        return false;
-    }
-
-    try{
-
-        // Step 1: Login
-        const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`,{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                email:email,
-                password:password
-            })
-        });
-
-        const loginResult = await loginResponse.json();
-
-        if(!loginResult.success){
-            alert(loginResult.message || "Invalid Email or Password");
-            return false;
-        }
-
-        // Step 2: Save login details
-        const token = loginResult.data.token;
-
-        localStorage.setItem("token", token);
-        localStorage.setItem("refreshToken", loginResult.data.refreshToken);
-        localStorage.setItem("userId", loginResult.data.id);
-        localStorage.setItem("email", loginResult.data.email);
-        localStorage.setItem("isLoggedIn","true");
-
-        // Step 3: Try User Profile API
-let profileResponse = await fetch(`${API_BASE_URL}/api/users/getProfile`, {
-    method: "GET",
-    headers: {
-        "Authorization": "Bearer " + token
-    }
-});
-
-let profileResult = await profileResponse.json();
-
-// If user API says only users can access, try Admin API
-if (!profileResult.success && profileResult.message === "Only users can access this API") {
-
-    profileResponse = await fetch(`${API_BASE_URL}/api/admin/getAdminProfile`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
-
-    profileResult = await profileResponse.json();
-}
-
-if (!profileResult.success) {
-    alert(profileResult.message || "Unable to fetch profile");
-    return false;
-}
-
-// Save profile details
-localStorage.setItem("name", profileResult.data.name);
-localStorage.setItem("phoneNumber", profileResult.data.phoneNumber);
-localStorage.setItem("age", profileResult.data.age);
-localStorage.setItem("gender", profileResult.data.gender);
-localStorage.setItem("role", profileResult.data.role);
-
-// Redirect
-if (profileResult.data.role === "ADMIN") {
-    alert("Welcome Admin");
-    window.location.href = "../admin/admin-dashboard.html";
-} else {
-    alert("Welcome " + profileResult.data.name);
-    window.location.href = "profile.html";
-}
-    }catch(error){
-        console.log(error);
-        alert("Unable to connect to backend.");
-    }
-
-    return false;
-}
-
-async function sendOTP(){
-  alert("Phone OTP API is not available now. Use Email Login.");
-}
-
-async function verifyOTP(){
-  alert("Phone OTP API is not available now. Use Email Login.");
-  return false;
-}
-
-let googleReady = false;
-
-window.onload = function(){
-  initGoogleLogin();
-};
-
-function initGoogleLogin(){
-  google.accounts.id.initialize({
-    client_id: "277109720887-bd1pfueg8eodgbm76qh18kn8rc22quvl.apps.googleusercontent.com",
-    callback: handleGoogleResponse,
-    use_fedcm_for_prompt: false
-  });
-
-  googleReady = true;
-}
-
-function startGoogleLogin(){
-  if(!googleReady){
-    alert("Google login is loading. Try again.");
+  if(!box){
+    alert(message);
     return;
   }
 
-  google.accounts.id.prompt();
+  box.textContent=message;
+  box.className=`form-message show ${type}`;
 }
 
-async function handleGoogleResponse(response){
-  const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      idToken: response.credential
-    })
-  });
+function clearLoginMessage(){
+  const box=document.getElementById("loginMessage");
 
-  const result = await res.json();
+  if(!box){
+    return;
+  }
 
-  if(result.success){
-    localStorage.setItem("token", result.data.token);
-    localStorage.setItem("refreshToken", result.data.refreshToken);
-    localStorage.setItem("userId", result.data.id);
-    localStorage.setItem("email", result.data.email);
-    localStorage.setItem("isLoggedIn", "true");
+  box.textContent="";
+  box.className="form-message";
+}
 
-    alert("Google login successful");
-    window.location.href = "profile.html";
+function saveLoginSession(data){
+  localStorage.setItem("token",data.token||"");
+  localStorage.setItem("refreshToken",data.refreshToken||"");
+  localStorage.setItem("userId",String(data.id||""));
+  localStorage.setItem("email",data.email||"");
+  localStorage.setItem("role",data.role||"USER");
+  localStorage.setItem("profileCompleted",String(Boolean(data.profileCompleted)));
+  localStorage.setItem("isLoggedIn","true");
+}
+
+function redirectByRole(role,profileCompleted){
+  if(role==="ADMIN"){
+    window.location.href="../admin/admin-dashboard.html";
+  }else if(role==="DOCTOR"){
+    window.location.href=profileCompleted
+      ? "../doctor/doctor-dashboard.html"
+      : "../doctor/doctor-profile.html";
+  }else if(role==="MEDICAL_STAFF"){
+    window.location.href=profileCompleted
+      ? "../staff/staff-dashboard.html"
+      : "../staff/staff-profile.html";
+  }else if(role==="THERAPIST"){
+    window.location.href=profileCompleted
+      ? "../therapist/therapist-dashboard.html"
+      : "../therapist/therapist-profile.html";
   }else{
-    alert(result.message || "Google login failed");
+    window.location.href="profile.html";
   }
 }
 
+async function emailLogin(event){
+  event.preventDefault();
+  clearLoginMessage();
 
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  const button =
+    document.getElementById("loginButton") ||
+    event.submitter ||
+    document.querySelector("#emailLoginForm button[type='submit']");
+
+  if(!email||!password){
+    showLoginMessage("Please enter email and password.");
+    return false;
+  }
+
+  if(button){
+    button.disabled=true;
+    button.textContent="Logging in...";
+  }
+
+  try{
+    const response=await fetch(`${API_BASE_URL}/api/auth/login`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email,password})
+    });
+
+    const result=await response.json();
+
+    if(!response.ok||!result.success){
+      showLoginMessage(result.message||"Invalid email or password.");
+      return false;
+    }
+
+    const data=result.data||{};
+
+    if(!data.token){
+      showLoginMessage("Login token was not returned by backend.");
+      return false;
+    }
+
+    saveLoginSession(data);
+    showLoginMessage("Login successful. Redirecting...","success");
+
+    setTimeout(()=>{
+      redirectByRole(data.role||"USER",Boolean(data.profileCompleted));
+    },500);
+
+  }catch(error){
+    console.error(error);
+    showLoginMessage("Unable to connect to backend. Make sure Spring Boot is running on port 8085.");
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent="Login";
+    }
+  }
+
+  return false;
+}
+
+function sendOTP(){
+  alert("Phone OTP login API is not available yet. Please use Email Login.");
+}
+
+function verifyOTP(){
+  alert("Phone OTP login API is not available yet. Please use Email Login.");
+  return false;
+}
+
+function startGoogleLogin(){
+  alert("Google login API is not available yet. Please use Email Login.");
+}
 </script>
 </body>
 </html>

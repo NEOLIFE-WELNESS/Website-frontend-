@@ -1272,42 +1272,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Qualification</label>
-                    <input type="text" id="qualification">
-                </div>
-
-                <div class="form-group">
-                    <label>Specialization</label>
-                    <input type="text" id="specialization">
-                </div>
-
-                <div class="form-group">
-                    <label>Experience</label>
-                    <input type="text" id="experience">
+                    <label>Email</label>
+                    <input type="email" id="doctorEmail" placeholder="doctor@example.com">
                 </div>
 
                 <div class="form-group">
                     <label>Phone Number</label>
-                    <input type="text" id="phoneNumber">
+                    <input type="tel" id="phoneNumber" maxlength="10" placeholder="10-digit number">
                 </div>
 
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="doctorEmail">
+                    <label>Age</label>
+                    <input type="number" id="doctorAge" min="18" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select id="doctorGender">
+                        <option value="">Select gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                    </select>
                 </div>
 
                 <div class="form-group full-width">
-                    <label>Image URL</label>
-                    <input
-                        type="text"
-                        id="imageUrl"
-                        placeholder="https://example.com/doctor.jpg"
-                    >
-                </div>
-
-                <div class="form-group full-width">
-                    <label>About</label>
-                    <textarea id="about"></textarea>
+                    <small style="color:#6e7871;line-height:1.6;">
+                        After creation, the doctor will receive a password setup link by email.
+                        Qualification and specialization can be completed later from the doctor profile.
+                    </small>
                 </div>
 
             </div>
@@ -1593,64 +1586,78 @@ function displayDoctors(doctors){
 }
 
 async function saveDoctor(){
-
     const token = localStorage.getItem("token");
 
     if(!token){
         alert("Please login as Admin.");
+        window.location.href = "../patient/login.html";
+        return;
+    }
+
+    const name = document.getElementById("doctorName").value.trim();
+    const email = document.getElementById("doctorEmail").value.trim();
+    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+    const ageValue = document.getElementById("doctorAge").value;
+    const gender = document.getElementById("doctorGender").value;
+
+    if(!name || !email || !phoneNumber || !ageValue || !gender){
+        alert("Please fill all doctor details.");
+        return;
+    }
+
+    if(!/^\d{10}$/.test(phoneNumber)){
+        alert("Please enter a valid 10-digit phone number.");
         return;
     }
 
     const doctor = {
-        name: document.getElementById("doctorName").value.trim(),
-        qualification: document.getElementById("qualification").value.trim(),
-        specialization: document.getElementById("specialization").value.trim(),
-        experience: document.getElementById("experience").value.trim(),
-        about: document.getElementById("about").value.trim(),
-        phoneNumber: document.getElementById("phoneNumber").value.trim(),
-        email: document.getElementById("doctorEmail").value.trim(),
-        imageUrl: document.getElementById("imageUrl").value.trim()
+        name,
+        email,
+        phoneNumber,
+        age: Number(ageValue),
+        gender
     };
 
     try{
-
         const response = await fetch(`${API_BASE_URL}/api/doctors/add`,{
-
             method:"POST",
-
             headers:{
                 "Content-Type":"application/json",
                 "Authorization":"Bearer " + token
             },
-
             body:JSON.stringify(doctor)
-
         });
 
-        const result = await response.json();
-
-        if(result.success){
-
-            alert(result.message);
-
-            closeModal();
-
-            document.getElementById("doctorModal").style.display = "none";
-clearAddDoctorForm();
-loadDoctors();
-
-        }else{
-
-            alert(result.message);
-
+        let result = null;
+        try{
+            result = await response.json();
+        }catch(parseError){
+            throw new Error(`Invalid server response (${response.status}).`);
         }
 
+        if(response.status === 401 || response.status === 403){
+            throw new Error(result.message || "Admin session expired or access denied.");
+        }
+
+        if(!response.ok || result.success !== true){
+            throw new Error(result.message || "Failed to create doctor.");
+        }
+
+        alert(
+            (result.message || "Doctor created successfully") +
+            "\nA password setup link has been sent to the doctor's email."
+        );
+
+        closeModal();
+        clearAddDoctorForm();
+        await loadDoctors();
+
     }catch(error){
-  console.error(error);
-  alert(error.message);
+        console.error("CREATE DOCTOR ERROR:", error);
+        alert(error.message);
+    }
 }
 
-}
 let currentRow = null;
 
 async function editDoctor(id){
