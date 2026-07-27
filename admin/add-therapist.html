@@ -3,15 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Add Therapist - Neolife Admin Portal</title>
-
     <link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <style>
         :root {
@@ -26,13 +20,8 @@
             --muted: #6e7871;
             --border: #dfe7e1;
             --success: #287146;
-            --success-light: #ebf7ef;
             --danger: #c74747;
-            --danger-light: #fff0f0;
             --info: #31708f;
-            --info-light: #edf6fb;
-            --purple: #76548f;
-            --purple-light: #f5effb;
             --sidebar-width: 285px;
         }
 
@@ -52,8 +41,7 @@
 
         button,
         input,
-        select,
-        textarea {
+        select {
             font: inherit;
         }
 
@@ -125,7 +113,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             scrollbar-width: thin;
-            scrollbar-color: #eeedeb transparent;
+            scrollbar-color: var(--gold) transparent;
         }
 
         .admin-menu::-webkit-scrollbar {
@@ -233,27 +221,25 @@
             gap: 14px;
         }
 
-        .sidebar-toggle {
-            display: none;
-            width: 43px;
-            height: 43px;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            border-radius: 11px;
-            color: var(--white);
-            background: var(--dark-green);
-            font-size: 18px;
-        }
-
+        .sidebar-toggle,
         .back-button {
             width: 43px;
             height: 43px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid var(--border);
             border-radius: 11px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            border: none;
+            color: var(--white);
+            background: var(--dark-green);
+        }
+
+        .back-button {
+            border: 1px solid var(--border);
             color: var(--dark-green);
             background: var(--white);
         }
@@ -429,10 +415,6 @@
             font-weight: 800;
         }
 
-        .section-title:not(:first-child) {
-            margin-top: 28px;
-        }
-
         .section-title i {
             color: var(--gold-dark);
         }
@@ -493,11 +475,6 @@
             box-shadow: 0 0 0 3px rgba(199, 71, 71, 0.10);
         }
 
-        textarea.form-control {
-            min-height: 110px;
-            resize: vertical;
-        }
-
         .field-error {
             min-height: 16px;
             margin-top: 5px;
@@ -505,86 +482,24 @@
             font-size: 9px;
         }
 
-        .therapy-options {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .therapy-option input {
-            display: none;
-        }
-
-        .therapy-option label {
-            min-height: 44px;
-            margin: 0;
-            padding: 10px 12px;
+        .flow-note {
+            margin-top: 22px;
+            padding: 16px;
             display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--muted);
-            background: var(--white);
-            cursor: pointer;
+            align-items: flex-start;
+            gap: 12px;
+            border: 1px solid #d8e8dc;
+            border-radius: 13px;
+            color: var(--dark-green);
+            background: var(--green-light);
+            font-size: 11px;
+            line-height: 1.6;
         }
 
-        .therapy-option input:checked + label {
-            color: var(--white);
-            border-color: var(--dark-green);
-            background: var(--dark-green);
-        }
-
-        .status-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .status-option {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .status-option input {
-            display: none;
-        }
-
-        .status-option label {
-            min-height: 48px;
-            margin: 0;
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: 1px solid var(--border);
-            border-radius: 11px;
-            color: var(--muted);
-            background: var(--white);
-            cursor: pointer;
-        }
-
-        .status-option input:checked + label {
-            color: var(--white);
-            border-color: var(--dark-green);
-            background: var(--dark-green);
-        }
-
-        .password-toggle {
-            position: absolute;
-            top: 50%;
-            right: 12px;
-            width: 34px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            border-radius: 8px;
-            color: var(--muted);
-            background: transparent;
-            transform: translateY(-50%);
+        .flow-note i {
+            margin-top: 2px;
+            color: var(--gold-dark);
+            font-size: 16px;
         }
 
         .form-actions {
@@ -633,8 +548,13 @@
             border-color: var(--gold-dark);
         }
 
+        .form-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
         .page-alert {
-            width: min(390px, calc(100% - 35px));
+            width: min(410px, calc(100% - 35px));
             padding: 15px 17px;
             position: fixed;
             top: 102px;
@@ -674,12 +594,6 @@
 
         .sidebar-overlay.show {
             display: block;
-        }
-
-        @media (max-width: 1000px) {
-            .therapy-options {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
         }
 
         @media (max-width: 900px) {
@@ -730,8 +644,7 @@
                 flex-direction: column;
             }
 
-            .form-grid,
-            .therapy-options {
+            .form-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -747,1476 +660,608 @@
 </head>
 
 <body>
-
     <div class="page-alert" id="pageAlert">
         <i class="fa-solid fa-circle-info" id="alertIcon"></i>
-        <div class="alert-message" id="alertMessage"></div>
+        <div id="alertMessage"></div>
     </div>
 
-    <div
-        class="sidebar-overlay"
-        id="sidebarOverlay"
-        onclick="closeSidebar()"
-    ></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
     <div class="admin-layout">
-
         <aside class="admin-sidebar" id="adminSidebar">
-
             <div class="admin-brand">
-
-                <img
-                    src="../assets/main_logo.jpeg"
-                    alt="Neolife Logo"
-                >
-
+                <img src="../assets/main_logo.jpeg" alt="Neolife Logo">
                 <div>
                     <h2>Neolife</h2>
                     <span>Admin Portal</span>
                 </div>
-
             </div>
 
             <nav class="admin-menu">
-
                 <span class="menu-label">Main</span>
-
                 <a href="admin-dashboard.html">
                     <i class="fa-solid fa-chart-line"></i>
                     Dashboard
                 </a>
 
                 <span class="menu-label">User Management</span>
-
                 <a href="admin-doctors.html">
                     <i class="fa-solid fa-user-doctor"></i>
                     Doctors
                 </a>
-
                 <a href="admin-medical-staff.html">
                     <i class="fa-solid fa-user-nurse"></i>
                     Medical Staff
                 </a>
-
                 <a href="admin-therapists.html" class="active">
                     <i class="fa-solid fa-spa"></i>
                     Therapists
                 </a>
-
                 <a href="admin-users.html">
                     <i class="fa-solid fa-users"></i>
                     Patients / Users
                 </a>
 
                 <span class="menu-label">Clinical Oversight</span>
-
                 <a href="admin-appointments.html">
                     <i class="fa-solid fa-calendar-check"></i>
                     Appointments
                 </a>
-
                 <a href="admin-consultations.html">
                     <i class="fa-solid fa-video"></i>
                     Consultations
                 </a>
-
                 <a href="admin-therapy-bookings.html">
                     <i class="fa-solid fa-calendar-days"></i>
                     Therapy Bookings
                 </a>
 
                 <span class="menu-label">Commerce</span>
-
                 <a href="admin-products.html">
                     <i class="fa-solid fa-box-open"></i>
                     Products
                 </a>
-
                 <a href="admin-inventory.html">
                     <i class="fa-solid fa-warehouse"></i>
                     Inventory
                 </a>
-
                 <a href="admin-orders.html">
                     <i class="fa-solid fa-cart-shopping"></i>
                     Orders
                 </a>
-
                 <a href="admin-coupons.html">
                     <i class="fa-solid fa-ticket"></i>
                     Coupons
                 </a>
 
                 <span class="menu-label">System</span>
-
                 <a href="admin-reports.html">
                     <i class="fa-solid fa-chart-column"></i>
                     Reports & Analytics
                 </a>
-
                 <a href="admin-notification-templates.html">
                     <i class="fa-solid fa-envelope-open-text"></i>
                     Notification Templates
                 </a>
-
             </nav>
 
             <div class="sidebar-footer">
-
-                <button
-                    type="button"
-                    class="sidebar-logout"
-                    onclick="logoutAdmin()"
-                >
+                <button type="button" class="sidebar-logout" onclick="logoutAdmin()">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Logout
                 </button>
-
             </div>
-
         </aside>
 
         <main class="admin-main">
-
             <header class="admin-topbar">
-
                 <div class="topbar-left">
-
-                    <button
-                        type="button"
-                        class="sidebar-toggle"
-                        onclick="toggleSidebar()"
-                    >
+                    <button type="button" class="sidebar-toggle" onclick="toggleSidebar()">
                         <i class="fa-solid fa-bars"></i>
                     </button>
 
-                    <button
-                        type="button"
-                        class="back-button"
-                        onclick="goBack()"
-                    >
+                    <button type="button" class="back-button" onclick="goBack()">
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
 
                     <div class="page-title">
                         <h1>Add Therapist</h1>
-                        <p>Create a new therapist staff account.</p>
+                        <p>Create a therapist account and send profile setup access.</p>
                     </div>
-
                 </div>
 
                 <div class="topbar-actions">
-
                     <div class="admin-profile-box">
-
-                        <span class="admin-avatar">A</span>
-
+                        <span class="admin-avatar" id="adminAvatar">A</span>
                         <div class="admin-profile-text">
-                            <strong>Admin</strong>
+                            <strong id="adminName">Admin</strong>
                             <span>System Administrator</span>
                         </div>
-
                     </div>
-
                 </div>
-
             </header>
 
             <section class="admin-content">
-
                 <section class="page-banner">
-
                     <div class="page-banner-content">
-
-                        <h2>Onboard Therapist Staff</h2>
-
+                        <h2>Onboard a New Therapist</h2>
                         <p>
-                            Add therapist personal details, professional
-                            qualification, assigned therapies, shift,
-                            availability and therapist portal login access.
+                            Enter the therapist's basic account information. After creation,
+                            the therapist can set a password and complete the professional profile.
                         </p>
-
                     </div>
 
                     <div class="page-banner-icon">
                         <i class="fa-solid fa-user-plus"></i>
                     </div>
-
                 </section>
 
-                <form
-                    class="form-card"
-                    id="therapistForm"
-                    novalidate
-                >
-
+                <form class="form-card" id="therapistForm" novalidate>
                     <div class="form-card-header">
-
                         <div>
-                            <h2>Therapist Information</h2>
-                            <p>Complete all required fields before saving.</p>
+                            <h2>Therapist Account Information</h2>
+                            <p>All fields below are required by the create therapist API.</p>
                         </div>
 
                         <span class="required-note">
                             <span class="required">*</span>
                             Required fields
                         </span>
-
                     </div>
 
                     <div class="form-body">
-
                         <div class="section-title">
                             <i class="fa-solid fa-address-card"></i>
-                            Personal Information
+                            Basic Information
                         </div>
 
                         <div class="form-grid">
-
                             <div class="form-group">
-
                                 <label for="name">
-                                    Full Name
-                                    <span class="required">*</span>
+                                    Full Name <span class="required">*</span>
                                 </label>
-
                                 <div class="input-wrapper">
                                     <i class="fa-solid fa-user"></i>
-
                                     <input
                                         type="text"
                                         id="name"
                                         class="form-control"
                                         placeholder="Enter therapist name"
+                                        autocomplete="name"
                                     >
                                 </div>
-
                                 <div class="field-error" id="nameError"></div>
-
                             </div>
 
                             <div class="form-group">
-
                                 <label for="email">
-                                    Email Address
-                                    <span class="required">*</span>
+                                    Email Address <span class="required">*</span>
                                 </label>
-
                                 <div class="input-wrapper">
                                     <i class="fa-solid fa-envelope"></i>
-
                                     <input
                                         type="email"
                                         id="email"
                                         class="form-control"
                                         placeholder="Enter email address"
+                                        autocomplete="email"
                                     >
                                 </div>
-
                                 <div class="field-error" id="emailError"></div>
-
                             </div>
 
                             <div class="form-group">
-
                                 <label for="phone">
-                                    Phone Number
-                                    <span class="required">*</span>
+                                    Phone Number <span class="required">*</span>
                                 </label>
-
                                 <div class="input-wrapper">
                                     <i class="fa-solid fa-phone"></i>
-
                                     <input
                                         type="tel"
                                         id="phone"
                                         class="form-control"
                                         placeholder="Enter 10-digit number"
                                         maxlength="10"
+                                        inputmode="numeric"
+                                        autocomplete="tel"
                                     >
                                 </div>
-
                                 <div class="field-error" id="phoneError"></div>
-
                             </div>
 
                             <div class="form-group">
-
-                                <label for="emergencyContact">
-                                    Emergency Contact
-                                </label>
-
-                                <div class="input-wrapper">
-                                    <i class="fa-solid fa-phone-volume"></i>
-
-                                    <input
-                                        type="tel"
-                                        id="emergencyContact"
-                                        class="form-control"
-                                        placeholder="Enter emergency contact"
-                                        maxlength="10"
-                                    >
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="emergencyContactError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
                                 <label for="age">
-                                    Age
-                                    <span class="required">*</span>
+                                    Age <span class="required">*</span>
                                 </label>
-
-                                <input
-                                    type="number"
-                                    id="age"
-                                    class="form-control"
-                                    min="18"
-                                    max="70"
-                                    placeholder="Enter age"
-                                >
-
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                    <input
+                                        type="number"
+                                        id="age"
+                                        class="form-control"
+                                        placeholder="Enter age"
+                                        min="18"
+                                        max="70"
+                                    >
+                                </div>
                                 <div class="field-error" id="ageError"></div>
-
                             </div>
 
-                            <div class="form-group">
-
+                            <div class="form-group full-width">
                                 <label for="gender">
-                                    Gender
-                                    <span class="required">*</span>
+                                    Gender <span class="required">*</span>
                                 </label>
-
-                                <select id="gender" class="form-control">
-
-                                    <option value="">Select gender</option>
-                                    <option value="MALE">Male</option>
-                                    <option value="FEMALE">Female</option>
-                                    <option value="OTHER">Other</option>
-
-                                </select>
-
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-venus-mars"></i>
+                                    <select id="gender" class="form-control">
+                                        <option value="">Select gender</option>
+                                        <option value="MALE">Male</option>
+                                        <option value="FEMALE">Female</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
                                 <div class="field-error" id="genderError"></div>
-
                             </div>
-
-                            <div class="form-group full-width">
-
-                                <label for="address">Address</label>
-
-                                <textarea
-                                    id="address"
-                                    class="form-control"
-                                    placeholder="Enter complete address"
-                                ></textarea>
-
-                                <div class="field-error" id="addressError"></div>
-
-                            </div>
-
                         </div>
 
-                        <div class="section-title">
-                            <i class="fa-solid fa-spa"></i>
-                            Professional Information
+                        <div class="flow-note">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <div>
+                                The admin does not set the therapist's password. After the account
+                                is created, the therapist uses the setup token with
+                                <strong>POST /api/auth/set-password</strong>, logs in, and completes
+                                the professional profile using
+                                <strong>POST /api/therapists/complete-profile</strong>.
+                            </div>
                         </div>
-
-                        <div class="form-grid">
-
-                            <div class="form-group">
-
-                                <label for="specialization">
-                                    Specialization
-                                    <span class="required">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="specialization"
-                                    class="form-control"
-                                    placeholder="Example: Panchakarma Therapy"
-                                >
-
-                                <div
-                                    class="field-error"
-                                    id="specializationError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="qualification">
-                                    Qualification
-                                    <span class="required">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="qualification"
-                                    class="form-control"
-                                    placeholder="Enter qualification"
-                                >
-
-                                <div
-                                    class="field-error"
-                                    id="qualificationError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="experience">
-                                    Experience
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="experience"
-                                    class="form-control"
-                                    placeholder="Example: 5 Years"
-                                >
-
-                                <div
-                                    class="field-error"
-                                    id="experienceError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="joiningDate">
-                                    Joining Date
-                                    <span class="required">*</span>
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="joiningDate"
-                                    class="form-control"
-                                >
-
-                                <div
-                                    class="field-error"
-                                    id="joiningDateError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="shift">
-                                    Shift
-                                    <span class="required">*</span>
-                                </label>
-
-                                <select id="shift" class="form-control">
-
-                                    <option value="">Select shift</option>
-                                    <option value="Morning">Morning</option>
-                                    <option value="Evening">Evening</option>
-                                    <option value="General">General</option>
-                                    <option value="Rotational">Rotational</option>
-
-                                </select>
-
-                                <div class="field-error" id="shiftError"></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="availability">
-                                    Availability
-                                    <span class="required">*</span>
-                                </label>
-
-                                <select id="availability" class="form-control">
-
-                                    <option value="">Select availability</option>
-                                    <option value="AVAILABLE">Available</option>
-                                    <option value="BUSY">Busy</option>
-                                    <option value="UNAVAILABLE">Unavailable</option>
-
-                                </select>
-
-                                <div
-                                    class="field-error"
-                                    id="availabilityError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group full-width">
-
-                                <label>
-                                    Assigned Therapies
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="therapy-options">
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyPanchakarma"
-                                            name="therapies"
-                                            value="Panchakarma"
-                                        >
-                                        <label for="therapyPanchakarma">
-                                            <i class="fa-solid fa-leaf"></i>
-                                            Panchakarma
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyAcupuncture"
-                                            name="therapies"
-                                            value="Acupuncture"
-                                        >
-                                        <label for="therapyAcupuncture">
-                                            <i class="fa-solid fa-circle-dot"></i>
-                                            Acupuncture
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyYoga"
-                                            name="therapies"
-                                            value="Yoga"
-                                        >
-                                        <label for="therapyYoga">
-                                            <i class="fa-solid fa-person-praying"></i>
-                                            Yoga
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyNaturopathy"
-                                            name="therapies"
-                                            value="Naturopathy"
-                                        >
-                                        <label for="therapyNaturopathy">
-                                            <i class="fa-solid fa-seedling"></i>
-                                            Naturopathy
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyBeauty"
-                                            name="therapies"
-                                            value="Beauty Therapy"
-                                        >
-                                        <label for="therapyBeauty">
-                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                            Beauty Therapy
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyHair"
-                                            name="therapies"
-                                            value="Hair Treatment"
-                                        >
-                                        <label for="therapyHair">
-                                            <i class="fa-solid fa-scissors"></i>
-                                            Hair Treatment
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyAbhyanga"
-                                            name="therapies"
-                                            value="Abhyanga"
-                                        >
-                                        <label for="therapyAbhyanga">
-                                            <i class="fa-solid fa-hands"></i>
-                                            Abhyanga
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyShirodhara"
-                                            name="therapies"
-                                            value="Shirodhara"
-                                        >
-                                        <label for="therapyShirodhara">
-                                            <i class="fa-solid fa-droplet"></i>
-                                            Shirodhara
-                                        </label>
-                                    </div>
-
-                                    <div class="therapy-option">
-                                        <input
-                                            type="checkbox"
-                                            id="therapyPain"
-                                            name="therapies"
-                                            value="Pain Management"
-                                        >
-                                        <label for="therapyPain">
-                                            <i class="fa-solid fa-hand-holding-medical"></i>
-                                            Pain Management
-                                        </label>
-                                    </div>
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="assignedTherapiesError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group full-width">
-
-                                <label for="notes">Notes</label>
-
-                                <textarea
-                                    id="notes"
-                                    class="form-control"
-                                    placeholder="Enter therapist responsibilities or notes"
-                                ></textarea>
-
-                            </div>
-
-                        </div>
-
-                        <div class="section-title">
-                            <i class="fa-solid fa-lock"></i>
-                            Login Access
-                        </div>
-
-                        <div class="form-grid">
-
-                            <div class="form-group">
-
-                                <label for="password">
-                                    Temporary Password
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-key"></i>
-
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        class="form-control"
-                                        placeholder="Minimum 8 characters"
-                                    >
-
-                                    <button
-                                        type="button"
-                                        class="password-toggle"
-                                        onclick="togglePassword('password', this)"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="passwordError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="confirmPassword">
-                                    Confirm Password
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-key"></i>
-
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        class="form-control"
-                                        placeholder="Re-enter password"
-                                    >
-
-                                    <button
-                                        type="button"
-                                        class="password-toggle"
-                                        onclick="togglePassword('confirmPassword', this)"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="confirmPasswordError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group full-width">
-
-                                <label>Account Status</label>
-
-                                <div class="status-options">
-
-                                    <div class="status-option">
-                                        <input
-                                            type="radio"
-                                            id="statusActive"
-                                            name="status"
-                                            value="ACTIVE"
-                                            checked
-                                        >
-                                        <label for="statusActive">
-                                            <i class="fa-solid fa-circle-check"></i>
-                                            Active
-                                        </label>
-                                    </div>
-
-                                    <div class="status-option">
-                                        <input
-                                            type="radio"
-                                            id="statusInactive"
-                                            name="status"
-                                            value="INACTIVE"
-                                        >
-                                        <label for="statusInactive">
-                                            <i class="fa-solid fa-circle-xmark"></i>
-                                            Inactive
-                                        </label>
-                                    </div>
-
-                                    <div class="status-option">
-                                        <input
-                                            type="radio"
-                                            id="statusLeave"
-                                            name="status"
-                                            value="ON_LEAVE"
-                                        >
-                                        <label for="statusLeave">
-                                            <i class="fa-solid fa-calendar-minus"></i>
-                                            On Leave
-                                        </label>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
                     </div>
 
                     <div class="form-actions">
-
-                        <button
-                            type="button"
-                            class="form-button cancel-button"
-                            onclick="goBack()"
-                        >
+                        <button type="button" class="form-button cancel-button" onclick="goBack()">
                             <i class="fa-solid fa-xmark"></i>
                             Cancel
                         </button>
 
-                        <button
-                            type="button"
-                            class="form-button reset-button"
-                            onclick="resetForm()"
-                        >
+                        <button type="button" class="form-button reset-button" onclick="resetForm()">
                             <i class="fa-solid fa-rotate-left"></i>
                             Reset
                         </button>
 
-                        <button
-                            type="submit"
-                            class="form-button save-button"
-                            id="saveButton"
-                        >
+                        <button type="submit" class="form-button save-button" id="saveButton">
                             <i class="fa-solid fa-floppy-disk"></i>
                             Save Therapist
                         </button>
-
                     </div>
-
                 </form>
-
             </section>
-
         </main>
-
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "http://localhost:8085";
+        const CREATE_THERAPIST_ENDPOINT = "/api/therapists/create";
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                setDefaultDate();
+        document.addEventListener("DOMContentLoaded", function () {
+            requireAdminLogin();
+            loadAdminName();
 
-                document
-                    .getElementById(
-                        "therapistForm"
-                    )
-                    .addEventListener(
-                        "submit",
-                        saveTherapist
-                    );
+            document
+                .getElementById("therapistForm")
+                .addEventListener("submit", createTherapistByAdmin);
+
+            document
+                .getElementById("phone")
+                .addEventListener("input", function () {
+                    this.value = this.value.replace(/\D/g, "").slice(0, 10);
+                });
+        });
+
+        function requireAdminLogin() {
+            const token = localStorage.getItem("token");
+            const role = normalizeRole(localStorage.getItem("role"));
+
+            if (!token) {
+                showAlert("Please log in as admin.", "error");
+
+                setTimeout(function () {
+                    window.location.href = "../frontend/login.html";
+                }, 1200);
+
+                return false;
             }
-        );
 
-        function setDefaultDate() {
-            document.getElementById(
-                "joiningDate"
-            ).value =
-                new Date()
-                    .toISOString()
-                    .substring(0, 10);
+            if (role && role !== "ADMIN") {
+                showAlert("Only an admin can create therapists.", "error");
+
+                setTimeout(function () {
+                    window.location.href = "../frontend/login.html";
+                }, 1200);
+
+                return false;
+            }
+
+            return true;
         }
 
-        function saveTherapist(event) {
-            event.preventDefault();
+        function normalizeRole(role) {
+            return String(role || "")
+                .replace("ROLE_", "")
+                .replace(/['\"]/g, "")
+                .trim()
+                .toUpperCase();
+        }
 
+        function loadAdminName() {
+            const storedName =
+                localStorage.getItem("name") ||
+                localStorage.getItem("userName") ||
+                localStorage.getItem("fullName") ||
+                "Admin";
+
+            const cleanName = String(storedName).replace(/['\"]/g, "").trim();
+
+            document.getElementById("adminName").textContent = cleanName || "Admin";
+            document.getElementById("adminAvatar").textContent =
+                (cleanName || "Admin").charAt(0).toUpperCase();
+        }
+
+        async function createTherapistByAdmin(event) {
+            event.preventDefault();
             clearErrors();
 
-            const payload =
-                getPayload();
+            const payload = getCreateTherapistPayload();
 
-            if (!validateForm(payload)) {
-                showAlert(
-                    "Please correct the highlighted fields.",
-                    "error"
-                );
-
+            if (!validateCreateTherapist(payload)) {
+                showAlert("Please correct the highlighted fields.", "error");
                 return;
             }
 
-            const button =
-                document.getElementById(
-                    "saveButton"
+            const token = localStorage.getItem("token");
+            const saveButton = document.getElementById("saveButton");
+
+            if (!token) {
+                showAlert("Your session has expired. Please log in again.", "error");
+                return;
+            }
+
+            setButtonLoading(saveButton, true);
+
+            try {
+                const response = await fetch(
+                    API_BASE_URL + CREATE_THERAPIST_ENDPOINT,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
+                        body: JSON.stringify(payload)
+                    }
                 );
 
-            setButtonLoading(
-                button,
-                true
-            );
+                const result = await readJsonResponse(response);
 
-            /*
-            Enable backend later:
-
-            const token =
-                localStorage.getItem("token");
-
-            fetch(
-                API_BASE_URL +
-                "/api/admin/therapists",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-
-                        "Authorization":
-                            "Bearer " + token
-                    },
-
-                    body:
-                        JSON.stringify(payload)
+                if (response.status === 401) {
+                    clearLoginStorage();
+                    throw new Error("Your session has expired. Please log in again.");
                 }
-            )
-            .then(response => response.json())
-            .then(result => {
-                if (
-                    !result.success
-                ) {
+
+                if (response.status === 403) {
+                    throw new Error("You are not authorized to create a therapist.");
+                }
+
+                if (!response.ok || result.success === false) {
                     throw new Error(
-                        result.message
+                        result.message ||
+                        getValidationMessage(result) ||
+                        "Unable to create therapist."
                     );
                 }
 
                 showAlert(
-                    "Therapist added successfully.",
+                    result.message || "Therapist account created successfully.",
                     "success"
                 );
 
-                window.location.href =
-                    "admin-therapists.html";
-            })
-            .catch(error => {
+                document.getElementById("therapistForm").reset();
+
+                setTimeout(function () {
+                    window.location.href = "admin-therapists.html";
+                }, 1400);
+
+            } catch (error) {
+                console.error("Create therapist error:", error);
+
                 showAlert(
-                    error.message,
+                    error.message ||
+                    "Something went wrong while creating the therapist.",
                     "error"
                 );
-            });
 
-            return;
-            */
-
-            saveDemoTherapist(payload);
-
-            showAlert(
-                "Therapist added successfully.",
-                "success"
-            );
-
-            setTimeout(
-                function () {
-                    window.location.href =
-                        "admin-therapists.html";
-                },
-                900
-            );
-
-            setButtonLoading(
-                button,
-                false
-            );
+            } finally {
+                setButtonLoading(saveButton, false);
+            }
         }
 
-        function getPayload() {
+        function getCreateTherapistPayload() {
             return {
-                name:
-                    getValue("name"),
-
-                email:
-                    getValue("email")
-                        .toLowerCase(),
-
-                phone:
-                    getValue("phone"),
-
-                emergencyContact:
-                    getValue(
-                        "emergencyContact"
-                    ),
-
-                age:
-                    Number(
-                        getValue("age")
-                    ),
-
-                gender:
-                    getValue("gender"),
-
-                address:
-                    getValue("address"),
-
-                specialization:
-                    getValue(
-                        "specialization"
-                    ),
-
-                qualification:
-                    getValue(
-                        "qualification"
-                    ),
-
-                experience:
-                    getValue("experience"),
-
-                assignedTherapies:
-                    Array.from(
-                        document.querySelectorAll(
-                            'input[name="therapies"]:checked'
-                        )
-                    ).map(
-                        input =>
-                            input.value
-                    ),
-
-                joiningDate:
-                    getValue("joiningDate"),
-
-                shift:
-                    getValue("shift"),
-
-                availability:
-                    getValue(
-                        "availability"
-                    ),
-
-                notes:
-                    getValue("notes"),
-
-                password:
-                    getValue("password"),
-
-                role:
-                    "THERAPIST",
-
-                status:
-                    document.querySelector(
-                        'input[name="status"]:checked'
-                    )?.value ||
-                    "ACTIVE",
-
-                todaySessions:
-                    0
+                name: getValue("name"),
+                email: getValue("email").toLowerCase(),
+                phoneNumber: getValue("phone"),
+                age: Number(getValue("age")),
+                gender: getValue("gender").toUpperCase()
             };
         }
 
-        function validateForm(payload) {
+        function validateCreateTherapist(payload) {
             let valid = true;
 
-            if (
-                payload.name.length < 3
-            ) {
-                setError(
-                    "name",
-                    "Enter a valid full name."
-                );
-
+            if (!payload.name || payload.name.length < 3) {
+                setError("name", "Enter a valid therapist name.");
                 valid = false;
             }
 
             if (
-                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                    .test(payload.email)
+                !payload.email ||
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)
             ) {
-                setError(
-                    "email",
-                    "Enter a valid email."
-                );
-
+                setError("email", "Enter a valid email address.");
                 valid = false;
             }
 
             if (
-                !/^[6-9]\d{9}$/
-                    .test(payload.phone)
+                !payload.phoneNumber ||
+                !/^[6-9]\d{9}$/.test(payload.phoneNumber)
             ) {
-                setError(
-                    "phone",
-                    "Enter a valid 10-digit number."
-                );
-
+                setError("phone", "Enter a valid 10-digit phone number.");
                 valid = false;
             }
 
             if (
-                payload.emergencyContact &&
-                !/^[6-9]\d{9}$/
-                    .test(
-                        payload.emergencyContact
-                    )
-            ) {
-                setError(
-                    "emergencyContact",
-                    "Enter a valid contact number."
-                );
-
-                valid = false;
-            }
-
-            if (
-                !payload.age ||
+                !Number.isInteger(payload.age) ||
                 payload.age < 18 ||
                 payload.age > 70
             ) {
-                setError(
-                    "age",
-                    "Age must be between 18 and 70."
-                );
-
+                setError("age", "Age must be between 18 and 70.");
                 valid = false;
             }
 
-            if (!payload.gender) {
-                setError(
-                    "gender",
-                    "Select gender."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.specialization
-                    .length < 2
-            ) {
-                setError(
-                    "specialization",
-                    "Enter specialization."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.qualification
-                    .length < 2
-            ) {
-                setError(
-                    "qualification",
-                    "Enter qualification."
-                );
-
-                valid = false;
-            }
-
-            if (
-                !payload.assignedTherapies
-                    .length
-            ) {
-                document.getElementById(
-                    "assignedTherapiesError"
-                ).textContent =
-                    "Select at least one therapy.";
-
-                valid = false;
-            }
-
-            if (!payload.joiningDate) {
-                setError(
-                    "joiningDate",
-                    "Select joining date."
-                );
-
-                valid = false;
-            }
-
-            if (!payload.shift) {
-                setError(
-                    "shift",
-                    "Select shift."
-                );
-
-                valid = false;
-            }
-
-            if (!payload.availability) {
-                setError(
-                    "availability",
-                    "Select availability."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.password.length < 8
-            ) {
-                setError(
-                    "password",
-                    "Password must contain 8 characters."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.password !==
-                getValue(
-                    "confirmPassword"
-                )
-            ) {
-                setError(
-                    "confirmPassword",
-                    "Passwords do not match."
-                );
-
+            if (!['MALE', 'FEMALE', 'OTHER'].includes(payload.gender)) {
+                setError("gender", "Select a valid gender.");
                 valid = false;
             }
 
             return valid;
         }
 
-        function saveDemoTherapist(
-            payload
-        ) {
-            const saved =
-                readLocalArray(
-                    "demoTherapists"
-                );
+        async function readJsonResponse(response) {
+            const contentType = response.headers.get("content-type") || "";
 
-            const id =
-                Date.now();
+            if (!contentType.includes("application/json")) {
+                const text = await response.text();
 
-            const therapist = {
-                id:
-                    id,
+                if (!response.ok) {
+                    throw new Error(text || "The server returned an invalid response.");
+                }
 
-                therapistCode:
-                    "THR-" +
-                    String(id)
-                        .slice(-4),
-
-                ...payload
-            };
-
-            delete therapist.password;
-
-            saved.push(
-                therapist
-            );
-
-            localStorage.setItem(
-                "demoTherapists",
-                JSON.stringify(saved)
-            );
-        }
-
-        function readLocalArray(key) {
-            try {
-                const value =
-                    JSON.parse(
-                        localStorage.getItem(
-                            key
-                        ) ||
-                        "[]"
-                    );
-
-                return Array.isArray(value)
-                    ? value
-                    : [];
-
-            } catch (error) {
-                return [];
+                return {
+                    success: true,
+                    message: text || "Therapist created successfully."
+                };
             }
+
+            return response.json();
         }
 
-        function resetForm() {
-            document
-                .getElementById(
-                    "therapistForm"
-                )
-                .reset();
-
-            clearErrors();
-            setDefaultDate();
-
-            document.getElementById(
-                "statusActive"
-            ).checked = true;
-
-            showAlert(
-                "Form reset successfully.",
-                "info"
-            );
-        }
-
-        function togglePassword(
-            inputId,
-            button
-        ) {
-            const input =
-                document.getElementById(
-                    inputId
-                );
-
-            const icon =
-                button.querySelector("i");
-
-            if (
-                input.type ===
-                "password"
-            ) {
-                input.type = "text";
-                icon.className =
-                    "fa-solid fa-eye-slash";
-
-            } else {
-                input.type = "password";
-                icon.className =
-                    "fa-solid fa-eye";
+        function getValidationMessage(result) {
+            if (!result || !result.errors) {
+                return "";
             }
+
+            if (Array.isArray(result.errors)) {
+                return result.errors.join(", ");
+            }
+
+            if (typeof result.errors === "object") {
+                return Object.values(result.errors).join(", ");
+            }
+
+            return String(result.errors);
         }
 
-        function setError(
-            fieldId,
-            message
-        ) {
-            const field =
-                document.getElementById(
-                    fieldId
-                );
-
-            const error =
-                document.getElementById(
-                    fieldId + "Error"
-                );
+        function setError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + "Error");
 
             if (field) {
-                field.classList.add(
-                    "error"
-                );
+                field.classList.add("error");
             }
 
             if (error) {
-                error.textContent =
-                    message;
+                error.textContent = message;
             }
         }
 
         function clearErrors() {
-            document
-                .querySelectorAll(
-                    ".form-control"
-                )
-                .forEach(
-                    field =>
-                        field.classList.remove(
-                            "error"
-                        )
-                );
+            document.querySelectorAll(".form-control").forEach(function (field) {
+                field.classList.remove("error");
+            });
 
-            document
-                .querySelectorAll(
-                    ".field-error"
-                )
-                .forEach(
-                    error =>
-                        error.textContent =
-                            ""
-                );
-        }
-
-        function setButtonLoading(
-            button,
-            loading
-        ) {
-            button.disabled =
-                loading;
-
-            button.innerHTML =
-                loading
-                    ? `
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Saving...
-                    `
-                    : `
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    Save Therapist
-                    `;
+            document.querySelectorAll(".field-error").forEach(function (error) {
+                error.textContent = "";
+            });
         }
 
         function getValue(id) {
-            return document
-                .getElementById(id)
-                .value
-                .trim();
+            const element = document.getElementById(id);
+            return element ? element.value.trim() : "";
+        }
+
+        function setButtonLoading(button, loading) {
+            if (!button) {
+                return;
+            }
+
+            button.disabled = loading;
+            button.innerHTML = loading
+                ? '<i class="fa-solid fa-spinner fa-spin"></i> Creating Therapist...'
+                : '<i class="fa-solid fa-floppy-disk"></i> Save Therapist';
+        }
+
+        function resetForm() {
+            document.getElementById("therapistForm").reset();
+            clearErrors();
+            showAlert("Form reset successfully.", "info");
         }
 
         function goBack() {
-            window.location.href =
-                "admin-therapists.html";
+            window.location.href = "admin-therapists.html";
         }
 
         function toggleSidebar() {
-            document
-                .getElementById(
-                    "adminSidebar"
-                )
-                .classList
-                .toggle("open");
-
-            document
-                .getElementById(
-                    "sidebarOverlay"
-                )
-                .classList
-                .toggle("show");
+            document.getElementById("adminSidebar").classList.toggle("open");
+            document.getElementById("sidebarOverlay").classList.toggle("show");
         }
 
         function closeSidebar() {
-            document
-                .getElementById(
-                    "adminSidebar"
-                )
-                .classList
-                .remove("open");
-
-            document
-                .getElementById(
-                    "sidebarOverlay"
-                )
-                .classList
-                .remove("show");
+            document.getElementById("adminSidebar").classList.remove("open");
+            document.getElementById("sidebarOverlay").classList.remove("show");
         }
 
         function logoutAdmin() {
+            clearLoginStorage();
+            window.location.href = "../frontend/login.html";
+        }
+
+        function clearLoginStorage() {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
             localStorage.removeItem("userId");
-
-            window.location.href =
-                "../frontend/login.html";
+            localStorage.removeItem("name");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("fullName");
         }
 
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
+        function showAlert(message, type) {
+            const box = document.getElementById("pageAlert");
+            const icon = document.getElementById("alertIcon");
 
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
+            document.getElementById("alertMessage").textContent = message;
+            box.className = "page-alert show " + type;
 
-            document.getElementById(
-                "alertMessage"
-            ).textContent =
-                message;
+            icon.className = type === "success"
+                ? "fa-solid fa-circle-check"
+                : type === "error"
+                    ? "fa-solid fa-circle-exclamation"
+                    : "fa-solid fa-circle-info";
 
-            box.className =
-                `page-alert show ${type}`;
+            clearTimeout(window.therapistFormTimer);
 
-            icon.className =
-                type === "success"
-                    ? "fa-solid fa-circle-check"
-                    : type === "error"
-                        ? "fa-solid fa-circle-exclamation"
-                        : "fa-solid fa-circle-info";
-
-            clearTimeout(
-                window.therapistFormTimer
-            );
-
-            window.therapistFormTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
+            window.therapistFormTimer = setTimeout(function () {
+                box.classList.remove("show");
+            }, 4500);
         }
     </script>
-
 </body>
 </html>

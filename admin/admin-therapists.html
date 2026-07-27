@@ -2162,23 +2162,266 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                /*
-                Backend/login calls are disabled temporarily.
+            async function () {
+                if (!requireAdminLogin()) {
+                    return;
+                }
 
-                requireAdminLogin();
-                loadAdminProfile();
-                */
-
-                loadTherapists();
+                await Promise.all([
+                    loadLoggedInUser(),
+                    loadTherapists()
+                ]);
             }
         );
 
         /* =========================
-           LOAD THERAPISTS
+           AUTHENTICATION
         ========================== */
 
-        function loadTherapists() {
+        function getToken() {
+            return (
+                localStorage.getItem("token") ||
+                ""
+            );
+        }
+
+        function authHeaders(
+            includeContentType = false
+        ) {
+            const headers = {
+                "Accept": "application/json",
+                "Authorization":
+                    "Bearer " + getToken()
+            };
+
+            if (includeContentType) {
+                headers["Content-Type"] =
+                    "application/json";
+            }
+
+            return headers;
+        }
+
+        function requireAdminLogin() {
+            const token = getToken();
+
+            if (!token) {
+                window.location.href =
+                    "../frontend/login.html";
+
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearAuthentication() {
+            [
+                "token",
+                "refreshToken",
+                "role",
+                "userId",
+                "name",
+                "userName"
+            ].forEach(
+                key =>
+                    localStorage.removeItem(
+                        key
+                    )
+            );
+        }
+
+        /* =========================
+           LOGGED-IN USER
+        ========================== */
+
+        async function loadLoggedInUser() {
+            try {
+                const response = await fetch(
+                    API_BASE_URL +
+                    "/api/users/getProfile",
+                    {
+                        method: "GET",
+                        headers: authHeaders()
+                    }
+                );
+
+                const result =
+                    await safelyReadResponse(
+                        response
+                    );
+
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    window.location.href =
+                        "../frontend/login.html";
+
+                    return;
+                }
+
+                if (
+                    !response.ok ||
+                    result?.success === false
+                ) {
+                    throw new Error(
+                        result?.message ||
+                        "Unable to load logged-in user."
+                    );
+                }
+
+                const user =
+                    result?.data || {};
+
+                const userName =
+                    user.name ||
+                    user.userName ||
+                    user.email ||
+                    "User";
+
+                const role =
+                    formatStatus(
+                        user.role ||
+                        localStorage.getItem(
+                            "role"
+                        ) ||
+                        "USER"
+                    );
+
+                setText(
+                    "adminName",
+                    userName
+                );
+
+                setText(
+                    "adminRole",
+                    role
+                );
+
+                setText(
+                    "adminAvatar",
+                    getInitial(userName)
+                );
+
+            } catch (error) {
+                console.error(
+                    "Load logged-in user error:",
+                    error
+                );
+
+                const storedName =
+                    localStorage.getItem(
+                        "name"
+                    ) ||
+                    localStorage.getItem(
+                        "userName"
+                    ) ||
+                    "User";
+
+                setText(
+                    "adminName",
+                    storedName
+                );
+
+                setText(
+                    "adminRole",
+                    formatStatus(
+                        localStorage.getItem(
+                            "role"
+                        ) ||
+                        "USER"
+                    )
+                );
+
+                setText(
+                    "adminAvatar",
+                    getInitial(storedName)
+                );
+            }
+        }
+
+        /* =========================
+           LOAD REAL THERAPISTS
+        ========================== */
+
+        async function loadTherapists() {
+            showTableLoading();
+
+            try {
+                const response = await fetch(
+                    API_BASE_URL +
+                    "/api/therapists/getAll",
+                    {
+                        method: "GET",
+                        headers: authHeaders()
+                    }
+                );
+
+                const result =
+                    await safelyReadResponse(
+                        response
+                    );
+
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    window.location.href =
+                        "../frontend/login.html";
+
+                    return;
+                }
+
+                if (response.status === 403) {
+                    throw new Error(
+                        result?.message ||
+                        "You are not authorized to view therapists."
+                    );
+                }
+
+                if (
+                    !response.ok ||
+                    result?.success === false
+                ) {
+                    throw new Error(
+                        result?.message ||
+                        "Unable to load therapists."
+                    );
+                }
+
+                const data =
+                    Array.isArray(result?.data)
+                        ? result.data
+                        : [];
+
+                allTherapists =
+                    data.map(
+                        normalizeTherapist
+                    );
+
+                currentPage = 1;
+
+                populateFilters();
+                updateSummary();
+                applyFilters();
+
+            } catch (error) {
+                console.error(
+                    "Load therapists error:",
+                    error
+                );
+
+                allTherapists = [];
+                filteredTherapists = [];
+
+                updateSummary();
+                renderLoadError(
+                    error.message ||
+                    "Unable to load therapists."
+                );
+            }
+        }
+
+        function showTableLoading() {
             document.getElementById(
                 "therapistTableBody"
             ).innerHTML = `
@@ -2192,298 +2435,184 @@
                     </td>
                 </tr>
             `;
-
-            /*
-            Enable this API code later:
-
-            const token =
-                localStorage.getItem("token");
-
-            fetch(
-                API_BASE_URL +
-                "/api/admin/therapists",
-                {
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            )
-            .then(response => response.json())
-            .then(result => {
-                allTherapists =
-                    (result.data || [])
-                    .map(normalizeTherapist);
-
-                populateFilters();
-                updateSummary();
-                applyFilters();
-            })
-            .catch(error => {
-                console.error(error);
-
-                allTherapists =
-                    getDemoTherapists();
-
-                populateFilters();
-                updateSummary();
-                applyFilters();
-            });
-
-            return;
-            */
-
-            allTherapists =
-                mergeStoredTherapists(
-                    getDemoTherapists()
-                );
-
-            populateFilters();
-            updateSummary();
-            applyFilters();
-
-            showAlert(
-                "Demo therapist data loaded.",
-                "info"
-            );
         }
 
-        function getDemoTherapists() {
-            return [
-                {
-                    id: 1,
-                    therapistCode: "THR-1001",
-                    name: "Sowmya Shetty",
-                    email: "sowmya.therapist@neolife.com",
-                    phone: "9876543201",
-                    gender: "FEMALE",
-                    age: 30,
-                    specialization: "Panchakarma Therapy",
-                    qualification: "Diploma in Panchakarma",
-                    experience: "6 Years",
-                    assignedTherapies: [
-                        "Panchakarma",
-                        "Abhyanga",
-                        "Shirodhara"
-                    ],
-                    todaySessions: 5,
-                    availability: "BUSY",
-                    status: "ACTIVE",
-                    joiningDate: "2024-03-12",
-                    shift: "Morning",
-                    address: "Udupi, Karnataka",
-                    emergencyContact: "9876500101",
-                    notes: "Senior therapist for Panchakarma procedures."
-                },
-                {
-                    id: 2,
-                    therapistCode: "THR-1002",
-                    name: "Arun Kumar",
-                    email: "arun.therapist@neolife.com",
-                    phone: "9876543202",
-                    gender: "MALE",
-                    age: 35,
-                    specialization: "Acupuncture Therapy",
-                    qualification: "Certificate in Acupuncture Assistance",
-                    experience: "8 Years",
-                    assignedTherapies: [
-                        "Acupuncture",
-                        "Pain Management"
-                    ],
-                    todaySessions: 3,
-                    availability: "AVAILABLE",
-                    status: "ACTIVE",
-                    joiningDate: "2023-09-18",
-                    shift: "General",
-                    address: "Manipal, Karnataka",
-                    emergencyContact: "9876500102",
-                    notes: "Supports acupuncture and pain-management sessions."
-                },
-                {
-                    id: 3,
-                    therapistCode: "THR-1003",
-                    name: "Anusha Rao",
-                    email: "anusha.therapist@neolife.com",
-                    phone: "9876543203",
-                    gender: "FEMALE",
-                    age: 28,
-                    specialization: "Beauty & Cosmetic Therapy",
-                    qualification: "Advanced Diploma in Cosmetology",
-                    experience: "5 Years",
-                    assignedTherapies: [
-                        "Facial",
-                        "Lip Correction",
-                        "Eyebrow Treatment",
-                        "Pedicure"
-                    ],
-                    todaySessions: 4,
-                    availability: "BUSY",
-                    status: "ACTIVE",
-                    joiningDate: "2025-01-10",
-                    shift: "General",
-                    address: "Brahmavar, Karnataka",
-                    emergencyContact: "9876500103",
-                    notes: "Handles beauty and cosmetic therapy services."
-                },
-                {
-                    id: 4,
-                    therapistCode: "THR-1004",
-                    name: "Vishal Pai",
-                    email: "vishal.therapist@neolife.com",
-                    phone: "9876543204",
-                    gender: "MALE",
-                    age: 33,
-                    specialization: "Yoga & Naturopathy",
-                    qualification: "Diploma in Yoga Therapy",
-                    experience: "7 Years",
-                    assignedTherapies: [
-                        "Yoga",
-                        "Naturopathy",
-                        "Breathing Therapy"
-                    ],
-                    todaySessions: 2,
-                    availability: "AVAILABLE",
-                    status: "ACTIVE",
-                    joiningDate: "2024-07-05",
-                    shift: "Morning",
-                    address: "Kundapura, Karnataka",
-                    emergencyContact: "9876500104",
-                    notes: "Conducts guided yoga and naturopathy sessions."
-                },
-                {
-                    id: 5,
-                    therapistCode: "THR-1005",
-                    name: "Meera K",
-                    email: "meera.therapist@neolife.com",
-                    phone: "9876543205",
-                    gender: "FEMALE",
-                    age: 31,
-                    specialization: "Hair Therapy",
-                    qualification: "Certificate in Ayurvedic Hair Care",
-                    experience: "4 Years",
-                    assignedTherapies: [
-                        "Hair Treatment",
-                        "Shirodhara",
-                        "Kesha Dhoopana"
-                    ],
-                    todaySessions: 0,
-                    availability: "UNAVAILABLE",
-                    status: "ON_LEAVE",
-                    joiningDate: "2025-04-22",
-                    shift: "Evening",
-                    address: "Udupi, Karnataka",
-                    emergencyContact: "9876500105",
-                    notes: "Currently on approved leave."
-                },
-                {
-                    id: 6,
-                    therapistCode: "THR-1006",
-                    name: "Pradeep Acharya",
-                    email: "pradeep.therapist@neolife.com",
-                    phone: "9876543206",
-                    gender: "MALE",
-                    age: 39,
-                    specialization: "Ayurvedic Body Therapy",
-                    qualification: "Diploma in Ayurvedic Therapy",
-                    experience: "10 Years",
-                    assignedTherapies: [
-                        "Abhyanga",
-                        "Swedana",
-                        "Body Therapy"
-                    ],
-                    todaySessions: 0,
-                    availability: "UNAVAILABLE",
-                    status: "INACTIVE",
-                    joiningDate: "2022-11-14",
-                    shift: "General",
-                    address: "Udupi, Karnataka",
-                    emergencyContact: "9876500106",
-                    notes: "Account currently inactive."
-                }
-            ];
+        function renderLoadError(message) {
+            document.getElementById(
+                "therapistTableBody"
+            ).innerHTML = `
+                <tr>
+                    <td
+                        colspan="11"
+                        class="table-message"
+                    >
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        ${escapeHtml(message)}
+
+                        <br><br>
+
+                        <button
+                            type="button"
+                            class="reset-button"
+                            onclick="loadTherapists()"
+                        >
+                            <i class="fa-solid fa-rotate"></i>
+                            Try Again
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            setText(
+                "resultCount",
+                "0 Therapists"
+            );
+
+            setText(
+                "paginationInfo",
+                "Showing 0 therapists"
+            );
+
+            document.getElementById(
+                "paginationButtons"
+            ).innerHTML = "";
         }
 
-        function mergeStoredTherapists(baseData) {
-            const created =
-                readLocalArray(
-                    "demoTherapists"
-                );
+        function normalizeTherapist(data) {
+            const experienceYears =
+                data.experienceYears ??
+                data.experience ??
+                0;
 
-            const updated =
-                readLocalArray(
-                    "updatedDemoTherapists"
-                );
+            const specialization =
+                data.specialization ||
+                "Not completed";
 
-            const removedIds =
-                readLocalArray(
-                    "removedDemoTherapistIds"
-                )
-                .map(String);
+            return {
+                id:
+                    data.id,
 
-            const therapistMap =
-                new Map();
+                userId:
+                    data.userId,
 
-            baseData.forEach(
-                therapist =>
-                    therapistMap.set(
-                        String(therapist.id),
-                        { ...therapist }
-                    )
-            );
+                therapistCode:
+                    data.therapistCode ||
+                    (
+                        data.id
+                            ? `THR-${String(
+                                data.id
+                              ).padStart(
+                                4,
+                                "0"
+                              )}`
+                            : "-"
+                    ),
 
-            created.forEach(
-                therapist =>
-                    therapistMap.set(
-                        String(therapist.id),
-                        { ...therapist }
-                    )
-            );
+                name:
+                    data.name ||
+                    "Therapist",
 
-            updated.forEach(
-                therapist =>
-                    therapistMap.set(
-                        String(therapist.id),
-                        {
-                            ...therapistMap.get(
-                                String(therapist.id)
-                            ),
-                            ...therapist
-                        }
-                    )
-            );
+                email:
+                    data.email ||
+                    "-",
 
-            removedIds.forEach(
-                id =>
-                    therapistMap.delete(id)
-            );
+                phone:
+                    data.phoneNumber ||
+                    data.phone ||
+                    "-",
 
-            return Array.from(
-                therapistMap.values()
-            );
-        }
+                gender:
+                    data.gender ||
+                    "-",
 
-        function readLocalArray(key) {
-            try {
-                const value =
-                    JSON.parse(
-                        localStorage.getItem(
-                            key
-                        ) ||
-                        "[]"
-                    );
+                age:
+                    data.age ?? "-",
 
-                return Array.isArray(value)
-                    ? value
-                    : [];
+                qualification:
+                    data.qualification ||
+                    "Not completed",
 
-            } catch (error) {
-                console.error(
-                    "Unable to read " + key,
-                    error
-                );
+                specialization:
+                    specialization,
 
-                return [];
-            }
+                experienceYears:
+                    Number(
+                        experienceYears || 0
+                    ),
+
+                experience:
+                    `${Number(
+                        experienceYears || 0
+                    )} Years`,
+
+                about:
+                    data.about ||
+                    "Profile information has not been completed.",
+
+                profileImage:
+                    data.profileImage ||
+                    data.imageUrl ||
+                    "",
+
+                active:
+                    data.active !== false,
+
+                status:
+                    data.active === false
+                        ? "INACTIVE"
+                        : "ACTIVE",
+
+                createdAt:
+                    data.createdAt ||
+                    "",
+
+                updatedAt:
+                    data.updatedAt ||
+                    "",
+
+                joiningDate:
+                    data.createdAt ||
+                    "",
+
+                assignedTherapies:
+                    specialization &&
+                    specialization !==
+                        "Not completed"
+                        ? [specialization]
+                        : [],
+
+                todaySessions:
+                    Number(
+                        data.todaySessions ||
+                        0
+                    ),
+
+                availability:
+                    data.active === false
+                        ? "UNAVAILABLE"
+                        : (
+                            data.availability ||
+                            "AVAILABLE"
+                        ),
+
+                shift:
+                    data.shift ||
+                    "-",
+
+                address:
+                    data.address ||
+                    "-",
+
+                emergencyContact:
+                    data.emergencyContact ||
+                    "-",
+
+                notes:
+                    data.notes ||
+                    data.about ||
+                    "-"
+            };
         }
 
         /* =========================
@@ -2500,8 +2629,7 @@
                 "activeTherapistCount",
                 allTherapists.filter(
                     therapist =>
-                        therapist.status ===
-                        "ACTIVE"
+                        therapist.active
                 ).length
             );
 
@@ -2509,8 +2637,7 @@
                 "inactiveTherapistCount",
                 allTherapists.filter(
                     therapist =>
-                        therapist.status ===
-                        "INACTIVE"
+                        !therapist.active
                 ).length
             );
 
@@ -2530,16 +2657,28 @@
                 )
             );
 
+            const services =
+                new Set();
+
+            allTherapists.forEach(
+                therapist => {
+                    therapist
+                        .assignedTherapies
+                        .forEach(
+                            therapy => {
+                                if (therapy) {
+                                    services.add(
+                                        therapy
+                                    );
+                                }
+                            }
+                        );
+                }
+            );
+
             setText(
                 "therapyServiceCount",
-                new Set(
-                    allTherapists
-                        .flatMap(
-                            therapist =>
-                                therapist.assignedTherapies ||
-                                []
-                        )
-                ).size
+                services.size
             );
         }
 
@@ -2550,48 +2689,47 @@
         function populateFilters() {
             populateSelect(
                 "therapyFilter",
-                allTherapists.flatMap(
-                    therapist =>
-                        therapist.assignedTherapies ||
-                        []
+                uniqueValues(
+                    allTherapists.flatMap(
+                        therapist =>
+                            therapist
+                                .assignedTherapies
+                    )
                 ),
                 "All Therapies"
             );
 
             populateSelect(
                 "specializationFilter",
-                allTherapists.map(
-                    therapist =>
-                        therapist.specialization
+                uniqueValues(
+                    allTherapists.map(
+                        therapist =>
+                            therapist.specialization
+                    )
                 ),
                 "All Specializations"
             );
         }
 
         function populateSelect(
-            elementId,
+            id,
             values,
-            firstLabel
+            defaultLabel
         ) {
             const select =
-                document.getElementById(
-                    elementId
-                );
+                document.getElementById(id);
 
-            const valuesList = [
-                ...new Set(
-                    values.filter(Boolean)
-                )
-            ].sort();
+            const currentValue =
+                select.value;
 
             select.innerHTML = `
                 <option value="">
-                    ${escapeHtml(firstLabel)}
+                    ${escapeHtml(defaultLabel)}
                 </option>
             `;
 
-            valuesList.forEach(
-                function (value) {
+            values.forEach(
+                value => {
                     const option =
                         document.createElement(
                             "option"
@@ -2600,8 +2738,40 @@
                     option.value = value;
                     option.textContent = value;
 
-                    select.appendChild(option);
+                    select.appendChild(
+                        option
+                    );
                 }
+            );
+
+            if (
+                values.includes(
+                    currentValue
+                )
+            ) {
+                select.value =
+                    currentValue;
+            }
+        }
+
+        function uniqueValues(values) {
+            return Array.from(
+                new Set(
+                    values
+                        .filter(Boolean)
+                        .filter(
+                            value =>
+                                value !== "-"
+                        )
+                )
+            ).sort(
+                (
+                    first,
+                    second
+                ) =>
+                    first.localeCompare(
+                        second
+                    )
             );
         }
 
@@ -2609,7 +2779,8 @@
             const search =
                 document.getElementById(
                     "searchInput"
-                ).value
+                )
+                .value
                 .trim()
                 .toLowerCase();
 
@@ -2635,28 +2806,34 @@
 
             filteredTherapists =
                 allTherapists.filter(
-                    function (therapist) {
+                    therapist => {
+                        const searchable =
+                            [
+                                therapist.id,
+                                therapist.userId,
+                                therapist.therapistCode,
+                                therapist.name,
+                                therapist.email,
+                                therapist.phone,
+                                therapist.specialization,
+                                therapist.qualification
+                            ]
+                            .join(" ")
+                            .toLowerCase();
+
                         const matchesSearch =
                             !search ||
-                            therapist.name
-                                .toLowerCase()
-                                .includes(search) ||
-                            therapist.email
-                                .toLowerCase()
-                                .includes(search) ||
-                            therapist.phone
-                                .toLowerCase()
-                                .includes(search) ||
-                            therapist.therapistCode
-                                .toLowerCase()
-                                .includes(search);
+                            searchable.includes(
+                                search
+                            );
 
                         const matchesTherapy =
                             !therapy ||
-                            (
-                                therapist.assignedTherapies ||
-                                []
-                            ).includes(therapy);
+                            therapist
+                                .assignedTherapies
+                                .includes(
+                                    therapy
+                                );
 
                         const matchesSpecialization =
                             !specialization ||
@@ -2713,7 +2890,7 @@
         }
 
         /* =========================
-           RENDER THERAPISTS
+           RENDER TABLE
         ========================== */
 
         function renderTherapists() {
@@ -2722,11 +2899,14 @@
                     "therapistTableBody"
                 );
 
+            const total =
+                filteredTherapists.length;
+
             const totalPages =
                 Math.max(
                     1,
                     Math.ceil(
-                        filteredTherapists.length /
+                        total /
                         pageSize
                     )
                 );
@@ -2740,33 +2920,37 @@
             }
 
             const startIndex =
-                (currentPage - 1) *
+                (
+                    currentPage -
+                    1
+                ) *
                 pageSize;
 
             const pageItems =
                 filteredTherapists.slice(
                     startIndex,
-                    startIndex + pageSize
+                    startIndex +
+                    pageSize
                 );
 
             setText(
                 "resultCount",
-                `${filteredTherapists.length} Therapist${
-                    filteredTherapists.length === 1
-                        ? ""
-                        : "s"
+                `${total} ${
+                    total === 1
+                        ? "Therapist"
+                        : "Therapists"
                 }`
             );
 
-            if (!pageItems.length) {
+            if (pageItems.length === 0) {
                 body.innerHTML = `
                     <tr>
                         <td
                             colspan="11"
                             class="table-message"
                         >
-                            <i class="fa-solid fa-users-slash"></i>
-                            No therapists matched the selected filters.
+                            <i class="fa-solid fa-user-slash"></i>
+                            No therapists found.
                         </td>
                     </tr>
                 `;
@@ -2777,212 +2961,25 @@
                     0
                 );
 
-                renderPaginationButtons(1);
+                renderPaginationButtons(
+                    1
+                );
 
                 return;
             }
 
-            body.innerHTML = "";
-
-            pageItems.forEach(
-                function (therapist) {
-                    const therapyHtml =
-                        (
-                            therapist.assignedTherapies ||
-                            []
-                        )
-                        .slice(0, 3)
-                        .map(
-                            therapy => `
-                                <span class="therapy-badge">
-                                    ${escapeHtml(therapy)}
-                                </span>
-                            `
-                        )
-                        .join("");
-
-                    const extraCount =
-                        Math.max(
-                            0,
-                            (
-                                therapist.assignedTherapies ||
-                                []
-                            ).length - 3
-                        );
-
-                    body.insertAdjacentHTML(
-                        "beforeend",
-                        `
-                        <tr>
-
-                            <td>
-                                <strong>
-                                    ${escapeHtml(
-                                        therapist.therapistCode
-                                    )}
-                                </strong>
-                            </td>
-
-                            <td>
-
-                                <div class="therapist-cell">
-
-                                    <span class="therapist-avatar">
-                                        ${escapeHtml(
-                                            therapist.name
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        )}
-                                    </span>
-
-                                    <div>
-
-                                        <strong>
-                                            ${escapeHtml(
-                                                therapist.name
-                                            )}
-                                        </strong>
-
-                                        <small>
-                                            ${escapeHtml(
-                                                therapist.email
-                                            )}
-                                        </small>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    therapist.specialization
-                                )}
-                            </td>
-
-                            <td>
-
-                                <div class="therapy-list">
-                                    ${therapyHtml}
-
-                                    ${
-                                        extraCount > 0
-                                            ? `
-                                            <span class="therapy-badge">
-                                                +${extraCount}
-                                            </span>
-                                            `
-                                            : ""
-                                    }
-                                </div>
-
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    therapist.experience
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    therapist.phone
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    therapist.todaySessions
-                                )}
-                            </td>
-
-                            <td>
-                                ${createAvailabilityBadge(
-                                    therapist.availability
-                                )}
-                            </td>
-
-                            <td>
-                                ${createStatusBadge(
-                                    therapist.status
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    formatDate(
-                                        therapist.joiningDate
-                                    )
-                                )}
-                            </td>
-
-                            <td>
-
-                                <div class="action-buttons">
-
-                                    <button
-                                        type="button"
-                                        class="action-button view-button"
-                                        onclick="openDetailsModal('${therapist.id}')"
-                                        title="View therapist"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button edit-button"
-                                        onclick="editTherapist('${therapist.id}')"
-                                        title="Edit therapist"
-                                    >
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button schedule-button"
-                                        onclick="viewTherapistSchedule('${therapist.id}')"
-                                        title="View schedule"
-                                    >
-                                        <i class="fa-solid fa-calendar-days"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button toggle-button"
-                                        onclick="toggleTherapistStatus('${therapist.id}')"
-                                        title="Activate or deactivate"
-                                    >
-                                        <i class="fa-solid fa-power-off"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button delete-button"
-                                        onclick="openDeleteModal('${therapist.id}')"
-                                        title="Remove therapist"
-                                    >
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-                        `
-                    );
-                }
-            );
+            body.innerHTML =
+                pageItems
+                .map(
+                    createTherapistRow
+                )
+                .join("");
 
             updatePaginationInfo(
                 startIndex + 1,
-                Math.min(
-                    startIndex + pageSize,
-                    filteredTherapists.length
-                ),
-                filteredTherapists.length
+                startIndex +
+                    pageItems.length,
+                total
             );
 
             renderPaginationButtons(
@@ -2990,66 +2987,241 @@
             );
         }
 
-        function createStatusBadge(status) {
-            const normalized =
-                String(
-                    status ||
-                    "INACTIVE"
-                ).toUpperCase();
-
-            const className = {
-                ACTIVE:
-                    "status-active",
-
-                INACTIVE:
-                    "status-inactive",
-
-                ON_LEAVE:
-                    "status-on-leave"
-            }[normalized] ||
-                "status-inactive";
+        function createTherapistRow(
+            therapist
+        ) {
+            const therapies =
+                therapist
+                    .assignedTherapies
+                    .length
+                    ? therapist
+                        .assignedTherapies
+                        .map(
+                            therapy => `
+                                <span class="therapy-badge">
+                                    ${escapeHtml(
+                                        therapy
+                                    )}
+                                </span>
+                            `
+                        )
+                        .join("")
+                    : "-";
 
             return `
-                <span
-                    class="status-badge ${className}"
-                >
-                    ${escapeHtml(
-                        formatStatus(
-                            normalized
-                        )
-                    )}
-                </span>
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(
+                                therapist.therapistCode
+                            )}
+                        </strong>
+
+                        <br>
+
+                        <small>
+                            DB ID:
+                            ${escapeHtml(
+                                therapist.id
+                            )}
+                        </small>
+                    </td>
+
+                    <td>
+                        <div class="therapist-cell">
+
+                            ${createAvatar(
+                                therapist
+                            )}
+
+                            <div>
+                                <strong>
+                                    ${escapeHtml(
+                                        therapist.name
+                                    )}
+                                </strong>
+
+                                <small>
+                                    ${escapeHtml(
+                                        therapist.email
+                                    )}
+                                </small>
+                            </div>
+
+                        </div>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            therapist.specialization
+                        )}
+                    </td>
+
+                    <td>
+                        <div class="therapy-list">
+                            ${therapies}
+                        </div>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            therapist.experience
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            therapist.phone
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            therapist.todaySessions
+                        )}
+                    </td>
+
+                    <td>
+                        <span class="
+                            availability-badge
+                            availability-${therapist.availability
+                                .toLowerCase()
+                                .replaceAll(
+                                    "_",
+                                    "-"
+                                )}
+                        ">
+                            ${escapeHtml(
+                                formatStatus(
+                                    therapist.availability
+                                )
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="
+                            status-badge
+                            ${therapist.active
+                                ? "status-active"
+                                : "status-inactive"}
+                        ">
+                            ${escapeHtml(
+                                therapist.status
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            formatDate(
+                                therapist.joiningDate
+                            )
+                        )}
+                    </td>
+
+                    <td>
+                        <div class="action-buttons">
+
+                            <button
+                                type="button"
+                                class="action-button view-button"
+                                title="View therapist"
+                                onclick="viewTherapist(
+                                    ${Number(
+                                        therapist.id
+                                    )}
+                                )"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="action-button edit-button"
+                                title="Edit therapist"
+                                onclick="editTherapist(
+                                    ${Number(
+                                        therapist.id
+                                    )}
+                                )"
+                            >
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="action-button schedule-button"
+                                title="View schedule"
+                                onclick="viewTherapistSchedule(
+                                    ${Number(
+                                        therapist.id
+                                    )}
+                                )"
+                            >
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </button>
+
+                            ${
+                                therapist.active
+                                    ? `
+                                        <button
+                                            type="button"
+                                            class="action-button delete-button"
+                                            title="Deactivate therapist"
+                                            onclick="openDeleteModal(
+                                                ${Number(
+                                                    therapist.id
+                                                )}
+                                            )"
+                                        >
+                                            <i class="fa-solid fa-user-slash"></i>
+                                        </button>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+                    </td>
+
+                </tr>
             `;
         }
 
-        function createAvailabilityBadge(
-            availability
+        function createAvatar(
+            therapist
         ) {
-            const normalized =
-                String(
-                    availability ||
-                    "UNAVAILABLE"
-                ).toUpperCase();
-
-            const className = {
-                AVAILABLE:
-                    "availability-available",
-
-                BUSY:
-                    "availability-busy",
-
-                UNAVAILABLE:
-                    "availability-unavailable"
-            }[normalized] ||
-                "availability-unavailable";
+            if (
+                therapist.profileImage
+            ) {
+                return `
+                    <img
+                        src="${escapeHtml(
+                            therapist.profileImage
+                        )}"
+                        alt="${escapeHtml(
+                            therapist.name
+                        )}"
+                        class="therapist-avatar"
+                        style="object-fit:cover"
+                        onerror="
+                            this.outerHTML =
+                            '<span class=&quot;therapist-avatar&quot;>${escapeHtml(
+                                getInitial(
+                                    therapist.name
+                                )
+                            )}</span>'
+                        "
+                    >
+                `;
+            }
 
             return `
-                <span
-                    class="availability-badge ${className}"
-                >
+                <span class="therapist-avatar">
                     ${escapeHtml(
-                        formatStatus(
-                            normalized
+                        getInitial(
+                            therapist.name
                         )
                     )}
                 </span>
@@ -3060,40 +3232,48 @@
            DETAILS
         ========================== */
 
-        function openDetailsModal(id) {
+        function viewTherapist(id) {
             selectedTherapist =
                 findTherapist(id);
 
             if (!selectedTherapist) {
+                showAlert(
+                    "Therapist not found.",
+                    "error"
+                );
+
                 return;
             }
 
             const assignedTherapies =
-                (
-                    selectedTherapist.assignedTherapies ||
-                    []
-                )
-                .map(
-                    therapy =>
-                        `<span class="therapy-badge">${escapeHtml(therapy)}</span>`
-                )
-                .join(" ");
+                selectedTherapist
+                    .assignedTherapies
+                    .length
+                    ? selectedTherapist
+                        .assignedTherapies
+                        .map(
+                            therapy => `
+                                <span class="therapy-badge">
+                                    ${escapeHtml(
+                                        therapy
+                                    )}
+                                </span>
+                            `
+                        )
+                        .join("")
+                    : "-";
 
             document.getElementById(
                 "detailsModalContent"
             ).innerHTML = `
+
                 <div class="modal-therapist-card">
 
-                    <span class="therapist-avatar">
-                        ${escapeHtml(
-                            selectedTherapist.name
-                                .charAt(0)
-                                .toUpperCase()
-                        )}
-                    </span>
+                    ${createAvatar(
+                        selectedTherapist
+                    )}
 
                     <div>
-
                         <h3>
                             ${escapeHtml(
                                 selectedTherapist.name
@@ -3106,162 +3286,83 @@
                             )}
                             ·
                             ${escapeHtml(
-                                selectedTherapist.email
+                                selectedTherapist.specialization
                             )}
                         </p>
-
                     </div>
 
                 </div>
 
                 <div class="details-grid">
 
-                    <div class="detail-box">
-                        <span>Specialization</span>
+                    ${detailBox(
+                        "User ID",
+                        selectedTherapist.userId
+                    )}
 
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.specialization
-                            )}
-                        </strong>
-                    </div>
+                    ${detailBox(
+                        "Therapist ID",
+                        selectedTherapist.id
+                    )}
 
-                    <div class="detail-box">
-                        <span>Qualification</span>
+                    ${detailBox(
+                        "Email",
+                        selectedTherapist.email
+                    )}
 
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.qualification
-                            )}
-                        </strong>
-                    </div>
+                    ${detailBox(
+                        "Phone",
+                        selectedTherapist.phone
+                    )}
 
-                    <div class="detail-box">
-                        <span>Experience</span>
+                    ${detailBox(
+                        "Age",
+                        selectedTherapist.age
+                    )}
 
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.experience
-                            )}
-                        </strong>
-                    </div>
+                    ${detailBox(
+                        "Gender",
+                        formatStatus(
+                            selectedTherapist.gender
+                        )
+                    )}
 
-                    <div class="detail-box">
-                        <span>Shift</span>
+                    ${detailBox(
+                        "Qualification",
+                        selectedTherapist.qualification
+                    )}
 
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.shift
-                            )}
-                        </strong>
-                    </div>
+                    ${detailBox(
+                        "Experience",
+                        selectedTherapist.experience
+                    )}
 
-                    <div class="detail-box">
-                        <span>Phone</span>
+                    ${detailBox(
+                        "Account Status",
+                        selectedTherapist.status
+                    )}
 
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.phone
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Emergency Contact</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.emergencyContact
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Age / Gender</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.age
-                            )}
-                            /
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedTherapist.gender
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Joining Date</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedTherapist.joiningDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Today's Sessions</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedTherapist.todaySessions
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Availability</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedTherapist.availability
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Account Status</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedTherapist.status
-                                )
-                            )}
-                        </strong>
-                    </div>
+                    ${detailBox(
+                        "Created On",
+                        formatDate(
+                            selectedTherapist.createdAt
+                        )
+                    )}
 
                     <div class="detail-box full-width">
-                        <span>Assigned Therapies</span>
+                        <span>Assigned Therapy / Specialization</span>
 
                         <div class="therapy-list">
-                            ${assignedTherapies || "-"}
+                            ${assignedTherapies}
                         </div>
                     </div>
 
                     <div class="detail-box full-width">
-                        <span>Address</span>
+                        <span>About Therapist</span>
 
                         <p>
                             ${escapeHtml(
-                                selectedTherapist.address
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Notes</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedTherapist.notes
+                                selectedTherapist.about
                             )}
                         </p>
                     </div>
@@ -3272,6 +3373,25 @@
             openModal(
                 "detailsModal"
             );
+        }
+
+        function detailBox(
+            label,
+            value
+        ) {
+            return `
+                <div class="detail-box">
+                    <span>
+                        ${escapeHtml(label)}
+                    </span>
+
+                    <strong>
+                        ${escapeHtml(
+                            value ?? "-"
+                        )}
+                    </strong>
+                </div>
+            `;
         }
 
         function editSelectedTherapist() {
@@ -3309,98 +3429,7 @@
         }
 
         /* =========================
-           STATUS
-        ========================== */
-
-        function toggleTherapistStatus(id) {
-            const therapist =
-                findTherapist(id);
-
-            if (!therapist) {
-                return;
-            }
-
-            therapist.status =
-                therapist.status ===
-                "ACTIVE"
-                    ? "INACTIVE"
-                    : "ACTIVE";
-
-            if (
-                therapist.status ===
-                "INACTIVE"
-            ) {
-                therapist.availability =
-                    "UNAVAILABLE";
-
-            } else if (
-                therapist.availability ===
-                "UNAVAILABLE"
-            ) {
-                therapist.availability =
-                    "AVAILABLE";
-            }
-
-            persistTherapistUpdate(
-                therapist
-            );
-
-            updateSummary();
-            applyFilters();
-
-            showAlert(
-                `${therapist.name} is now ${formatStatus(
-                    therapist.status
-                )}.`,
-                "success"
-            );
-
-            /*
-            Enable backend later:
-
-            PUT /api/admin/therapists/{id}/status
-
-            {
-                "active": true
-            }
-            */
-        }
-
-        function persistTherapistUpdate(
-            therapist
-        ) {
-            const updated =
-                readLocalArray(
-                    "updatedDemoTherapists"
-                );
-
-            const index =
-                updated.findIndex(
-                    item =>
-                        String(item.id) ===
-                        String(therapist.id)
-                );
-
-            if (index >= 0) {
-                updated[index] = {
-                    ...updated[index],
-                    ...therapist
-                };
-
-            } else {
-                updated.push({
-                    ...therapist
-                });
-            }
-
-            localStorage.setItem(
-                "updatedDemoTherapists",
-                JSON.stringify(updated)
-            );
-        }
-
-        /* =========================
-           DELETE
+           DEACTIVATE THERAPIST
         ========================== */
 
         function openDeleteModal(id) {
@@ -3408,22 +3437,23 @@
                 findTherapist(id);
 
             if (!selectedTherapist) {
+                showAlert(
+                    "Therapist not found.",
+                    "error"
+                );
+
                 return;
             }
 
             document.getElementById(
                 "deleteTherapistCard"
             ).innerHTML = `
-                <span class="therapist-avatar">
-                    ${escapeHtml(
-                        selectedTherapist.name
-                            .charAt(0)
-                            .toUpperCase()
-                    )}
-                </span>
+
+                ${createAvatar(
+                    selectedTherapist
+                )}
 
                 <div>
-
                     <h3>
                         ${escapeHtml(
                             selectedTherapist.name
@@ -3439,7 +3469,6 @@
                             selectedTherapist.specialization
                         )}
                     </p>
-
                 </div>
             `;
 
@@ -3448,72 +3477,98 @@
             );
         }
 
-        function confirmDeleteTherapist() {
+        async function confirmDeleteTherapist() {
             if (!selectedTherapist) {
                 return;
             }
 
-            const name =
+            const therapistId =
+                selectedTherapist.id;
+
+            const therapistName =
                 selectedTherapist.name;
 
-            const removedIds =
-                readLocalArray(
-                    "removedDemoTherapistIds"
-                )
-                .map(String);
-
-            if (
-                !removedIds.includes(
-                    String(
-                        selectedTherapist.id
-                    )
-                )
-            ) {
-                removedIds.push(
-                    String(
-                        selectedTherapist.id
-                    )
+            const deleteButton =
+                document.querySelector(
+                    "#deleteModal .modal-delete-button"
                 );
+
+            const originalContent =
+                deleteButton.innerHTML;
+
+            deleteButton.disabled = true;
+            deleteButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Deactivating...
+            `;
+
+            try {
+                const response = await fetch(
+                    API_BASE_URL +
+                    `/api/therapists/delete/${encodeURIComponent(
+                        therapistId
+                    )}`,
+                    {
+                        method: "DELETE",
+                        headers: authHeaders()
+                    }
+                );
+
+                const result =
+                    await safelyReadResponse(
+                        response
+                    );
+
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    window.location.href =
+                        "../frontend/login.html";
+
+                    return;
+                }
+
+                if (
+                    !response.ok ||
+                    result?.success === false
+                ) {
+                    throw new Error(
+                        result?.message ||
+                        "Unable to deactivate therapist."
+                    );
+                }
+
+                closeModal(
+                    "deleteModal"
+                );
+
+                selectedTherapist = null;
+
+                showAlert(
+                    result?.message ||
+                    `${therapistName} deactivated successfully.`,
+                    "success"
+                );
+
+                await loadTherapists();
+
+            } catch (error) {
+                console.error(
+                    "Deactivate therapist error:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Unable to deactivate therapist.",
+                    "error"
+                );
+
+            } finally {
+                deleteButton.disabled = false;
+                deleteButton.innerHTML =
+                    originalContent;
             }
-
-            localStorage.setItem(
-                "removedDemoTherapistIds",
-                JSON.stringify(
-                    removedIds
-                )
-            );
-
-            allTherapists =
-                allTherapists.filter(
-                    therapist =>
-                        String(
-                            therapist.id
-                        ) !==
-                        String(
-                            selectedTherapist.id
-                        )
-                );
-
-            closeModal(
-                "deleteModal"
-            );
-
-            selectedTherapist = null;
-
-            populateFilters();
-            updateSummary();
-            applyFilters();
-
-            showAlert(
-                `${name} was removed successfully.`,
-                "success"
-            );
-
-            /*
-            Enable backend later:
-
-            DELETE /api/admin/therapists/{id}
-            */
         }
 
         /* =========================
@@ -3549,7 +3604,6 @@
                 );
 
             previous.type = "button";
-
             previous.className =
                 "pagination-button";
 
@@ -3608,7 +3662,6 @@
                 );
 
             next.type = "button";
-
             next.className =
                 "pagination-button";
 
@@ -3649,7 +3702,6 @@
             }
 
             currentPage = page;
-
             renderTherapists();
         }
 
@@ -3660,9 +3712,20 @@
         function findTherapist(id) {
             return allTherapists.find(
                 therapist =>
-                    String(therapist.id) ===
+                    String(
+                        therapist.id
+                    ) ===
                     String(id)
             );
+        }
+
+        function getInitial(name) {
+            return String(
+                name || "U"
+            )
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "U";
         }
 
         function openModal(id) {
@@ -3700,7 +3763,9 @@
 
             const date =
                 new Date(
-                    String(value).includes("T")
+                    String(value).includes(
+                        "T"
+                    )
                         ? value
                         : `${value}T00:00:00`
                 );
@@ -3724,14 +3789,43 @@
         }
 
         function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
+            return String(
+                value || "-"
+            )
+            .replaceAll(
+                "_",
+                " "
+            )
+            .toLowerCase()
+            .replace(
+                /\b\w/g,
+                character =>
+                    character.toUpperCase()
+            );
+        }
+
+        async function safelyReadResponse(
+            response
+        ) {
+            const responseText =
+                await response.text();
+
+            if (!responseText) {
+                return null;
+            }
+
+            try {
+                return JSON.parse(
+                    responseText
                 );
+
+            } catch (error) {
+                return {
+                    success: false,
+                    message:
+                        responseText
+                };
+            }
         }
 
         function toggleSidebar() {
@@ -3767,10 +3861,7 @@
         }
 
         function logoutAdmin() {
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("role");
-            localStorage.removeItem("userId");
+            clearAuthentication();
 
             window.location.href =
                 "../frontend/login.html";
@@ -3798,9 +3889,7 @@
             box.className =
                 `page-alert show ${type}`;
 
-            if (
-                type === "success"
-            ) {
+            if (type === "success") {
                 icon.className =
                     "fa-solid fa-circle-check";
 
@@ -3816,10 +3905,12 @@
             }
 
             clearTimeout(
-                window.therapistAlertTimer
+                window
+                    .therapistAlertTimer
             );
 
-            window.therapistAlertTimer =
+            window
+                .therapistAlertTimer =
                 setTimeout(
                     function () {
                         box.classList.remove(
@@ -3830,33 +3921,40 @@
                 );
         }
 
-        function setText(
-            id,
-            value
-        ) {
+        function setText(id, value) {
             const element =
                 document.getElementById(id);
 
             if (element) {
                 element.textContent =
-                    value;
+                    value ?? "-";
             }
         }
 
         function escapeHtml(value) {
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return "";
-            }
-
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
+            return String(
+                value ?? ""
+            )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
         }
     </script>
 

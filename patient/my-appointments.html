@@ -1071,19 +1071,31 @@ const API_BASE_URL = "http://localhost:8085";
 let allAppointments = [];
 let activeFilter = "ALL";
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "../login.html";
+    return;
+  }
+
   loadProfileIcon();
   loadMyAppointments();
 });
 
-function authHeaders(){
+function authHeaders() {
   return {
-    "Authorization":"Bearer " + localStorage.getItem("token")
+    "Accept": "application/json",
+    "Authorization": "Bearer " + localStorage.getItem("token")
   };
 }
 
-function loadMyAppointments(){
+/* =====================================================
+   LOAD PATIENT'S APPOINTMENTS
+   GET /api/appointments/my-appointments
+===================================================== */
 
+async function loadMyAppointments() {
   const list = document.getElementById("appointmentList");
 
   list.innerHTML = `
@@ -1093,98 +1105,197 @@ function loadMyAppointments(){
     </div>
   `;
 
-  allAppointments = [
-    {
-      id:1,
-      appointmentNumber:"APT-1001",
-      appointmentType:"OFFLINE",
-      doctorName:"Dr. N. G. Muraleedhara",
-      department:"Panchakarma Consultation",
-      appointmentDate:"2026-07-22",
-      appointmentTime:"10:30 AM",
-      status:"CONFIRMED",
-      paymentStatus:"PAID",
-      symptoms:"General wellness consultation and digestive discomfort.",
-      location:"Neolife Wellness Center, Udupi"
-    },
-    {
-      id:2,
-      appointmentNumber:"ONL-1002",
-      appointmentType:"ONLINE",
-      doctorName:"Dr. N. G. Muraleedhara",
-      department:"Ayurveda Consultation",
-      appointmentDate:"2026-07-25",
-      appointmentTime:"04:00 PM",
-      status:"PENDING_DOCTOR_CONFIRMATION",
-      paymentStatus:"NOT_REQUIRED_YET",
-      symptoms:"Digestive discomfort and follow-up guidance.",
-      meetingLink:null
-    },
-    {
-      id:3,
-      appointmentNumber:"ONL-1003",
-      appointmentType:"ONLINE",
-      doctorName:"Dr. Aditi",
-      department:"Yoga & Naturopathy Consultation",
-      appointmentDate:"2026-07-28",
-      appointmentTime:"11:00 AM",
-      status:"DOCTOR_CONFIRMED",
-      paymentStatus:"PENDING",
-      symptoms:"Stress, sleep disturbance and lifestyle consultation.",
-      meetingLink:null
-    },
-    {
-      id:4,
-      appointmentNumber:"APT-0998",
-      appointmentType:"OFFLINE",
-      doctorName:"Dr. N. G. Muraleedhara",
-      department:"Acupuncture",
-      appointmentDate:"2026-07-10",
-      appointmentTime:"03:00 PM",
-      status:"COMPLETED",
-      paymentStatus:"PAID",
-      symptoms:"Shoulder pain and reduced hand movement.",
-      prescriptionId:12,
-      reviewAllowed:true,
-      location:"Neolife Wellness Center, Udupi"
-    },
-    {
-      id:5,
-      appointmentNumber:"ONL-0995",
-      appointmentType:"ONLINE",
-      doctorName:"Dr. Sibagath Ulla Sharieff R",
-      department:"Ayurveda Consultation",
-      appointmentDate:"2026-07-06",
-      appointmentTime:"05:30 PM",
-      status:"COMPLETED",
-      paymentStatus:"PAID",
-      symptoms:"Skin allergy follow-up consultation.",
-      prescriptionId:18,
-      reviewAllowed:true,
-      meetingLink:"https://meet.google.com/demo-neolife-room"
-    },
-    {
-      id:6,
-      appointmentNumber:"APT-0992",
-      appointmentType:"OFFLINE",
-      doctorName:"Dr. Aditi",
-      department:"Yoga Therapy",
-      appointmentDate:"2026-07-02",
-      appointmentTime:"09:00 AM",
-      status:"CANCELLED",
-      paymentStatus:"REFUND_PENDING",
-      symptoms:"Back stiffness and posture guidance.",
-      location:"Neolife Wellness Center, Udupi"
-    }
-  ];
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/appointments/my-appointments`,
+      {
+        method: "GET",
+        headers: authHeaders()
+      }
+    );
 
-  setTimeout(function(){
+    const result = await safelyReadResponse(response);
+
+    if (response.status === 401) {
+      clearAuthentication();
+
+      throw new Error(
+        "Your login session has expired. Please login again."
+      );
+    }
+
+    if (response.status === 403) {
+      throw new Error(
+        result?.message ||
+        "You are not authorized to view these appointments."
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        result?.message ||
+        "Unable to load your appointments."
+      );
+    }
+
+    if (result && result.success === false) {
+      throw new Error(
+        result.message ||
+        "Unable to load your appointments."
+      );
+    }
+
+    const appointments = Array.isArray(result?.data)
+      ? result.data
+      : [];
+
+    allAppointments = appointments.map(normalizeAppointment);
+
     renderAppointments();
-  }, 350);
+
+  } catch (error) {
+    console.error("Load appointments error:", error);
+
+    list.innerHTML = `
+      <div class="appointment-message">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        ${escapeHtml(
+          error.message ||
+          "Unable to load your appointments."
+        )}
+        <br><br>
+        <button
+          type="button"
+          class="btn view-btn"
+          onclick="loadMyAppointments()"
+        >
+          Try Again
+        </button>
+      </div>
+    `;
+
+    if (
+      String(error.message || "")
+        .toLowerCase()
+        .includes("expired")
+    ) {
+      setTimeout(function () {
+        window.location.href = "../login.html";
+      }, 1400);
+    }
+  }
 }
 
-function filterAppointments(filter, button){
+/* =====================================================
+   NORMALIZE BACKEND RESPONSE
+===================================================== */
 
+function normalizeAppointment(item) {
+  return {
+    id: item.id,
+
+    appointmentNumber:
+      item.appointmentNumber ||
+      `APT-${item.id || ""}`,
+
+    appointmentType:
+      item.appointmentMode ||
+      item.appointmentType ||
+      "OFFLINE",
+
+    doctorId:
+      item.doctorId,
+
+    doctorName:
+      item.doctorName ||
+      item.doctor ||
+      "Doctor",
+
+    department:
+      item.doctorSpecialization ||
+      item.department ||
+      item.specialization ||
+      "Consultation",
+
+    appointmentDate:
+      item.appointmentDate,
+
+    startTime:
+      item.startTime ||
+      item.appointmentTime ||
+      item.time,
+
+    endTime:
+      item.endTime || "",
+
+    appointmentTime:
+      formatTimeRange(
+        item.startTime ||
+        item.appointmentTime ||
+        item.time,
+        item.endTime
+      ),
+
+    status:
+      item.status ||
+      "PENDING",
+
+    paymentStatus:
+      item.paymentStatus ||
+      "PENDING",
+
+    symptoms:
+      item.symptoms || "",
+
+    pastMedicalHistory:
+      item.pastMedicalHistory || "",
+
+    cancellationReason:
+      item.cancellationReason || "",
+
+    rescheduleReason:
+      item.rescheduleReason || "",
+
+    bookingFee:
+      item.bookingFee,
+
+    patientId:
+      item.patientId,
+
+    patientName:
+      item.patientName,
+
+    phoneNumber:
+      item.phoneNumber,
+
+    age:
+      item.age,
+
+    gender:
+      item.gender,
+
+    createdAt:
+      item.createdAt,
+
+    updatedAt:
+      item.updatedAt,
+
+    location:
+      item.location ||
+      "Neolife Wellness Center, Udupi",
+
+    meetingLink:
+      item.meetingLink || null,
+
+    prescriptionId:
+      item.prescriptionId || null,
+
+    reviewAllowed:
+      Boolean(item.reviewAllowed)
+  };
+}
+
+function filterAppointments(filter, button) {
   activeFilter = filter;
 
   document
@@ -1196,49 +1307,58 @@ function filterAppointments(filter, button){
   renderAppointments();
 }
 
-function renderAppointments(){
-
+function renderAppointments() {
   const list = document.getElementById("appointmentList");
 
   let filtered = [...allAppointments];
 
-  if(activeFilter === "OFFLINE"){
+  if (activeFilter === "OFFLINE") {
     filtered = filtered.filter(
       item => normalize(item.appointmentType) === "OFFLINE"
     );
   }
 
-  if(activeFilter === "ONLINE"){
+  if (activeFilter === "ONLINE") {
     filtered = filtered.filter(
       item => normalize(item.appointmentType) === "ONLINE"
     );
   }
 
-  if(activeFilter === "COMPLETED"){
+  if (activeFilter === "COMPLETED") {
     filtered = filtered.filter(
       item => normalize(item.status) === "COMPLETED"
     );
   }
 
-  if(activeFilter === "CANCELLED"){
-    filtered = filtered.filter(
-      item => normalize(item.status) === "CANCELLED"
+  if (activeFilter === "CANCELLED") {
+    filtered = filtered.filter(item =>
+      ["CANCELLED", "REJECTED"].includes(
+        normalize(item.status)
+      )
     );
   }
 
-  if(activeFilter === "UPCOMING"){
+  if (activeFilter === "UPCOMING") {
     filtered = filtered.filter(item => {
       const status = normalize(item.status);
 
       return ![
         "COMPLETED",
         "CANCELLED",
-        "REJECTED"
+        "REJECTED",
+        "NO_SHOW"
       ].includes(status);
     });
   }
 
-  if(filtered.length === 0){
+  filtered.sort((a, b) => {
+    const dateA = buildAppointmentDateTime(a);
+    const dateB = buildAppointmentDateTime(b);
+
+    return dateB - dateA;
+  });
+
+  if (filtered.length === 0) {
     list.innerHTML = `
       <div class="appointment-message">
         <i class="fa-solid fa-calendar-xmark"></i>
@@ -1253,10 +1373,15 @@ function renderAppointments(){
     .join("");
 }
 
-function createAppointmentCard(item){
+function createAppointmentCard(item) {
+  const type = normalize(
+    item.appointmentType || "OFFLINE"
+  );
 
-  const type = normalize(item.appointmentType || "OFFLINE");
-  const status = normalize(item.status || "PENDING");
+  const status = normalize(
+    item.status || "PENDING"
+  );
+
   const paymentStatus = normalize(
     item.paymentStatus || "PENDING"
   );
@@ -1286,31 +1411,21 @@ function createAppointmentCard(item){
         </div>
 
         <h2>
-          ${escapeHtml(
-            item.doctorName ||
-            item.doctor ||
-            "Doctor"
-          )}
+          ${escapeHtml(item.doctorName)}
         </h2>
 
         <div class="appointment-meta">
 
           <p>
-            <strong>Department:</strong>
+            <strong>Specialization:</strong>
             ${escapeHtml(
-              item.department ||
-              item.therapyService ||
-              item.specialization ||
-              "Consultation"
+              item.department || "Consultation"
             )}
           </p>
 
           <p>
             <strong>Appointment No:</strong>
-            ${escapeHtml(
-              item.appointmentNumber ||
-              `APT-${item.id || ""}`
-            )}
+            ${escapeHtml(item.appointmentNumber)}
           </p>
 
           <p>
@@ -1323,10 +1438,19 @@ function createAppointmentCard(item){
           <p>
             <strong>Time:</strong>
             ${escapeHtml(
-              item.appointmentTime ||
-              item.time ||
-              "-"
+              item.appointmentTime || "-"
             )}
+          </p>
+
+          <p>
+            <strong>Booking Fee:</strong>
+            ${
+              item.bookingFee != null
+                ? `₹${escapeHtml(
+                    formatMoney(item.bookingFee)
+                  )}`
+                : "-"
+            }
           </p>
 
           <p>
@@ -1346,8 +1470,11 @@ function createAppointmentCard(item){
 
       <div class="actions">
 
-        <button class="btn view-btn"
-                onclick="viewDetails(${item.id})">
+        <button
+          type="button"
+          class="btn view-btn"
+          onclick="viewDetails(${Number(item.id)})"
+        >
           View Details
         </button>
 
@@ -1359,88 +1486,86 @@ function createAppointmentCard(item){
   `;
 }
 
-function createStatusActions(item){
-
-  const type = normalize(item.appointmentType);
+function createStatusActions(item) {
   const status = normalize(item.status);
   const paymentStatus = normalize(item.paymentStatus);
 
   let html = "";
 
-  if(
-    type === "ONLINE" &&
-    [
-      "DOCTOR_CONFIRMED",
-      "CONFIRMED"
-    ].includes(status) &&
-    paymentStatus !== "PAID"
-  ){
+  if (
+    status === "PAYMENT_PENDING" ||
+    paymentStatus === "PENDING"
+  ) {
     html += `
-      <button class="btn pay-btn"
-              onclick="payConsultation(${item.id})">
-        Pay ₹200
+      <button
+        type="button"
+        class="btn pay-btn"
+        onclick="payAppointment(${Number(item.id)})"
+      >
+        Pay ₹${escapeHtml(
+          formatMoney(item.bookingFee || 50)
+        )}
       </button>
     `;
   }
 
-  if(
-    type === "ONLINE" &&
+  if (
+    normalize(item.appointmentType) === "ONLINE" &&
     paymentStatus === "PAID" &&
     item.meetingLink
-  ){
+  ) {
     html += `
-      <button class="btn join-btn"
-              onclick="joinConsultation('${escapeJs(item.meetingLink)}')">
+      <button
+        type="button"
+        class="btn join-btn"
+        onclick="joinConsultation(
+          '${escapeJs(item.meetingLink)}'
+        )"
+      >
         Join Consultation
       </button>
     `;
   }
 
-  if(
-    type === "ONLINE" &&
-    normalize(item.status) === "RESCHEDULED"
-  ){
+  if (
+    status === "COMPLETED" &&
+    item.prescriptionId
+  ) {
     html += `
-      <button class="btn reschedule-btn"
-              onclick="acceptRescheduledSlot(${item.id})">
-        Accept New Slot
-      </button>
-    `;
-  }
-
-  if(status === "COMPLETED" && item.prescriptionId){
-    html += `
-      <button class="btn prescription-btn"
-              onclick="viewPrescription(${item.prescriptionId})">
+      <button
+        type="button"
+        class="btn prescription-btn"
+        onclick="viewPrescription(
+          ${Number(item.prescriptionId)}
+        )"
+      >
         View Prescription
       </button>
     `;
   }
 
-  if(status === "COMPLETED" && item.reviewAllowed){
-    html += `
-      <button class="btn review-btn"
-              onclick="writeReview(${item.id})">
-        Write Review
-      </button>
-    `;
-  }
-
-  if(
+  if (
     ![
       "COMPLETED",
       "CANCELLED",
-      "REJECTED"
+      "REJECTED",
+      "NO_SHOW"
     ].includes(status)
-  ){
+  ) {
     html += `
-      <button class="btn reschedule-btn"
-              onclick="requestReschedule(${item.id})">
+      <button
+        type="button"
+        class="btn reschedule-btn"
+        onclick="requestReschedule(${Number(item.id)})"
+      >
         Reschedule
       </button>
 
-      <button class="btn cancel-btn"
-              onclick="cancelAppointment(${item.id})">
+      <button
+        type="button"
+        class="btn cancel-btn"
+        onclick="cancelAppointment(${Number(item.id)})"
+      >
         Cancel
       </button>
     `;
@@ -1449,37 +1574,34 @@ function createStatusActions(item){
   return html;
 }
 
-function viewDetails(id){
-
+function viewDetails(id) {
   const item = allAppointments.find(
-    appointment => Number(appointment.id) === Number(id)
+    appointment =>
+      Number(appointment.id) === Number(id)
   );
 
-  if(!item){
+  if (!item) {
     return;
   }
 
   setText(
     "modalAppointmentNumber",
-    item.appointmentNumber || `APT-${item.id || ""}`
+    item.appointmentNumber
   );
 
   setText(
     "modalType",
-    formatStatus(item.appointmentType || "OFFLINE")
+    formatStatus(item.appointmentType)
   );
 
   setText(
     "modalDoctor",
-    item.doctorName || item.doctor || "Doctor"
+    item.doctorName
   );
 
   setText(
     "modalTherapy",
-    item.department ||
-    item.therapyService ||
-    item.specialization ||
-    "Consultation"
+    item.department || "Consultation"
   );
 
   setText(
@@ -1489,63 +1611,73 @@ function viewDetails(id){
 
   setText(
     "modalTime",
-    item.appointmentTime || item.time || "-"
+    item.appointmentTime || "-"
   );
 
   setText(
     "modalStatus",
-    formatStatus(item.status || "PENDING")
+    formatStatus(item.status)
   );
 
   setText(
     "modalPaymentStatus",
-    formatStatus(item.paymentStatus || "PENDING")
+    formatStatus(item.paymentStatus)
   );
+
+  const notes = [
+    item.symptoms
+      ? `Symptoms: ${item.symptoms}`
+      : "",
+
+    item.pastMedicalHistory
+      ? `Past history: ${item.pastMedicalHistory}`
+      : "",
+
+    item.cancellationReason
+      ? `Cancellation reason: ${item.cancellationReason}`
+      : "",
+
+    item.rescheduleReason
+      ? `Reschedule reason: ${item.rescheduleReason}`
+      : ""
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   setText(
     "modalSymptoms",
-    item.symptoms || item.notes || "-"
+    notes || "-"
   );
 
   setText(
     "modalLocation",
     item.meetingLink
       ? `Online Meeting: ${item.meetingLink}`
-      : item.location ||
-        "Neolife Wellness Center, Udupi"
+      : item.location
   );
 
-  document.getElementById("detailsModal").style.display = "flex";
+  document
+    .getElementById("detailsModal")
+    .style.display = "flex";
 }
 
-function closeModal(){
-  document.getElementById("detailsModal").style.display = "none";
+function closeModal() {
+  document
+    .getElementById("detailsModal")
+    .style.display = "none";
 }
 
-async function payConsultation(id){
+/* =====================================================
+   APPOINTMENT ACTIONS
+===================================================== */
 
-  /*
-    Recommended flow:
-    POST /api/payment/create-order
-    body:
-    {
-      appointmentId: id,
-      paymentType: "ONLINE_CONSULTATION",
-      amount: 200
-    }
-
-    Then redirect/open PayU checkout.
-  */
-
-  alert(
-    "PayU payment integration will open here for ₹200. " +
-    "Appointment ID: " + id
-  );
+function payAppointment(id) {
+  window.location.href =
+    `appointment-payment.html?appointmentId=${encodeURIComponent(id)}`;
 }
 
-function joinConsultation(meetingLink){
-
-  if(!meetingLink){
+function joinConsultation(meetingLink) {
+  if (!meetingLink) {
     alert("Meeting link is not available yet.");
     return;
   }
@@ -1553,213 +1685,369 @@ function joinConsultation(meetingLink){
   window.location.href = meetingLink;
 }
 
-async function requestReschedule(id){
-
-  const requestedDate = prompt(
-    "Enter preferred new date in YYYY-MM-DD format:"
+async function requestReschedule(id) {
+  const appointmentDate = prompt(
+    "Enter new appointment date in YYYY-MM-DD format:"
   );
 
-  if(!requestedDate){
+  if (!appointmentDate) {
     return;
   }
 
-  const requestedTime = prompt(
-    "Enter preferred new time, for example 10:30 AM:"
+  const startTime = prompt(
+    "Enter new start time in HH:mm format, for example 10:30:"
   );
 
-  if(!requestedTime){
+  if (!startTime) {
     return;
   }
 
-  /*
-    Recommended endpoint:
-    PUT /api/appointments/request-reschedule/{id}
-  */
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/appointments/${id}/reschedule`,
+      {
+        method: "PUT",
 
-  alert(
-    `Reschedule request submitted for ${requestedDate} at ${requestedTime}.`
-  );
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          appointmentDate,
+          startTime
+        })
+      }
+    );
+
+    const result = await safelyReadResponse(response);
+
+    if (!response.ok || result?.success === false) {
+      throw new Error(
+        result?.message ||
+        "Unable to reschedule appointment."
+      );
+    }
+
+    alert(
+      result?.message ||
+      "Appointment rescheduled successfully."
+    );
+
+    await loadMyAppointments();
+
+  } catch (error) {
+    alert(
+      error.message ||
+      "Unable to reschedule appointment."
+    );
+  }
 }
 
-async function acceptRescheduledSlot(id){
-
-  /*
-    Recommended endpoint:
-    PUT /api/appointments/{id}/accept-rescheduled-slot
-  */
-
-  alert("Rescheduled slot accepted.");
-}
-
-async function cancelAppointment(id){
-
-  const confirmCancel = confirm(
+async function cancelAppointment(id) {
+  const confirmed = confirm(
     "Are you sure you want to cancel this appointment?"
   );
 
-  if(!confirmCancel){
+  if (!confirmed) {
     return;
   }
 
-  /*
-    Recommended endpoint:
-    PUT /api/appointments/cancel/{id}
-  */
+  const cancellationReason =
+    prompt("Enter cancellation reason:") ||
+    "Cancelled by patient";
 
-  const item = allAppointments.find(
-    appointment => Number(appointment.id) === Number(id)
-  );
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/appointments/${id}/cancel`,
+      {
+        method: "PUT",
 
-  if(item){
-    item.status = "CANCELLED";
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          cancellationReason
+        })
+      }
+    );
+
+    const result = await safelyReadResponse(response);
+
+    if (!response.ok || result?.success === false) {
+      throw new Error(
+        result?.message ||
+        "Unable to cancel appointment."
+      );
+    }
+
+    alert(
+      result?.message ||
+      "Appointment cancelled successfully."
+    );
+
+    await loadMyAppointments();
+
+  } catch (error) {
+    alert(
+      error.message ||
+      "Unable to cancel appointment."
+    );
   }
-
-  renderAppointments();
-
-  alert("Appointment cancelled successfully.");
 }
 
-function viewPrescription(prescriptionId){
+function viewPrescription(prescriptionId) {
   window.location.href =
-    `my-prescriptions.html?id=${prescriptionId}`;
+    `my-prescriptions.html?id=${encodeURIComponent(
+      prescriptionId
+    )}`;
 }
 
-function writeReview(appointmentId){
-  window.location.href =
-    `../write-review.html?appointmentId=${appointmentId}`;
-}
+/* =====================================================
+   HELPERS
+===================================================== */
 
-function getBadgeClass(status){
-
+function getBadgeClass(status) {
   const normalized = normalize(status);
 
-  if(
+  if (
     [
       "CONFIRMED",
       "DOCTOR_CONFIRMED",
       "APPROVED",
       "PAID"
     ].includes(normalized)
-  ){
+  ) {
     return "confirmed";
   }
 
-  if(normalized === "COMPLETED"){
+  if (normalized === "COMPLETED") {
     return "completed";
   }
 
-  if(normalized === "CANCELLED" || normalized === "REJECTED"){
+  if (
+    normalized === "CANCELLED" ||
+    normalized === "REJECTED" ||
+    normalized === "NO_SHOW"
+  ) {
     return "cancelled";
   }
 
-  if(normalized === "RESCHEDULED"){
+  if (normalized === "RESCHEDULED") {
     return "rescheduled";
   }
 
-  if(normalized.includes("PAYMENT")){
+  if (normalized.includes("PAYMENT")) {
     return "payment-pending";
   }
 
   return "pending";
 }
 
-function normalize(value){
+function normalize(value) {
   return String(value || "")
     .trim()
     .toUpperCase()
-    .replaceAll(" ","_");
+    .replaceAll(" ", "_");
 }
 
-function formatStatus(value){
+function formatStatus(value) {
   return String(value || "")
-    .replaceAll("_"," ")
+    .replaceAll("_", " ")
     .toLowerCase()
-    .replace(/\b\w/g,letter => letter.toUpperCase());
+    .replace(/\b\w/g, letter =>
+      letter.toUpperCase()
+    );
 }
 
-function formatDate(value){
-
-  if(!value){
+function formatDate(value) {
+  if (!value) {
     return "-";
   }
 
-  const date = new Date(value);
+  const date = new Date(
+    String(value).includes("T")
+      ? value
+      : `${value}T00:00:00`
+  );
 
-  if(Number.isNaN(date.getTime())){
+  if (Number.isNaN(date.getTime())) {
     return String(value);
   }
 
-  return date.toLocaleDateString("en-IN",{
-    day:"2-digit",
-    month:"long",
-    year:"numeric"
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
   });
 }
 
-function setText(id,value){
+function formatTime(value) {
+  if (!value) {
+    return "-";
+  }
 
-  const element = document.getElementById(id);
+  const parts = String(value).split(":");
 
-  if(element){
-    element.innerText = value;
+  if (parts.length < 2) {
+    return String(value);
+  }
+
+  const hours = Number(parts[0]);
+  const minutes = Number(parts[1]);
+
+  if (
+    Number.isNaN(hours) ||
+    Number.isNaN(minutes)
+  ) {
+    return String(value);
+  }
+
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+
+  return date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+}
+
+function formatTimeRange(startTime, endTime) {
+  if (!startTime && !endTime) {
+    return "-";
+  }
+
+  if (startTime && endTime) {
+    return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+  }
+
+  return formatTime(startTime || endTime);
+}
+
+function formatMoney(value) {
+  const number = Number(value);
+
+  if (Number.isNaN(number)) {
+    return String(value ?? "0");
+  }
+
+  return number.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function buildAppointmentDateTime(item) {
+  const date = item.appointmentDate || "1970-01-01";
+  const time = item.startTime || "00:00:00";
+  const value = new Date(`${date}T${time}`);
+
+  return Number.isNaN(value.getTime())
+    ? new Date(0)
+    : value;
+}
+
+function setText(id, value) {
+  const element =
+    document.getElementById(id);
+
+  if (element) {
+    element.innerText = value ?? "-";
   }
 }
 
-function escapeHtml(value){
-
+function escapeHtml(value) {
   return String(value ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function escapeJs(value){
-
+function escapeJs(value) {
   return String(value ?? "")
-    .replaceAll("\\","\\\\")
-    .replaceAll("'","\\'");
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'");
 }
 
-async function loadProfileIcon(){
+async function safelyReadResponse(response) {
+  const responseText =
+    await response.text();
 
-  const icon = document.getElementById("profileIcon");
-  const token = localStorage.getItem("token");
+  if (!responseText) {
+    return null;
+  }
 
-  if(!token){
+  try {
+    return JSON.parse(responseText);
+  } catch (error) {
+    return {
+      success: false,
+      message: responseText
+    };
+  }
+}
+
+function clearAuthentication() {
+  [
+    "token",
+    "refreshToken",
+    "role",
+    "userId"
+  ].forEach(key =>
+    localStorage.removeItem(key)
+  );
+}
+
+/* =====================================================
+   PROFILE ICON
+===================================================== */
+
+async function loadProfileIcon() {
+  const icon =
+    document.getElementById("profileIcon");
+
+  const token =
+    localStorage.getItem("token");
+
+  if (!token) {
     icon.innerHTML =
       '<i class="fa-solid fa-user"></i>';
+
     icon.href = "../login.html";
     return;
   }
 
-  try{
+  try {
     const response = await fetch(
       `${API_BASE_URL}/api/users/getProfile`,
       {
-        headers:{
-          "Authorization":"Bearer " + token
-        }
+        headers: authHeaders()
       }
     );
 
-    const result = await response.json();
+    const result =
+      await safelyReadResponse(response);
 
-    if(
+    if (
       response.ok &&
-      result.success &&
-      result.data &&
-      result.data.name
-    ){
+      result?.success &&
+      result?.data?.name
+    ) {
       icon.innerText =
-        result.data.name.charAt(0).toUpperCase();
-    }else{
+        result.data.name
+          .charAt(0)
+          .toUpperCase();
+    } else {
       icon.innerHTML =
         '<i class="fa-solid fa-user"></i>';
     }
 
-  }catch(error){
+  } catch (error) {
     console.error(error);
 
     icon.innerHTML =
@@ -1767,9 +2055,7 @@ async function loadProfileIcon(){
   }
 }
 
-
-function toggleMobileMenu(){
-
+function toggleMobileMenu() {
   const menu =
     document.getElementById("mobileNavigation");
 
@@ -1779,7 +2065,7 @@ function toggleMobileMenu(){
   const icon =
     document.getElementById("mobileMenuIcon");
 
-  if(!menu || !overlay){
+  if (!menu || !overlay) {
     return;
   }
 
@@ -1789,7 +2075,7 @@ function toggleMobileMenu(){
   const isOpen =
     menu.classList.contains("open");
 
-  if(icon){
+  if (icon) {
     icon.className = isOpen
       ? "fa-solid fa-xmark"
       : "fa-solid fa-bars";
@@ -1799,8 +2085,7 @@ function toggleMobileMenu(){
     isOpen ? "hidden" : "";
 }
 
-function closeMobileMenu(){
-
+function closeMobileMenu() {
   const menu =
     document.getElementById("mobileNavigation");
 
@@ -1810,15 +2095,15 @@ function closeMobileMenu(){
   const icon =
     document.getElementById("mobileMenuIcon");
 
-  if(menu){
+  if (menu) {
     menu.classList.remove("open");
   }
 
-  if(overlay){
+  if (overlay) {
     overlay.classList.remove("show");
   }
 
-  if(icon){
+  if (icon) {
     icon.className =
       "fa-solid fa-bars";
   }
@@ -1826,15 +2111,19 @@ function closeMobileMenu(){
   document.body.style.overflow = "";
 }
 
-window.addEventListener("click",function(event){
+window.addEventListener(
+  "click",
+  function (event) {
+    const modal =
+      document.getElementById(
+        "detailsModal"
+      );
 
-  const modal =
-    document.getElementById("detailsModal");
-
-  if(event.target === modal){
-    closeModal();
+    if (event.target === modal) {
+      closeModal();
+    }
   }
-});
+);
 </script>
 
 </body>
