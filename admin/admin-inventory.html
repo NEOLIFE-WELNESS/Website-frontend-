@@ -629,10 +629,190 @@ tbody tr:hover{
         flex-direction:column;
     }
 }
+
+/* API ACTION TOOLBAR */
+.inventory-tool-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    gap:9px;
+}
+.tool-button{
+    min-height:42px;
+    padding:9px 13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--dark-green);
+    background:var(--white);
+    font-size:10px;
+    font-weight:800;
+}
+.tool-button:hover,
+.tool-button.active{
+    color:var(--white);
+    border-color:var(--dark-green);
+    background:var(--dark-green);
+}
+.tool-button.warning{
+    color:#946300;
+    background:var(--warning-light);
+}
+.tool-button.danger{
+    color:var(--danger);
+    background:var(--danger-light);
+}
+.tool-button:disabled,
+.add-stock-btn:disabled,
+.reduce-stock-btn:disabled,
+.save-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+.table-message{
+    padding:38px 18px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+}
+.table-message i{
+    margin-right:7px;
+    color:var(--gold-dark);
+}
+.page-alert{
+    width:min(410px,calc(100% - 34px));
+    padding:15px 17px;
+    position:fixed;
+    top:102px;
+    right:22px;
+    z-index:5000;
+    display:none;
+    align-items:flex-start;
+    gap:10px;
+    border-radius:13px;
+    color:var(--white);
+    box-shadow:0 14px 35px rgba(0,0,0,.2);
+}
+.page-alert.show{display:flex}
+.page-alert.success{background:var(--success)}
+.page-alert.error{background:var(--danger)}
+.page-alert.info{background:var(--info)}
+.history-modal{
+    position:fixed;
+    inset:0;
+    z-index:4000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(13,36,24,.62);
+}
+.history-modal.show{display:flex}
+.history-dialog{
+    width:min(950px,100%);
+    max-height:86vh;
+    overflow:hidden;
+    border-radius:20px;
+    background:var(--white);
+    box-shadow:0 24px 70px rgba(0,0,0,.26);
+}
+.history-header{
+    padding:18px 21px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    color:var(--white);
+    background:var(--dark-green);
+}
+.history-header h2{font-size:18px}
+.history-close{
+    width:36px;
+    height:36px;
+    border:none;
+    border-radius:50%;
+    color:var(--white);
+    background:rgba(255,255,255,.12);
+}
+.history-body{
+    max-height:calc(86vh - 72px);
+    overflow:auto;
+    padding:20px;
+}
+.history-table{
+    min-width:850px;
+}
+.history-type{
+    display:inline-flex;
+    padding:6px 9px;
+    border-radius:16px;
+    font-size:9px;
+    font-weight:800;
+}
+.history-add{color:var(--success);background:var(--success-light)}
+.history-remove{color:var(--danger);background:var(--danger-light)}
+@media(max-width:700px){
+    .inventory-tool-actions{
+        justify-content:stretch;
+    }
+    .tool-button,
+    .view-all-btn{
+        width:100%;
+    }
+}
+
 </style>
 </head>
 
 <body>
+
+<div class="page-alert" id="pageAlert">
+    <i id="alertIcon" class="fa-solid fa-circle-info"></i>
+    <div id="alertMessage"></div>
+</div>
+
+<div class="history-modal" id="historyModal" onclick="handleHistoryOutside(event)">
+    <div class="history-dialog">
+        <div class="history-header">
+            <div>
+                <h2>Inventory History</h2>
+            </div>
+            <button type="button" class="history-close" onclick="closeHistoryModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="history-body">
+            <div class="table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Reason</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="8" class="table-message">
+                                No history loaded.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div
     class="sidebar-overlay"
@@ -886,20 +1066,52 @@ tbody tr:hover{
                 <input
                     type="text"
                     id="searchInput"
-                    placeholder="Search by product no, product name or manufacturer..."
-                    onkeyup="searchInventory()"
+                    placeholder="Search by product code, product name or manufacturer..."
+                    oninput="scheduleInventorySearch()"
                 >
 
             </div>
 
-            <button
-                type="button"
-                class="view-all-btn"
-                onclick="viewAllInventory()"
-            >
-                <i class="fa-solid fa-list"></i>
-                View All Inventory
-            </button>
+            <div class="inventory-tool-actions">
+
+                <button
+                    type="button"
+                    class="view-all-btn"
+                    id="allInventoryButton"
+                    onclick="viewAllInventory()"
+                >
+                    <i class="fa-solid fa-list"></i>
+                    All Inventory
+                </button>
+
+                <button
+                    type="button"
+                    class="tool-button warning"
+                    onclick="loadLowStock()"
+                >
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Low Stock
+                </button>
+
+                <button
+                    type="button"
+                    class="tool-button danger"
+                    onclick="loadOutOfStock()"
+                >
+                    <i class="fa-solid fa-ban"></i>
+                    Out of Stock
+                </button>
+
+                <button
+                    type="button"
+                    class="tool-button"
+                    onclick="openInventoryHistory()"
+                >
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    History
+                </button>
+
+            </div>
 
         </section>
 
@@ -934,214 +1146,12 @@ tbody tr:hover{
                     </thead>
 
                     <tbody id="inventoryTable">
-
                         <tr>
-                            <td>PROD001</td>
-                            <td>Neolife Special Hair Oil</td>
-                            <td>Neolife Wellness Center</td>
-
-                            <td class="current-stock">100</td>
-
-                            <td>
-                                <div class="stock-action">
-                                    <input
-                                        type="number"
-                                        class="stock-input add-value"
-                                        min="0"
-                                        placeholder="Qty"
-                                    >
-
-                                    <button
-                                        class="add-stock-btn"
-                                        onclick="addStock(this)"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="stock-action">
-                                    <input
-                                        type="number"
-                                        class="stock-input reduce-value"
-                                        min="0"
-                                        placeholder="Qty"
-                                    >
-
-                                    <button
-                                        class="reduce-stock-btn"
-                                        onclick="reduceStock(this)"
-                                    >
-                                        Reduce
-                                    </button>
-                                </div>
-                            </td>
-
-                            <td>
-                                <input
-                                    type="number"
-                                    class="stock-input low-limit"
-                                    value="10"
-                                    min="0"
-                                    onchange="updateStatus(this)"
-                                >
-                            </td>
-
-                            <td>
-                                <span class="status in-stock">In Stock</span>
-                            </td>
-
-                            <td class="last-updated">24-06-2026</td>
-
-                            <td>
-                                <button
-                                    class="save-btn"
-                                    onclick="saveInventory(this)"
-                                >
-                                    Save
-                                </button>
+                            <td colspan="10" class="table-message">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                Loading inventory...
                             </td>
                         </tr>
-
-                        <tr>
-                            <td>PROD002</td>
-                            <td>Neolife Joints Care Choorna</td>
-                            <td>Neolife Wellness Center</td>
-
-                            <td class="current-stock">8</td>
-
-                            <td>
-                                <div class="stock-action">
-                                    <input
-                                        type="number"
-                                        class="stock-input add-value"
-                                        min="0"
-                                        placeholder="Qty"
-                                    >
-
-                                    <button
-                                        class="add-stock-btn"
-                                        onclick="addStock(this)"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="stock-action">
-                                    <input
-                                        type="number"
-                                        class="stock-input reduce-value"
-                                        min="0"
-                                        placeholder="Qty"
-                                    >
-
-                                    <button
-                                        class="reduce-stock-btn"
-                                        onclick="reduceStock(this)"
-                                    >
-                                        Reduce
-                                    </button>
-                                </div>
-                            </td>
-
-                            <td>
-                                <input
-                                    type="number"
-                                    class="stock-input low-limit"
-                                    value="10"
-                                    min="0"
-                                    onchange="updateStatus(this)"
-                                >
-                            </td>
-
-                            <td>
-                                <span class="status low-stock">Low Stock</span>
-                            </td>
-
-                            <td class="last-updated">24-06-2026</td>
-
-                            <td>
-                                <button
-                                    class="save-btn"
-                                    onclick="saveInventory(this)"
-                                >
-                                    Save
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>PROD003</td>
-                            <td>Neodia Kashayam</td>
-                            <td>Neolife Wellness Center</td>
-
-                            <td class="current-stock">0</td>
-
-                            <td>
-                                <div class="stock-action">
-                                    <input
-                                        type="number"
-                                        class="stock-input add-value"
-                                        min="0"
-                                        placeholder="Qty"
-                                    >
-
-                                    <button
-                                        class="add-stock-btn"
-                                        onclick="addStock(this)"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="stock-action">
-                                    <input
-                                        type="number"
-                                        class="stock-input reduce-value"
-                                        min="0"
-                                        placeholder="Qty"
-                                    >
-
-                                    <button
-                                        class="reduce-stock-btn"
-                                        onclick="reduceStock(this)"
-                                    >
-                                        Reduce
-                                    </button>
-                                </div>
-                            </td>
-
-                            <td>
-                                <input
-                                    type="number"
-                                    class="stock-input low-limit"
-                                    value="10"
-                                    min="0"
-                                    onchange="updateStatus(this)"
-                                >
-                            </td>
-
-                            <td>
-                                <span class="status out-stock">Out of Stock</span>
-                            </td>
-
-                            <td class="last-updated">24-06-2026</td>
-
-                            <td>
-                                <button
-                                    class="save-btn"
-                                    onclick="saveInventory(this)"
-                                >
-                                    Save
-                                </button>
-                            </td>
-                        </tr>
-
                     </tbody>
 
                 </table>
@@ -1161,154 +1171,863 @@ tbody tr:hover{
 </div>
 
 <script>
+const API_BASE_URL = "http://localhost:8085";
 
-function getTodayDate(){
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2,"0");
-    const month = String(today.getMonth() + 1).padStart(2,"0");
-    const year = today.getFullYear();
+let inventoryRecords = [];
+let searchTimer = null;
 
-    return day + "-" + month + "-" + year;
-}
-
-function updateStockStatus(row){
-    const stock = parseInt(row.querySelector(".current-stock").innerText);
-    const lowLimit = parseInt(row.querySelector(".low-limit").value);
-    const status = row.querySelector(".status");
-
-    if(stock <= 0){
-        status.innerText = "Out of Stock";
-        status.className = "status out-stock";
-    }
-    else if(stock <= lowLimit){
-        status.innerText = "Low Stock";
-        status.className = "status low-stock";
-    }
-    else{
-        status.innerText = "In Stock";
-        status.className = "status in-stock";
-    }
-
-    row.querySelector(".last-updated").innerText = getTodayDate();
-}
-
-function addStock(button){
-    const row = button.closest("tr");
-    const addInput = row.querySelector(".add-value");
-    const currentStockCell = row.querySelector(".current-stock");
-
-    const addQty = parseInt(addInput.value);
-
-    if(isNaN(addQty) || addQty <= 0){
-        alert("Enter valid stock quantity to add.");
+document.addEventListener("DOMContentLoaded", function () {
+    if (!requireLogin()) {
         return;
     }
 
-    currentStockCell.innerText = parseInt(currentStockCell.innerText) + addQty;
-    addInput.value = "";
+    loadAllInventory();
+});
 
-    updateStockStatus(row);
+function getToken() {
+    return localStorage.getItem("token") || "";
 }
 
-function reduceStock(button){
-    const row = button.closest("tr");
-    const reduceInput = row.querySelector(".reduce-value");
-    const currentStockCell = row.querySelector(".current-stock");
-
-    const reduceQty = parseInt(reduceInput.value);
-    const currentStock = parseInt(currentStockCell.innerText);
-
-    if(isNaN(reduceQty) || reduceQty <= 0){
-        alert("Enter valid stock quantity to reduce.");
-        return;
+function requireLogin() {
+    if (!getToken()) {
+        window.location.href = "../frontend/login.html";
+        return false;
     }
 
-    if(reduceQty > currentStock){
-        alert("Reduce quantity cannot be greater than current stock.");
-        return;
-    }
-
-    currentStockCell.innerText = currentStock - reduceQty;
-    reduceInput.value = "";
-
-    updateStockStatus(row);
+    return true;
 }
 
-function updateStatus(input){
-    const row = input.closest("tr");
-    updateStockStatus(row);
-}
-
-function saveInventory(button){
-    const row = button.closest("tr");
-
-    const inventory = {
-        productNo: row.children[0].innerText,
-        productName: row.children[1].innerText,
-        manufacturer: row.children[2].innerText,
-        currentStock: row.querySelector(".current-stock").innerText,
-        lowStockLimit: row.querySelector(".low-limit").value,
-        status: row.querySelector(".status").innerText,
-        lastUpdated: row.querySelector(".last-updated").innerText
+function authHeaders(includeJson = false) {
+    const headers = {
+        "Accept": "application/json",
+        "Authorization": "Bearer " + getToken()
     };
 
-    console.log(inventory);
+    if (includeJson) {
+        headers["Content-Type"] = "application/json";
+    }
 
-    alert("Inventory saved successfully!");
+    return headers;
 }
 
-function searchInventory(){
-    const searchValue = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#inventoryTable tr");
-    let visibleCount = 0;
-
-    rows.forEach(row => {
-        const rowText = row.innerText.toLowerCase();
-
-        if(rowText.includes(searchValue)){
-            row.style.display = "";
-            visibleCount++;
-        }else{
-            row.style.display = "none";
+async function inventoryApi(endpoint, options = {}) {
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers: {
+                ...authHeaders(Boolean(options.body)),
+                ...(options.headers || {})
+            }
         }
-    });
+    );
 
-    document.getElementById("noResult").style.display =
-        visibleCount === 0 ? "block" : "none";
+    const result = await safelyReadResponse(response);
+
+    if (response.status === 401) {
+        clearAuthentication();
+
+        throw new Error(
+            "Your login session has expired. Please login again."
+        );
+    }
+
+    if (response.status === 403) {
+        throw new Error(
+            result?.message ||
+            "You are not authorized to manage inventory."
+        );
+    }
+
+    if (!response.ok || result?.success === false) {
+        throw new Error(
+            result?.message ||
+            "Inventory request failed."
+        );
+    }
+
+    return result;
 }
 
-function viewAllInventory(){
+/* =========================
+   GET ALL INVENTORY
+========================= */
+
+async function loadAllInventory() {
+    showInventoryLoading("Loading inventory...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/getAll"
+        );
+
+        inventoryRecords = Array.isArray(result?.data)
+            ? result.data
+            : [];
+
+        renderInventory(inventoryRecords);
+
+    } catch (error) {
+        handleInventoryError(error);
+    }
+}
+
+function viewAllInventory() {
     document.getElementById("searchInput").value = "";
-
-    const rows = document.querySelectorAll("#inventoryTable tr");
-
-    rows.forEach(row => {
-        row.style.display = "";
-    });
-
-    document.getElementById("noResult").style.display = "none";
+    loadAllInventory();
 }
 
+/* =========================
+   SEARCH INVENTORY
+========================= */
 
-function toggleSidebar(){
-    document.getElementById("adminSidebar").classList.toggle("open");
-    document.getElementById("sidebarOverlay").classList.toggle("show");
+function scheduleInventorySearch() {
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(
+        searchInventory,
+        350
+    );
 }
 
-function closeSidebar(){
-    document.getElementById("adminSidebar").classList.remove("open");
-    document.getElementById("sidebarOverlay").classList.remove("show");
+async function searchInventory() {
+    const keyword = document
+        .getElementById("searchInput")
+        .value
+        .trim();
+
+    if (!keyword) {
+        loadAllInventory();
+        return;
+    }
+
+    showInventoryLoading("Searching inventory...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/search?keyword=" +
+            encodeURIComponent(keyword)
+        );
+
+        const records = Array.isArray(result?.data)
+            ? result.data
+            : [];
+
+        renderInventory(records);
+
+    } catch (error) {
+        handleInventoryError(error);
+    }
 }
 
-function logoutAdmin(){
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("role");
-    localStorage.removeItem("userId");
+/* =========================
+   LOW / OUT OF STOCK
+========================= */
 
-    window.location.href = "../frontend/login.html";
+async function loadLowStock() {
+    document.getElementById("searchInput").value = "";
+    showInventoryLoading("Loading low-stock products...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/low-stock"
+        );
+
+        renderInventory(
+            Array.isArray(result?.data)
+                ? result.data
+                : []
+        );
+
+        showAlert(
+            result?.message ||
+            "Low-stock products loaded.",
+            "info"
+        );
+
+    } catch (error) {
+        handleInventoryError(error);
+    }
 }
 
+async function loadOutOfStock() {
+    document.getElementById("searchInput").value = "";
+    showInventoryLoading("Loading out-of-stock products...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/out-of-stock"
+        );
+
+        renderInventory(
+            Array.isArray(result?.data)
+                ? result.data
+                : []
+        );
+
+        showAlert(
+            result?.message ||
+            "Out-of-stock products loaded.",
+            "info"
+        );
+
+    } catch (error) {
+        handleInventoryError(error);
+    }
+}
+
+/* =========================
+   ADD STOCK
+========================= */
+
+async function addStock(button, productId) {
+    const row = button.closest("tr");
+    const input = row.querySelector(".add-value");
+    const quantity = Number(input.value);
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        showAlert(
+            "Enter a valid whole-number quantity to add.",
+            "error"
+        );
+
+        input.focus();
+        return;
+    }
+
+    setActionLoading(button, true, "Adding...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/add-stock",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    productId: Number(productId),
+                    quantity: quantity
+                })
+            }
+        );
+
+        input.value = "";
+
+        showAlert(
+            result?.message ||
+            "Stock added successfully.",
+            "success"
+        );
+
+        await refreshCurrentView();
+
+    } catch (error) {
+        handleActionError(error);
+
+    } finally {
+        setActionLoading(button, false, "Add");
+    }
+}
+
+/* =========================
+   REMOVE STOCK
+========================= */
+
+async function reduceStock(button, productId) {
+    const row = button.closest("tr");
+    const input = row.querySelector(".reduce-value");
+    const quantity = Number(input.value);
+    const currentStock = Number(
+        row.querySelector(".current-stock").textContent
+    );
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        showAlert(
+            "Enter a valid whole-number quantity to remove.",
+            "error"
+        );
+
+        input.focus();
+        return;
+    }
+
+    if (quantity > currentStock) {
+        showAlert(
+            "Remove quantity cannot be greater than current stock.",
+            "error"
+        );
+
+        input.focus();
+        return;
+    }
+
+    setActionLoading(button, true, "Removing...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/remove-stock",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    productId: Number(productId),
+                    quantity: quantity
+                })
+            }
+        );
+
+        input.value = "";
+
+        showAlert(
+            result?.message ||
+            "Stock removed successfully.",
+            "success"
+        );
+
+        await refreshCurrentView();
+
+    } catch (error) {
+        handleActionError(error);
+
+    } finally {
+        setActionLoading(button, false, "Reduce");
+    }
+}
+
+/* =========================
+   UPDATE LOW-STOCK LIMIT
+========================= */
+
+async function saveInventory(button, productId) {
+    const row = button.closest("tr");
+    const input = row.querySelector(".low-limit");
+    const lowStockLimit = Number(input.value);
+
+    if (
+        !Number.isInteger(lowStockLimit) ||
+        lowStockLimit < 0
+    ) {
+        showAlert(
+            "Low-stock limit must be zero or a positive whole number.",
+            "error"
+        );
+
+        input.focus();
+        return;
+    }
+
+    setActionLoading(button, true, "Saving...");
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/update-limit",
+            {
+                method: "PUT",
+                body: JSON.stringify({
+                    productId: Number(productId),
+                    lowStockLimit: lowStockLimit
+                })
+            }
+        );
+
+        showAlert(
+            result?.message ||
+            "Low-stock limit updated successfully.",
+            "success"
+        );
+
+        await refreshCurrentView();
+
+    } catch (error) {
+        handleActionError(error);
+
+    } finally {
+        setActionLoading(button, false, "Save");
+    }
+}
+
+async function refreshCurrentView() {
+    const keyword = document
+        .getElementById("searchInput")
+        .value
+        .trim();
+
+    if (keyword) {
+        await searchInventory();
+    } else {
+        await loadAllInventory();
+    }
+}
+
+/* =========================
+   INVENTORY HISTORY
+========================= */
+
+async function openInventoryHistory() {
+    const modal = document.getElementById("historyModal");
+    const body = document.getElementById("historyTableBody");
+
+    modal.classList.add("show");
+
+    body.innerHTML = `
+        <tr>
+            <td colspan="8" class="table-message">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading inventory history...
+            </td>
+        </tr>
+    `;
+
+    try {
+        const result = await inventoryApi(
+            "/api/inventory/history"
+        );
+
+        const history = Array.isArray(result?.data)
+            ? result.data
+            : [];
+
+        renderHistory(history);
+
+    } catch (error) {
+        body.innerHTML = `
+            <tr>
+                <td colspan="8" class="table-message">
+                    ${escapeHtml(
+                        error.message ||
+                        "Unable to load inventory history."
+                    )}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function renderHistory(history) {
+    const body = document.getElementById(
+        "historyTableBody"
+    );
+
+    if (!history.length) {
+        body.innerHTML = `
+            <tr>
+                <td colspan="8" class="table-message">
+                    No inventory history found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    body.innerHTML = history.map(function (item) {
+        const type = normalizeStatus(item.type);
+        const typeClass =
+            type === "ADD_STOCK"
+                ? "history-add"
+                : "history-remove";
+
+        return `
+            <tr>
+                <td>${escapeHtml(item.id)}</td>
+                <td>
+                    <strong>${escapeHtml(item.productName || "-")}</strong>
+                    <br>
+                    <small>Product ID: ${escapeHtml(item.productId)}</small>
+                </td>
+                <td>
+                    <span class="history-type ${typeClass}">
+                        ${escapeHtml(formatStatus(type))}
+                    </span>
+                </td>
+                <td>${escapeHtml(item.quantity)}</td>
+                <td>${escapeHtml(item.stockBefore)}</td>
+                <td>${escapeHtml(item.stockAfter)}</td>
+                <td>${escapeHtml(item.reason || "-")}</td>
+                <td>${escapeHtml(formatDateTime(item.createdAt))}</td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function closeHistoryModal() {
+    document
+        .getElementById("historyModal")
+        .classList
+        .remove("show");
+}
+
+function handleHistoryOutside(event) {
+    if (event.target.id === "historyModal") {
+        closeHistoryModal();
+    }
+}
+
+/* =========================
+   RENDER INVENTORY
+========================= */
+
+function renderInventory(records) {
+    const body = document.getElementById(
+        "inventoryTable"
+    );
+
+    const noResult = document.getElementById(
+        "noResult"
+    );
+
+    if (!records.length) {
+        body.innerHTML = `
+            <tr>
+                <td colspan="10" class="table-message">
+                    <i class="fa-solid fa-box-open"></i>
+                    No inventory records found.
+                </td>
+            </tr>
+        `;
+
+        noResult.style.display = "none";
+        return;
+    }
+
+    noResult.style.display = "none";
+
+    body.innerHTML = records.map(
+        createInventoryRow
+    ).join("");
+}
+
+function createInventoryRow(item) {
+    const status = normalizeStatus(item.status);
+    const statusClass =
+        status === "OUT_OF_STOCK"
+            ? "out-stock"
+            : status === "LOW_STOCK"
+                ? "low-stock"
+                : "in-stock";
+
+    return `
+        <tr data-product-id="${Number(item.productId)}">
+
+            <td>
+                <strong>${escapeHtml(item.productCode || "-")}</strong>
+                <br>
+                <small>ID: ${escapeHtml(item.productId)}</small>
+            </td>
+
+            <td>
+                ${escapeHtml(item.productName || "-")}
+            </td>
+
+            <td>
+                ${escapeHtml(item.manufacturer || "-")}
+            </td>
+
+            <td class="current-stock">
+                ${escapeHtml(item.currentStock ?? 0)}
+            </td>
+
+            <td>
+                <div class="stock-action">
+                    <input
+                        type="number"
+                        class="stock-input add-value"
+                        min="1"
+                        step="1"
+                        placeholder="Qty"
+                    >
+
+                    <button
+                        type="button"
+                        class="add-stock-btn"
+                        onclick="addStock(this, ${Number(item.productId)})"
+                    >
+                        Add
+                    </button>
+                </div>
+            </td>
+
+            <td>
+                <div class="stock-action">
+                    <input
+                        type="number"
+                        class="stock-input reduce-value"
+                        min="1"
+                        step="1"
+                        placeholder="Qty"
+                    >
+
+                    <button
+                        type="button"
+                        class="reduce-stock-btn"
+                        onclick="reduceStock(this, ${Number(item.productId)})"
+                    >
+                        Reduce
+                    </button>
+                </div>
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    class="stock-input low-limit"
+                    value="${escapeHtml(item.lowStockLimit ?? 0)}"
+                    min="0"
+                    step="1"
+                >
+            </td>
+
+            <td>
+                <span class="status ${statusClass}">
+                    ${escapeHtml(formatStatus(status))}
+                </span>
+            </td>
+
+            <td class="last-updated">
+                ${escapeHtml(formatDateTime(item.lastUpdated))}
+            </td>
+
+            <td>
+                <button
+                    type="button"
+                    class="save-btn"
+                    onclick="saveInventory(this, ${Number(item.productId)})"
+                >
+                    Save
+                </button>
+            </td>
+
+        </tr>
+    `;
+}
+
+function showInventoryLoading(message) {
+    document.getElementById(
+        "inventoryTable"
+    ).innerHTML = `
+        <tr>
+            <td colspan="10" class="table-message">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                ${escapeHtml(message)}
+            </td>
+        </tr>
+    `;
+
+    document.getElementById(
+        "noResult"
+    ).style.display = "none";
+}
+
+function handleInventoryError(error) {
+    console.error(error);
+
+    document.getElementById(
+        "inventoryTable"
+    ).innerHTML = `
+        <tr>
+            <td colspan="10" class="table-message">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                ${escapeHtml(
+                    error.message ||
+                    "Unable to load inventory."
+                )}
+                <br><br>
+                <button
+                    type="button"
+                    class="view-all-btn"
+                    onclick="loadAllInventory()"
+                >
+                    Try Again
+                </button>
+            </td>
+        </tr>
+    `;
+
+    handleActionError(error);
+}
+
+function handleActionError(error) {
+    console.error(error);
+
+    showAlert(
+        error.message ||
+        "Inventory operation failed.",
+        "error"
+    );
+
+    if (
+        String(error.message || "")
+        .toLowerCase()
+        .includes("expired")
+    ) {
+        setTimeout(
+            function () {
+                window.location.href =
+                    "../frontend/login.html";
+            },
+            1300
+        );
+    }
+}
+
+/* =========================
+   GENERAL HELPERS
+========================= */
+
+function setActionLoading(
+    button,
+    loading,
+    text
+) {
+    button.disabled = loading;
+    button.textContent = text;
+}
+
+function normalizeStatus(value) {
+    return String(value || "")
+        .trim()
+        .toUpperCase()
+        .replaceAll(" ", "_");
+}
+
+function formatStatus(value) {
+    return String(value || "-")
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            function (character) {
+                return character.toUpperCase();
+            }
+        );
+}
+
+function formatDateTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+}
+
+async function safelyReadResponse(response) {
+    const text = await response.text();
+
+    if (!text) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(text);
+
+    } catch (error) {
+        return {
+            success: false,
+            message: text
+        };
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showAlert(message, type) {
+    const box = document.getElementById(
+        "pageAlert"
+    );
+
+    const icon = document.getElementById(
+        "alertIcon"
+    );
+
+    document.getElementById(
+        "alertMessage"
+    ).textContent = message;
+
+    box.className =
+        `page-alert show ${type}`;
+
+    icon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.inventoryAlertTimer
+    );
+
+    window.inventoryAlertTimer =
+        setTimeout(
+            function () {
+                box.classList.remove("show");
+            },
+            4000
+        );
+}
+
+function clearAuthentication() {
+    [
+        "token",
+        "refreshToken",
+        "role",
+        "userId"
+    ].forEach(
+        function (key) {
+            localStorage.removeItem(key);
+        }
+    );
+}
+
+function toggleSidebar() {
+    document
+        .getElementById("adminSidebar")
+        .classList
+        .toggle("open");
+
+    document
+        .getElementById("sidebarOverlay")
+        .classList
+        .toggle("show");
+}
+
+function closeSidebar() {
+    document
+        .getElementById("adminSidebar")
+        .classList
+        .remove("open");
+
+    document
+        .getElementById("sidebarOverlay")
+        .classList
+        .remove("show");
+}
+
+function logoutAdmin() {
+    clearAuthentication();
+
+    window.location.href =
+        "../frontend/login.html";
+}
 </script>
 
 </body>

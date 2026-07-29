@@ -123,7 +123,10 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}
   </div>
   <div class="doctor-box">
     <div class="doctor-avatar" id="doctorInitial">D</div>
-    <div><strong id="doctorTopbarName">Doctor</strong><span>Medical Consultant</span></div>
+    <div>
+      <strong id="doctorTopbarName">Loading...</strong>
+      <span id="doctorTopbarRole">Doctor</span>
+    </div>
   </div>
 </header>
 
@@ -199,10 +202,13 @@ let currentPage=1;
 const pageSize=8;
 let selectedPatientId=null;
 
-document.addEventListener("DOMContentLoaded",()=>{
-  requireDoctorLogin();
-  loadDoctorProfile();
-  loadPatients();
+document.addEventListener("DOMContentLoaded", async ()=>{
+  if(!requireDoctorLogin()){
+    return;
+  }
+
+  await loadDoctorProfile();
+  await loadPatients();
 });
 
 function getToken(){return localStorage.getItem("token")||localStorage.getItem("doctorToken")}
@@ -210,9 +216,13 @@ function getToken(){return localStorage.getItem("token")||localStorage.getItem("
 function requireDoctorLogin(){
   const token=getToken();
   const role=(localStorage.getItem("role")||"").toUpperCase();
+
   if(!token||role!=="DOCTOR"){
     window.location.href="../patient/login.html";
+    return false;
   }
+
+  return true;
 }
 
 async function apiRequest(endpoint,options={}){
@@ -250,43 +260,99 @@ async function apiRequest(endpoint,options={}){
   return result;
 }
 
-function loadDoctorProfile(){
-  let name=
+async function loadDoctorProfile(){
+  const savedName=
     localStorage.getItem("doctorName")||
     localStorage.getItem("userName")||
     localStorage.getItem("name")||
     "Doctor";
 
-  const storedDoctor=
-    localStorage.getItem("doctor");
+  updateDoctorHeader(savedName);
 
-  if(storedDoctor){
-    try{
-      const doctor=JSON.parse(storedDoctor);
+  try{
+    const result=await apiRequest(
+      "/api/doctors/my-profile"
+    );
 
-      name=
-        doctor.name||
-        doctor.doctorName||
-        doctor.user?.name||
-        name;
-    }catch(error){
-      console.warn(
-        "Unable to read stored doctor profile:",
-        error
+    const doctor=result.data||{};
+
+    const doctorName=
+      doctor.name||
+      doctor.doctorName||
+      savedName;
+
+    updateDoctorHeader(doctorName);
+
+    if(doctor.id!==null&&doctor.id!==undefined){
+      localStorage.setItem(
+        "doctorId",
+        String(doctor.id)
       );
     }
+
+    if(doctor.email){
+      localStorage.setItem(
+        "email",
+        doctor.email
+      );
+    }
+
+    localStorage.setItem(
+      "doctor",
+      JSON.stringify(doctor)
+    );
+
+  }catch(error){
+    console.error(
+      "Unable to load logged-in doctor:",
+      error
+    );
+
+    updateDoctorHeader(savedName);
+
+    showAlert(
+      error.message||
+      "Unable to load doctor profile.",
+      "error"
+    );
   }
+}
+
+function updateDoctorHeader(name){
+  const cleanName=
+    String(name||"Doctor").trim();
+
+  const nameWithoutTitle=
+    cleanName.replace(
+      /^Dr\.?\s*/i,
+      ""
+    );
+
+  const initial=
+    (
+      nameWithoutTitle||
+      cleanName||
+      "D"
+    )
+    .charAt(0)
+    .toUpperCase();
 
   document
     .getElementById("doctorTopbarName")
-    .textContent=name;
+    .textContent=cleanName;
+
+  document
+    .getElementById("doctorTopbarRole")
+    .textContent="Doctor";
 
   document
     .getElementById("doctorInitial")
-    .textContent=
-      name.replace(/^Dr\.?\s*/i,"")
-          .charAt(0)
-          .toUpperCase()||"D";
+    .textContent=initial;
+
+  localStorage.setItem(
+    "doctorName",
+    cleanName
+  );
 }
 
 async function loadPatients(){
@@ -481,11 +547,16 @@ async function openPatientRecord(patientId){
 }
 
 function renderPatientRecord(record){
-  const patient=record.patient||{};
+  const patient=record.patient||record.patientDetails||{};
   const appointments=Array.isArray(record.appointments)?record.appointments:[];
   const consultations=Array.isArray(record.consultations)?record.consultations:[];
   const prescriptions=Array.isArray(record.prescriptions)?record.prescriptions:[];
-  const therapies=Array.isArray(record.therapies)?record.therapies:[];
+  const therapies=
+    Array.isArray(record.therapies)
+      ?record.therapies
+      :Array.isArray(record.treatmentPlans)
+        ?record.treatmentPlans
+        :[];
   const notes=Array.isArray(record.notes)?record.notes:[];
 
   document.getElementById("recordModalBody").innerHTML=`
@@ -510,7 +581,10 @@ function renderPatientRecord(record){
         ${escapeHtml(formatLabel(item.status))} ${item.createdAt?`· ${formatDateTime(item.createdAt)}`:""}
       `)}
       ${recordSection("Therapies",therapies,item=>`
-        <strong>${escapeHtml(item.therapyName||item.serviceName||"Therapy")}</strong><br>
+        <strong>${escapeHtml(item.therapyName||
+         item.serviceName||
+         item.treatmentName||
+         "Therapy")}</strong><br>
         ${escapeHtml(formatLabel(item.status))}
       `)}
       ${recordSection("Doctor Notes",notes,item=>`
@@ -761,7 +835,7 @@ function closeSidebar(){
 }
 
 function clearDoctorSession(){
-  ["token","doctorToken","refreshToken","doctorRefreshToken","role","doctorId","userId","profileCompleted","isLoggedIn"].forEach(key=>localStorage.removeItem(key));
+  ["token","doctorToken","refreshToken","doctorRefreshToken","role","doctorId","doctorName","doctor","userId","email","profileCompleted","isLoggedIn"].forEach(key=>localStorage.removeItem(key));
 }
 
 function doctorLogout(){

@@ -1617,6 +1617,10 @@
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
+                <a href="online-consultation.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Consultation Details
+                </a>
 
                 <a href="video-recordings.html">
                     <i class="fa-solid fa-video"></i>
@@ -1711,7 +1715,7 @@
                         <div class="doctor-profile-text">
 
                             <strong id="doctorTopbarName">
-                                Doctor
+                                Loading...
                             </strong>
 
                             <span id="doctorTopbarRole">
@@ -1838,14 +1842,14 @@
                     <article class="summary-card">
 
                         <div class="summary-icon icon-red">
-                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                            <i class="fa-solid fa-calendar-days"></i>
                         </div>
 
                         <div class="summary-details">
-                            <p>Today's Earnings</p>
+                            <p>Upcoming Appointments</p>
 
-                            <h3 id="todayEarnings">
-                                ₹0
+                            <h3 id="upcomingAppointments">
+                                0
                             </h3>
                         </div>
 
@@ -2231,20 +2235,38 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                requireDoctorLogin();
+            async function () {
+                if (!requireDoctorLogin()) {
+                    return;
+                }
+
                 setCurrentDate();
                 setMinimumRescheduleDate();
 
-                loadDoctorProfile();
-                loadDashboardSummary();
-                loadTodayAppointments();
-                loadUpcomingSchedule();
-                loadOnlineRequests();
-                loadRecentPatients();
-                loadRecentTransactions();
+                await loadDoctorProfile();
+                await refreshDoctorDashboard();
             }
         );
+
+        async function refreshDoctorDashboard() {
+            await Promise.allSettled([
+                loadDashboardSummary(),
+                loadTodayAppointments(),
+                loadUpcomingSchedule(),
+                loadOnlineRequests(),
+                loadRecentPatients(),
+                loadRecentTransactions()
+            ]);
+        }
+
+        async function refreshConsultationSections() {
+            await Promise.allSettled([
+                loadDashboardSummary(),
+                loadTodayAppointments(),
+                loadUpcomingSchedule(),
+                loadOnlineRequests()
+            ]);
+        }
 
         /* =========================
            AUTHENTICATION
@@ -2255,7 +2277,7 @@
 
             if (!token) {
                 window.location.href = "../patient/login.html";
-                return;
+                return false;
             }
 
             const role = (localStorage.getItem("role") || "").toUpperCase();
@@ -2265,12 +2287,15 @@
             if (role !== "DOCTOR") {
                 alert("Only doctors can access this portal.");
                 window.location.href = "../patient/login.html";
-                return;
+                return false;
             }
 
             if (!profileCompleted) {
                 window.location.href = "doctor-profile.html";
+                return false;
             }
+
+            return true;
         }
 
         async function doctorApiRequest(endpoint, options = {}) {
@@ -2348,37 +2373,39 @@
 
         async function loadDoctorProfile() {
             try {
-                /*
-                 * Change this endpoint if your doctor
-                 * profile API uses a different URL.
-                 */
                 const result =
                     await doctorApiRequest(
-                        "/api/users/getProfile"
+                        "/api/doctors/my-profile"
                     );
 
-                const doctor = result.data || {};
+                const doctor =
+                    result.data || {};
 
-                const name =
+                const doctorName =
                     doctor.name ||
                     doctor.doctorName ||
                     "Doctor";
 
-                updateDoctorName(name);
+                updateDoctorName(
+                    doctorName
+                );
 
-                const roleLabel =
-                    String(doctor.role || "DOCTOR")
-                        .replaceAll("_", " ")
-                        .toLowerCase()
-                        .replace(/\b\w/g, character =>
-                            character.toUpperCase()
-                        );
+                document.getElementById(
+                    "doctorTopbarRole"
+                ).textContent = "Doctor";
 
-                const roleElement =
-                    document.getElementById("doctorTopbarRole");
+                if (doctor.id != null) {
+                    localStorage.setItem(
+                        "doctorId",
+                        String(doctor.id)
+                    );
+                }
 
-                if (roleElement) {
-                    roleElement.textContent = roleLabel;
+                if (doctor.email) {
+                    localStorage.setItem(
+                        "email",
+                        doctor.email
+                    );
                 }
 
             } catch (error) {
@@ -2390,21 +2417,53 @@
                 const savedName =
                     localStorage.getItem(
                         "doctorName"
-                    );
+                    ) || "Doctor";
 
                 updateDoctorName(
-                    savedName || "Doctor"
+                    savedName
+                );
+
+                document.getElementById(
+                    "doctorTopbarRole"
+                ).textContent = "Doctor";
+
+                showDashboardAlert(
+                    error.message ||
+                    "Unable to load doctor profile.",
+                    "error"
                 );
             }
         }
 
         function updateDoctorName(name) {
             const cleanName =
-                String(name || "Doctor").trim();
+                String(name || "Doctor")
+                    .trim();
+
+            const nameWithoutTitle =
+                cleanName.replace(
+                    /^Dr\.?\s*/i,
+                    ""
+                );
+
+            const initial =
+                (
+                    nameWithoutTitle ||
+                    cleanName ||
+                    "D"
+                )
+                .charAt(0)
+                .toUpperCase();
 
             document.getElementById(
                 "doctorTopbarName"
-            ).textContent = cleanName;
+            ).textContent =
+                cleanName;
+
+            document.getElementById(
+                "doctorTopbarRole"
+            ).textContent =
+                "Doctor";
 
             document.getElementById(
                 "welcomeDoctorName"
@@ -2414,9 +2473,12 @@
             document.getElementById(
                 "doctorInitial"
             ).textContent =
-                cleanName.charAt(0).toUpperCase();
+                initial;
 
-            localStorage.setItem("doctorName", cleanName);
+            localStorage.setItem(
+                "doctorName",
+                cleanName
+            );
         }
 
         /* =========================
@@ -2430,9 +2492,9 @@
                         "/api/doctor-dashboard/summary"
                     );
 
-                const summary = result.data || {};
-
-                updateSummaryCards(summary);
+                updateSummaryCards(
+                    result.data || {}
+                );
 
             } catch (error) {
                 console.error(
@@ -2440,53 +2502,71 @@
                     error
                 );
 
-                /*
-                 * Demo values are shown until the
-                 * dashboard summary API is created.
-                 */
-                updateSummaryCards({
-                    todayAppointments: 8,
-                    pendingOnlineRequests: 3,
-                    totalPatients: 156,
-                    completedConsultations: 92,
-                    todayEarnings: 850
-                });
+                updateSummaryCards({});
+
+                showDashboardAlert(
+                    error.message ||
+                    "Unable to load dashboard summary.",
+                    "error"
+                );
             }
         }
 
         function updateSummaryCards(summary) {
+            const todayAppointments =
+                Number(
+                    summary.todayAppointments || 0
+                );
+
+            const pendingRequests =
+                Number(
+                    summary.pendingConsultationRequests || 0
+                );
+
+            const totalPatients =
+                Number(
+                    summary.totalPatients || 0
+                );
+
+            const completedConsultations =
+                Number(
+                    summary.completedConsultations || 0
+                );
+
+            const upcomingAppointments =
+                Number(
+                    summary.upcomingAppointments || 0
+                );
+
             document.getElementById(
                 "todayAppointments"
             ).textContent =
-                summary.todayAppointments || 0;
+                todayAppointments;
 
             document.getElementById(
                 "pendingRequests"
             ).textContent =
-                summary.pendingOnlineRequests || 0;
+                pendingRequests;
 
             document.getElementById(
                 "totalPatients"
             ).textContent =
-                summary.totalPatients || 0;
+                totalPatients;
 
             document.getElementById(
                 "completedConsultations"
             ).textContent =
-                summary.completedConsultations || 0;
+                completedConsultations;
 
             document.getElementById(
-                "todayEarnings"
+                "upcomingAppointments"
             ).textContent =
-                "₹" +
-                Number(
-                    summary.todayEarnings || 0
-                ).toLocaleString("en-IN");
+                upcomingAppointments;
 
             document.getElementById(
                 "notificationCount"
             ).textContent =
-                summary.pendingOnlineRequests || 0;
+                pendingRequests;
         }
 
         /* =========================
@@ -2505,72 +2585,104 @@
                         "/api/doctor-dashboard/today"
                     );
 
+                const data =
+                    result.data || {};
+
                 const appointments =
-                    Array.isArray(result.data)
-                        ? result.data
+                    Array.isArray(
+                        data.appointments
+                    )
+                        ? data.appointments
                         : [];
 
+                const consultations =
+                    Array.isArray(
+                        data.consultations
+                    )
+                        ? data.consultations
+                        : [];
+
+                const todayItems = [
+                    ...appointments.map(
+                        function (appointment) {
+                            return {
+                                ...appointment,
+                                scheduleKind:
+                                    "APPOINTMENT",
+                                appointmentType:
+                                    appointment.appointmentMode ||
+                                    appointment.appointmentType ||
+                                    "OFFLINE",
+                                appointmentTime:
+                                    appointment.startTime ||
+                                    appointment.appointmentTime
+                            };
+                        }
+                    ),
+
+                    ...consultations.map(
+                        function (consultation) {
+                            return {
+                                ...consultation,
+                                scheduleKind:
+                                    "CONSULTATION",
+                                appointmentType:
+                                    "ONLINE",
+                                appointmentTime:
+                                    consultation.startTime ||
+                                    consultation.consultationTime
+                            };
+                        }
+                    )
+                ].sort(
+                    compareTodayScheduleItems
+                );
+
                 renderTodayAppointments(
-                    appointments
+                    todayItems
                 );
 
             } catch (error) {
                 console.error(
-                    "Today's appointments failed:",
+                    "Today's schedule failed:",
                     error
                 );
 
-                const demoAppointments = [
-                    {
-                        id: 101,
-                        patientName:
-                            "Nisha Rao",
-                        appointmentTime:
-                            "09:00",
-                        appointmentType:
-                            "OFFLINE",
-                        symptoms:
-                            "Joint pain and stiffness"
-                    },
-                    {
-                        id: 102,
-                        patientName:
-                            "Raghavendra Bhat",
-                        appointmentTime:
-                            "10:00",
-                        appointmentType:
-                            "ONLINE",
-                        symptoms:
-                            "Headache and anxiety"
-                    },
-                    {
-                        id: 103,
-                        patientName:
-                            "Anitha Shetty",
-                        appointmentTime:
-                            "11:30",
-                        appointmentType:
-                            "OFFLINE",
-                        symptoms:
-                            "Digestive health consultation"
-                    },
-                    {
-                        id: 104,
-                        patientName:
-                            "Kiran Kumar",
-                        appointmentTime:
-                            "15:00",
-                        appointmentType:
-                            "ONLINE",
-                        symptoms:
-                            "Follow-up consultation"
-                    }
-                ];
-
-                renderTodayAppointments(
-                    demoAppointments
-                );
+                container.innerHTML = `
+                    <div class="panel-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        ${escapeHtml(
+                            error.message ||
+                            "Unable to load today's schedule."
+                        )}
+                    </div>
+                `;
             }
+        }
+
+        function compareTodayScheduleItems(
+            first,
+            second
+        ) {
+            const firstTime =
+                String(
+                    first.startTime ||
+                    first.appointmentTime ||
+                    first.consultationTime ||
+                    "23:59:59"
+                );
+
+            const secondTime =
+                String(
+                    second.startTime ||
+                    second.appointmentTime ||
+                    second.consultationTime ||
+                    "23:59:59"
+                );
+
+            return firstTime.localeCompare(
+                secondTime
+            );
         }
 
         function renderTodayAppointments(
@@ -2662,7 +2774,7 @@
                             <button
                                 type="button"
                                 class="appointment-action"
-                                onclick="openAppointmentDetails('${id}')"
+                                onclick="openScheduleDetails('${id}', '${escapeHtml(appointment.scheduleKind || "APPOINTMENT")}')"
                                 title="View appointment"
                             >
                                 <i class="fa-solid fa-arrow-right"></i>
@@ -2674,7 +2786,21 @@
                 });
         }
 
-        function openAppointmentDetails(id) {
+        function openScheduleDetails(
+            id,
+            scheduleKind
+        ) {
+            if (
+                String(scheduleKind)
+                    .toUpperCase() ===
+                "CONSULTATION"
+            ) {
+                window.location.href =
+                    `consultation-details.html?id=${encodeURIComponent(id)}`;
+
+                return;
+            }
+
             window.location.href =
                 `appointment-details.html?id=${encodeURIComponent(id)}`;
         }
@@ -2891,7 +3017,11 @@
                         item.symptoms ||
                         item.reason ||
                         item.patientConcern ||
-                        `${scheduleKind.toLowerCase()} · ${status}`;
+                        (
+                            scheduleKind === "CONSULTATION"
+                                ? `Online consultation · ${status}`
+                                : `Appointment · ${status}`
+                        );
 
                     const timeRange =
                         endTime
@@ -2946,7 +3076,7 @@
                                         scheduleKind
                                     )}'
                                 )"
-                                title="View details"
+                                title="View ${escapeHtml(status)} details"
                             >
                                 <i class="fa-solid fa-arrow-right"></i>
                             </button>
@@ -3034,34 +3164,20 @@
                     error
                 );
 
-                const demoRequests = [
-                    {
-                        id: 201,
-                        patientName:
-                            "Meghana P",
-                        preferredDate:
-                            "2026-07-15",
-                        preferredTime:
-                            "10:30",
-                        symptoms:
-                            "Migraine, anxiety and loss of concentration"
-                    },
-                    {
-                        id: 202,
-                        patientName:
-                            "Suresh Acharya",
-                        preferredDate:
-                            "2026-07-15",
-                        preferredTime:
-                            "15:30",
-                        symptoms:
-                            "Back pain and sleep difficulty"
-                    }
-                ];
+                const container =
+                    document.getElementById(
+                        "onlineRequestsList"
+                    );
 
-                renderOnlineRequests(
-                    demoRequests
-                );
+                container.innerHTML = `
+                    <div class="panel-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        ${escapeHtml(
+                            error.message ||
+                            "Unable to load online consultation requests."
+                        )}
+                    </div>
+                `;
             }
         }
 
@@ -3207,21 +3323,21 @@
             }
 
             try {
-                await doctorApiRequest(
-                    `/api/consultations/${encodeURIComponent(id)}/accept`,
-                    {
-                        method: "PUT"
-                    }
-                );
+                const result =
+                    await doctorApiRequest(
+                        `/api/consultations/${encodeURIComponent(id)}/accept`,
+                        {
+                            method: "PUT"
+                        }
+                    );
 
                 showAlert(
+                    result.message ||
                     "Consultation accepted successfully.",
                     "success"
                 );
 
-                loadOnlineRequests();
-                loadDashboardSummary();
-                loadTodayAppointments();
+                await refreshConsultationSections();
 
             } catch (error) {
                 console.error(
@@ -3250,23 +3366,24 @@
             }
 
             try {
-                await doctorApiRequest(
-                    `/api/consultations/${encodeURIComponent(id)}/reject`,
-                    {
-                        method: "PUT",
-                        body: JSON.stringify({
-                            reason: reason.trim()
-                        })
-                    }
-                );
+                const result =
+                    await doctorApiRequest(
+                        `/api/consultations/${encodeURIComponent(id)}/reject`,
+                        {
+                            method: "PUT",
+                            body: JSON.stringify({
+                                reason: reason.trim()
+                            })
+                        }
+                    );
 
                 showAlert(
+                    result.message ||
                     "Consultation rejected.",
                     "success"
                 );
 
-                loadOnlineRequests();
-                loadDashboardSummary();
+                await refreshConsultationSections();
 
             } catch (error) {
                 console.error(
@@ -3406,27 +3523,31 @@
             `;
 
             try {
-                await doctorApiRequest(
-                    `/api/consultations/${encodeURIComponent(id)}/reschedule`,
-                    {
-                        method: "PUT",
-                        body: JSON.stringify({
-                            newDate: newDate,
-                            newTime: newTime,
-                            reason: reason
-                        })
-                    }
-                );
+                const result =
+                    await doctorApiRequest(
+                        `/api/consultations/${encodeURIComponent(id)}/reschedule`,
+                        {
+                            method: "PUT",
+                            body: JSON.stringify({
+                                newDate: newDate,
+                                newTime:
+                                    normalizeApiTime(
+                                        newTime
+                                    ),
+                                reason: reason
+                            })
+                        }
+                    );
 
                 closeRescheduleModal();
 
                 showAlert(
+                    result.message ||
                     "Consultation rescheduled successfully.",
                     "success"
                 );
 
-                loadOnlineRequests();
-                loadDashboardSummary();
+                await refreshConsultationSections();
 
             } catch (error) {
                 console.error(
@@ -3905,6 +4026,33 @@
                     year: "numeric"
                 }
             );
+        }
+
+        function normalizeApiTime(timeValue) {
+            if (!timeValue) {
+                return "";
+            }
+
+            const value =
+                String(timeValue).trim();
+
+            if (
+                /^\d{2}:\d{2}:\d{2}$/.test(
+                    value
+                )
+            ) {
+                return value;
+            }
+
+            if (
+                /^\d{2}:\d{2}$/.test(
+                    value
+                )
+            ) {
+                return value + ":00";
+            }
+
+            return value;
         }
 
         function formatTime(timeValue) {

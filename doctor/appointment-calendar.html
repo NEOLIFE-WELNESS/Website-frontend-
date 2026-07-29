@@ -1529,7 +1529,7 @@
                     Appointment Calendar
                 </a>
                 <a href="doctor-availability.html">
-                    <i class="fa-solid fa-users"></i>
+                    <i class="fa-solid fa-clock"></i>
                     Manage Availability
                 </a>
 
@@ -1626,11 +1626,11 @@
                         <div class="doctor-profile-text">
 
                             <strong id="doctorTopbarName">
-                                Doctor
+                                Loading...
                             </strong>
 
-                            <span>
-                                Medical Consultant
+                            <span id="doctorTopbarRole">
+                                Doctor
                             </span>
 
                         </div>
@@ -1857,7 +1857,7 @@
 
             <div class="modal-header">
 
-                <h2>Appointment Details</h2>
+                <h2 id="appointmentModalTitle">Booking Details</h2>
 
                 <button
                     type="button"
@@ -1999,13 +1999,47 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                requireDoctorLogin();
+            async function () {
+                if (!requireDoctorLogin()) {
+                    return;
+                }
+
                 setMinimumRescheduleDate();
-                loadDoctorProfile();
-                loadAppointments();
+
+                await loadDoctorProfile();
+                await loadAppointments();
             }
         );
+
+        function setMinimumRescheduleDate() {
+            const dateInput =
+                document.getElementById(
+                    "rescheduleDate"
+                );
+
+            if (!dateInput) {
+                return;
+            }
+
+            const today =
+                new Date();
+
+            const year =
+                today.getFullYear();
+
+            const month =
+                String(
+                    today.getMonth() + 1
+                ).padStart(2, "0");
+
+            const day =
+                String(
+                    today.getDate()
+                ).padStart(2, "0");
+
+            dateInput.min =
+                `${year}-${month}-${day}`;
+        }
 
         /* =========================
            AUTH
@@ -2019,17 +2053,42 @@
         }
 
         function requireDoctorLogin() {
-            if (!getDoctorToken()) {
+            const token =
+                getDoctorToken();
+
+            const role =
+                String(
+                    localStorage.getItem("role") ||
+                    ""
+                ).toUpperCase();
+
+            if (!token) {
                 window.location.href =
                     "../patient/login.html";
+
+                return false;
             }
+
+            if (role && role !== "DOCTOR") {
+                window.alert(
+                    "Only doctors can access this page."
+                );
+
+                window.location.href =
+                    "../patient/login.html";
+
+                return false;
+            }
+
+            return true;
         }
 
         async function doctorApiRequest(
             endpoint,
             options = {}
         ) {
-            const token = getDoctorToken();
+            const token =
+                getDoctorToken();
 
             if (!token) {
                 window.location.href =
@@ -2041,6 +2100,7 @@
             }
 
             const headers = {
+                "Accept": "application/json",
                 ...(options.headers || {})
             };
 
@@ -2063,16 +2123,39 @@
                 }
             );
 
-            let result;
+            const responseText =
+                await response.text();
 
-            try {
-                result = await response.json();
-            } catch (error) {
-                result = {
-                    success: false,
-                    message:
-                        "Invalid server response."
-                };
+            let result = {};
+
+            if (responseText) {
+                try {
+                    result =
+                        JSON.parse(responseText);
+
+                } catch (error) {
+                    result = {
+                        success: false,
+                        message:
+                            responseText ||
+                            "Invalid server response."
+                    };
+                }
+            }
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+                clearDoctorSession();
+
+                window.location.href =
+                    "../patient/login.html";
+
+                throw new Error(
+                    result.message ||
+                    "Doctor session expired."
+                );
             }
 
             if (
@@ -2088,12 +2171,29 @@
             return result;
         }
 
+        function clearDoctorSession() {
+            [
+                "doctorToken",
+                "doctorRefreshToken",
+                "token",
+                "refreshToken",
+                "role",
+                "doctorId",
+                "doctorName",
+                "doctor",
+                "userId",
+                "email",
+                "profileCompleted",
+                "isLoggedIn"
+            ].forEach(
+                function (key) {
+                    localStorage.removeItem(key);
+                }
+            );
+        }
+
         function doctorLogout() {
-            localStorage.removeItem("doctorToken");
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            localStorage.removeItem("doctorId");
-            localStorage.removeItem("userId");
+            clearDoctorSession();
 
             window.location.href =
                 "../patient/login.html";
@@ -2104,31 +2204,120 @@
         ========================== */
 
         async function loadDoctorProfile() {
+            const savedName =
+                localStorage.getItem(
+                    "doctorName"
+                ) ||
+                localStorage.getItem(
+                    "userName"
+                ) ||
+                localStorage.getItem(
+                    "name"
+                ) ||
+                "Doctor";
+
+            updateDoctorHeader(
+                savedName
+            );
+
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/users/getProfile"
+                        "/api/doctors/my-profile"
                     );
 
-                const name =
-                    result.data?.name ||
-                    "Doctor";
+                const doctor =
+                    result.data || {};
 
-                document.getElementById(
-                    "doctorTopbarName"
-                ).textContent = name;
+                const doctorName =
+                    doctor.name ||
+                    doctor.doctorName ||
+                    savedName;
 
-                document.getElementById(
-                    "doctorInitial"
-                ).textContent =
-                    name.charAt(0).toUpperCase();
+                updateDoctorHeader(
+                    doctorName
+                );
+
+                if (
+                    doctor.id !== null &&
+                    doctor.id !== undefined
+                ) {
+                    localStorage.setItem(
+                        "doctorId",
+                        String(doctor.id)
+                    );
+                }
+
+                if (doctor.email) {
+                    localStorage.setItem(
+                        "email",
+                        doctor.email
+                    );
+                }
+
+                localStorage.setItem(
+                    "doctor",
+                    JSON.stringify(doctor)
+                );
 
             } catch (error) {
                 console.error(
                     "Doctor profile failed:",
                     error
                 );
+
+                updateDoctorHeader(
+                    savedName
+                );
+
+                showAlert(
+                    error.message ||
+                    "Doctor profile could not be loaded.",
+                    "error"
+                );
             }
+        }
+
+        function updateDoctorHeader(name) {
+            const cleanName =
+                String(
+                    name || "Doctor"
+                ).trim();
+
+            const nameWithoutTitle =
+                cleanName.replace(
+                    /^Dr\.?\s*/i,
+                    ""
+                );
+
+            const initial =
+                (
+                    nameWithoutTitle ||
+                    cleanName ||
+                    "D"
+                )
+                .charAt(0)
+                .toUpperCase();
+
+            document.getElementById(
+                "doctorTopbarName"
+            ).textContent =
+                cleanName;
+
+            document.getElementById(
+                "doctorTopbarRole"
+            ).textContent =
+                "Doctor";
+
+            document.getElementById(
+                "doctorInitial"
+            ).textContent =
+                initial;
+
+            localStorage.setItem(
+                "doctorName",
+                cleanName
+            );
         }
 
         /* =========================
@@ -2138,49 +2327,156 @@
         async function loadAppointments() {
             showCalendarLoading();
 
-            try {
-                const result =
-                    await doctorApiRequest(
+            const results =
+                await Promise.allSettled([
+                    doctorApiRequest(
                         "/api/appointments/doctor/my-appointments"
+                    ),
+
+                    doctorApiRequest(
+                        "/api/consultations/doctor/upcoming"
+                    ),
+
+                    doctorApiRequest(
+                        "/api/consultations/doctor/requests"
+                    )
+                ]);
+
+            const errors = [];
+
+            let offlineAppointments = [];
+            let upcomingConsultations = [];
+            let pendingConsultations = [];
+
+            if (
+                results[0].status ===
+                "fulfilled"
+            ) {
+                offlineAppointments =
+                    extractAppointmentArray(
+                        results[0].value
                     );
-
-                console.log(
-                    "Doctor appointments API response:",
-                    result
-                );
-
-                const rawAppointments =
-                    extractAppointmentArray(result);
-
-                appointments =
-                    rawAppointments
-                        .map(normalizeAppointment)
-                        .filter(function (item) {
-                            return item.id && item.date && item.time;
-                        });
-
-                console.log(
-                    "Appointments used by calendar:",
-                    appointments
-                );
-
-            } catch (error) {
-                console.error(
-                    "Calendar loading failed:",
-                    error
-                );
-
-                appointments = [];
-
-                showAlert(
-                    error.message ||
-                    "Appointments could not be loaded.",
-                    "error"
+            } else {
+                errors.push(
+                    results[0].reason?.message ||
+                    "Offline appointments could not be loaded."
                 );
             }
 
+            if (
+                results[1].status ===
+                "fulfilled"
+            ) {
+                upcomingConsultations =
+                    extractConsultationArray(
+                        results[1].value
+                    );
+            } else {
+                errors.push(
+                    results[1].reason?.message ||
+                    "Upcoming online consultations could not be loaded."
+                );
+            }
+
+            if (
+                results[2].status ===
+                "fulfilled"
+            ) {
+                pendingConsultations =
+                    extractConsultationArray(
+                        results[2].value
+                    );
+            } else {
+                errors.push(
+                    results[2].reason?.message ||
+                    "Pending online consultation requests could not be loaded."
+                );
+            }
+
+            const normalizedAppointments =
+                offlineAppointments
+                    .map(normalizeAppointment)
+                    .filter(
+                        item =>
+                            item.id &&
+                            item.date &&
+                            item.time
+                    );
+
+            const consultationMap =
+                new Map();
+
+            [
+                ...pendingConsultations,
+                ...upcomingConsultations
+            ].forEach(
+                function (item) {
+                    const normalized =
+                        normalizeConsultation(
+                            item
+                        );
+
+                    if (
+                        normalized.id &&
+                        normalized.date &&
+                        normalized.time
+                    ) {
+                        consultationMap.set(
+                            String(
+                                normalized.id
+                            ),
+                            normalized
+                        );
+                    }
+                }
+            );
+
+            appointments = [
+                ...normalizedAppointments,
+                ...consultationMap.values()
+            ];
+
+            appointments.sort(
+                function (first, second) {
+                    const firstDate =
+                        `${first.date}T${first.time}:00`;
+
+                    const secondDate =
+                        `${second.date}T${second.time}:00`;
+
+                    return (
+                        new Date(firstDate) -
+                        new Date(secondDate)
+                    );
+                }
+            );
+
             updateSummary();
             renderCalendar();
+
+            if (
+                errors.length &&
+                appointments.length
+            ) {
+                console.warn(
+                    "Some calendar APIs failed:",
+                    errors
+                );
+
+                showAlert(
+                    "Some calendar records could not be loaded.",
+                    "info"
+                );
+
+            } else if (
+                errors.length &&
+                !appointments.length
+            ) {
+                showAlert(
+                    errors.join(" "),
+                    "error"
+                );
+            }
         }
 
         function extractAppointmentArray(result) {
@@ -2207,8 +2503,34 @@
             return [];
         }
 
+        function extractConsultationArray(result) {
+            if (Array.isArray(result)) {
+                return result;
+            }
+
+            if (Array.isArray(result?.data)) {
+                return result.data;
+            }
+
+            if (Array.isArray(result?.data?.content)) {
+                return result.data.content;
+            }
+
+            if (Array.isArray(result?.data?.consultations)) {
+                return result.data.consultations;
+            }
+
+            if (Array.isArray(result?.consultations)) {
+                return result.consultations;
+            }
+
+            return [];
+        }
+
         function normalizeAppointment(item) {
             return {
+                recordType: "APPOINTMENT",
+
                 id:
                     item.id ??
                     item.appointmentId ??
@@ -2286,7 +2608,109 @@
                     item.doctorName || "-",
 
                 doctorSpecialization:
-                    item.doctorSpecialization || "-"
+                    item.doctorSpecialization || "-",
+
+                fee:
+                    item.bookingFee ?? 50,
+
+                meetingLink: null,
+                meetingLinkExpiresAt: null
+            };
+        }
+
+        function normalizeConsultation(item) {
+            return {
+                recordType: "CONSULTATION",
+
+                id:
+                    item.id ??
+                    item.consultationId ??
+                    null,
+
+                patientId:
+                    item.patientId ??
+                    item.patient?.id ??
+                    null,
+
+                patientName:
+                    item.patientName ||
+                    item.patient?.name ||
+                    "Patient",
+
+                phoneNumber:
+                    item.phoneNumber ||
+                    item.patient?.phoneNumber ||
+                    "-",
+
+                type: "ONLINE",
+
+                date:
+                    normalizeAppointmentDate(
+                        item.consultationDate ||
+                        item.date
+                    ),
+
+                time:
+                    normalizeAppointmentTime(
+                        item.startTime ||
+                        item.consultationTime ||
+                        item.time
+                    ),
+
+                endTime:
+                    normalizeAppointmentTime(
+                        item.endTime
+                    ),
+
+                symptoms:
+                    item.symptoms ||
+                    "Online consultation",
+
+                pastMedicalHistory:
+                    item.pastMedicalHistory ||
+                    "-",
+
+                status:
+                    String(
+                        item.status ||
+                        "PENDING_DOCTOR_CONFIRMATION"
+                    ).toUpperCase(),
+
+                paymentStatus:
+                    String(
+                        item.paymentStatus ||
+                        "NOT_REQUIRED_YET"
+                    ).toUpperCase(),
+
+                age:
+                    item.age ?? "-",
+
+                gender:
+                    item.gender || "-",
+
+                email:
+                    item.email || "-",
+
+                doctorName:
+                    item.doctorName || "-",
+
+                doctorSpecialization:
+                    item.doctorSpecialization || "-",
+
+                fee:
+                    item.consultationFee ?? 200,
+
+                meetingLink:
+                    item.meetingLink || null,
+
+                meetingLinkExpiresAt:
+                    item.meetingLinkExpiresAt || null,
+
+                cancellationReason:
+                    item.cancellationReason || null,
+
+                rescheduleReason:
+                    item.rescheduleReason || null
             };
         }
 
@@ -3010,6 +3434,14 @@
                         : "status-confirmed";
 
             document.getElementById(
+                "appointmentModalTitle"
+            ).textContent =
+                appointment.recordType ===
+                    "CONSULTATION"
+                    ? "Online Consultation Details"
+                    : "Appointment Details";
+
+            document.getElementById(
                 "appointmentModalContent"
             ).innerHTML = `
                 <div class="appointment-modal-top">
@@ -3030,10 +3462,14 @@
                         </h3>
 
                         <p>
-                            ${escapeHtml(
-                                appointment.type
-                            )}
-                            Appointment
+                            ${
+                                appointment.recordType ===
+                                    "CONSULTATION"
+                                    ? "Online Consultation"
+                                    : `${escapeHtml(
+                                        appointment.type
+                                      )} Appointment`
+                            }
                         </p>
                     </div>
 
@@ -3090,6 +3526,24 @@
                         <strong>
                             ${escapeHtml(
                                 appointment.paymentStatus
+                            )}
+                        </strong>
+                    </div>
+
+                    <div class="detail-box">
+                        <span>${
+                            appointment.recordType ===
+                                "CONSULTATION"
+                                ? "Consultation Fee"
+                                : "Booking Fee"
+                        }</span>
+                        <strong>
+                            ₹${escapeHtml(
+                                Number(
+                                    appointment.fee || 0
+                                ).toLocaleString(
+                                    "en-IN"
+                                )
                             )}
                         </strong>
                     </div>
@@ -3178,13 +3632,27 @@
                     "appointmentModalActions"
                 );
 
-            const canConfirm =
+            const isConsultation =
+                appointment.recordType ===
+                "CONSULTATION";
+
+            const status =
+                String(
+                    appointment.status || ""
+                ).toUpperCase();
+
+            const isPendingConsultation =
+                isConsultation &&
+                status ===
+                    "PENDING_DOCTOR_CONFIRMATION";
+
+            const canReschedule =
                 ![
-                    "CONFIRMED",
                     "COMPLETED",
                     "CANCELLED",
-                    "REJECTED"
-                ].includes(appointment.status);
+                    "REJECTED",
+                    "NO_SHOW"
+                ].includes(status);
 
             actions.innerHTML = `
                 <button
@@ -3195,15 +3663,84 @@
                     Close
                 </button>
 
-                ${canConfirm ? `
-                    <button
-                        type="button"
-                        class="modal-action-btn accept-btn"
-                        onclick="confirmAppointment('${appointment.id}')"
-                    >
-                        Confirm Appointment
-                    </button>
-                ` : ""}
+                ${
+                    !isConsultation &&
+                    ![
+                        "CONFIRMED",
+                        "COMPLETED",
+                        "CANCELLED",
+                        "REJECTED"
+                    ].includes(status)
+                        ? `
+                            <button
+                                type="button"
+                                class="modal-action-btn accept-btn"
+                                onclick="confirmAppointment('${appointment.id}')"
+                            >
+                                Confirm Appointment
+                            </button>
+                          `
+                        : ""
+                }
+
+                ${
+                    isPendingConsultation
+                        ? `
+                            <button
+                                type="button"
+                                class="modal-action-btn accept-btn"
+                                onclick="acceptConsultation('${appointment.id}')"
+                            >
+                                Accept Consultation
+                            </button>
+
+                            <button
+                                type="button"
+                                class="modal-action-btn reject-btn"
+                                onclick="rejectConsultation('${appointment.id}')"
+                            >
+                                Reject
+                            </button>
+                          `
+                        : ""
+                }
+
+                ${
+                    canReschedule
+                        ? `
+                            <button
+                                type="button"
+                                class="modal-action-btn reschedule-btn"
+                                onclick="openRescheduleModal('${appointment.id}')"
+                            >
+                                Reschedule
+                            </button>
+                          `
+                        : ""
+                }
+
+                ${
+                    isConsultation &&
+                    appointment.meetingLink &&
+                    [
+                        "SUCCESS",
+                        "PAID"
+                    ].includes(
+                        appointment.paymentStatus
+                    )
+                        ? `
+                            <button
+                                type="button"
+                                class="modal-action-btn view-details-btn"
+                                onclick="openMeetingLink('${escapeJs(
+                                    appointment.meetingLink
+                                )}')"
+                            >
+                                Join Consultation
+                            </button>
+                          `
+                        : ""
+                }
 
                 <button
                     type="button"
@@ -3213,6 +3750,333 @@
                     View Full Details
                 </button>
             `;
+        }
+
+
+        function openRescheduleModal(id) {
+            const appointment =
+                appointments.find(
+                    item =>
+                        String(item.id) ===
+                        String(id)
+                );
+
+            if (!appointment) {
+                showAlert(
+                    "Appointment not found.",
+                    "error"
+                );
+
+                return;
+            }
+
+            selectedAppointment =
+                appointment;
+
+            document.getElementById(
+                "rescheduleAppointmentId"
+            ).value =
+                appointment.id;
+
+            document.getElementById(
+                "rescheduleDate"
+            ).value =
+                appointment.date || "";
+
+            document.getElementById(
+                "rescheduleTime"
+            ).value =
+                appointment.time || "";
+
+            document.getElementById(
+                "rescheduleReason"
+            ).value = "";
+
+            closeAppointmentModal();
+
+            document.getElementById(
+                "rescheduleModal"
+            ).classList.add("show");
+        }
+
+        function closeRescheduleModal() {
+            document.getElementById(
+                "rescheduleModal"
+            ).classList.remove("show");
+
+            document.getElementById(
+                "rescheduleAppointmentId"
+            ).value = "";
+
+            document.getElementById(
+                "rescheduleReason"
+            ).value = "";
+        }
+
+        function handleRescheduleModalClick(
+            event
+        ) {
+            if (
+                event.target.id ===
+                "rescheduleModal"
+            ) {
+                closeRescheduleModal();
+            }
+        }
+
+        async function submitReschedule() {
+            const appointmentId =
+                document.getElementById(
+                    "rescheduleAppointmentId"
+                ).value;
+
+            const appointmentDate =
+                document.getElementById(
+                    "rescheduleDate"
+                ).value;
+
+            const selectedTime =
+                document.getElementById(
+                    "rescheduleTime"
+                ).value;
+
+            const reason =
+                document.getElementById(
+                    "rescheduleReason"
+                ).value
+                .trim();
+
+            if (
+                !appointmentId ||
+                !appointmentDate ||
+                !selectedTime
+            ) {
+                showAlert(
+                    "Select a new date and time.",
+                    "error"
+                );
+
+                return;
+            }
+
+            const button =
+                document.getElementById(
+                    "confirmRescheduleButton"
+                );
+
+            const originalContent =
+                button.innerHTML;
+
+            button.disabled = true;
+
+            button.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Rescheduling...
+            `;
+
+            try {
+                const isConsultation =
+                    selectedAppointment?.recordType ===
+                    "CONSULTATION";
+
+                const endpoint =
+                    isConsultation
+                        ? `/api/consultations/${encodeURIComponent(
+                            appointmentId
+                          )}/reschedule`
+                        : `/api/appointments/${encodeURIComponent(
+                            appointmentId
+                          )}/reschedule`;
+
+                const requestBody =
+                    isConsultation
+                        ? {
+                            newDate:
+                                appointmentDate,
+
+                            newTime:
+                                selectedTime.length === 5
+                                    ? selectedTime + ":00"
+                                    : selectedTime,
+
+                            reason:
+                                reason ||
+                                "Rescheduled by doctor"
+                          }
+                        : {
+                            appointmentDate:
+                                appointmentDate,
+
+                            startTime:
+                                selectedTime.length === 5
+                                    ? selectedTime + ":00"
+                                    : selectedTime,
+
+                            reason:
+                                reason ||
+                                "Rescheduled by doctor"
+                          };
+
+                const result =
+                    await doctorApiRequest(
+                        endpoint,
+                        {
+                            method: "PUT",
+                            body:
+                                JSON.stringify(
+                                    requestBody
+                                )
+                        }
+                    );
+
+                showAlert(
+                    result.message ||
+                    selectedAppointment?.recordType === "CONSULTATION"
+                        ? "Consultation rescheduled successfully."
+                        : "Appointment rescheduled successfully.",
+                    "success"
+                );
+
+                closeRescheduleModal();
+
+                await loadAppointments();
+
+            } catch (error) {
+                console.error(
+                    "Appointment reschedule failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Appointment could not be rescheduled.",
+                    "error"
+                );
+
+            } finally {
+                button.disabled = false;
+                button.innerHTML =
+                    originalContent;
+            }
+        }
+
+        async function acceptConsultation(id) {
+            const confirmed =
+                window.confirm(
+                    "Accept this online consultation request?"
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const result =
+                    await doctorApiRequest(
+                        `/api/consultations/${encodeURIComponent(
+                            id
+                        )}/accept`,
+                        {
+                            method: "PUT"
+                        }
+                    );
+
+                showAlert(
+                    result.message ||
+                    "Consultation accepted successfully.",
+                    "success"
+                );
+
+                closeAppointmentModal();
+                await loadAppointments();
+
+            } catch (error) {
+                console.error(
+                    "Consultation acceptance failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Consultation could not be accepted.",
+                    "error"
+                );
+            }
+        }
+
+        async function rejectConsultation(id) {
+            const reason =
+                window.prompt(
+                    "Enter the reason for rejecting this consultation:"
+                );
+
+            if (reason === null) {
+                return;
+            }
+
+            if (!reason.trim()) {
+                showAlert(
+                    "Please enter a rejection reason.",
+                    "error"
+                );
+
+                return;
+            }
+
+            try {
+                const result =
+                    await doctorApiRequest(
+                        `/api/consultations/${encodeURIComponent(
+                            id
+                        )}/reject`,
+                        {
+                            method: "PUT",
+                            body:
+                                JSON.stringify({
+                                    reason:
+                                        reason.trim()
+                                })
+                        }
+                    );
+
+                showAlert(
+                    result.message ||
+                    "Consultation rejected successfully.",
+                    "success"
+                );
+
+                closeAppointmentModal();
+                await loadAppointments();
+
+            } catch (error) {
+                console.error(
+                    "Consultation rejection failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Consultation could not be rejected.",
+                    "error"
+                );
+            }
+        }
+
+        function openMeetingLink(link) {
+            if (!link) {
+                showAlert(
+                    "Meeting link is not available.",
+                    "error"
+                );
+
+                return;
+            }
+
+            window.open(
+                link,
+                "_blank",
+                "noopener,noreferrer"
+            );
         }
 
         async function confirmAppointment(id) {
@@ -3275,8 +4139,29 @@
         }
 
         function openFullDetails(id) {
+            const item =
+                appointments.find(
+                    record =>
+                        String(record.id) ===
+                        String(id)
+                );
+
+            if (
+                item?.recordType ===
+                "CONSULTATION"
+            ) {
+                window.location.href =
+                    `doctor-online-consultations.html?consultationId=${encodeURIComponent(
+                        id
+                    )}`;
+
+                return;
+            }
+
             window.location.href =
-                `doctor-appointments.html?appointmentId=${encodeURIComponent(id)}`;
+                `doctor-appointments.html?appointmentId=${encodeURIComponent(
+                    id
+                )}`;
         }
 
         /* =========================
@@ -3607,6 +4492,16 @@
                     },
                     4000
                 );
+        }
+
+        function escapeJs(value) {
+            return String(
+                value ?? ""
+            )
+                .replaceAll("\\", "\\\\")
+                .replaceAll("'", "\\'")
+                .replaceAll("\n", "\\n")
+                .replaceAll("\r", "\\r");
         }
 
         function escapeHtml(value) {

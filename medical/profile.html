@@ -1307,7 +1307,7 @@
                         <h1>Medical Staff Profile</h1>
 
                         <p>
-                            View and update your personal and work information.
+                            Complete and update your professional profile.
                         </p>
 
                     </div>
@@ -1358,7 +1358,7 @@
                             Staff Profile
                         </span>
 
-                        <h2>Manage Your Profile</h2>
+                        <h2>Medical Staff Professional Profile</h2>
 
                         <p>
                             Keep your contact information, department and
@@ -1402,7 +1402,7 @@
 
                                 <label
                                     for="profileImageInput"
-                                    class="profile-upload-button"
+                                    class="profile-upload-button" style="display:none;"
                                     title="Change profile image"
                                 >
                                     <i class="fa-solid fa-camera"></i>
@@ -1413,7 +1413,7 @@
                                     id="profileImageInput"
                                     accept="image/*"
                                     hidden
-                                    onchange="previewProfileImage(event)"
+                                    
                                 >
 
                             </div>
@@ -1455,7 +1455,7 @@
                                     <i class="fa-solid fa-id-badge"></i>
 
                                     <div>
-                                        <span>Employee ID</span>
+                                        <span>Medical Staff ID</span>
 
                                         <strong id="profileEmployeeId">
                                             -
@@ -1497,9 +1497,9 @@
                                     <i class="fa-solid fa-calendar-check"></i>
 
                                     <div>
-                                        <span>Joining Date</span>
+                                        <span>Experience</span>
 
-                                        <strong id="profileJoiningDate">
+                                        <strong id="profileExperience">
                                             -
                                         </strong>
                                     </div>
@@ -1516,15 +1516,18 @@
 
                     <div>
 
+                        
                         <section class="form-card">
 
                             <div class="form-card-header">
 
                                 <div>
-                                    <h2>Profile Information</h2>
+                                    <h2 id="profileFormTitle">
+                                        Complete Professional Profile
+                                    </h2>
 
-                                    <p>
-                                        Update your personal and employment details.
+                                    <p id="profileFormSubtitle">
+                                        Enter the professional information required for your medical staff account.
                                     </p>
                                 </div>
 
@@ -1533,6 +1536,7 @@
                                     class="edit-profile-button"
                                     id="editProfileButton"
                                     onclick="enableProfileEditing()"
+                                    style="display:none;"
                                 >
                                     <i class="fa-solid fa-pen"></i>
                                     Edit Profile
@@ -1543,289 +1547,171 @@
                             <form
                                 class="profile-form"
                                 id="staffProfileForm"
-                                onsubmit="updateStaffProfile(event)"
+                                onsubmit="saveStaffProfile(event)"
                             >
 
                                 <h3 class="form-section-title">
-                                    Personal Information
+                                    Account Information
                                 </h3>
 
                                 <div class="form-grid">
 
                                     <div class="form-group">
-
-                                        <label for="staffName">
-                                            Full Name
-                                            <span class="required">*</span>
-                                        </label>
-
+                                        <label for="staffName">Full Name</label>
                                         <input
                                             type="text"
                                             id="staffName"
-                                            class="form-control profile-field"
+                                            class="form-control"
                                             disabled
-                                            required
                                         >
-
                                     </div>
 
                                     <div class="form-group">
-
-                                        <label for="staffEmail">
-                                            Email Address
-                                            <span class="required">*</span>
-                                        </label>
-
+                                        <label for="staffEmail">Email Address</label>
                                         <input
                                             type="email"
                                             id="staffEmail"
-                                            class="form-control profile-field"
+                                            class="form-control"
                                             disabled
-                                            required
                                         >
-
                                     </div>
 
                                     <div class="form-group">
-
-                                        <label for="staffPhone">
-                                            Phone Number
-                                        </label>
-
+                                        <label for="staffPhone">Phone Number</label>
                                         <input
                                             type="tel"
                                             id="staffPhone"
-                                            class="form-control profile-field"
-                                            maxlength="15"
+                                            class="form-control"
                                             disabled
                                         >
-
                                     </div>
 
                                     <div class="form-group">
-
-                                        <label for="staffGender">
-                                            Gender
-                                        </label>
-
-                                        <select
-                                            id="staffGender"
-                                            class="form-control profile-field"
-                                            disabled
-                                        >
-                                            <option value="">
-                                                Select Gender
-                                            </option>
-
-                                            <option value="MALE">
-                                                Male
-                                            </option>
-
-                                            <option value="FEMALE">
-                                                Female
-                                            </option>
-
-                                            <option value="OTHER">
-                                                Other
-                                            </option>
-                                        </select>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="dateOfBirth">
-                                            Date of Birth
-                                        </label>
-
-                                        <input
-                                            type="date"
-                                            id="dateOfBirth"
-                                            class="form-control profile-field"
-                                            disabled
-                                        >
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="address">
-                                            Address
-                                        </label>
-
+                                        <label for="staffGender">Gender</label>
                                         <input
                                             type="text"
-                                            id="address"
-                                            class="form-control profile-field"
+                                            id="staffGender"
+                                            class="form-control"
                                             disabled
                                         >
+                                    </div>
 
+                                    <div class="form-group">
+                                        <label for="staffAge">Age</label>
+                                        <input
+                                            type="number"
+                                            id="staffAge"
+                                            class="form-control"
+                                            disabled
+                                        >
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="medicalStaffId">Medical Staff ID</label>
+                                        <input
+                                            type="text"
+                                            id="medicalStaffId"
+                                            class="form-control"
+                                            disabled
+                                            placeholder="Created after profile completion"
+                                        >
                                     </div>
 
                                 </div>
 
                                 <h3 class="form-section-title">
-                                    Employment Information
+                                    Professional Information
                                 </h3>
 
                                 <div class="form-grid">
 
                                     <div class="form-group">
-
-                                        <label for="employeeId">
-                                            Employee ID
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            id="employeeId"
-                                            class="form-control profile-field"
-                                            disabled
-                                        >
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="staffRole">
-                                            Staff Role
-                                        </label>
-
-                                        <select
-                                            id="staffRole"
-                                            class="form-control profile-field"
-                                            disabled
-                                        >
-                                            <option value="MEDICAL_STAFF">
-                                                Medical Staff
-                                            </option>
-
-                                            <option value="PHARMACIST">
-                                                Pharmacist
-                                            </option>
-
-                                            <option value="INVENTORY_STAFF">
-                                                Inventory Staff
-                                            </option>
-
-                                            <option value="ORDER_STAFF">
-                                                Order Staff
-                                            </option>
-
-                                            <option value="RECEPTIONIST">
-                                                Receptionist
-                                            </option>
-                                        </select>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="department">
-                                            Department
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            id="department"
-                                            class="form-control profile-field"
-                                            placeholder="Example: Pharmacy"
-                                            disabled
-                                        >
-
-                                    </div>
-
-                                    <div class="form-group">
-
                                         <label for="designation">
                                             Designation
+                                            <span class="required">*</span>
                                         </label>
 
                                         <input
                                             type="text"
                                             id="designation"
-                                            class="form-control profile-field"
-                                            placeholder="Example: Senior Medical Staff"
-                                            disabled
+                                            class="form-control professional-field"
+                                            placeholder="Example: Pharmacist"
+                                            required
                                         >
-
                                     </div>
 
                                     <div class="form-group">
-
-                                        <label for="joiningDate">
-                                            Joining Date
+                                        <label for="department">
+                                            Department
+                                            <span class="required">*</span>
                                         </label>
 
                                         <input
-                                            type="date"
-                                            id="joiningDate"
-                                            class="form-control profile-field"
-                                            disabled
+                                            type="text"
+                                            id="department"
+                                            class="form-control professional-field"
+                                            placeholder="Example: Pharmacy"
+                                            required
                                         >
-
                                     </div>
 
                                     <div class="form-group">
-
-                                        <label for="shift">
-                                            Work Shift
+                                        <label for="experienceYears">
+                                            Experience in Years
+                                            <span class="required">*</span>
                                         </label>
 
-                                        <select
-                                            id="shift"
-                                            class="form-control profile-field"
-                                            disabled
+                                        <input
+                                            type="number"
+                                            id="experienceYears"
+                                            class="form-control professional-field"
+                                            min="0"
+                                            max="60"
+                                            placeholder="Example: 4"
+                                            required
                                         >
-                                            <option value="">
-                                                Select Shift
-                                            </option>
+                                    </div>
 
-                                            <option value="MORNING">
-                                                Morning
-                                            </option>
+                                    <div class="form-group">
+                                        <label for="profileImageUrl">
+                                            Profile Image URL
+                                        </label>
 
-                                            <option value="AFTERNOON">
-                                                Afternoon
-                                            </option>
-
-                                            <option value="EVENING">
-                                                Evening
-                                            </option>
-
-                                            <option value="FULL_DAY">
-                                                Full Day
-                                            </option>
-                                        </select>
-
+                                        <input
+                                            type="url"
+                                            id="profileImageUrl"
+                                            class="form-control professional-field"
+                                            placeholder="https://example.com/staff.jpg"
+                                            oninput="previewProfileImageUrl()"
+                                        >
                                     </div>
 
                                     <div class="form-group full-width">
-
-                                        <label for="staffNotes">
-                                            Additional Information
+                                        <label for="about">
+                                            About
+                                            <span class="required">*</span>
                                         </label>
 
                                         <textarea
-                                            id="staffNotes"
-                                            class="form-control profile-field"
-                                            placeholder="Additional staff details"
-                                            disabled
+                                            id="about"
+                                            class="form-control professional-field"
+                                            placeholder="Describe your responsibilities and professional experience"
+                                            required
                                         ></textarea>
-
                                     </div>
 
                                 </div>
 
                                 <div
-                                    class="form-actions"
+                                    class="form-actions show"
                                     id="profileFormActions"
                                 >
-
                                     <button
                                         type="button"
                                         class="cancel-button"
+                                        id="cancelEditButton"
                                         onclick="cancelProfileEditing()"
+                                        style="display:none;"
                                     >
                                         Cancel
                                     </button>
@@ -1835,141 +1721,19 @@
                                         class="save-button"
                                         id="saveProfileButton"
                                     >
-                                        <i class="fa-solid fa-floppy-disk"></i>
-                                        Save Changes
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <span id="saveProfileButtonText">
+                                            Complete Profile
+                                        </span>
                                     </button>
-
                                 </div>
 
                             </form>
 
                         </section>
 
-                        <!-- CHANGE PASSWORD -->
 
-                        <section class="password-card">
-
-                            <div class="password-card-header">
-
-                                <h2>Change Password</h2>
-
-                                <p>
-                                    Use a strong password to protect your account.
-                                </p>
-
-                            </div>
-
-                            <form
-                                class="password-form"
-                                id="passwordForm"
-                                onsubmit="changeStaffPassword(event)"
-                            >
-
-                                <div class="form-grid">
-
-                                    <div class="form-group full-width">
-
-                                        <label for="currentPassword">
-                                            Current Password
-                                        </label>
-
-                                        <div class="password-input-wrapper">
-
-                                            <input
-                                                type="password"
-                                                id="currentPassword"
-                                                class="form-control"
-                                                required
-                                            >
-
-                                            <button
-                                                type="button"
-                                                class="password-toggle"
-                                                onclick="togglePassword('currentPassword', this)"
-                                            >
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="newPassword">
-                                            New Password
-                                        </label>
-
-                                        <div class="password-input-wrapper">
-
-                                            <input
-                                                type="password"
-                                                id="newPassword"
-                                                class="form-control"
-                                                minlength="6"
-                                                required
-                                            >
-
-                                            <button
-                                                type="button"
-                                                class="password-toggle"
-                                                onclick="togglePassword('newPassword', this)"
-                                            >
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="form-group">
-
-                                        <label for="confirmPassword">
-                                            Confirm New Password
-                                        </label>
-
-                                        <div class="password-input-wrapper">
-
-                                            <input
-                                                type="password"
-                                                id="confirmPassword"
-                                                class="form-control"
-                                                minlength="6"
-                                                required
-                                            >
-
-                                            <button
-                                                type="button"
-                                                class="password-toggle"
-                                                onclick="togglePassword('confirmPassword', this)"
-                                            >
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="form-actions show">
-
-                                    <button
-                                        type="submit"
-                                        class="save-button"
-                                        id="changePasswordButton"
-                                    >
-                                        <i class="fa-solid fa-key"></i>
-                                        Change Password
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </section>
-
-                    </div>
+                        <!-- CHANGE PASSWORD REMOVED: use common account password flow --></div>
 
                 </div>
 
@@ -1983,13 +1747,25 @@
         const API_BASE_URL =
             "http://localhost:8085";
 
-        let originalProfileData = {};
-        let selectedProfileImage = null;
+        let originalProfessionalData = {};
+        let isProfileCompleted = false;
+        let currentMedicalStaffId = null;
 
         document.addEventListener(
             "DOMContentLoaded",
             function () {
-                requireStaffLogin();
+                if (!requireStaffLogin()) {
+                    return;
+                }
+
+                currentMedicalStaffId =
+                    getMedicalStaffId();
+
+                isProfileCompleted =
+                    Boolean(
+                        currentMedicalStaffId
+                    );
+
                 loadStaffProfile();
             }
         );
@@ -1998,329 +1774,283 @@
            AUTHENTICATION
         ========================== */
 
-        // function getStaffToken() {
-        //     return (
-        //         localStorage.getItem("staffToken") ||
-        //         localStorage.getItem("token")
-        //     );
-        // }
+        function getStaffToken() {
+            return (
+                localStorage.getItem(
+                    "staffToken"
+                ) ||
+                localStorage.getItem(
+                    "token"
+                ) ||
+                ""
+            );
+        }
 
-        // function requireStaffLogin() {
-        //     const token =
-        //         getStaffToken();
+        function getMedicalStaffId() {
+            const urlId =
+                new URLSearchParams(
+                    window.location.search
+                ).get("id");
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "staff-login.html";
-        //     }
-        // }
+            return (
+                urlId ||
+                localStorage.getItem(
+                    "medicalStaffId"
+                ) ||
+                localStorage.getItem(
+                    "staffId"
+                ) ||
+                ""
+            );
+        }
 
-        // async function staffApiRequest(
-        //     endpoint,
-        //     options = {}
-        // ) {
-        //     const token =
-        //         getStaffToken();
+        function requireStaffLogin() {
+            if (!getStaffToken()) {
+                window.location.href =
+                    "staff-login.html";
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "staff-login.html";
+                return false;
+            }
 
-        //         throw new Error(
-        //             "Medical staff login required."
-        //         );
-        //     }
+            return true;
+        }
 
-        //     const headers = {
-        //         ...(options.headers || {})
-        //     };
+        function authHeaders(
+            includeContentType = false
+        ) {
+            const headers = {
+                "Accept": "application/json",
+                "Authorization":
+                    "Bearer " +
+                    getStaffToken()
+            };
 
-        //     if (
-        //         options.body &&
-        //         !(options.body instanceof FormData)
-        //     ) {
-        //         headers["Content-Type"] =
-        //             "application/json";
-        //     }
+            if (includeContentType) {
+                headers["Content-Type"] =
+                    "application/json";
+            }
 
-        //     headers.Authorization =
-        //         "Bearer " + token;
+            return headers;
+        }
 
-        //     const response =
-        //         await fetch(
-        //             API_BASE_URL + endpoint,
-        //             {
-        //                 ...options,
-        //                 headers
-        //             }
-        //         );
-
-        //     let result;
-
-        //     try {
-        //         result =
-        //             await response.json();
-
-        //     } catch (error) {
-        //         result = {
-        //             success: false,
-        //             message:
-        //                 "Invalid response from server."
-        //         };
-        //     }
-
-        //     if (
-        //         response.status === 401 ||
-        //         response.status === 403
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Medical staff session expired."
-        //         );
-        //     }
-
-        //     if (
-        //         !response.ok ||
-        //         result.success === false
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Request failed."
-        //         );
-        //     }
-
-        //     return result;
-        // }
+        function clearAuthentication() {
+            [
+                "staffToken",
+                "staffRefreshToken",
+                "token",
+                "refreshToken",
+                "role",
+                "medicalStaffId",
+                "staffId",
+                "userId",
+                "staffName"
+            ].forEach(
+                function (key) {
+                    localStorage.removeItem(
+                        key
+                    );
+                }
+            );
+        }
 
         function staffLogout() {
-            localStorage.removeItem("staffToken");
-            localStorage.removeItem(
-                "staffRefreshToken"
-            );
-
-            localStorage.removeItem("token");
-            localStorage.removeItem(
-                "refreshToken"
-            );
-
-            localStorage.removeItem("role");
-            localStorage.removeItem("staffId");
-            localStorage.removeItem("userId");
-            localStorage.removeItem("staffName");
+            clearAuthentication();
 
             window.location.href =
                 "staff-login.html";
         }
 
         /* =========================
-           LOAD PROFILE
+           LOAD LOGGED-IN USER
         ========================== */
 
         async function loadStaffProfile() {
+            setPageMode();
+
             try {
+                const response = await fetch(
+                    API_BASE_URL +
+                    "/api/users/getProfile",
+                    {
+                        method: "GET",
+                        headers:
+                            authHeaders()
+                    }
+                );
+
                 const result =
-                    await staffApiRequest(
-                        "/api/users/getProfile"
+                    await safelyReadResponse(
+                        response
                     );
 
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    window.location.href =
+                        "staff-login.html";
+
+                    return;
+                }
+
+                if (
+                    !response.ok ||
+                    result?.success === false
+                ) {
+                    throw new Error(
+                        result?.message ||
+                        "Unable to load logged-in staff details."
+                    );
+                }
+
+                const data =
+                    result?.data || {};
+
+                /*
+                 * Some backends return the medical-staff
+                 * professional fields inside getProfile.
+                 * This page supports that response when present.
+                 */
                 const profile =
-                    normalizeStaffProfile(
-                        result.data || {}
-                    );
+                    normalizeProfile(data);
 
-                originalProfileData = {
-                    ...profile
+                if (
+                    profile.id &&
+                    profile.designation
+                ) {
+                    currentMedicalStaffId =
+                        profile.id;
+
+                    isProfileCompleted =
+                        true;
+
+                    localStorage.setItem(
+                        "medicalStaffId",
+                        profile.id
+                    );
+                }
+
+                displayBasicProfile(
+                    profile
+                );
+
+                fillProfessionalForm(
+                    profile
+                );
+
+                originalProfessionalData = {
+                    designation:
+                        profile.designation,
+
+                    department:
+                        profile.department,
+
+                    experienceYears:
+                        profile.experienceYears,
+
+                    about:
+                        profile.about,
+
+                    profileImage:
+                        profile.profileImage
                 };
 
-                displayStaffProfile(profile);
-                fillProfileForm(profile);
+                setPageMode();
 
             } catch (error) {
                 console.error(
-                    "Staff profile loading failed:",
+                    "Load medical staff profile error:",
                     error
                 );
 
-                const demoProfile = {
-                    name:
-                        localStorage.getItem(
-                            "staffName"
-                        ) ||
-                        "Medical Staff",
-
-                    email:
-                        "staff@neolifeayush.com",
-
-                    phoneNumber:
-                        "9481489866",
-
-                    gender:
-                        "FEMALE",
-
-                    dateOfBirth:
-                        "1995-05-10",
-
-                    address:
-                        "Udupi, Karnataka",
-
-                    employeeId:
-                        "NL-STF-001",
-
-                    role:
-                        "MEDICAL_STAFF",
-
-                    department:
-                        "Pharmacy and Inventory",
-
-                    designation:
-                        "Medical Staff",
-
-                    joiningDate:
-                        "2025-01-10",
-
-                    shift:
-                        "FULL_DAY",
-
-                    notes:
-                        "Handles products, prescriptions, inventory and patient orders.",
-
-                    profileImageUrl:
-                        ""
-                };
-
-                originalProfileData = {
-                    ...demoProfile
-                };
-
-                displayStaffProfile(
-                    demoProfile
-                );
-
-                fillProfileForm(
-                    demoProfile
-                );
-
                 showAlert(
-                    "Profile API is unavailable. Demo profile is displayed.",
-                    "info"
+                    error.message ||
+                    "Unable to load profile information.",
+                    "error"
                 );
             }
         }
 
-        function normalizeStaffProfile(data) {
+        function normalizeProfile(data) {
             return {
+                id:
+                    data.medicalStaffId ||
+                    data.staffId ||
+                    (
+                        data.designation
+                            ? data.id
+                            : currentMedicalStaffId
+                    ) ||
+                    "",
+
+                userId:
+                    data.userId ||
+                    data.id ||
+                    "",
+
                 name:
                     data.name ||
-                    data.staffName ||
+                    data.userName ||
+                    localStorage.getItem(
+                        "staffName"
+                    ) ||
                     "Medical Staff",
 
                 email:
-                    data.email || "",
+                    data.email ||
+                    "",
 
                 phoneNumber:
                     data.phoneNumber ||
                     data.phone ||
                     "",
 
+                age:
+                    data.age ?? "",
+
                 gender:
-                    data.gender || "",
-
-                dateOfBirth:
-                    data.dateOfBirth ||
-                    data.dob ||
+                    data.gender ||
                     "",
 
-                address:
-                    data.address || "",
-
-                employeeId:
-                    data.employeeId ||
-                    data.staffCode ||
-                    data.employeeCode ||
+                designation:
+                    data.designation ||
                     "",
-
-                role:
-                    data.role ||
-                    "MEDICAL_STAFF",
 
                 department:
                     data.department ||
                     "",
 
-                designation:
-                    data.designation ||
-                    data.jobTitle ||
+                experienceYears:
+                    data.experienceYears ??
                     "",
 
-                joiningDate:
-                    data.joiningDate ||
-                    data.dateOfJoining ||
+                about:
+                    data.about ||
                     "",
 
-                shift:
-                    data.shift ||
-                    data.workShift ||
-                    "",
-
-                notes:
-                    data.notes ||
-                    data.description ||
-                    "",
-
-                profileImageUrl:
+                profileImage:
+                    data.profileImage ||
                     data.profileImageUrl ||
                     data.imageUrl ||
-                    data.photoUrl ||
-                    ""
+                    "",
+
+                active:
+                    data.active !== false
             };
         }
 
-        function displayStaffProfile(profile) {
+        function displayBasicProfile(profile) {
             const name =
                 profile.name ||
                 "Medical Staff";
 
-            const role =
-                formatStatus(
-                    profile.role ||
-                    "MEDICAL_STAFF"
-                );
+            const initial =
+                name
+                    .charAt(0)
+                    .toUpperCase();
 
             setText(
                 "profileStaffName",
                 name
-            );
-
-            setText(
-                "profileStaffRole",
-                role
-            );
-
-            setText(
-                "profileDepartment",
-                profile.department || "-"
-            );
-
-            setText(
-                "profileEmployeeId",
-                profile.employeeId || "-"
-            );
-
-            setText(
-                "profileEmail",
-                profile.email || "-"
-            );
-
-            setText(
-                "profilePhone",
-                profile.phoneNumber || "-"
-            );
-
-            setText(
-                "profileJoiningDate",
-                formatDate(
-                    profile.joiningDate
-                )
             );
 
             setText(
@@ -2329,12 +2059,16 @@
             );
 
             setText(
-                "topbarStaffRole",
-                role
+                "profileStaffRole",
+                profile.designation ||
+                "Medical Staff"
             );
 
-            const initial =
-                name.charAt(0).toUpperCase();
+            setText(
+                "topbarStaffRole",
+                profile.designation ||
+                "Medical Staff"
+            );
 
             setText(
                 "topbarInitial",
@@ -2346,15 +2080,41 @@
                 initial
             );
 
-            showProfileImage(
-                profile.profileImageUrl
+            setText(
+                "profileDepartment",
+                profile.department ||
+                "-"
             );
-        }
 
-        function fillProfileForm(profile) {
+            setText(
+                "profileEmployeeId",
+                profile.id ||
+                "-"
+            );
+
+            setText(
+                "profileEmail",
+                profile.email ||
+                "-"
+            );
+
+            setText(
+                "profilePhone",
+                profile.phoneNumber ||
+                "-"
+            );
+
+            setText(
+                "profileExperience",
+                profile.experienceYears !==
+                    ""
+                    ? `${profile.experienceYears} Years`
+                    : "-"
+            );
+
             setInputValue(
                 "staffName",
-                profile.name
+                name
             );
 
             setInputValue(
@@ -2369,27 +2129,30 @@
 
             setInputValue(
                 "staffGender",
-                profile.gender
+                formatStatus(
+                    profile.gender
+                )
             );
 
             setInputValue(
-                "dateOfBirth",
-                profile.dateOfBirth
+                "staffAge",
+                profile.age
             );
 
             setInputValue(
-                "address",
-                profile.address
+                "medicalStaffId",
+                profile.id
             );
 
-            setInputValue(
-                "employeeId",
-                profile.employeeId
+            showProfileImage(
+                profile.profileImage
             );
+        }
 
+        function fillProfessionalForm(profile) {
             setInputValue(
-                "staffRole",
-                profile.role
+                "designation",
+                profile.designation
             );
 
             setInputValue(
@@ -2398,192 +2161,38 @@
             );
 
             setInputValue(
-                "designation",
-                profile.designation
+                "experienceYears",
+                profile.experienceYears
             );
 
             setInputValue(
-                "joiningDate",
-                profile.joiningDate
+                "about",
+                profile.about
             );
 
             setInputValue(
-                "shift",
-                profile.shift
+                "profileImageUrl",
+                profile.profileImage
             );
 
-            setInputValue(
-                "staffNotes",
-                profile.notes
-            );
+            previewProfileImageUrl();
         }
 
         /* =========================
-           EDIT PROFILE
+           COMPLETE / UPDATE PROFILE
         ========================== */
 
-        function enableProfileEditing() {
-            document
-                .querySelectorAll(
-                    ".profile-field"
-                )
-                .forEach(field => {
-                    field.disabled = false;
-                });
-
-            /*
-             * Usually role and employee ID should not
-             * be changed by staff.
-             */
-            document.getElementById(
-                "employeeId"
-            ).disabled = true;
-
-            document.getElementById(
-                "staffRole"
-            ).disabled = true;
-
-            document
-                .getElementById(
-                    "profileFormActions"
-                )
-                .classList.add("show");
-
-            document
-                .getElementById(
-                    "editProfileButton"
-                )
-                .style.display = "none";
-        }
-
-        function cancelProfileEditing() {
-            fillProfileForm(
-                originalProfileData
-            );
-
-            disableProfileEditing();
-        }
-
-        function disableProfileEditing() {
-            document
-                .querySelectorAll(
-                    ".profile-field"
-                )
-                .forEach(field => {
-                    field.disabled = true;
-                });
-
-            document
-                .getElementById(
-                    "profileFormActions"
-                )
-                .classList.remove("show");
-
-            document
-                .getElementById(
-                    "editProfileButton"
-                )
-                .style.display =
-                    "inline-flex";
-        }
-
-        async function updateStaffProfile(event) {
+        async function saveStaffProfile(event) {
             event.preventDefault();
 
-            const requestBody = {
-                name:
-                    document
-                        .getElementById(
-                            "staffName"
-                        )
-                        .value.trim(),
+            const payload =
+                getProfessionalPayload();
 
-                email:
-                    document
-                        .getElementById(
-                            "staffEmail"
-                        )
-                        .value.trim(),
-
-                phoneNumber:
-                    document
-                        .getElementById(
-                            "staffPhone"
-                        )
-                        .value.trim(),
-
-                gender:
-                    document
-                        .getElementById(
-                            "staffGender"
-                        )
-                        .value,
-
-                dateOfBirth:
-                    document
-                        .getElementById(
-                            "dateOfBirth"
-                        )
-                        .value,
-
-                address:
-                    document
-                        .getElementById(
-                            "address"
-                        )
-                        .value.trim(),
-
-                department:
-                    document
-                        .getElementById(
-                            "department"
-                        )
-                        .value.trim(),
-
-                designation:
-                    document
-                        .getElementById(
-                            "designation"
-                        )
-                        .value.trim(),
-
-                joiningDate:
-                    document
-                        .getElementById(
-                            "joiningDate"
-                        )
-                        .value,
-
-                shift:
-                    document
-                        .getElementById(
-                            "shift"
-                        )
-                        .value,
-
-                notes:
-                    document
-                        .getElementById(
-                            "staffNotes"
-                        )
-                        .value.trim()
-            };
-
-            if (!requestBody.name) {
-                showAlert(
-                    "Staff name is required.",
-                    "error"
-                );
-
-                return;
-            }
-
-            if (!requestBody.email) {
-                showAlert(
-                    "Email address is required.",
-                    "error"
-                );
-
+            if (
+                !validateProfessionalPayload(
+                    payload
+                )
+            ) {
                 return;
             }
 
@@ -2603,76 +2212,171 @@
             `;
 
             try {
-                const result =
-                    await staffApiRequest(
-                        "/api/users/updateProfile",
-                        {
-                            method: "PUT",
-
-                            body:
-                                JSON.stringify(
-                                    requestBody
-                                )
-                        }
+                const updating =
+                    Boolean(
+                        currentMedicalStaffId
                     );
 
-                const updatedProfile =
-                    normalizeStaffProfile({
-                        ...originalProfileData,
-                        ...(result.data ||
-                            requestBody)
-                    });
+                const endpoint =
+                    updating
+                        ? `/api/medical-staff/update/${encodeURIComponent(
+                            currentMedicalStaffId
+                          )}`
+                        : "/api/medical-staff/complete-profile";
 
-                originalProfileData = {
-                    ...updatedProfile
+                const method =
+                    updating
+                        ? "PUT"
+                        : "POST";
+
+                const response = await fetch(
+                    API_BASE_URL +
+                    endpoint,
+                    {
+                        method,
+
+                        headers:
+                            authHeaders(true),
+
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
+                    }
+                );
+
+                const result =
+                    await safelyReadResponse(
+                        response
+                    );
+
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    throw new Error(
+                        "Your login session has expired. Please login again."
+                    );
+                }
+
+                if (response.status === 403) {
+                    throw new Error(
+                        result?.message ||
+                        "Only the logged-in medical staff member can update this profile."
+                    );
+                }
+
+                if (
+                    !response.ok ||
+                    result?.success === false
+                ) {
+                    throw new Error(
+                        result?.message ||
+                        (
+                            updating
+                                ? "Unable to update medical staff profile."
+                                : "Unable to complete medical staff profile."
+                        )
+                    );
+                }
+
+                const saved =
+                    normalizeProfile(
+                        result?.data ||
+                        payload
+                    );
+
+                if (saved.id) {
+                    currentMedicalStaffId =
+                        saved.id;
+
+                    localStorage.setItem(
+                        "medicalStaffId",
+                        saved.id
+                    );
+
+                    localStorage.setItem(
+                        "staffId",
+                        saved.id
+                    );
+                }
+
+                isProfileCompleted = true;
+
+                originalProfessionalData = {
+                    designation:
+                        saved.designation,
+
+                    department:
+                        saved.department,
+
+                    experienceYears:
+                        saved.experienceYears,
+
+                    about:
+                        saved.about,
+
+                    profileImage:
+                        saved.profileImage
                 };
 
-                displayStaffProfile(
-                    updatedProfile
+                displayBasicProfile(
+                    saved
                 );
 
-                fillProfileForm(
-                    updatedProfile
+                fillProfessionalForm(
+                    saved
                 );
 
-                localStorage.setItem(
-                    "staffName",
-                    updatedProfile.name
-                );
-
+                setPageMode();
                 disableProfileEditing();
 
                 showAlert(
-                    result.message ||
-                    "Staff profile updated successfully.",
+                    result?.message ||
+                    (
+                        updating
+                            ? "Medical staff profile updated successfully."
+                            : "Medical staff profile completed successfully."
+                    ),
                     "success"
                 );
 
+                if (!updating) {
+                    setTimeout(
+                        function () {
+                            window.location.href =
+                                "staff-dashboard.html";
+                        },
+                        1400
+                    );
+                }
+
             } catch (error) {
                 console.error(
-                    "Staff profile update failed:",
+                    "Save medical staff profile error:",
                     error
                 );
 
-                originalProfileData = {
-                    ...originalProfileData,
-                    ...requestBody
-                };
-
-                displayStaffProfile(
-                    originalProfileData
-                );
-
-                fillProfileForm(
-                    originalProfileData
-                );
-
-                disableProfileEditing();
-
                 showAlert(
-                    "Profile updated in the frontend. Connect the profile update API for permanent storage.",
-                    "info"
+                    error.message ||
+                    "Unable to save medical staff profile.",
+                    "error"
                 );
+
+                if (
+                    String(
+                        error.message || ""
+                    )
+                    .toLowerCase()
+                    .includes("expired")
+                ) {
+                    setTimeout(
+                        function () {
+                            window.location.href =
+                                "staff-login.html";
+                        },
+                        1300
+                    );
+                }
 
             } finally {
                 button.disabled = false;
@@ -2681,57 +2385,289 @@
             }
         }
 
-        /* =========================
-           PROFILE IMAGE
-        ========================== */
+        function getProfessionalPayload() {
+            return {
+                designation:
+                    getValue(
+                        "designation"
+                    ),
 
-        function previewProfileImage(event) {
-            const file =
-                event.target.files?.[0];
+                department:
+                    getValue(
+                        "department"
+                    ),
 
-            if (!file) {
-                return;
-            }
+                experienceYears:
+                    Number(
+                        getValue(
+                            "experienceYears"
+                        )
+                    ),
 
-            if (!file.type.startsWith("image/")) {
+                about:
+                    getValue(
+                        "about"
+                    ),
+
+                profileImage:
+                    getValue(
+                        "profileImageUrl"
+                    )
+            };
+        }
+
+        function validateProfessionalPayload(
+            payload
+        ) {
+            if (
+                !payload.designation ||
+                payload.designation.length <
+                    2
+            ) {
                 showAlert(
-                    "Please select a valid image file.",
+                    "Enter a valid designation.",
                     "error"
                 );
 
-                event.target.value = "";
-                return;
+                document
+                    .getElementById(
+                        "designation"
+                    )
+                    .focus();
+
+                return false;
             }
 
             if (
-                file.size >
-                5 * 1024 * 1024
+                !payload.department ||
+                payload.department.length <
+                    2
             ) {
                 showAlert(
-                    "Profile image must be below 5 MB.",
+                    "Enter a valid department.",
                     "error"
                 );
 
-                event.target.value = "";
+                document
+                    .getElementById(
+                        "department"
+                    )
+                    .focus();
+
+                return false;
+            }
+
+            if (
+                Number.isNaN(
+                    payload.experienceYears
+                ) ||
+                payload.experienceYears <
+                    0 ||
+                payload.experienceYears >
+                    60
+            ) {
+                showAlert(
+                    "Experience must be between 0 and 60 years.",
+                    "error"
+                );
+
+                document
+                    .getElementById(
+                        "experienceYears"
+                    )
+                    .focus();
+
+                return false;
+            }
+
+            if (
+                !payload.about ||
+                payload.about.length < 10
+            ) {
+                showAlert(
+                    "About must contain at least 10 characters.",
+                    "error"
+                );
+
+                document
+                    .getElementById(
+                        "about"
+                    )
+                    .focus();
+
+                return false;
+            }
+
+            if (
+                payload.profileImage &&
+                !isValidUrl(
+                    payload.profileImage
+                )
+            ) {
+                showAlert(
+                    "Enter a valid profile image URL.",
+                    "error"
+                );
+
+                document
+                    .getElementById(
+                        "profileImageUrl"
+                    )
+                    .focus();
+
+                return false;
+            }
+
+            return true;
+        }
+
+        /* =========================
+           EDITING MODE
+        ========================== */
+
+        function setPageMode() {
+            const completed =
+                Boolean(
+                    currentMedicalStaffId
+                );
+
+            setText(
+                "profileFormTitle",
+                completed
+                    ? "Professional Profile"
+                    : "Complete Professional Profile"
+            );
+
+            setText(
+                "profileFormSubtitle",
+                completed
+                    ? "Review your details and use Edit Profile to make changes."
+                    : "Enter the professional information required for your medical staff account."
+            );
+
+            setText(
+                "saveProfileButtonText",
+                completed
+                    ? "Save Changes"
+                    : "Complete Profile"
+            );
+
+            document.getElementById(
+                "editProfileButton"
+            ).style.display =
+                completed
+                    ? "inline-flex"
+                    : "none";
+
+            document.getElementById(
+                "cancelEditButton"
+            ).style.display =
+                completed
+                    ? "inline-flex"
+                    : "none";
+
+            if (completed) {
+                disableProfileEditing();
+
+            } else {
+                enableProfessionalFields();
+            }
+        }
+
+        function enableProfileEditing() {
+            enableProfessionalFields();
+
+            document
+                .getElementById(
+                    "profileFormActions"
+                )
+                .classList
+                .add("show");
+
+            document.getElementById(
+                "editProfileButton"
+            ).style.display =
+                "none";
+        }
+
+        function enableProfessionalFields() {
+            document
+                .querySelectorAll(
+                    ".professional-field"
+                )
+                .forEach(
+                    function (field) {
+                        field.disabled =
+                            false;
+                    }
+                );
+        }
+
+        function disableProfileEditing() {
+            if (
+                !currentMedicalStaffId
+            ) {
                 return;
             }
 
-            selectedProfileImage = file;
+            document
+                .querySelectorAll(
+                    ".professional-field"
+                )
+                .forEach(
+                    function (field) {
+                        field.disabled =
+                            true;
+                    }
+                );
 
-            const previewUrl =
-                URL.createObjectURL(file);
+            document
+                .getElementById(
+                    "profileFormActions"
+                )
+                .classList
+                .remove("show");
 
+            document.getElementById(
+                "editProfileButton"
+            ).style.display =
+                "inline-flex";
+        }
+
+        function cancelProfileEditing() {
+            fillProfessionalForm({
+                designation:
+                    originalProfessionalData.designation,
+
+                department:
+                    originalProfessionalData.department,
+
+                experienceYears:
+                    originalProfessionalData.experienceYears,
+
+                about:
+                    originalProfessionalData.about,
+
+                profileImage:
+                    originalProfessionalData.profileImage
+            });
+
+            disableProfileEditing();
+        }
+
+        /* =========================
+           IMAGE
+        ========================== */
+
+        function previewProfileImageUrl() {
             showProfileImage(
-                previewUrl
-            );
-
-            showAlert(
-                "Profile image selected. Connect the upload API to save it permanently.",
-                "info"
+                getValue(
+                    "profileImageUrl"
+                )
             );
         }
 
-        function showProfileImage(imageUrl) {
+        function showProfileImage(url) {
             const image =
                 document.getElementById(
                     "staffProfileImage"
@@ -2742,10 +2678,7 @@
                     "profileImagePlaceholder"
                 );
 
-            const finalUrl =
-                getImageUrl(imageUrl);
-
-            if (!finalUrl) {
+            if (!url) {
                 image.style.display =
                     "none";
 
@@ -2755,7 +2688,7 @@
                 return;
             }
 
-            image.src = finalUrl;
+            image.src = url;
             image.style.display =
                 "block";
 
@@ -2772,263 +2705,51 @@
                 };
         }
 
-        function getImageUrl(imageUrl) {
-            if (
-                !imageUrl ||
-                typeof imageUrl !== "string"
-            ) {
-                return "";
-            }
-
-            const cleanUrl =
-                imageUrl.trim();
-
-            if (
-                cleanUrl.startsWith("blob:") ||
-                cleanUrl.startsWith("data:") ||
-                cleanUrl.startsWith("http://") ||
-                cleanUrl.startsWith("https://") ||
-                cleanUrl.startsWith("../") ||
-                cleanUrl.startsWith("./")
-            ) {
-                return cleanUrl;
-            }
-
-            if (
-                /^[a-zA-Z]:[\\/]/.test(
-                    cleanUrl
-                )
-            ) {
-                return "";
-            }
-
-            if (cleanUrl.startsWith("/")) {
-                return API_BASE_URL +
-                    cleanUrl;
-            }
-
-            return API_BASE_URL +
-                "/" +
-                cleanUrl;
-        }
-
-        /* =========================
-           PASSWORD
-        ========================== */
-
-        async function changeStaffPassword(event) {
-            event.preventDefault();
-
-            const currentPassword =
-                document
-                    .getElementById(
-                        "currentPassword"
-                    )
-                    .value;
-
-            const newPassword =
-                document
-                    .getElementById(
-                        "newPassword"
-                    )
-                    .value;
-
-            const confirmPassword =
-                document
-                    .getElementById(
-                        "confirmPassword"
-                    )
-                    .value;
-
-            if (
-                newPassword !==
-                confirmPassword
-            ) {
-                showAlert(
-                    "New password and confirmation do not match.",
-                    "error"
-                );
-
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                showAlert(
-                    "New password must contain at least 6 characters.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const button =
-                document.getElementById(
-                    "changePasswordButton"
-                );
-
-            const originalContent =
-                button.innerHTML;
-
-            button.disabled = true;
-
-            button.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                Updating...
-            `;
-
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/users/change-password",
-                        {
-                            method: "PUT",
-
-                            body:
-                                JSON.stringify({
-                                    currentPassword:
-                                        currentPassword,
-
-                                    newPassword:
-                                        newPassword,
-
-                                    confirmPassword:
-                                        confirmPassword
-                                })
-                        }
-                    );
-
-                document
-                    .getElementById(
-                        "passwordForm"
-                    )
-                    .reset();
-
-                showAlert(
-                    result.message ||
-                    "Password changed successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                console.error(
-                    "Password update failed:",
-                    error
-                );
-
-                showAlert(
-                    error.message ||
-                    "Password could not be changed.",
-                    "error"
-                );
-
-            } finally {
-                button.disabled = false;
-                button.innerHTML =
-                    originalContent;
-            }
-        }
-
-        function togglePassword(
-            inputId,
-            button
-        ) {
-            const input =
-                document.getElementById(
-                    inputId
-                );
-
-            const icon =
-                button.querySelector("i");
-
-            if (input.type === "password") {
-                input.type = "text";
-
-                icon.className =
-                    "fa-solid fa-eye-slash";
-
-            } else {
-                input.type = "password";
-
-                icon.className =
-                    "fa-solid fa-eye";
-            }
-        }
-
-        /* =========================
-           SIDEBAR
-        ========================== */
-
-        function toggleSidebar() {
-            document
-                .getElementById(
-                    "staffSidebar"
-                )
-                .classList.toggle("open");
-
-            document
-                .getElementById(
-                    "sidebarOverlay"
-                )
-                .classList.toggle("show");
-        }
-
-        function closeSidebar() {
-            document
-                .getElementById(
-                    "staffSidebar"
-                )
-                .classList.remove("open");
-
-            document
-                .getElementById(
-                    "sidebarOverlay"
-                )
-                .classList.remove("show");
-        }
-
         /* =========================
            HELPERS
         ========================== */
 
-        function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
-                );
+        async function safelyReadResponse(
+            response
+        ) {
+            const text =
+                await response.text();
+
+            if (!text) {
+                return null;
+            }
+
+            try {
+                return JSON.parse(text);
+
+            } catch (error) {
+                return {
+                    success: false,
+                    message: text
+                };
+            }
         }
 
-        function formatDate(value) {
-            if (!value) {
-                return "-";
+        function getValue(id) {
+            const element =
+                document.getElementById(id);
+
+            return element
+                ? element.value.trim()
+                : "";
+        }
+
+        function setInputValue(
+            id,
+            value
+        ) {
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                element.value =
+                    value ?? "";
             }
-
-            const date =
-                new Date(
-                    String(value).includes("T")
-                        ? value
-                        : `${value}T00:00:00`
-                );
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return String(value);
-            }
-
-            return date.toLocaleDateString(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric"
-                }
-            );
         }
 
         function setText(id, value) {
@@ -3037,21 +2758,64 @@
 
             if (element) {
                 element.textContent =
-                    value ?? "";
+                    value ?? "-";
             }
         }
 
-        function setInputValue(
-            id,
-            value
-        ) {
-            const input =
-                document.getElementById(id);
+        function formatStatus(value) {
+            return String(
+                value || ""
+            )
+            .replaceAll("_", " ")
+            .toLowerCase()
+            .replace(
+                /\b\w/g,
+                function (letter) {
+                    return letter.toUpperCase();
+                }
+            );
+        }
 
-            if (input) {
-                input.value =
-                    value ?? "";
+        function isValidUrl(value) {
+            try {
+                new URL(value);
+                return true;
+
+            } catch (error) {
+                return false;
             }
+        }
+
+        function toggleSidebar() {
+            document
+                .getElementById(
+                    "staffSidebar"
+                )
+                .classList
+                .toggle("open");
+
+            document
+                .getElementById(
+                    "sidebarOverlay"
+                )
+                .classList
+                .toggle("show");
+        }
+
+        function closeSidebar() {
+            document
+                .getElementById(
+                    "staffSidebar"
+                )
+                .classList
+                .remove("open");
+
+            document
+                .getElementById(
+                    "sidebarOverlay"
+                )
+                .classList
+                .remove("show");
         }
 
         function showAlert(
@@ -3076,20 +2840,12 @@
             box.className =
                 `page-alert show ${type}`;
 
-            if (type === "success") {
-                icon.className =
-                    "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
-
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
+            icon.className =
+                type === "success"
+                    ? "fa-solid fa-circle-check"
+                    : type === "error"
+                        ? "fa-solid fa-circle-exclamation"
+                        : "fa-solid fa-circle-info";
 
             clearTimeout(
                 window.profileAlertTimer

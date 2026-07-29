@@ -1519,6 +1519,10 @@
                     <i class="fa-solid fa-chart-line"></i>
                     Dashboard
                 </a>
+                <a href="manage-availability.html">
+    <i class="fa-solid fa-clock"></i>
+    Manage Availability
+</a>
 
                 <a href="booking-requests.html">
                     <i class="fa-solid fa-calendar-plus"></i>
@@ -1627,11 +1631,11 @@
                         <div class="therapist-profile-text">
 
                             <strong id="therapistTopbarName">
-                                Therapist
+                                Loading...
                             </strong>
 
                             <span id="therapistSpecialization">
-                                Therapy Staff
+                                Therapist
                             </span>
 
                         </div>
@@ -2175,6 +2179,14 @@
         ========================== */
 
         async function loadTherapistProfile() {
+            const storedName =
+                localStorage.getItem("therapistName") ||
+                localStorage.getItem("userName") ||
+                localStorage.getItem("name") ||
+                "Therapist";
+
+            updateTherapistHeader(storedName);
+
             try {
                 const result =
                     await therapistApiRequest(
@@ -2187,33 +2199,30 @@
                 const name =
                     therapistProfile.name ||
                     therapistProfile.therapistName ||
-                    "Therapist";
+                    storedName;
 
-                const specialization =
-                    therapistProfile.specialization ||
-                    therapistProfile.department ||
-                    "Therapy Staff";
+                updateTherapistHeader(name);
 
-                setText(
-                    "therapistTopbarName",
-                    name
-                );
+                if (
+                    therapistProfile.id !== null &&
+                    therapistProfile.id !== undefined
+                ) {
+                    localStorage.setItem(
+                        "therapistId",
+                        String(therapistProfile.id)
+                    );
+                }
 
-                setText(
-                    "therapistSpecialization",
-                    specialization
-                );
+                if (therapistProfile.email) {
+                    localStorage.setItem(
+                        "email",
+                        therapistProfile.email
+                    );
+                }
 
-                setText(
-                    "therapistInitial",
-                    name
-                        .charAt(0)
-                        .toUpperCase()
-                );
-
-                setText(
-                    "welcomeTitle",
-                    `Welcome back, ${name}`
+                localStorage.setItem(
+                    "therapistProfile",
+                    JSON.stringify(therapistProfile)
                 );
 
             } catch (error) {
@@ -2221,7 +2230,48 @@
                     "Therapist profile loading failed:",
                     error
                 );
+
+                updateTherapistHeader(storedName);
+
+                showAlert(
+                    error.message ||
+                    "Unable to load therapist profile.",
+                    "error"
+                );
             }
+        }
+
+        function updateTherapistHeader(name) {
+            const cleanName =
+                String(name || "Therapist").trim();
+
+            const initial =
+                cleanName.charAt(0).toUpperCase() || "T";
+
+            setText(
+                "therapistTopbarName",
+                cleanName
+            );
+
+            setText(
+                "therapistSpecialization",
+                "Therapist"
+            );
+
+            setText(
+                "therapistInitial",
+                initial
+            );
+
+            setText(
+                "welcomeTitle",
+                `Welcome back, ${cleanName}`
+            );
+
+            localStorage.setItem(
+                "therapistName",
+                cleanName
+            );
         }
 
         /* =========================
@@ -2265,8 +2315,7 @@
                     );
 
             } else {
-                bookingRequests =
-                    getDemoBookings();
+                bookingRequests = [];
             }
 
             if (
@@ -2281,8 +2330,7 @@
                     );
 
             } else {
-                scheduleSessions =
-                    getDemoSchedule();
+                scheduleSessions = [];
             }
 
             if (

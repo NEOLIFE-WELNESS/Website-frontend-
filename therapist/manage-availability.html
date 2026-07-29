@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Availability - Neolife Therapist Portal</title>
+<link rel="icon" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{--dark:#153d29;--green:#2d6844;--light:#edf5ef;--gold:#c99a16;--cream:#f6f8f4;--white:#fff;--text:#173c29;--muted:#6e7871;--border:#dfe7e1;--success:#287146;--danger:#c74747;--info:#31708f;--sidebar:275px}
+*{margin:0;padding:0;box-sizing:border-box}body{min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:var(--cream)}a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}
+.layout{display:flex;min-height:100vh}.sidebar{width:var(--sidebar);height:100vh;position:fixed;left:0;top:0;z-index:1000;display:flex;flex-direction:column;color:#fff;background:linear-gradient(180deg,#123824,#1e5134);box-shadow:8px 0 30px rgba(18,56,36,.14);transition:.3s}
+.brand{min-height:104px;padding:20px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(255,255,255,.12)}.brand img{width:58px;height:58px;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}.brand h2{font-size:18px;margin-bottom:5px}.brand span{color:#f2cf69;font-size:10px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}
+.menu{flex:1;padding:20px 13px;overflow-y:auto}.menu-label{display:block;margin:9px 12px 10px;color:rgba(255,255,255,.48);font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.menu a{min-height:49px;margin-bottom:7px;padding:12px 14px;display:flex;align-items:center;gap:13px;border-radius:12px;color:rgba(255,255,255,.82);font-size:14px;font-weight:700}.menu a i{width:21px;text-align:center}.menu a:hover,.menu a.active{color:var(--dark);background:#fff;transform:translateX(3px)}.menu a.active i{color:var(--gold)}
+.sidebar-footer{padding:17px 13px;border-top:1px solid rgba(255,255,255,.12)}.logout{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.2);border-radius:12px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}
+.main{width:calc(100% - var(--sidebar));min-height:100vh;margin-left:var(--sidebar)}.topbar{min-height:86px;padding:15px 28px;position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border)}.top-left{display:flex;align-items:center;gap:14px}.toggle{display:none;width:43px;height:43px;border:none;border-radius:11px;color:#fff;background:var(--dark)}.title h1{font-size:27px;color:var(--dark);margin-bottom:5px}.title p{font-size:13px;color:var(--muted)}
+.profile{display:flex;align-items:center;gap:10px;padding:6px 11px 6px 7px;border:1px solid var(--border);border-radius:30px;background:#fff}.avatar{width:39px;height:39px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(145deg,var(--gold),#9b7200);font-weight:800}.profile strong{display:block;font-size:13px}.profile span{font-size:10px;color:var(--muted)}
+.content{padding:28px}.banner{margin-bottom:24px;padding:28px 30px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-radius:22px;color:#fff;background:linear-gradient(120deg,var(--dark),#347650);box-shadow:0 16px 38px rgba(21,61,41,.15)}.banner span{font-size:11px;font-weight:800;color:#ffe28b;text-transform:uppercase}.banner h2{font-size:29px;margin:8px 0}.banner p{max-width:720px;font-size:13px;line-height:1.7;color:rgba(255,255,255,.82)}.banner-icon{width:70px;height:70px;border-radius:19px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#ffe28b;font-size:30px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:22px;align-items:start}.card{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:0 10px 30px rgba(21,61,41,.07);overflow:hidden}.card-head{padding:19px 22px;border-bottom:1px solid var(--border)}.card-head h2{font-size:19px;color:var(--dark);margin-bottom:4px}.card-head p{font-size:11px;color:var(--muted)}.form{padding:22px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.group{margin-bottom:17px}.full{grid-column:1/-1}.group label{display:block;margin-bottom:7px;font-size:11px;font-weight:800;color:var(--dark)}.required{color:var(--danger)}.control{width:100%;min-height:47px;padding:11px 13px;border:1px solid var(--border);border-radius:11px;outline:none;background:#fff}.control:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,154,22,.12)}
+.switch-row{min-height:47px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:11px;background:#fbfcfa}.switch{width:48px;height:26px;position:relative}.switch input{opacity:0}.slider{position:absolute;inset:0;border-radius:30px;background:#cdd6cf}.slider:before{content:"";width:20px;height:20px;position:absolute;left:3px;bottom:3px;border-radius:50%;background:#fff;transition:.25s}.switch input:checked+.slider{background:var(--success)}.switch input:checked+.slider:before{transform:translateX(22px)}
+.actions{margin-top:7px;display:flex;justify-content:flex-end;gap:10px}.btn{min-height:43px;padding:10px 20px;border-radius:10px;font-size:11px;font-weight:800}.reset{color:var(--dark);background:#fff;border:1px solid var(--border)}.save{color:#fff;background:var(--dark);border:1px solid var(--dark)}.btn:disabled{opacity:.65;cursor:not-allowed}
+.preview{padding:22px}.summary{margin-bottom:18px;padding:16px;border-radius:14px;background:var(--light)}.summary h3{margin-bottom:8px}.summary p{font-size:12px;line-height:1.7;color:var(--muted)}.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.slot{padding:10px 12px;border:1px solid #d4e3d8;border-radius:10px;text-align:center;font-size:11px;font-weight:800}.empty{padding:35px 15px;text-align:center;color:var(--muted)}.empty i{display:block;margin-bottom:12px;color:var(--gold);font-size:30px}
+.saved{margin-top:22px}.availability-list{padding:20px}.item{margin-bottom:12px;padding:15px;display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center;border:1px solid var(--border);border-radius:13px;background:#fbfcfa}.item h3{font-size:14px;margin-bottom:5px}.item p{font-size:11px;line-height:1.6;color:var(--muted)}.badge{padding:7px 11px;border-radius:20px;font-size:10px;font-weight:800}.active-badge{color:var(--success);background:#ebf7ef}.inactive-badge{color:var(--danger);background:#fff0f0}
+.alert{width:min(390px,calc(100% - 35px));padding:15px 17px;position:fixed;top:102px;right:22px;z-index:5000;display:none;gap:11px;border-radius:13px;color:#fff}.alert.show{display:flex}.alert.success{background:var(--success)}.alert.error{background:var(--danger)}.alert.info{background:var(--info)}.overlay{position:fixed;inset:0;z-index:950;display:none;background:rgba(13,36,24,.58)}.overlay.show{display:block}
+@media(max-width:1050px){.grid{grid-template-columns:1fr}}@media(max-width:900px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;margin-left:0}.toggle{display:block}}@media(max-width:700px){.topbar{padding:13px 16px}.content{padding:20px 14px}.title h1{font-size:21px}.title p,.profile div{display:none}.banner{flex-direction:column-reverse;align-items:flex-start}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.actions{flex-direction:column-reverse}.btn{width:100%}.slots{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="alert" id="pageAlert"><i id="alertIcon" class="fa-solid fa-circle-info"></i><div id="alertMessage"></div></div>
+<div class="overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+<aside class="sidebar" id="therapistSidebar">
+<div class="brand"><img src="../assets/main_logo.jpeg" alt="Neolife Logo"><div><h2>Neolife</h2><span>Therapist Portal</span></div></div>
+<nav class="menu">
+<span class="menu-label">Main</span>
+<a href="therapist-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
+<a href="booking-requests.html"><i class="fa-solid fa-calendar-plus"></i>Booking Requests</a>
+<a href="daily-schedule.html"><i class="fa-solid fa-calendar-days"></i>Daily Schedule</a>
+<a href="manage-availability.html" class="active"><i class="fa-solid fa-clock"></i>Manage Availability</a>
+<span class="menu-label">Treatment Operations</span>
+<a href="attendance.html"><i class="fa-solid fa-user-check"></i>Attendance & Sessions</a>
+<a href="patient-history.html"><i class="fa-solid fa-clock-rotate-left"></i>Patient History</a>
+<a href="therapist-profile.html"><i class="fa-solid fa-user-gear"></i>My Profile</a>
+</nav>
+<div class="sidebar-footer"><button class="logout" onclick="therapistLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
+</aside>
+<main class="main">
+<header class="topbar">
+<div class="top-left"><button class="toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button><div class="title"><h1>Manage Availability</h1><p>Create your weekly working hours and appointment slots.</p></div></div>
+<div class="profile"><span class="avatar" id="therapistAvatar">T</span><div><strong id="therapistName">Loading...</strong><span id="therapistSpecialization">Therapist</span></div></div>
+</header>
+<section class="content">
+<section class="banner"><div><span><i class="fa-solid fa-clock"></i> Weekly Schedule</span><h2>Create Your Available Working Hours</h2><p>Select a day, choose your working time and slot duration. Patients can book within the available time range.</p></div><div class="banner-icon"><i class="fa-solid fa-calendar-check"></i></div></section>
+<div class="grid">
+<section class="card">
+<div class="card-head"><h2>Create Availability</h2><p>Add availability for one weekday at a time.</p></div>
+<form class="form" id="availabilityForm" novalidate>
+<div class="form-grid">
+<div class="group full"><label>Day of Week <span class="required">*</span></label><select id="dayOfWeek" class="control" required><option value="">Select day</option><option value="MONDAY">Monday</option><option value="TUESDAY">Tuesday</option><option value="WEDNESDAY">Wednesday</option><option value="THURSDAY">Thursday</option><option value="FRIDAY">Friday</option><option value="SATURDAY">Saturday</option><option value="SUNDAY">Sunday</option></select></div>
+<div class="group"><label>Start Time <span class="required">*</span></label><input id="startTime" class="control" type="time" value="09:00" required></div>
+<div class="group"><label>End Time <span class="required">*</span></label><input id="endTime" class="control" type="time" value="13:00" required></div>
+<div class="group"><label>Slot Duration <span class="required">*</span></label><select id="slotDurationMinutes" class="control"><option value="15">15 Minutes</option><option value="20">20 Minutes</option><option value="30" selected>30 Minutes</option><option value="45">45 Minutes</option><option value="60">60 Minutes</option></select></div>
+<div class="group"><label>Availability Status</label><div class="switch-row"><span id="activeText">Active</span><label class="switch"><input type="checkbox" id="active" checked><span class="slider"></span></label></div></div>
+</div>
+<div class="actions"><button type="button" class="btn reset" onclick="resetForm()">Reset</button><button type="submit" class="btn save" id="saveButton"><i class="fa-solid fa-floppy-disk"></i> Create Availability</button></div>
+</form>
+</section>
+<aside class="card">
+<div class="card-head"><h2>Generated Slot Preview</h2><p>Slots are calculated from your selected range.</p></div>
+<div class="preview" id="slotPreview"><div class="empty"><i class="fa-solid fa-clock"></i>Select a day and time range.</div></div>
+</aside>
+</div>
+<section class="card saved">
+<div class="card-head"><h2>Created Availability</h2><p>Availability created during this browser session.</p></div>
+<div class="availability-list" id="availabilityList"><div class="empty"><i class="fa-solid fa-calendar-xmark"></i>No availability created yet.</div></div>
+</section>
+</section>
+</main>
+</div>
+<script>
+const API_BASE_URL="http://localhost:8085";
+let createdAvailability=[];
+document.addEventListener("DOMContentLoaded",()=>{
+ if(!getToken()){location.href="therapist-login.html";return}
+ loadLoggedInTherapist();
+ document.getElementById("availabilityForm").addEventListener("submit",createAvailability);
+ ["dayOfWeek","startTime","endTime","slotDurationMinutes"].forEach(id=>document.getElementById(id).addEventListener("change",previewSlots));
+ document.getElementById("active").addEventListener("change",()=>document.getElementById("activeText").textContent=document.getElementById("active").checked?"Active":"Inactive");
+ previewSlots();
+});
+async function createAvailability(e){
+ e.preventDefault();
+ const payload={dayOfWeek:v("dayOfWeek"),startTime:apiTime(v("startTime")),endTime:apiTime(v("endTime")),slotDurationMinutes:Number(v("slotDurationMinutes")),active:document.getElementById("active").checked};
+ if(!validate(payload))return;
+ const b=document.getElementById("saveButton"),old=b.innerHTML;b.disabled=true;b.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+ try{
+  const response=await fetch(API_BASE_URL+"/api/therapist-availability/create",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json","Authorization":"Bearer "+getToken()},body:JSON.stringify(payload)});
+  const result=await readResponse(response);
+  if(response.status===401){clearAuth();throw new Error("Your login session has expired.")}
+  if(!response.ok||result?.success===false)throw new Error(result?.message||"Unable to create availability.");
+  createdAvailability.unshift(result?.data||payload);
+  renderCreated();
+  alertBox(result?.message||"Therapist availability created successfully.","success");
+ }catch(err){alertBox(err.message||"Unable to create availability.","error")}finally{b.disabled=false;b.innerHTML=old}
+}
+function validate(p){
+ if(!p.dayOfWeek){alertBox("Please select a day.","error");return false}
+ const s=toMinutes(p.startTime),e=toMinutes(p.endTime);
+ if(e<=s){alertBox("End time must be later than start time.","error");return false}
+ if(e-s<p.slotDurationMinutes){alertBox("Time range must contain at least one complete slot.","error");return false}
+ return true;
+}
+function previewSlots(){
+ const day=v("dayOfWeek"),start=v("startTime"),end=v("endTime"),duration=Number(v("slotDurationMinutes")),box=document.getElementById("slotPreview");
+ if(!day||!start||!end||!duration){box.innerHTML='<div class="empty"><i class="fa-solid fa-clock"></i>Select a day and time range.</div>';return}
+ const s=toMinutes(start),e=toMinutes(end);
+ if(e<=s){box.innerHTML='<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i>End time must be later than start time.</div>';return}
+ const slots=[];for(let t=s;t+duration<=e;t+=duration)slots.push(displayMinutes(t)+" - "+displayMinutes(t+duration));
+ box.innerHTML='<div class="summary"><h3>'+formatStatus(day)+'</h3><p>'+displayTime(start)+' to '+displayTime(end)+' · '+duration+' minute slots · '+slots.length+' total</p></div><div class="slots">'+slots.map(x=>'<div class="slot">'+x+'</div>').join("")+'</div>';
+}
+function renderCreated(){
+ const list=document.getElementById("availabilityList");
+ if(!createdAvailability.length){list.innerHTML='<div class="empty"><i class="fa-solid fa-calendar-xmark"></i>No availability created yet.</div>';return}
+ list.innerHTML=createdAvailability.map(x=>'<article class="item"><div><h3>'+escapeHtml(formatStatus(x.dayOfWeek))+'</h3><p>'+escapeHtml(displayTime(x.startTime))+' - '+escapeHtml(displayTime(x.endTime))+' · '+escapeHtml(x.slotDurationMinutes)+' minute slots</p></div><span class="badge '+(x.active?'active-badge':'inactive-badge')+'">'+(x.active?'Active':'Inactive')+'</span></article>').join("");
+}
+async function loadLoggedInTherapist(){
+ const name=localStorage.getItem("name")||localStorage.getItem("userName")||"Therapist";setHeader(name,"Therapist");
+ try{const r=await fetch(API_BASE_URL+"/api/users/getProfile",{headers:{"Authorization":"Bearer "+getToken()}});const j=await readResponse(r);if(r.ok&&j?.data)setHeader(j.data.name||name,j.data.specialization||formatStatus(j.data.role||"THERAPIST"))}catch(e){}
+}
+function setHeader(name,spec){document.getElementById("therapistName").textContent=name;document.getElementById("therapistSpecialization").textContent=spec;document.getElementById("therapistAvatar").textContent=String(name).charAt(0).toUpperCase()}
+function resetForm(){document.getElementById("availabilityForm").reset();document.getElementById("startTime").value="09:00";document.getElementById("endTime").value="13:00";document.getElementById("slotDurationMinutes").value="30";document.getElementById("active").checked=true;document.getElementById("activeText").textContent="Active";previewSlots()}
+function getToken(){return localStorage.getItem("therapistToken")||localStorage.getItem("token")||""}
+function clearAuth(){["therapistToken","therapistRefreshToken","token","refreshToken","role","therapistId","userId"].forEach(k=>localStorage.removeItem(k))}
+function therapistLogout(){clearAuth();location.href="therapist-login.html"}
+function v(id){return document.getElementById(id).value.trim()}function apiTime(x){return x&&x.length===5?x+":00":x}
+function toMinutes(x){const p=String(x).split(":");return Number(p[0])*60+Number(p[1])}
+function displayMinutes(m){return displayTime(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"))}
+function displayTime(x){if(!x)return"-";const p=String(x).split(":"),d=new Date();d.setHours(Number(p[0]),Number(p[1]),0,0);return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:true})}
+function formatStatus(x){return String(x||"").replaceAll("_"," ").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}
+async function readResponse(r){const t=await r.text();if(!t)return null;try{return JSON.parse(t)}catch{return{success:false,message:t}}}
+function escapeHtml(x){return String(x??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function alertBox(m,t){const b=document.getElementById("pageAlert");document.getElementById("alertMessage").textContent=m;b.className="alert show "+t;document.getElementById("alertIcon").className=t==="success"?"fa-solid fa-circle-check":t==="error"?"fa-solid fa-circle-exclamation":"fa-solid fa-circle-info";setTimeout(()=>b.classList.remove("show"),4000)}
+function toggleSidebar(){document.getElementById("therapistSidebar").classList.toggle("open");document.getElementById("sidebarOverlay").classList.toggle("show")}function closeSidebar(){document.getElementById("therapistSidebar").classList.remove("open");document.getElementById("sidebarOverlay").classList.remove("show")}
+</script>
+</body>
+</html>

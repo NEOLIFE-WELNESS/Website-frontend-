@@ -1,0 +1,2780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Treatments - Neolife Wellness Center</title>
+
+<link rel="icon" href="../assets/main_logo.jpeg">
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<style>
+:root{
+    --dark:#153d29;
+    --green:#2d6844;
+    --soft:#edf5ef;
+    --gold:#c99a16;
+    --gold-dark:#9b7200;
+    --cream:#f6f8f4;
+    --white:#fff;
+    --text:#173c29;
+    --muted:#6e7871;
+    --border:#dfe7e1;
+    --danger:#c74747;
+    --warning:#d88b18;
+    --success:#287146;
+    --info:#31708f;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+    padding-top:76px;
+
+    font-family:Arial,Helvetica,sans-serif;
+    color:var(--text);
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(201,154,22,.08),
+            transparent 28%
+        ),
+        var(--cream);
+}
+
+button,
+input,
+select,
+textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+/* =========================
+   HEADER
+========================== */
+
+.main-header{
+    width:100%;
+    height:76px;
+    padding:0 24px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+
+    display:flex;
+    align-items:center;
+
+    background:#fff;
+    border-bottom:1px solid #ddd;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.header-logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.header-logo img{
+    width:48px;
+    height:48px;
+
+    object-fit:cover;
+    border-radius:50%;
+
+    border:2px solid var(--gold);
+}
+
+.logo-info{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.logo-title{
+    color:var(--dark);
+    font-size:17px;
+    font-weight:800;
+}
+
+.logo-subtitle{
+    color:#a87800;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1.2px;
+}
+
+.desktop-nav{
+    margin-left:auto;
+
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.desktop-nav a{
+    color:var(--dark);
+    font-size:12px;
+    font-weight:800;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active{
+    color:#a87800;
+}
+
+.profile-circle{
+    width:40px;
+    height:40px;
+    margin-left:18px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    color:#fff;
+    background:linear-gradient(145deg,var(--gold),var(--gold-dark));
+
+    font-weight:800;
+}
+
+.mobile-menu-btn{
+    display:none;
+
+    width:40px;
+    height:40px;
+    margin-left:10px;
+
+    border:0;
+    border-radius:9px;
+
+    color:#fff;
+    background:var(--dark);
+}
+
+.mobile-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1998;
+
+    display:none;
+
+    background:rgba(10,35,23,.6);
+}
+
+.mobile-overlay.show{
+    display:block;
+}
+
+.mobile-nav{
+    width:min(310px,85vw);
+    height:100vh;
+    padding:22px;
+
+    position:fixed;
+    top:0;
+    right:0;
+    z-index:1999;
+
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+
+    background:linear-gradient(180deg,#123824,#1e5134);
+
+    transform:translateX(105%);
+    transition:.3s;
+}
+
+.mobile-nav.open{
+    transform:translateX(0);
+}
+
+.mobile-nav-head{
+    margin-bottom:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    color:#fff;
+}
+
+.mobile-nav-close{
+    width:36px;
+    height:36px;
+
+    border:0;
+    border-radius:9px;
+
+    color:var(--dark);
+    background:#fff;
+}
+
+.mobile-nav a{
+    padding:12px 13px;
+
+    border-radius:9px;
+
+    color:rgba(255,255,255,.9);
+    font-size:14px;
+    font-weight:700;
+}
+
+.mobile-nav a:hover,
+.mobile-nav a.active{
+    color:var(--dark);
+    background:#fff;
+}
+
+/* =========================
+   PAGE
+========================== */
+
+.page-shell{
+    width:min(1180px,92%);
+    margin:34px auto 80px;
+}
+
+.hero{
+    margin-bottom:22px;
+    padding:28px 30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+
+    border-radius:22px;
+
+    color:#fff;
+    background:linear-gradient(120deg,var(--dark),#347650);
+
+    box-shadow:0 15px 35px rgba(21,61,41,.14);
+}
+
+.hero h1{
+    margin-bottom:8px;
+    font-size:30px;
+}
+
+.hero p{
+    max-width:750px;
+
+    color:rgba(255,255,255,.82);
+    font-size:14px;
+    line-height:1.7;
+}
+
+.hero-icon{
+    width:68px;
+    height:68px;
+
+    display:grid;
+    place-items:center;
+    flex-shrink:0;
+
+    border-radius:18px;
+
+    color:#ffe28b;
+    background:rgba(255,255,255,.1);
+
+    font-size:29px;
+}
+
+.summary-grid{
+    margin-bottom:22px;
+
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:15px;
+}
+
+.summary-card{
+    padding:18px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    border:1px solid var(--border);
+    border-radius:17px;
+
+    background:#fff;
+
+    box-shadow:0 9px 25px rgba(21,61,41,.06);
+}
+
+.summary-icon{
+    width:48px;
+    height:48px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:14px;
+
+    color:var(--green);
+    background:var(--soft);
+
+    font-size:19px;
+}
+
+.summary-card p{
+    margin-bottom:4px;
+
+    color:var(--muted);
+    font-size:10px;
+    font-weight:700;
+}
+
+.summary-card h3{
+    color:var(--dark);
+    font-size:22px;
+}
+
+/* =========================
+   TABS
+========================== */
+
+.tabs{
+    margin-bottom:20px;
+    padding:7px;
+
+    display:flex;
+    gap:8px;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    background:#fff;
+}
+
+.tab-btn{
+    flex:1;
+    min-height:46px;
+
+    border:0;
+    border-radius:11px;
+
+    color:var(--dark);
+    background:transparent;
+
+    font-weight:800;
+}
+
+.tab-btn.active{
+    color:#fff;
+    background:var(--dark);
+}
+
+.tab-panel{
+    display:none;
+}
+
+.tab-panel.active{
+    display:block;
+}
+
+/* =========================
+   PLAN CARDS
+========================== */
+
+.plan-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+}
+
+.plan-card{
+    padding:22px;
+
+    border:1px solid var(--border);
+    border-radius:19px;
+
+    background:#fff;
+
+    box-shadow:0 10px 28px rgba(21,61,41,.06);
+}
+
+.plan-head{
+    margin-bottom:16px;
+
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+}
+
+.plan-head h3{
+    margin-bottom:6px;
+
+    color:var(--dark);
+    font-size:20px;
+}
+
+.plan-head p{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.5;
+}
+
+.badge{
+    padding:6px 10px;
+
+    display:inline-flex;
+
+    border-radius:20px;
+
+    font-size:10px;
+    font-weight:800;
+}
+
+.status-active,
+.status-approved,
+.status-completed{
+    color:var(--success);
+    background:#eaf6ed;
+}
+
+.status-pending,
+.status-rescheduled{
+    color:#946300;
+    background:#fff6e8;
+}
+
+.status-cancelled,
+.status-missed,
+.status-rejected{
+    color:var(--danger);
+    background:#fff0f0;
+}
+
+.status-default{
+    color:#667;
+    background:#f1f3f1;
+}
+
+.plan-details{
+    margin-bottom:18px;
+
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.detail-box{
+    padding:11px 12px;
+
+    border:1px solid var(--border);
+    border-radius:10px;
+
+    background:#fbfcfa;
+}
+
+.detail-box.full{
+    grid-column:1/-1;
+}
+
+.detail-box span{
+    display:block;
+    margin-bottom:4px;
+
+    color:var(--muted);
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.detail-box strong,
+.detail-box p{
+    color:var(--dark);
+    font-size:11px;
+    line-height:1.55;
+}
+
+.progress-wrap{
+    margin-bottom:18px;
+}
+
+.progress-info{
+    margin-bottom:7px;
+
+    display:flex;
+    justify-content:space-between;
+
+    color:var(--muted);
+    font-size:11px;
+    font-weight:700;
+}
+
+.progress-bar{
+    height:9px;
+
+    overflow:hidden;
+
+    border-radius:20px;
+
+    background:#e7ece8;
+}
+
+.progress-fill{
+    height:100%;
+
+    border-radius:20px;
+
+    background:linear-gradient(90deg,var(--gold),#e4bb3e);
+}
+
+.plan-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+}
+
+.btn{
+    min-height:40px;
+    padding:9px 14px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+
+    border-radius:9px;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.primary-btn{
+    color:#fff;
+    background:var(--dark);
+    border:1px solid var(--dark);
+}
+
+.secondary-btn{
+    color:var(--dark);
+    background:#fff;
+    border:1px solid var(--border);
+}
+
+.info-btn{
+    color:var(--info);
+    background:#edf6fb;
+    border:1px solid #cfe3ed;
+}
+
+/* =========================
+   SESSIONS TABLE
+========================== */
+
+.panel{
+    overflow:hidden;
+
+    border:1px solid var(--border);
+    border-radius:20px;
+
+    background:#fff;
+
+    box-shadow:0 11px 32px rgba(21,61,41,.07);
+}
+
+.panel-head{
+    padding:18px 21px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+
+    border-bottom:1px solid var(--border);
+}
+
+.panel-head h2{
+    margin-bottom:4px;
+    font-size:18px;
+}
+
+.panel-head p{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.count{
+    padding:8px 12px;
+
+    border-radius:18px;
+
+    background:var(--soft);
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+.table{
+    width:100%;
+    min-width:1000px;
+
+    border-collapse:collapse;
+}
+
+.table th{
+    padding:13px;
+
+    color:var(--muted);
+    background:#f8faf7;
+
+    border-bottom:1px solid var(--border);
+
+    font-size:9px;
+    text-align:left;
+    text-transform:uppercase;
+}
+
+.table td{
+    padding:14px 13px;
+
+    color:#4f5b53;
+
+    border-bottom:1px solid #edf0ed;
+
+    font-size:11px;
+}
+
+.session-title{
+    color:var(--dark);
+    font-weight:800;
+}
+
+.message{
+    padding:48px;
+
+    text-align:center;
+
+    color:var(--muted);
+}
+
+.message i{
+    display:block;
+    margin-bottom:10px;
+
+    color:var(--gold);
+    font-size:28px;
+}
+
+/* =========================
+   MODALS
+========================== */
+
+.overlay{
+    padding:20px;
+
+    position:fixed;
+    inset:0;
+    z-index:4000;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(13,36,24,.68);
+}
+
+.overlay.show{
+    display:flex;
+}
+
+.modal{
+    width:min(680px,100%);
+    max-height:92vh;
+
+    overflow:auto;
+
+    border-radius:20px;
+
+    background:#fff;
+}
+
+.modal-head{
+    padding:19px 22px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    border-bottom:1px solid var(--border);
+}
+
+.modal-head h2{
+    font-size:20px;
+}
+
+.close{
+    width:36px;
+    height:36px;
+
+    border:0;
+    border-radius:50%;
+
+    color:var(--dark);
+    background:var(--soft);
+}
+
+.modal-body{
+    padding:22px;
+}
+
+.modal-form{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.form-group.full{
+    grid-column:1/-1;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:7px;
+
+    color:var(--dark);
+    font-size:11px;
+    font-weight:800;
+}
+
+.control{
+    width:100%;
+    min-height:46px;
+    padding:10px 12px;
+
+    border:1px solid var(--border);
+    border-radius:10px;
+
+    color:#354039;
+    background:#fff;
+
+    outline:none;
+}
+
+.control:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(201,154,22,.12);
+}
+
+textarea.control{
+    min-height:100px;
+    resize:vertical;
+}
+
+.modal-actions{
+    padding:17px 22px;
+
+    display:flex;
+    justify-content:flex-end;
+    gap:9px;
+
+    border-top:1px solid var(--border);
+}
+
+.modal-btn{
+    padding:10px 16px;
+
+    border-radius:9px;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.modal-btn.secondary{
+    color:var(--dark);
+    background:#fff;
+    border:1px solid var(--border);
+}
+
+.modal-btn.primary{
+    color:#fff;
+    background:var(--dark);
+    border:1px solid var(--dark);
+}
+
+.modal-btn:disabled{
+    opacity:.65;
+    cursor:not-allowed;
+}
+
+/* =========================
+   ALERT
+========================== */
+
+.alert{
+    width:min(390px,calc(100% - 35px));
+    padding:14px 16px;
+
+    position:fixed;
+    top:94px;
+    right:22px;
+    z-index:5000;
+
+    display:none;
+
+    border-radius:12px;
+
+    color:#fff;
+
+    box-shadow:0 14px 35px rgba(0,0,0,.2);
+}
+
+.alert.show{
+    display:block;
+}
+
+.alert.error{
+    background:var(--danger);
+}
+
+.alert.success{
+    background:var(--success);
+}
+
+.alert.info{
+    background:var(--info);
+}
+
+/* =========================
+   RESPONSIVE
+========================== */
+
+@media(max-width:1000px){
+    .desktop-nav{
+        display:none;
+    }
+
+    .mobile-menu-btn{
+        display:block;
+    }
+
+    .profile-circle{
+        margin-left:auto;
+    }
+
+    .summary-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:760px){
+    .plan-grid{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        align-items:flex-start;
+    }
+
+    .hero-icon{
+        display:none;
+    }
+}
+
+@media(max-width:600px){
+    body{
+        padding-top:70px;
+    }
+
+    .main-header{
+        height:70px;
+        padding:0 14px;
+    }
+
+    .header-logo img{
+        width:44px;
+        height:44px;
+    }
+
+    .logo-title{
+        font-size:14px;
+    }
+
+    .logo-subtitle{
+        font-size:9px;
+    }
+
+    .page-shell{
+        width:94%;
+        margin-top:22px;
+    }
+
+    .hero{
+        padding:23px 20px;
+    }
+
+    .hero h1{
+        font-size:25px;
+    }
+
+    .summary-grid{
+        grid-template-columns:1fr;
+    }
+
+    .tabs{
+        flex-direction:column;
+    }
+
+    .plan-details,
+    .modal-form{
+        grid-template-columns:1fr;
+    }
+
+    .detail-box.full,
+    .form-group.full{
+        grid-column:auto;
+    }
+
+    .panel-head{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .modal-actions{
+        flex-direction:column;
+    }
+
+    .modal-btn{
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="main-header">
+
+    <a href="homepage.html" class="header-logo">
+
+        <img
+            src="../assets/main_logo.jpeg"
+            alt="Neolife Logo"
+        >
+
+        <div class="logo-info">
+
+            <span class="logo-title">
+                Neolife Wellness Center
+            </span>
+
+            <span class="logo-subtitle">
+                Ayush Digital Care
+            </span>
+
+        </div>
+
+    </a>
+
+    <nav class="desktop-nav">
+        <a href="homepage.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Therapies</a>
+        <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+        <a href="products.html">Products</a>
+        <a href="consultation.html">Consultation</a>
+        <a href="blog.html">Blogs</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <a
+        href="profile.html"
+        class="profile-circle"
+        id="profileInitial"
+    >
+        U
+    </a>
+
+    <button
+        type="button"
+        class="mobile-menu-btn"
+        onclick="toggleMobileMenu()"
+        aria-label="Open menu"
+    >
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+</header>
+
+<div
+    class="mobile-overlay"
+    id="mobileOverlay"
+    onclick="closeMobileMenu()"
+></div>
+
+<nav class="mobile-nav" id="mobileNav">
+
+    <div class="mobile-nav-head">
+
+        <strong>Neolife Menu</strong>
+
+        <button
+            class="mobile-nav-close"
+            onclick="closeMobileMenu()"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+    </div>
+
+    <a href="homepage.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Therapies</a>
+    <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+    <a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a>
+    <a href="blog.html">Blogs</a>
+    <a href="contact.html">Contact</a>
+    <a href="profile.html">My Profile</a>
+    <a href="my-appointments.html">My Appointments</a>
+    <a href="my-treatments.html" class="active">My Treatments</a>
+
+</nav>
+
+<div class="alert" id="alertBox"></div>
+
+<main class="page-shell">
+
+    <section class="hero">
+
+        <div>
+
+            <h1>My Treatments</h1>
+
+            <p>
+                View treatment plans created by your doctor, track
+                completed and remaining sessions, book the next daily
+                treatment session and review therapist updates.
+            </p>
+
+        </div>
+
+        <div class="hero-icon">
+            <i class="fa-solid fa-spa"></i>
+        </div>
+
+    </section>
+
+    <section class="summary-grid">
+
+        <article class="summary-card">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-notes-medical"></i>
+            </div>
+
+            <div>
+                <p>Total Plans</p>
+                <h3 id="totalPlansCount">0</h3>
+            </div>
+
+        </article>
+
+        <article class="summary-card">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-play"></i>
+            </div>
+
+            <div>
+                <p>Active Plans</p>
+                <h3 id="activePlansCount">0</h3>
+            </div>
+
+        </article>
+
+        <article class="summary-card">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+
+            <div>
+                <p>Booked Sessions</p>
+                <h3 id="bookedSessionsCount">0</h3>
+            </div>
+
+        </article>
+
+        <article class="summary-card">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+                <p>Completed Sessions</p>
+                <h3 id="completedSessionsCount">0</h3>
+            </div>
+
+        </article>
+
+    </section>
+
+    <div class="tabs">
+
+        <button
+            type="button"
+            class="tab-btn active"
+            data-tab="plans"
+            onclick="switchTab('plans',this)"
+        >
+            <i class="fa-solid fa-notes-medical"></i>
+            Treatment Plans
+        </button>
+
+        <button
+            type="button"
+            class="tab-btn"
+            data-tab="sessions"
+            onclick="switchTab('sessions',this)"
+        >
+            <i class="fa-solid fa-calendar-days"></i>
+            Daily Sessions
+        </button>
+
+    </div>
+
+    <section
+        class="tab-panel active"
+        id="plansPanel"
+    >
+
+        <div class="plan-grid" id="planGrid">
+
+            <div class="message">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading treatment plans...
+            </div>
+
+        </div>
+
+    </section>
+
+    <section
+        class="tab-panel"
+        id="sessionsPanel"
+    >
+
+        <div class="panel">
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h2>Daily Treatment Sessions</h2>
+
+                    <p>
+                        Sessions booked under your active treatment plans.
+                    </p>
+
+                </div>
+
+                <span class="count" id="sessionResultCount">
+                    0 sessions
+                </span>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table class="table">
+
+                    <thead>
+                        <tr>
+                            <th>Treatment</th>
+                            <th>Session</th>
+                            <th>Date & Time</th>
+                            <th>Therapist</th>
+                            <th>Status</th>
+                            <th>Patient Notes</th>
+                            <th>Therapist Notes</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="sessionTableBody">
+
+                        <tr>
+                            <td colspan="7" class="message">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                Loading daily treatment sessions...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- PLAN DETAILS MODAL -->
+
+<div
+    class="overlay"
+    id="planDetailsModal"
+    onclick="outsidePlanDetailsClose(event)"
+>
+
+<div class="modal">
+
+    <div class="modal-head">
+
+        <h2>Treatment Plan Details</h2>
+
+        <button
+            class="close"
+            onclick="closePlanDetailsModal()"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+    </div>
+
+    <div class="modal-body" id="planDetailsBody"></div>
+
+    <div class="modal-actions">
+
+        <button
+            class="modal-btn secondary"
+            onclick="closePlanDetailsModal()"
+        >
+            Close
+        </button>
+
+    </div>
+
+</div>
+</div>
+
+<!-- BOOK SESSION MODAL -->
+
+<div
+    class="overlay"
+    id="bookSessionModal"
+    onclick="outsideBookSessionClose(event)"
+>
+
+<div class="modal">
+
+    <div class="modal-head">
+
+        <h2>Book Daily Treatment Session</h2>
+
+        <button
+            class="close"
+            onclick="closeBookSessionModal()"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+    </div>
+
+    <div class="modal-body">
+
+        <input type="hidden" id="bookTreatmentPlanId">
+
+        <div class="modal-form">
+
+            <div class="form-group full">
+
+                <label for="bookTreatmentName">
+                    Treatment Plan
+                </label>
+
+                <input
+                    id="bookTreatmentName"
+                    class="control"
+                    readonly
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="bookSessionDate">
+                    Session Date
+                    <span style="color:var(--danger)">*</span>
+                </label>
+
+                <input
+                    id="bookSessionDate"
+                    type="date"
+                    class="control"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="bookStartTime">
+                    Start Time
+                    <span style="color:var(--danger)">*</span>
+                </label>
+
+                <input
+                    id="bookStartTime"
+                    type="time"
+                    class="control"
+                >
+
+            </div>
+
+            <div class="form-group full">
+
+                <label for="bookPatientNotes">
+                    Patient Notes
+                </label>
+
+                <textarea
+                    id="bookPatientNotes"
+                    class="control"
+                    placeholder="Mention symptoms, pain level or any information for the therapist"
+                ></textarea>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal-actions">
+
+        <button
+            class="modal-btn secondary"
+            onclick="closeBookSessionModal()"
+        >
+            Cancel
+        </button>
+
+        <button
+            class="modal-btn primary"
+            id="bookSessionButton"
+            onclick="submitBookSession()"
+        >
+            <i class="fa-solid fa-calendar-plus"></i>
+            Book Session
+        </button>
+
+    </div>
+
+</div>
+</div>
+
+<script>
+const API_BASE_URL =
+    "http://localhost:8085";
+
+let treatmentPlans = [];
+let dailySessions = [];
+let selectedPlan = null;
+
+const alertBox =
+    document.getElementById(
+        "alertBox"
+    );
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requirePatientLogin()) {
+            return;
+        }
+
+        setMinimumSessionDate();
+        await loadPatientProfile();
+
+        await Promise.allSettled([
+            loadTreatmentPlans(),
+            loadDailySessions()
+        ]);
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================== */
+
+function getToken() {
+    return (
+        localStorage.getItem(
+            "token"
+        ) ||
+        localStorage.getItem(
+            "accessToken"
+        ) ||
+        ""
+    );
+}
+
+function requirePatientLogin() {
+    const token =
+        getToken();
+
+    const role =
+        String(
+            localStorage.getItem(
+                "role"
+            ) || ""
+        ).toUpperCase();
+
+    if (!token) {
+        location.href =
+            "login.html";
+
+        return false;
+    }
+
+    if (
+        role &&
+        role !== "USER"
+    ) {
+        alert(
+            "Only patients can access My Treatments."
+        );
+
+        location.href =
+            "login.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+async function apiRequest(
+    endpoint,
+    options = {}
+) {
+    const headers = {
+        "Accept":
+            "application/json",
+
+        ...(options.headers || {}),
+
+        "Authorization":
+            `Bearer ${getToken()}`
+    };
+
+    if (
+        options.body &&
+        !(
+            options.body instanceof
+            FormData
+        )
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response =
+        await fetch(
+            API_BASE_URL + endpoint,
+            {
+                ...options,
+                headers
+            }
+        );
+
+    const text =
+        await response.text();
+
+    let result = {};
+
+    try {
+        result =
+            text
+                ? JSON.parse(text)
+                : {};
+
+    } catch (error) {
+        result = {
+            success: false,
+            message:
+                text ||
+                "Invalid server response."
+        };
+    }
+
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearSession();
+
+        location.href =
+            "login.html";
+
+        throw new Error(
+            result.message ||
+            "Your login session has expired."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status})`
+        );
+    }
+
+    return result;
+}
+
+/* =========================
+   PATIENT PROFILE
+========================== */
+
+async function loadPatientProfile() {
+    const savedName =
+        localStorage.getItem(
+            "name"
+        ) ||
+        localStorage.getItem(
+            "userName"
+        ) ||
+        "User";
+
+    updateProfileInitial(
+        savedName
+    );
+
+    try {
+        const result =
+            await apiRequest(
+                "/api/users/getProfile"
+            );
+
+        const user =
+            result.data || {};
+
+        updateProfileInitial(
+            user.name ||
+            savedName
+        );
+
+    } catch (error) {
+        console.error(
+            "Patient profile error:",
+            error
+        );
+    }
+}
+
+function updateProfileInitial(name) {
+    const cleanName =
+        String(
+            name || "User"
+        ).trim();
+
+    profileInitial.textContent =
+        cleanName
+            .charAt(0)
+            .toUpperCase() ||
+        "U";
+}
+
+/* =========================
+   TREATMENT PLANS
+   GET /api/treatment-plans/my-plans
+========================== */
+
+async function loadTreatmentPlans() {
+    planGrid.innerHTML = `
+        <div class="message">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Loading treatment plans...
+        </div>
+    `;
+
+    try {
+        const result =
+            await apiRequest(
+                "/api/treatment-plans/my-plans",
+                {
+                    method:"GET"
+                }
+            );
+
+        treatmentPlans =
+            Array.isArray(
+                result.data
+            )
+                ? result.data
+                : [];
+
+        renderTreatmentPlans();
+        updateSummary();
+
+    } catch (error) {
+        treatmentPlans = [];
+
+        renderTreatmentPlans();
+        updateSummary();
+
+        showAlert(
+            error.message ||
+            "Unable to load treatment plans.",
+            "error"
+        );
+    }
+}
+
+function renderTreatmentPlans() {
+    if (!treatmentPlans.length) {
+        planGrid.innerHTML = `
+            <div class="message">
+                <i class="fa-solid fa-notes-medical"></i>
+                No treatment plans have been created for you.
+            </div>
+        `;
+
+        return;
+    }
+
+    planGrid.innerHTML =
+        treatmentPlans
+            .map(
+                function (plan) {
+                    const completed =
+                        Number(
+                            plan.completedSessions || 0
+                        );
+
+                    const total =
+                        Number(
+                            plan.totalSessions || 0
+                        );
+
+                    const percentage =
+                        total > 0
+                            ? Math.min(
+                                100,
+                                Math.round(
+                                    (
+                                        completed /
+                                        total
+                                    ) * 100
+                                )
+                              )
+                            : 0;
+
+                    const canBook =
+                        String(
+                            plan.status || ""
+                        ).toUpperCase() ===
+                            "ACTIVE" &&
+                        Number(
+                            plan.remainingSessions || 0
+                        ) > 0;
+
+                    return `
+                        <article class="plan-card">
+
+                            <div class="plan-head">
+
+                                <div>
+
+                                    <h3>
+                                        ${escapeHtml(
+                                            plan.treatmentName ||
+                                            "Treatment Plan"
+                                        )}
+                                    </h3>
+
+                                    <p>
+                                        Created by
+                                        ${escapeHtml(
+                                            plan.doctorName ||
+                                            "Doctor"
+                                        )}
+                                    </p>
+
+                                </div>
+
+                                <span
+                                    class="badge ${statusClass(plan.status)}"
+                                >
+                                    ${escapeHtml(
+                                        formatLabel(
+                                            plan.status
+                                        )
+                                    )}
+                                </span>
+
+                            </div>
+
+                            <div class="plan-details">
+
+                                <div class="detail-box">
+                                    <span>Therapist</span>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            plan.therapistName ||
+                                            "-"
+                                        )}
+                                    </strong>
+                                </div>
+
+                                <div class="detail-box">
+                                    <span>Diagnosis</span>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            plan.diagnosis ||
+                                            "-"
+                                        )}
+                                    </strong>
+                                </div>
+
+                                <div class="detail-box">
+                                    <span>Start Date</span>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            formatDate(
+                                                plan.startDate
+                                            )
+                                        )}
+                                    </strong>
+                                </div>
+
+                                <div class="detail-box">
+                                    <span>Expected End Date</span>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            formatDate(
+                                                plan.expectedEndDate
+                                            )
+                                        )}
+                                    </strong>
+                                </div>
+
+                                <div class="detail-box">
+                                    <span>Completed Sessions</span>
+
+                                    <strong>
+                                        ${completed}
+                                    </strong>
+                                </div>
+
+                                <div class="detail-box">
+                                    <span>Remaining Sessions</span>
+
+                                    <strong>
+                                        ${Number(
+                                            plan.remainingSessions || 0
+                                        )}
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                            <div class="progress-wrap">
+
+                                <div class="progress-info">
+
+                                    <span>
+                                        Treatment Progress
+                                    </span>
+
+                                    <span>
+                                        ${completed}/${total}
+                                    </span>
+
+                                </div>
+
+                                <div class="progress-bar">
+
+                                    <div
+                                        class="progress-fill"
+                                        style="width:${percentage}%"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="plan-actions">
+
+                                <button
+                                    type="button"
+                                    class="btn secondary-btn"
+                                    onclick="viewPlanDetails(${Number(plan.id)})"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                    View Details
+                                </button>
+
+                                ${
+                                    canBook
+                                        ? `
+                                            <button
+                                                type="button"
+                                                class="btn primary-btn"
+                                                onclick="openBookSessionModal(${Number(plan.id)})"
+                                            >
+                                                <i class="fa-solid fa-calendar-plus"></i>
+                                                Book Next Session
+                                            </button>
+                                          `
+                                        : ""
+                                }
+
+                                <button
+                                    type="button"
+                                    class="btn info-btn"
+                                    onclick="showSessionsForPlan(${Number(plan.id)})"
+                                >
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                    View Sessions
+                                </button>
+
+                            </div>
+
+                        </article>
+                    `;
+                }
+            )
+            .join("");
+}
+
+/* =========================
+   DAILY SESSIONS
+   GET /api/daily-treatments/my-sessions
+========================== */
+
+async function loadDailySessions() {
+    sessionTableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="message">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading daily treatment sessions...
+            </td>
+        </tr>
+    `;
+
+    try {
+        const result =
+            await apiRequest(
+                "/api/daily-treatments/my-sessions",
+                {
+                    method:"GET"
+                }
+            );
+
+        dailySessions =
+            Array.isArray(
+                result.data
+            )
+                ? result.data
+                : [];
+
+        renderDailySessions(
+            dailySessions
+        );
+
+        updateSummary();
+
+    } catch (error) {
+        dailySessions = [];
+
+        renderDailySessions(
+            dailySessions
+        );
+
+        updateSummary();
+
+        showAlert(
+            error.message ||
+            "Unable to load daily treatment sessions.",
+            "error"
+        );
+    }
+}
+
+function renderDailySessions(
+    sessions
+) {
+    sessionResultCount.textContent =
+        `${sessions.length} session${
+            sessions.length === 1
+                ? ""
+                : "s"
+        }`;
+
+    if (!sessions.length) {
+        sessionTableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="message">
+                    <i class="fa-regular fa-calendar-xmark"></i>
+                    No daily treatment sessions found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    sessionTableBody.innerHTML =
+        sessions
+            .map(
+                function (session) {
+                    return `
+                        <tr>
+
+                            <td>
+                                <span class="session-title">
+                                    ${escapeHtml(
+                                        session.treatmentName ||
+                                        "Treatment"
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                Session
+                                ${Number(
+                                    session.sessionNumber || 0
+                                )}
+                                of
+                                ${Number(
+                                    session.totalSessions || 0
+                                )}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${escapeHtml(
+                                        formatDate(
+                                            session.sessionDate
+                                        )
+                                    )}
+                                </strong>
+
+                                <br>
+
+                                <small>
+                                    ${escapeHtml(
+                                        formatTime(
+                                            session.startTime
+                                        )
+                                    )}
+
+                                    ${
+                                        session.endTime
+                                            ? ` - ${escapeHtml(
+                                                formatTime(
+                                                    session.endTime
+                                                )
+                                              )}`
+                                            : ""
+                                    }
+                                </small>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    session.therapistName ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                <span
+                                    class="badge ${statusClass(session.status)}"
+                                >
+                                    ${escapeHtml(
+                                        formatLabel(
+                                            session.status
+                                        )
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    session.patientNotes ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    session.therapistNotes ||
+                                    "-"
+                                )}
+                            </td>
+
+                        </tr>
+                    `;
+                }
+            )
+            .join("");
+}
+
+/* =========================
+   SUMMARY
+========================== */
+
+function updateSummary() {
+    totalPlansCount.textContent =
+        treatmentPlans.length;
+
+    activePlansCount.textContent =
+        treatmentPlans.filter(
+            plan =>
+                String(
+                    plan.status || ""
+                ).toUpperCase() ===
+                "ACTIVE"
+        ).length;
+
+    bookedSessionsCount.textContent =
+        dailySessions.length;
+
+    completedSessionsCount.textContent =
+        dailySessions.filter(
+            session =>
+                String(
+                    session.status || ""
+                ).toUpperCase() ===
+                "COMPLETED"
+        ).length;
+}
+
+/* =========================
+   PLAN DETAILS
+========================== */
+
+function viewPlanDetails(id) {
+    const plan =
+        treatmentPlans.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!plan) {
+        showAlert(
+            "Treatment plan details are unavailable.",
+            "error"
+        );
+
+        return;
+    }
+
+    const completed =
+        Number(
+            plan.completedSessions || 0
+        );
+
+    const total =
+        Number(
+            plan.totalSessions || 0
+        );
+
+    planDetailsBody.innerHTML = `
+        <div class="plan-details">
+
+            <div class="detail-box full">
+                <span>Treatment Name</span>
+
+                <strong>
+                    ${escapeHtml(
+                        plan.treatmentName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Doctor</span>
+
+                <strong>
+                    ${escapeHtml(
+                        plan.doctorName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Therapist</span>
+
+                <strong>
+                    ${escapeHtml(
+                        plan.therapistName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box full">
+                <span>Diagnosis</span>
+
+                <p>
+                    ${escapeHtml(
+                        plan.diagnosis ||
+                        "-"
+                    )}
+                </p>
+            </div>
+
+            <div class="detail-box">
+                <span>Total Sessions</span>
+
+                <strong>
+                    ${total}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Completed / Remaining</span>
+
+                <strong>
+                    ${completed} /
+                    ${Number(
+                        plan.remainingSessions || 0
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Start Date</span>
+
+                <strong>
+                    ${escapeHtml(
+                        formatDate(
+                            plan.startDate
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Expected End Date</span>
+
+                <strong>
+                    ${escapeHtml(
+                        formatDate(
+                            plan.expectedEndDate
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box full">
+                <span>Instructions</span>
+
+                <p>
+                    ${escapeHtml(
+                        plan.instructions ||
+                        "-"
+                    )}
+                </p>
+            </div>
+
+            <div class="detail-box full">
+                <span>Doctor Notes</span>
+
+                <p>
+                    ${escapeHtml(
+                        plan.notes ||
+                        "-"
+                    )}
+                </p>
+            </div>
+
+            <div class="detail-box">
+                <span>Status</span>
+
+                <strong>
+                    ${escapeHtml(
+                        formatLabel(
+                            plan.status
+                        )
+                    )}
+                </strong>
+            </div>
+
+        </div>
+    `;
+
+    planDetailsModal.classList.add(
+        "show"
+    );
+}
+
+function closePlanDetailsModal() {
+    planDetailsModal.classList.remove(
+        "show"
+    );
+}
+
+function outsidePlanDetailsClose(event) {
+    if (
+        event.target ===
+        planDetailsModal
+    ) {
+        closePlanDetailsModal();
+    }
+}
+
+/* =========================
+   BOOK SESSION
+   POST /api/daily-treatments/book-session
+========================== */
+
+function openBookSessionModal(id) {
+    const plan =
+        treatmentPlans.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!plan) {
+        showAlert(
+            "Treatment plan details are unavailable.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (
+        String(
+            plan.status || ""
+        ).toUpperCase() !==
+        "ACTIVE"
+    ) {
+        showAlert(
+            "Only active treatment plans can be booked.",
+            "error"
+        );
+
+        return;
+    }
+
+    selectedPlan =
+        plan;
+
+    bookTreatmentPlanId.value =
+        plan.id;
+
+    bookTreatmentName.value =
+        plan.treatmentName ||
+        "Treatment Plan";
+
+    bookSessionDate.value =
+        "";
+
+    bookStartTime.value =
+        "";
+
+    bookPatientNotes.value =
+        "";
+
+    setMinimumSessionDate();
+
+    bookSessionModal.classList.add(
+        "show"
+    );
+}
+
+async function submitBookSession() {
+    const treatmentPlanId =
+        Number(
+            bookTreatmentPlanId.value
+        );
+
+    const sessionDate =
+        bookSessionDate.value;
+
+    const startTime =
+        bookStartTime.value;
+
+    const patientNotes =
+        bookPatientNotes
+            .value
+            .trim();
+
+    if (!treatmentPlanId) {
+        showAlert(
+            "Treatment plan ID is missing.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (
+        !sessionDate ||
+        !startTime
+    ) {
+        showAlert(
+            "Please select the session date and start time.",
+            "error"
+        );
+
+        return;
+    }
+
+    const button =
+        bookSessionButton;
+
+    const originalContent =
+        button.innerHTML;
+
+    button.disabled =
+        true;
+
+    button.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Booking...
+    `;
+
+    try {
+        const result =
+            await apiRequest(
+                "/api/daily-treatments/book-session",
+                {
+                    method:"POST",
+
+                    body:
+                        JSON.stringify({
+                            treatmentPlanId:
+                                treatmentPlanId,
+
+                            sessionDate:
+                                sessionDate,
+
+                            startTime:
+                                normalizeApiTime(
+                                    startTime
+                                ),
+
+                            patientNotes:
+                                patientNotes
+                        })
+                }
+            );
+
+        showAlert(
+            result.message ||
+            "Daily treatment session booked successfully.",
+            "success"
+        );
+
+        closeBookSessionModal();
+
+        await Promise.allSettled([
+            loadTreatmentPlans(),
+            loadDailySessions()
+        ]);
+
+        switchTab(
+            "sessions",
+            document.querySelector(
+                '[data-tab="sessions"]'
+            )
+        );
+
+    } catch (error) {
+        showAlert(
+            error.message ||
+            "Unable to book the treatment session.",
+            "error"
+        );
+
+    } finally {
+        button.disabled =
+            false;
+
+        button.innerHTML =
+            originalContent;
+    }
+}
+
+function closeBookSessionModal() {
+    bookSessionModal.classList.remove(
+        "show"
+    );
+
+    selectedPlan =
+        null;
+}
+
+function outsideBookSessionClose(event) {
+    if (
+        event.target ===
+        bookSessionModal
+    ) {
+        closeBookSessionModal();
+    }
+}
+
+function setMinimumSessionDate() {
+    const today =
+        new Date();
+
+    const value =
+        [
+            today.getFullYear(),
+            String(
+                today.getMonth() + 1
+            ).padStart(2,"0"),
+            String(
+                today.getDate()
+            ).padStart(2,"0")
+        ].join("-");
+
+    if (bookSessionDate) {
+        bookSessionDate.min =
+            value;
+    }
+}
+
+/* =========================
+   TABS
+========================== */
+
+function switchTab(
+    tabName,
+    button
+) {
+    document
+        .querySelectorAll(
+            ".tab-btn"
+        )
+        .forEach(
+            item =>
+                item.classList.remove(
+                    "active"
+                )
+        );
+
+    document
+        .querySelectorAll(
+            ".tab-panel"
+        )
+        .forEach(
+            panel =>
+                panel.classList.remove(
+                    "active"
+                )
+        );
+
+    button?.classList.add(
+        "active"
+    );
+
+    document
+        .getElementById(
+            `${tabName}Panel`
+        )
+        ?.classList
+        .add("active");
+}
+
+function showSessionsForPlan(
+    treatmentPlanId
+) {
+    const sessions =
+        dailySessions.filter(
+            session =>
+                String(
+                    session.treatmentPlanId
+                ) ===
+                String(
+                    treatmentPlanId
+                )
+        );
+
+    switchTab(
+        "sessions",
+        document.querySelector(
+            '[data-tab="sessions"]'
+        )
+    );
+
+    renderDailySessions(
+        sessions
+    );
+
+    if (!sessions.length) {
+        showAlert(
+            "No sessions are booked for this treatment plan.",
+            "info"
+        );
+    }
+}
+
+/* =========================
+   MOBILE MENU
+========================== */
+
+function toggleMobileMenu() {
+    mobileNav.classList.toggle(
+        "open"
+    );
+
+    mobileOverlay.classList.toggle(
+        "show"
+    );
+
+    document.body.style.overflow =
+        mobileNav.classList.contains(
+            "open"
+        )
+            ? "hidden"
+            : "";
+}
+
+function closeMobileMenu() {
+    mobileNav.classList.remove(
+        "open"
+    );
+
+    mobileOverlay.classList.remove(
+        "show"
+    );
+
+    document.body.style.overflow =
+        "";
+}
+
+/* =========================
+   UTILITIES
+========================== */
+
+function statusClass(value) {
+    const status =
+        String(
+            value || ""
+        ).toUpperCase();
+
+    if (
+        [
+            "ACTIVE",
+            "APPROVED",
+            "COMPLETED"
+        ].includes(status)
+    ) {
+        return "status-active";
+    }
+
+    if (
+        [
+            "PENDING",
+            "PENDING_APPROVAL",
+            "RESCHEDULED"
+        ].includes(status)
+    ) {
+        return "status-pending";
+    }
+
+    if (
+        [
+            "CANCELLED",
+            "MISSED",
+            "REJECTED"
+        ].includes(status)
+    ) {
+        return "status-cancelled";
+    }
+
+    return "status-default";
+}
+
+function formatLabel(value) {
+    return String(
+        value || "-"
+    )
+        .replaceAll("_"," ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(
+            `${String(value).substring(0,10)}T00:00:00`
+        );
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? String(value)
+        : date.toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                year:"numeric"
+            }
+        );
+}
+
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const [
+        hour,
+        minute
+    ] =
+        String(value)
+            .split(":");
+
+    const date =
+        new Date();
+
+    date.setHours(
+        Number(hour),
+        Number(minute) || 0,
+        0,
+        0
+    );
+
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour:"2-digit",
+            minute:"2-digit"
+        }
+    );
+}
+
+function normalizeApiTime(value) {
+    if (!value) {
+        return "";
+    }
+
+    return String(value).length === 5
+        ? `${value}:00`
+        : value;
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    alertBox.textContent =
+        message;
+
+    alertBox.className =
+        `alert show ${type}`;
+
+    clearTimeout(
+        showAlert.timer
+    );
+
+    showAlert.timer =
+        setTimeout(
+            function () {
+                alertBox.className =
+                    "alert";
+            },
+            3800
+        );
+}
+
+function escapeHtml(value) {
+    return String(
+        value ?? ""
+    ).replace(
+        /[&<>'"]/g,
+        character => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            "'":"&#39;",
+            '"':"&quot;"
+        })[character]
+    );
+}
+
+function clearSession() {
+    [
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "userId",
+        "name",
+        "userName",
+        "email",
+        "isLoggedIn"
+    ].forEach(
+        key =>
+            localStorage.removeItem(
+                key
+            )
+    );
+}
+</script>
+
+</body>
+</html>

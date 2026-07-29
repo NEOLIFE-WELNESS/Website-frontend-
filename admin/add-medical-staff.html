@@ -1143,11 +1143,11 @@
                         <div>
 
                             <h2>
-                                Medical Staff Information
+                                Create Medical Staff Account
                             </h2>
 
                             <p>
-                                Complete the required fields before saving.
+                                Enter the basic information required to create the staff login account.
                             </p>
 
                         </div>
@@ -1254,33 +1254,6 @@
 
                             <div class="form-group">
 
-                                <label for="emergencyContact">
-                                    Emergency Contact
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-phone-volume"></i>
-
-                                    <input
-                                        type="tel"
-                                        id="emergencyContact"
-                                        class="form-control"
-                                        placeholder="Enter emergency contact"
-                                        maxlength="10"
-                                    >
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="emergencyContactError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
                                 <label for="age">
                                     Age
                                     <span class="required">*</span>
@@ -1343,387 +1316,7 @@
 
                             </div>
 
-                            <div class="form-group full-width">
-
-                                <label for="address">
-                                    Address
-                                </label>
-
-                                <textarea
-                                    id="address"
-                                    class="form-control"
-                                    placeholder="Enter complete address"
-                                ></textarea>
-
-                                <div
-                                    class="field-error"
-                                    id="addressError"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="section-title">
-                            <i class="fa-solid fa-briefcase-medical"></i>
-                            Professional Information
-                        </div>
-
-                        <div class="form-grid">
-
-                            <div class="form-group">
-
-                                <label for="department">
-                                    Department
-                                    <span class="required">*</span>
-                                </label>
-
-                                <select
-                                    id="department"
-                                    class="form-control"
-                                >
-                                    <option value="">
-                                        Select department
-                                    </option>
-
-                                    <option value="Pharmacy">
-                                        Pharmacy
-                                    </option>
-
-                                    <option value="Inventory">
-                                        Inventory
-                                    </option>
-
-                                    <option value="Order Fulfillment">
-                                        Order Fulfillment
-                                    </option>
-
-                                    <option value="Patient Services">
-                                        Patient Services
-                                    </option>
-
-                                    <option value="Consultation Support">
-                                        Consultation Support
-                                    </option>
-
-                                    <option value="Billing">
-                                        Billing
-                                    </option>
-                                </select>
-
-                                <div
-                                    class="field-error"
-                                    id="departmentError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="designation">
-                                    Designation
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-id-badge"></i>
-
-                                    <input
-                                        type="text"
-                                        id="designation"
-                                        class="form-control"
-                                        placeholder="Example: Pharmacist"
-                                    >
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="designationError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="qualification">
-                                    Qualification
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-graduation-cap"></i>
-
-                                    <input
-                                        type="text"
-                                        id="qualification"
-                                        class="form-control"
-                                        placeholder="Example: B.Pharm"
-                                    >
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="qualificationError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="experience">
-                                    Experience
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-business-time"></i>
-
-                                    <input
-                                        type="text"
-                                        id="experience"
-                                        class="form-control"
-                                        placeholder="Example: 5 Years"
-                                    >
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="experienceError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="joiningDate">
-                                    Joining Date
-                                    <span class="required">*</span>
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="joiningDate"
-                                    class="form-control"
-                                >
-
-                                <div
-                                    class="field-error"
-                                    id="joiningDateError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="shift">
-                                    Shift
-                                    <span class="required">*</span>
-                                </label>
-
-                                <select
-                                    id="shift"
-                                    class="form-control"
-                                >
-                                    <option value="">
-                                        Select shift
-                                    </option>
-
-                                    <option value="Morning">
-                                        Morning
-                                    </option>
-
-                                    <option value="Evening">
-                                        Evening
-                                    </option>
-
-                                    <option value="General">
-                                        General
-                                    </option>
-
-                                    <option value="Rotational">
-                                        Rotational
-                                    </option>
-                                </select>
-
-                                <div
-                                    class="field-error"
-                                    id="shiftError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group full-width">
-
-                                <label for="notes">
-                                    Staff Notes
-                                </label>
-
-                                <textarea
-                                    id="notes"
-                                    class="form-control"
-                                    placeholder="Enter role responsibilities or notes"
-                                ></textarea>
-
-                                <div
-                                    class="field-error"
-                                    id="notesError"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="section-title">
-                            <i class="fa-solid fa-lock"></i>
-                            Login Access
-                        </div>
-
-                        <div class="form-grid">
-
-                            <div class="form-group">
-
-                                <label for="password">
-                                    Temporary Password
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-key"></i>
-
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        class="form-control"
-                                        placeholder="Minimum 8 characters"
-                                        autocomplete="new-password"
-                                    >
-
-                                    <button
-                                        type="button"
-                                        class="password-toggle"
-                                        onclick="togglePassword('password', this)"
-                                        aria-label="Show password"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="passwordError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="confirmPassword">
-                                    Confirm Password
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="input-wrapper">
-
-                                    <i class="fa-solid fa-key"></i>
-
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        class="form-control"
-                                        placeholder="Re-enter password"
-                                        autocomplete="new-password"
-                                    >
-
-                                    <button
-                                        type="button"
-                                        class="password-toggle"
-                                        onclick="togglePassword('confirmPassword', this)"
-                                        aria-label="Show password"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    class="field-error"
-                                    id="confirmPasswordError"
-                                ></div>
-
-                            </div>
-
-                            <div class="form-group full-width">
-
-                                <label>
-                                    Account Status
-                                    <span class="required">*</span>
-                                </label>
-
-                                <div class="status-options">
-
-                                    <div class="status-option">
-
-                                        <input
-                                            type="radio"
-                                            id="statusActive"
-                                            name="status"
-                                            value="ACTIVE"
-                                            checked
-                                        >
-
-                                        <label for="statusActive">
-                                            <i class="fa-solid fa-circle-check"></i>
-                                            Active
-                                        </label>
-
-                                    </div>
-
-                                    <div class="status-option">
-
-                                        <input
-                                            type="radio"
-                                            id="statusInactive"
-                                            name="status"
-                                            value="INACTIVE"
-                                        >
-
-                                        <label for="statusInactive">
-                                            <i class="fa-solid fa-circle-xmark"></i>
-                                            Inactive
-                                        </label>
-
-                                    </div>
-
-                                    <div class="status-option">
-
-                                        <input
-                                            type="radio"
-                                            id="statusLeave"
-                                            name="status"
-                                            value="ON_LEAVE"
-                                        >
-
-                                        <label for="statusLeave">
-                                            <i class="fa-solid fa-calendar-minus"></i>
-                                            On Leave
-                                        </label>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
+                        </div></div>
 
                     <div class="form-actions">
 
@@ -1771,14 +1364,11 @@
         document.addEventListener(
             "DOMContentLoaded",
             function () {
-                /*
-                Backend/login mode is disabled temporarily.
+                if (!requireAdminLogin()) {
+                    return;
+                }
 
-                requireAdminLogin();
                 loadAdminProfile();
-                */
-
-                setDefaultJoiningDate();
 
                 document
                     .getElementById(
@@ -1786,45 +1376,152 @@
                     )
                     .addEventListener(
                         "submit",
-                        saveMedicalStaff
+                        createMedicalStaff
                     );
             }
         );
 
-        function setDefaultJoiningDate() {
-            const date =
-                new Date();
+        /* =========================
+           AUTHENTICATION
+        ========================== */
 
-            const year =
-                date.getFullYear();
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            document.getElementById(
-                "joiningDate"
-            ).value =
-                `${year}-${month}-${day}`;
+        function getToken() {
+            return (
+                localStorage.getItem("token") ||
+                ""
+            );
         }
 
-        async function saveMedicalStaff(event) {
+        function requireAdminLogin() {
+            if (!getToken()) {
+                window.location.href =
+                    "../frontend/login.html";
+
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearAuthentication() {
+            [
+                "token",
+                "refreshToken",
+                "role",
+                "userId",
+                "name",
+                "userName"
+            ].forEach(
+                function (key) {
+                    localStorage.removeItem(key);
+                }
+            );
+        }
+
+        /* =========================
+           LOAD LOGGED-IN ADMIN
+        ========================== */
+
+        async function loadAdminProfile() {
+            const storedName =
+                localStorage.getItem("name") ||
+                localStorage.getItem("userName") ||
+                "Admin";
+
+            setAdminHeader(
+                storedName,
+                localStorage.getItem("role") ||
+                "ADMIN"
+            );
+
+            try {
+                const response = await fetch(
+                    API_BASE_URL +
+                    "/api/users/getProfile",
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "Accept": "application/json",
+                            "Authorization":
+                                "Bearer " + getToken()
+                        }
+                    }
+                );
+
+                const result =
+                    await safelyReadResponse(response);
+
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    window.location.href =
+                        "../frontend/login.html";
+
+                    return;
+                }
+
+                if (
+                    response.ok &&
+                    result?.success &&
+                    result?.data
+                ) {
+                    const user = result.data;
+
+                    setAdminHeader(
+                        user.name ||
+                        user.userName ||
+                        storedName,
+
+                        user.role ||
+                        "ADMIN"
+                    );
+                }
+
+            } catch (error) {
+                console.error(
+                    "Unable to load admin profile:",
+                    error
+                );
+            }
+        }
+
+        function setAdminHeader(name, role) {
+            document.getElementById(
+                "adminName"
+            ).textContent =
+                name || "Admin";
+
+            document.getElementById(
+                "adminRole"
+            ).textContent =
+                formatStatus(
+                    role || "ADMIN"
+                );
+
+            document.getElementById(
+                "adminAvatar"
+            ).textContent =
+                String(
+                    name || "A"
+                )
+                .charAt(0)
+                .toUpperCase();
+        }
+
+        /* =========================
+           CREATE MEDICAL STAFF
+        ========================== */
+
+        async function createMedicalStaff(event) {
             event.preventDefault();
 
             clearAllErrors();
 
             const payload =
-                getFormPayload();
+                getCreatePayload();
 
-            if (
-                !validateForm(payload)
-            ) {
+            if (!validateForm(payload)) {
                 showAlert(
                     "Please correct the highlighted fields.",
                     "error"
@@ -1844,71 +1541,107 @@
             );
 
             try {
-                /*
-                Enable this API block later:
+                const response = await fetch(
+                    API_BASE_URL +
+                    "/api/medical-staff/create",
+                    {
+                        method: "POST",
 
-                const token =
-                    localStorage.getItem("token");
+                        headers: {
+                            "Content-Type":
+                                "application/json",
 
-                const response =
-                    await fetch(
-                        API_BASE_URL +
-                        "/api/admin/medical-staff",
-                        {
-                            method: "POST",
+                            "Accept":
+                                "application/json",
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json",
+                            "Authorization":
+                                "Bearer " + getToken()
+                        },
 
-                                "Authorization":
-                                    "Bearer " + token
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    payload
-                                )
-                        }
-                    );
+                        body:
+                            JSON.stringify(payload)
+                    }
+                );
 
                 const result =
-                    await response.json();
+                    await safelyReadResponse(
+                        response
+                    );
+
+                if (response.status === 401) {
+                    clearAuthentication();
+
+                    throw new Error(
+                        "Your login session has expired. Please login again."
+                    );
+                }
+
+                if (response.status === 403) {
+                    throw new Error(
+                        result?.message ||
+                        "Only an administrator can create medical staff."
+                    );
+                }
 
                 if (
                     !response.ok ||
-                    result.success === false
+                    result?.success === false
                 ) {
                     throw new Error(
-                        result.message ||
-                        "Medical staff could not be added."
+                        result?.message ||
+                        "Medical staff account could not be created."
                     );
                 }
-                */
-
-                saveDemoMedicalStaff(payload);
 
                 showAlert(
-                    "Medical staff added successfully.",
+                    result?.message ||
+                    "Medical staff account created successfully.",
                     "success"
                 );
+
+                /*
+                 * The backend should send a setup token/link.
+                 * The staff member then uses:
+                 * POST /api/auth/set-password
+                 * and later:
+                 * POST /api/medical-staff/complete-profile
+                 */
 
                 setTimeout(
                     function () {
                         window.location.href =
                             "admin-medical-staff.html";
                     },
-                    900
+                    1300
                 );
 
             } catch (error) {
-                console.error(error);
+                console.error(
+                    "Create medical staff error:",
+                    error
+                );
 
                 showAlert(
                     error.message ||
-                    "Medical staff could not be added.",
+                    "Medical staff account could not be created.",
                     "error"
                 );
+
+                if (
+                    String(
+                        error.message || ""
+                    )
+                    .toLowerCase()
+                    .includes("expired")
+                ) {
+                    setTimeout(
+                        function () {
+                            window.location.href =
+                                "../frontend/login.html";
+                        },
+                        1300
+                    );
+                }
 
             } finally {
                 setButtonLoading(
@@ -1918,22 +1651,17 @@
             }
         }
 
-        function getFormPayload() {
+        function getCreatePayload() {
             return {
                 name:
                     getValue("name"),
 
                 email:
                     getValue("email")
-                        .toLowerCase(),
+                    .toLowerCase(),
 
-                phone:
+                phoneNumber:
                     getValue("phone"),
-
-                emergencyContact:
-                    getValue(
-                        "emergencyContact"
-                    ),
 
                 age:
                     Number(
@@ -1941,43 +1669,8 @@
                     ),
 
                 gender:
-                    getValue("gender"),
-
-                address:
-                    getValue("address"),
-
-                department:
-                    getValue("department"),
-
-                designation:
-                    getValue("designation"),
-
-                qualification:
-                    getValue("qualification"),
-
-                experience:
-                    getValue("experience"),
-
-                joiningDate:
-                    getValue("joiningDate"),
-
-                shift:
-                    getValue("shift"),
-
-                notes:
-                    getValue("notes"),
-
-                password:
-                    getValue("password"),
-
-                role:
-                    "MEDICAL_STAFF",
-
-                status:
-                    document.querySelector(
-                        'input[name="status"]:checked'
-                    )?.value ||
-                    "ACTIVE"
+                    getValue("gender")
+                    .toUpperCase()
             };
         }
 
@@ -1985,6 +1678,7 @@
             let valid = true;
 
             if (
+                !payload.name ||
                 payload.name.length < 3
             ) {
                 setFieldError(
@@ -2010,26 +1704,12 @@
 
             if (
                 !isValidPhone(
-                    payload.phone
+                    payload.phoneNumber
                 )
             ) {
                 setFieldError(
                     "phone",
                     "Enter a valid 10-digit phone number."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.emergencyContact &&
-                !isValidPhone(
-                    payload.emergencyContact
-                )
-            ) {
-                setFieldError(
-                    "emergencyContact",
-                    "Enter a valid 10-digit contact number."
                 );
 
                 valid = false;
@@ -2048,7 +1728,15 @@
                 valid = false;
             }
 
-            if (!payload.gender) {
+            if (
+                ![
+                    "MALE",
+                    "FEMALE",
+                    "OTHER"
+                ].includes(
+                    payload.gender
+                )
+            ) {
                 setFieldError(
                     "gender",
                     "Select gender."
@@ -2057,127 +1745,12 @@
                 valid = false;
             }
 
-            if (!payload.department) {
-                setFieldError(
-                    "department",
-                    "Select department."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.designation.length < 2
-            ) {
-                setFieldError(
-                    "designation",
-                    "Enter designation."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.qualification.length < 2
-            ) {
-                setFieldError(
-                    "qualification",
-                    "Enter qualification."
-                );
-
-                valid = false;
-            }
-
-            if (!payload.joiningDate) {
-                setFieldError(
-                    "joiningDate",
-                    "Select joining date."
-                );
-
-                valid = false;
-            }
-
-            if (!payload.shift) {
-                setFieldError(
-                    "shift",
-                    "Select shift."
-                );
-
-                valid = false;
-            }
-
-            if (
-                payload.password.length < 8
-            ) {
-                setFieldError(
-                    "password",
-                    "Password must contain at least 8 characters."
-                );
-
-                valid = false;
-            }
-
-            const confirmPassword =
-                getValue(
-                    "confirmPassword"
-                );
-
-            if (
-                payload.password !==
-                confirmPassword
-            ) {
-                setFieldError(
-                    "confirmPassword",
-                    "Passwords do not match."
-                );
-
-                valid = false;
-            }
-
             return valid;
         }
 
-        function saveDemoMedicalStaff(
-            payload
-        ) {
-            const existing =
-                JSON.parse(
-                    localStorage.getItem(
-                        "demoMedicalStaff"
-                    ) ||
-                    "[]"
-                );
-
-            const generatedId =
-                Date.now();
-
-            const newStaff = {
-                id:
-                    generatedId,
-
-                staffCode:
-                    "MED-" +
-                    String(
-                        generatedId
-                    ).slice(-4),
-
-                ...payload,
-
-                lastLogin:
-                    null
-            };
-
-            delete newStaff.password;
-
-            existing.push(
-                newStaff
-            );
-
-            localStorage.setItem(
-                "demoMedicalStaff",
-                JSON.stringify(existing)
-            );
-        }
+        /* =========================
+           FORM HELPERS
+        ========================== */
 
         function resetMedicalStaffForm() {
             document
@@ -2187,43 +1760,11 @@
                 .reset();
 
             clearAllErrors();
-            setDefaultJoiningDate();
-
-            document.getElementById(
-                "statusActive"
-            ).checked = true;
 
             showAlert(
                 "Form reset successfully.",
                 "info"
             );
-        }
-
-        function togglePassword(
-            inputId,
-            button
-        ) {
-            const input =
-                document.getElementById(
-                    inputId
-                );
-
-            const icon =
-                button.querySelector("i");
-
-            const shouldShow =
-                input.type ===
-                "password";
-
-            input.type =
-                shouldShow
-                    ? "text"
-                    : "password";
-
-            icon.className =
-                shouldShow
-                    ? "fa-solid fa-eye-slash"
-                    : "fa-solid fa-eye";
         }
 
         function setButtonLoading(
@@ -2236,13 +1777,13 @@
             button.innerHTML =
                 loading
                     ? `
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Saving...
-                    `
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Creating Account...
+                      `
                     : `
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    Save Medical Staff
-                    `;
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Medical Staff
+                      `;
         }
 
         function setFieldError(
@@ -2277,10 +1818,11 @@
                     ".form-control"
                 )
                 .forEach(
-                    field =>
+                    function (field) {
                         field.classList.remove(
                             "error"
-                        )
+                        );
+                    }
                 );
 
             document
@@ -2288,9 +1830,9 @@
                     ".field-error"
                 )
                 .forEach(
-                    error =>
-                        error.textContent =
-                            ""
+                    function (error) {
+                        error.textContent = "";
+                    }
                 );
         }
 
@@ -2305,10 +1847,53 @@
         }
 
         function getValue(id) {
-            return document
-                .getElementById(id)
-                .value
-                .trim();
+            const element =
+                document.getElementById(id);
+
+            return element
+                ? element.value.trim()
+                : "";
+        }
+
+        async function safelyReadResponse(
+            response
+        ) {
+            const responseText =
+                await response.text();
+
+            if (!responseText) {
+                return null;
+            }
+
+            try {
+                return JSON.parse(
+                    responseText
+                );
+
+            } catch (error) {
+                return {
+                    success: false,
+                    message:
+                        responseText
+                };
+            }
+        }
+
+        function formatStatus(value) {
+            return String(
+                value || ""
+            )
+            .replaceAll(
+                "_",
+                " "
+            )
+            .toLowerCase()
+            .replace(
+                /\b\w/g,
+                function (character) {
+                    return character.toUpperCase();
+                }
+            );
         }
 
         function goBackToStaff() {
@@ -2349,21 +1934,7 @@
         }
 
         function logoutAdmin() {
-            localStorage.removeItem(
-                "token"
-            );
-
-            localStorage.removeItem(
-                "refreshToken"
-            );
-
-            localStorage.removeItem(
-                "role"
-            );
-
-            localStorage.removeItem(
-                "userId"
-            );
+            clearAuthentication();
 
             window.location.href =
                 "../frontend/login.html";
@@ -2391,9 +1962,7 @@
             box.className =
                 `page-alert show ${type}`;
 
-            if (
-                type === "success"
-            ) {
+            if (type === "success") {
                 icon.className =
                     "fa-solid fa-circle-check";
 

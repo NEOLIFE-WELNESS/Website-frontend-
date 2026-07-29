@@ -79,15 +79,23 @@ textarea.control{min-height:100px;resize:vertical;line-height:1.5}
   <nav class="menu">
     <span class="menu-label">Main</span>
     <a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
-    <a href="patients.html"><i class="fa-solid fa-users"></i>Patients</a>
+    <a href="patients.html"><i class="fa-solid fa-users"></i>Patient Dashboard</a>
     <a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
     <a href="doctor-availability.html">
-                    <i class="fa-solid fa-users"></i>
+                    <i class="fa-solid fa-clock"></i>
                     Manage Availability
                 </a>
     <span class="menu-label">Clinical</span>
     
     <a href="doctor-appointments.html"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
+    <a href="video-recordings.html"><i class="fa-solid fa-video"></i>Video Recordings</a>
+
+    <span class="menu-label">Finance</span>
+
+    <a href="transactions.html"><i class="fa-solid fa-indian-rupee-sign"></i>Transactions</a>
+
+    <span class="menu-label">Account</span>
+
     <a href="doctor-profile.html"><i class="fa-solid fa-user-doctor"></i>My Profile</a>
   </nav>
   <div class="sidebar-footer"><button class="logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
@@ -99,7 +107,13 @@ textarea.control{min-height:100px;resize:vertical;line-height:1.5}
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
     <div><h1>Prescription Pad</h1><p>Create and finalize a prescription for an appointment.</p></div>
   </div>
-  <div class="doctor-box"><div class="avatar" id="doctorInitial">D</div><div><strong id="doctorName">Doctor</strong><span>Medical Consultant</span></div></div>
+  <div class="doctor-box">
+      <div class="avatar" id="doctorInitial">D</div>
+      <div>
+        <strong id="doctorName">Loading...</strong>
+        <span id="doctorRole">Doctor</span>
+      </div>
+    </div>
 </header>
 
 <section class="content">
@@ -181,7 +195,10 @@ let prescriptionFinalized=false;
 let savedMedicineKeys=new Set();
 
 document.addEventListener("DOMContentLoaded",async()=>{
-  requireDoctor();
+  if(!requireDoctor()){
+    return;
+  }
+
   const params=new URLSearchParams(location.search);
   appointmentId=params.get("appointmentId")||params.get("id");
   patientId=params.get("patientId");
@@ -197,8 +214,25 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 function token(){return localStorage.getItem("token")||localStorage.getItem("doctorToken")}
 function requireDoctor(){
-  if(!token()){location.href="../patient/login.html";return}
-  if((localStorage.getItem("role")||"").toUpperCase()!=="DOCTOR"){location.href="../patient/login.html"}
+  const doctorToken=token();
+
+  const role=
+    String(
+      localStorage.getItem("role")||
+      ""
+    ).toUpperCase();
+
+  if(!doctorToken){
+    location.href="../patient/login.html";
+    return false;
+  }
+
+  if(role&&role!=="DOCTOR"){
+    location.href="../patient/login.html";
+    return false;
+  }
+
+  return true;
 }
 async function api(endpoint,options={}){
   const headers={"Accept":"application/json",...(options.headers||{})};
@@ -208,48 +242,107 @@ async function api(endpoint,options={}){
   const text=await response.text();
   let result={};
   try{result=text?JSON.parse(text):{}}catch{result={success:false,message:text||`Server error (${response.status})`}}
-  if(response.status===401||response.status===403){logout();throw new Error("Session expired")}
+  if(response.status===401||response.status===403){
+    clearDoctorSession();
+    location.href="../patient/login.html";
+    throw new Error(
+      result.message||
+      "Session expired"
+    );
+  }
   if(!response.ok||result.success===false)throw new Error(result.message||"Request failed");
   return result;
 }
 async function loadDoctorProfile(){
-  /*
-   * /api/users/getProfile may be restricted for the DOCTOR role in the
-   * current backend. Use stored login data first so this page does not fail.
-   */
-  const storedName =
-    localStorage.getItem("doctorName") ||
-    localStorage.getItem("userName") ||
-    localStorage.getItem("name");
+  const storedName=
+    localStorage.getItem("doctorName")||
+    localStorage.getItem("userName")||
+    localStorage.getItem("name")||
+    "Doctor";
 
-  let name = storedName || "Doctor";
+  updateDoctorHeader(storedName);
 
-  const storedDoctor =
-    localStorage.getItem("doctor");
+  try{
+    const result=await api(
+      "/api/doctors/my-profile"
+    );
 
-  if(storedDoctor){
-    try{
-      const doctor = JSON.parse(storedDoctor);
+    const doctor=
+      result.data||{};
 
-      name =
-        doctor.name ||
-        doctor.doctorName ||
-        doctor.user?.name ||
-        name;
-    }catch(error){
-      console.warn(
-        "Unable to read stored doctor profile:",
-        error
+    const name=
+      doctor.name||
+      doctor.doctorName||
+      storedName;
+
+    updateDoctorHeader(name);
+
+    if(
+      doctor.id!==null&&
+      doctor.id!==undefined
+    ){
+      localStorage.setItem(
+        "doctorId",
+        String(doctor.id)
       );
     }
-  }
 
-  doctorName.textContent = name;
-  doctorInitial.textContent =
-    name.replace(/^Dr\.?\s*/i,"")
-        .charAt(0)
-        .toUpperCase() || "D";
+    if(doctor.email){
+      localStorage.setItem(
+        "email",
+        doctor.email
+      );
+    }
+
+    localStorage.setItem(
+      "doctor",
+      JSON.stringify(doctor)
+    );
+
+  }catch(error){
+    console.error(
+      "Unable to load doctor profile:",
+      error
+    );
+
+    updateDoctorHeader(storedName);
+
+    showAlert(
+      error.message||
+      "Unable to load doctor profile.",
+      "error"
+    );
+  }
 }
+
+function updateDoctorHeader(name){
+  const cleanName=
+    String(name||"Doctor").trim();
+
+  const initial=
+    (
+      cleanName
+        .replace(/^Dr\\.?\\s*/i,"")
+        .trim()
+        .charAt(0)
+      ||"D"
+    ).toUpperCase();
+
+  doctorName.textContent=
+    cleanName;
+
+  doctorRole.textContent=
+    "Doctor";
+
+  doctorInitial.textContent=
+    initial;
+
+  localStorage.setItem(
+    "doctorName",
+    cleanName
+  );
+}
+
 async function loadProducts(){
   try{
     const r=await fetch(API_BASE_URL+"/api/products/getAll");
@@ -713,7 +806,29 @@ function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;",
 function goBack(){location.href="doctor-appointments.html"}
 function toggleSidebar(){sidebar.classList.toggle("open");overlay.classList.toggle("show")}
 function closeSidebar(){sidebar.classList.remove("open");overlay.classList.remove("show")}
-function logout(){["token","doctorToken","refreshToken","doctorRefreshToken","role","profileCompleted","isLoggedIn","userId"].forEach(k=>localStorage.removeItem(k));location.href="../patient/login.html"}
+function clearDoctorSession(){
+  [
+    "token",
+    "doctorToken",
+    "refreshToken",
+    "doctorRefreshToken",
+    "role",
+    "doctorId",
+    "doctorName",
+    "doctor",
+    "profileCompleted",
+    "isLoggedIn",
+    "userId",
+    "email"
+  ].forEach(
+    key=>localStorage.removeItem(key)
+  );
+}
+
+function logout(){
+  clearDoctorSession();
+  location.href="../patient/login.html";
+}
 </script>
 </body>
 </html>

@@ -1096,74 +1096,120 @@ function authHeaders() {
 ===================================================== */
 
 async function loadMyAppointments() {
-  const list = document.getElementById("appointmentList");
+  const list =
+    document.getElementById(
+      "appointmentList"
+    );
 
   list.innerHTML = `
     <div class="appointment-message">
       <i class="fa-solid fa-spinner fa-spin"></i>
-      Loading your appointments...
+      Loading your appointments and consultations...
     </div>
   `;
 
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/appointments/my-appointments`,
-      {
-        method: "GET",
-        headers: authHeaders()
-      }
-    );
+    const [
+      appointmentResult,
+      consultationResult
+    ] = await Promise.allSettled([
+      fetchPatientRecords(
+        "/api/appointments/my-appointments"
+      ),
 
-    const result = await safelyReadResponse(response);
+      fetchPatientRecords(
+        "/api/consultations/my-consultations"
+      )
+    ]);
 
-    if (response.status === 401) {
-      clearAuthentication();
+    let appointments = [];
+    let consultations = [];
+    const errors = [];
 
-      throw new Error(
-        "Your login session has expired. Please login again."
+    if (
+      appointmentResult.status ===
+      "fulfilled"
+    ) {
+      appointments =
+        Array.isArray(
+          appointmentResult.value
+        )
+          ? appointmentResult.value
+          : [];
+
+    } else {
+      errors.push(
+        appointmentResult.reason?.message ||
+        "Unable to load offline appointments."
       );
     }
 
-    if (response.status === 403) {
-      throw new Error(
-        result?.message ||
-        "You are not authorized to view these appointments."
+    if (
+      consultationResult.status ===
+      "fulfilled"
+    ) {
+      consultations =
+        Array.isArray(
+          consultationResult.value
+        )
+          ? consultationResult.value
+          : [];
+
+    } else {
+      errors.push(
+        consultationResult.reason?.message ||
+        "Unable to load online consultations."
       );
     }
 
-    if (!response.ok) {
-      throw new Error(
-        result?.message ||
-        "Unable to load your appointments."
-      );
-    }
+    allAppointments = [
+      ...appointments.map(
+        normalizeAppointment
+      ),
 
-    if (result && result.success === false) {
-      throw new Error(
-        result.message ||
-        "Unable to load your appointments."
-      );
-    }
-
-    const appointments = Array.isArray(result?.data)
-      ? result.data
-      : [];
-
-    allAppointments = appointments.map(normalizeAppointment);
+      ...consultations.map(
+        normalizeConsultation
+      )
+    ];
 
     renderAppointments();
 
+    if (
+      errors.length &&
+      allAppointments.length
+    ) {
+      console.warn(
+        "Some records could not be loaded:",
+        errors
+      );
+    }
+
+    if (
+      errors.length &&
+      !allAppointments.length
+    ) {
+      throw new Error(
+        errors.join(" ")
+      );
+    }
+
   } catch (error) {
-    console.error("Load appointments error:", error);
+    console.error(
+      "Load patient records error:",
+      error
+    );
 
     list.innerHTML = `
       <div class="appointment-message">
         <i class="fa-solid fa-triangle-exclamation"></i>
+
         ${escapeHtml(
           error.message ||
           "Unable to load your appointments."
         )}
+
         <br><br>
+
         <button
           type="button"
           class="btn view-btn"
@@ -1173,17 +1219,58 @@ async function loadMyAppointments() {
         </button>
       </div>
     `;
-
-    if (
-      String(error.message || "")
-        .toLowerCase()
-        .includes("expired")
-    ) {
-      setTimeout(function () {
-        window.location.href = "../login.html";
-      }, 1400);
-    }
   }
+}
+
+async function fetchPatientRecords(
+  endpoint
+) {
+  const response =
+    await fetch(
+      API_BASE_URL + endpoint,
+      {
+        method: "GET",
+        headers:
+          authHeaders()
+      }
+    );
+
+  const result =
+    await safelyReadResponse(
+      response
+    );
+
+  if (
+    response.status === 401 ||
+    response.status === 403
+  ) {
+    if (
+      response.status === 401
+    ) {
+      clearAuthentication();
+    }
+
+    throw new Error(
+      result?.message ||
+      "You are not authorized to view these records."
+    );
+  }
+
+  if (
+    !response.ok ||
+    result?.success === false
+  ) {
+    throw new Error(
+      result?.message ||
+      "Unable to load patient records."
+    );
+  }
+
+  return Array.isArray(
+    result?.data
+  )
+    ? result.data
+    : [];
 }
 
 /* =====================================================
@@ -1192,6 +1279,8 @@ async function loadMyAppointments() {
 
 function normalizeAppointment(item) {
   return {
+    recordType: "APPOINTMENT",
+
     id: item.id,
 
     appointmentNumber:
@@ -1286,6 +1375,115 @@ function normalizeAppointment(item) {
 
     meetingLink:
       item.meetingLink || null,
+
+    prescriptionId:
+      item.prescriptionId || null,
+
+    reviewAllowed:
+      Boolean(item.reviewAllowed)
+  };
+}
+
+function normalizeConsultation(item) {
+  return {
+    recordType: "CONSULTATION",
+
+    id:
+      item.id,
+
+    appointmentNumber:
+      item.consultationNumber ||
+      `CON-${item.id || ""}`,
+
+    appointmentType:
+      "ONLINE",
+
+    doctorId:
+      item.doctorId,
+
+    doctorName:
+      item.doctorName ||
+      item.doctor ||
+      "Doctor",
+
+    department:
+      item.doctorSpecialization ||
+      item.specialization ||
+      "Online Consultation",
+
+    appointmentDate:
+      item.consultationDate,
+
+    startTime:
+      item.startTime ||
+      item.consultationTime ||
+      item.time,
+
+    endTime:
+      item.endTime || "",
+
+    appointmentTime:
+      formatTimeRange(
+        item.startTime ||
+        item.consultationTime ||
+        item.time,
+        item.endTime
+      ),
+
+    status:
+      item.status ||
+      "PENDING_DOCTOR_CONFIRMATION",
+
+    paymentStatus:
+      item.paymentStatus ||
+      "NOT_REQUIRED_YET",
+
+    symptoms:
+      item.symptoms || "",
+
+    pastMedicalHistory:
+      item.pastMedicalHistory || "",
+
+    cancellationReason:
+      item.cancellationReason || "",
+
+    rescheduleReason:
+      item.rescheduleReason || "",
+
+    bookingFee:
+      item.consultationFee ?? 200,
+
+    patientId:
+      item.patientId,
+
+    patientName:
+      item.patientName,
+
+    phoneNumber:
+      item.phoneNumber,
+
+    age:
+      item.age,
+
+    gender:
+      item.gender,
+
+    createdAt:
+      item.createdAt,
+
+    updatedAt:
+      item.updatedAt,
+
+    location:
+      item.meetingLink
+        ? "Online Video Consultation"
+        : "Meeting link will be provided after payment",
+
+    meetingLink:
+      item.meetingLink || null,
+
+    meetingLinkExpiresAt:
+      item.meetingLinkExpiresAt || null,
 
     prescriptionId:
       item.prescriptionId || null,
@@ -1443,7 +1641,11 @@ function createAppointmentCard(item) {
           </p>
 
           <p>
-            <strong>Booking Fee:</strong>
+            <strong>${
+              item.recordType === "CONSULTATION"
+                ? "Consultation Fee"
+                : "Booking Fee"
+            }:</strong>
             ${
               item.bookingFee != null
                 ? `₹${escapeHtml(
@@ -1487,14 +1689,52 @@ function createAppointmentCard(item) {
 }
 
 function createStatusActions(item) {
-  const status = normalize(item.status);
-  const paymentStatus = normalize(item.paymentStatus);
+  const status =
+    normalize(item.status);
+
+  const paymentStatus =
+    normalize(
+      item.paymentStatus
+    );
+
+  const isConsultation =
+    item.recordType ===
+    "CONSULTATION";
 
   let html = "";
 
   if (
-    status === "PAYMENT_PENDING" ||
-    paymentStatus === "PENDING"
+    isConsultation &&
+    (
+      status ===
+        "PAYMENT_PENDING" ||
+      paymentStatus ===
+        "PENDING"
+    )
+  ) {
+    html += `
+      <button
+        type="button"
+        class="btn pay-btn"
+        onclick="payConsultation(${Number(item.id)})"
+      >
+        Pay ₹${escapeHtml(
+          formatMoney(
+            item.bookingFee || 200
+          )
+        )}
+      </button>
+    `;
+  }
+
+  if (
+    !isConsultation &&
+    (
+      status ===
+        "PAYMENT_PENDING" ||
+      paymentStatus ===
+        "PENDING"
+    )
   ) {
     html += `
       <button
@@ -1503,15 +1743,22 @@ function createStatusActions(item) {
         onclick="payAppointment(${Number(item.id)})"
       >
         Pay ₹${escapeHtml(
-          formatMoney(item.bookingFee || 50)
+          formatMoney(
+            item.bookingFee || 50
+          )
         )}
       </button>
     `;
   }
 
   if (
-    normalize(item.appointmentType) === "ONLINE" &&
-    paymentStatus === "PAID" &&
+    isConsultation &&
+    [
+      "SUCCESS",
+      "PAID"
+    ].includes(
+      paymentStatus
+    ) &&
     item.meetingLink
   ) {
     html += `
@@ -1552,23 +1799,38 @@ function createStatusActions(item) {
       "NO_SHOW"
     ].includes(status)
   ) {
-    html += `
-      <button
-        type="button"
-        class="btn reschedule-btn"
-        onclick="requestReschedule(${Number(item.id)})"
-      >
-        Reschedule
-      </button>
+    if (
+      isConsultation
+    ) {
+      html += `
+        <button
+          type="button"
+          class="btn cancel-btn"
+          onclick="cancelConsultation(${Number(item.id)})"
+        >
+          Cancel Consultation
+        </button>
+      `;
 
-      <button
-        type="button"
-        class="btn cancel-btn"
-        onclick="cancelAppointment(${Number(item.id)})"
-      >
-        Cancel
-      </button>
-    `;
+    } else {
+      html += `
+        <button
+          type="button"
+          class="btn reschedule-btn"
+          onclick="requestReschedule(${Number(item.id)})"
+        >
+          Reschedule
+        </button>
+
+        <button
+          type="button"
+          class="btn cancel-btn"
+          onclick="cancelAppointment(${Number(item.id)})"
+        >
+          Cancel
+        </button>
+      `;
+    }
   }
 
   return html;
@@ -1588,6 +1850,19 @@ function viewDetails(id) {
     "modalAppointmentNumber",
     item.appointmentNumber
   );
+
+  const modalHeading =
+    document.querySelector(
+      "#detailsModal .modal-box h2"
+    );
+
+  if (modalHeading) {
+    modalHeading.textContent =
+      item.recordType ===
+        "CONSULTATION"
+        ? "Online Consultation Details"
+        : "Appointment Details";
+  }
 
   setText(
     "modalType",
@@ -1674,6 +1949,19 @@ function closeModal() {
 function payAppointment(id) {
   window.location.href =
     `appointment-payment.html?appointmentId=${encodeURIComponent(id)}`;
+}
+
+function payConsultation(id) {
+  /*
+   * The API document confirms that consultation payment
+   * is required after doctor acceptance, but does not
+   * provide the exact payment endpoint.
+   *
+   * This redirects to a dedicated consultation payment
+   * page, where your PayU initiation API should be called.
+   */
+  window.location.href =
+    `consultation-payment.html?consultationId=${encodeURIComponent(id)}`;
 }
 
 function joinConsultation(meetingLink) {
@@ -1794,6 +2082,57 @@ async function cancelAppointment(id) {
     alert(
       error.message ||
       "Unable to cancel appointment."
+    );
+  }
+}
+
+async function cancelConsultation(id) {
+  const confirmed =
+    confirm(
+      "Are you sure you want to cancel this online consultation?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/consultations/${encodeURIComponent(id)}/cancel`,
+        {
+          method: "PUT",
+          headers:
+            authHeaders()
+        }
+      );
+
+    const result =
+      await safelyReadResponse(
+        response
+      );
+
+    if (
+      !response.ok ||
+      result?.success === false
+    ) {
+      throw new Error(
+        result?.message ||
+        "Unable to cancel consultation."
+      );
+    }
+
+    alert(
+      result?.message ||
+      "Consultation cancelled successfully."
+    );
+
+    await loadMyAppointments();
+
+  } catch (error) {
+    alert(
+      error.message ||
+      "Unable to cancel consultation."
     );
   }
 }
