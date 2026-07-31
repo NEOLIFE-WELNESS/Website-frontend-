@@ -30,6 +30,7 @@
     --success:#287146;
     --info:#31708f;
     --side:270px;
+    --sidebar-width:270px;
 }
 
 *{
@@ -69,127 +70,10 @@ a{
     min-height:100vh;
 }
 
-.sidebar{
-    width:var(--side);
-    height:100vh;
-
-    position:fixed;
-    inset:0 auto 0 0;
-    z-index:1000;
-
-    display:flex;
-    flex-direction:column;
-
-    color:#fff;
-    background:linear-gradient(180deg,#123824,#1e5134);
-
-    box-shadow:8px 0 30px rgba(18,56,36,.14);
-    transition:.3s;
-}
-
-.brand{
-    min-height:100px;
-    padding:19px 18px;
-
-    display:flex;
-    align-items:center;
-    gap:13px;
-
-    border-bottom:1px solid rgba(255,255,255,.12);
-}
-
-.brand img{
-    width:57px;
-    height:57px;
-
-    object-fit:cover;
-    border-radius:50%;
-    border:2px solid var(--gold);
-}
-
-.brand h2{
-    margin-bottom:5px;
-    font-size:18px;
-}
-
-.brand span{
-    color:#f2cf69;
-    font-size:10px;
-    letter-spacing:1.3px;
-    text-transform:uppercase;
-}
-
-.menu{
-    flex:1;
-    padding:18px 13px;
-
-    overflow-y:auto;
-}
-
-.menu-label{
-    display:block;
-    margin:10px 12px;
-
-    color:rgba(255,255,255,.48);
-
-    font-size:10px;
-    font-weight:800;
-    letter-spacing:1.3px;
-    text-transform:uppercase;
-}
-
-.menu a{
-    margin-bottom:7px;
-    padding:12px 14px;
-
-    display:flex;
-    align-items:center;
-    gap:12px;
-
-    border-radius:12px;
-
-    color:rgba(255,255,255,.84);
-
-    font-size:14px;
-    font-weight:700;
-}
-
-.menu a i{
-    width:21px;
-    text-align:center;
-}
-
-.menu a:hover,
-.menu a.active{
-    color:var(--dark);
-    background:#fff;
-}
-
-.menu a.active i{
-    color:var(--gold);
-}
-
-.sidebar-footer{
-    padding:15px 13px;
-    border-top:1px solid rgba(255,255,255,.12);
-}
-
-.logout{
-    width:100%;
-    padding:12px;
-
-    border:1px solid rgba(255,255,255,.2);
-    border-radius:12px;
-
-    color:#fff;
-    background:rgba(255,255,255,.08);
-
-    font-weight:800;
-}
-
 .main{
+    width:calc(100% - var(--sidebar-width));
     min-height:100vh;
-    margin-left:var(--side);
+    margin-left:var(--sidebar-width);
 }
 
 .topbar{
@@ -384,6 +268,202 @@ a{
 .card h3{
     color:var(--dark);
     font-size:22px;
+}
+/* =========================
+   DOCTOR SIDEBAR
+========================= */
+
+.doctor-sidebar{
+    width:var(--sidebar-width);
+    height:100vh;
+
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    color:var(--white);
+
+    background:linear-gradient(
+        180deg,
+        #123824 0%,
+        #1e5134 100%
+    );
+
+    box-shadow:8px 0 30px rgba(18,56,36,.14);
+    transition:transform .3s ease;
+}
+
+.doctor-brand{
+    min-height:104px;
+    padding:20px 18px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    flex-shrink:0;
+
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.doctor-brand img{
+    width:58px;
+    height:58px;
+
+    flex-shrink:0;
+
+    object-fit:cover;
+
+    border:2px solid var(--gold);
+    border-radius:50%;
+
+    background:var(--white);
+}
+
+.doctor-brand h2{
+    margin:0 0 5px;
+
+    color:var(--white);
+
+    font-size:18px;
+    font-weight:800;
+}
+
+.doctor-brand span{
+    display:block;
+
+    color:#f2cf69;
+
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+}
+
+.doctor-menu{
+    flex:1;
+    min-height:0;
+
+    padding:20px 13px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    scrollbar-width:thin;
+    scrollbar-color:var(--gold) transparent;
+}
+
+.doctor-menu::-webkit-scrollbar{
+    width:6px;
+}
+
+.doctor-menu::-webkit-scrollbar-thumb{
+    border-radius:10px;
+    background:var(--gold);
+}
+
+.doctor-menu::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.menu-label{
+    display:block;
+
+    margin:8px 12px 10px;
+
+    color:rgba(255,255,255,.48);
+
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+}
+
+.doctor-menu a{
+    width:100%;
+    min-height:49px;
+
+    margin-bottom:7px;
+    padding:12px 14px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    border-radius:12px;
+
+    color:rgba(255,255,255,.82);
+    text-decoration:none;
+
+    font-size:14px;
+    font-weight:700;
+
+    transition:
+        color .25s ease,
+        background .25s ease,
+        transform .25s ease;
+}
+
+.doctor-menu a i{
+    width:21px;
+
+    flex-shrink:0;
+
+    text-align:center;
+    font-size:17px;
+}
+
+.doctor-menu a:hover,
+.doctor-menu a.active{
+    color:var(--dark);
+    background:var(--white);
+
+    transform:translateX(3px);
+}
+
+.doctor-menu a.active i{
+    color:var(--gold);
+}
+
+.sidebar-footer{
+    padding:17px 13px;
+
+    flex-shrink:0;
+
+    border-top:1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-logout{
+    width:100%;
+    min-height:46px;
+    padding:11px 14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    border:1px solid rgba(255,255,255,.20);
+    border-radius:12px;
+
+    color:var(--white);
+    background:rgba(255,255,255,.08);
+
+    font-size:14px;
+    font-weight:800;
+
+    transition:.25s ease;
+}
+
+.sidebar-logout:hover{
+    color:var(--dark);
+    background:var(--white);
 }
 
 /* =========================
@@ -909,20 +989,23 @@ textarea.control{
 }
 
 @media(max-width:900px){
-    .sidebar{
+    .doctor-sidebar{
         transform:translateX(-100%);
     }
 
-    .sidebar.open{
+    .doctor-sidebar.open{
         transform:translateX(0);
     }
 
     .main{
+        width:100%;
         margin-left:0;
     }
 
     .toggle{
-        display:block;
+        display:flex;
+        align-items:center;
+        justify-content:center;
     }
 }
 
@@ -988,85 +1071,103 @@ textarea.control{
 
 <div class="layout">
 
-<aside class="sidebar" id="sidebar">
-
-    <div class="brand">
-        <img src="../assets/main_logo.jpeg" alt="Neolife">
-
-        <div>
-            <h2>Neolife</h2>
-            <span>Doctor Portal</span>
-        </div>
-    </div>
-
-    <nav class="menu">
-
-        <span class="menu-label">Main</span>
-
-        <a href="doctor-dashboard.html">
-            <i class="fa-solid fa-chart-line"></i>
-            Dashboard
-        </a>
-
-        <a href="patients.html">
-            <i class="fa-solid fa-users"></i>
-            Patient Dashboard
-        </a>
-
-        <a href="appointment-calendar.html">
-            <i class="fa-solid fa-calendar-days"></i>
-            Appointment Calendar
-        </a>
-
-        <a href="doctor-availability.html">
-            <i class="fa-solid fa-clock"></i>
-            Manage Availability
-        </a>
-
-        <span class="menu-label">Clinical</span>
-
-        <a href="doctor-appointments.html">
-            <i class="fa-solid fa-clipboard-list"></i>
-            Appointment Details
-        </a>
-
-        <a
-            href="doctor-online-consultations.html"
-            class="active"
+<aside
+            class="doctor-sidebar"
+            id="doctorSidebar"
         >
-            <i class="fa-solid fa-video"></i>
-            Online Consultations
-        </a>
 
-        <a href="video-recordings.html">
-            <i class="fa-solid fa-circle-play"></i>
-            Video Recordings
-        </a>
+            <div class="doctor-brand">
 
-        <span class="menu-label">Finance</span>
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
 
-        <a href="transactions.html">
-            <i class="fa-solid fa-indian-rupee-sign"></i>
-            Transactions
-        </a>
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Doctor Portal</span>
+                </div>
 
-        <span class="menu-label">Account</span>
+            </div>
 
-        <a href="doctor-profile.html">
-            <i class="fa-solid fa-user-doctor"></i>
-            My Profile
-        </a>
+            <nav class="doctor-menu">
 
-    </nav>
+                <span class="menu-label">
+                    Main
+                </span>
 
-    <div class="sidebar-footer">
-        <button class="logout" onclick="logout()">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            Logout
-        </button>
-    </div>
+                <a
+                    href="doctor-dashboard.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
 
-</aside>
+                <a href="patients.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patient Dashboard
+                </a>
+
+                <a href="appointment-calendar.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Appointment Calendar
+                </a>
+                <a href="doctor-availability.html">
+                    <i class="fa-solid fa-users"></i>
+                    Manage Availability
+                </a>
+
+                <span class="menu-label">
+                    Clinical
+                </span>
+
+                
+
+                <a href="doctor-appointments.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Appointment Details
+                </a>
+                <a href="online-consultation.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Consultation Details
+                </a>
+
+                <a href="video-recordings.html">
+                    <i class="fa-solid fa-video"></i>
+                    Video Recordings
+                </a>
+
+                <span class="menu-label">
+                    Finance
+                </span>
+
+                <a href="transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="doctor-profile.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="doctorLogout()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
 
 <main class="main">
 
@@ -1081,7 +1182,7 @@ textarea.control{
         <div class="title">
             <h1>Online Consultations</h1>
             <p>
-                Review requests and manage upcoming online consultations.
+                View and manage all online consultations with their current status.
             </p>
         </div>
 
@@ -1250,8 +1351,8 @@ textarea.control{
                 <h2>Consultation List</h2>
 
                 <p>
-                    Pending requests and upcoming consultations for the
-                    logged-in doctor.
+                    All online consultations assigned to the logged-in doctor,
+                    including pending, paid, completed, rejected and cancelled records.
                 </p>
             </div>
 
@@ -1585,6 +1686,9 @@ textarea.control{
 const API_BASE_URL =
     "http://localhost:8085";
 
+const CONSULTATION_ROOM_URL =
+    "http://127.0.0.1:5500/consultation-room.html";
+
 let consultations = [];
 let filteredConsultations = [];
 let selectedConsultation = null;
@@ -1844,105 +1948,178 @@ function updateDoctorHeader(name) {
 async function loadConsultations() {
     showLoading();
 
-    const results =
-        await Promise.allSettled([
-            api(
-                "/api/consultations/doctor/requests"
-            ),
-
-            api(
-                "/api/consultations/doctor/upcoming"
+    const doctorId =
+        Number(
+            localStorage.getItem(
+                "doctorId"
             )
-        ]);
+        );
 
-    const errors = [];
-    const consultationMap =
-        new Map();
+    try {
+        /*
+         * Fetch every consultation and then keep only records
+         * assigned to the currently logged-in doctor.
+         *
+         * Documented endpoint:
+         * GET /api/consultations/admin/getAll
+         *
+         * The backend must allow DOCTOR users to read this endpoint,
+         * or preferably provide:
+         * GET /api/consultations/doctor/all
+         */
+        const result =
+            await api(
+                "/api/consultations/admin/getAll"
+            );
 
-    results.forEach(
-        function (
-            result,
-            index
-        ) {
-            if (
-                result.status ===
-                "fulfilled"
-            ) {
-                extractArray(
-                    result.value
-                ).forEach(
-                    function (item) {
-                        const normalized =
-                            normalizeConsultation(
-                                item
-                            );
+        const records =
+            extractArray(result);
 
-                        if (normalized.id) {
-                            consultationMap.set(
-                                String(
-                                    normalized.id
-                                ),
-                                normalized
-                            );
+        consultations =
+            records
+                .map(
+                    normalizeConsultation
+                )
+                .filter(
+                    item => {
+                        if (!doctorId) {
+                            return true;
                         }
+
+                        return (
+                            Number(item.doctorId) ===
+                            doctorId
+                        );
                     }
                 );
 
-            } else {
-                errors.push(
-                    result.reason?.message ||
-                    (
-                        index === 0
-                            ? "Pending requests could not be loaded."
-                            : "Upcoming consultations could not be loaded."
-                    )
-                );
-            }
-        }
-    );
+        consultations.sort(
+            function (
+                first,
+                second
+            ) {
+                const firstDate =
+                    new Date(
+                        `${first.date || "1970-01-01"}T${first.startTime || "00:00:00"}`
+                    );
 
-    consultations =
-        Array.from(
-            consultationMap.values()
+                const secondDate =
+                    new Date(
+                        `${second.date || "1970-01-01"}T${second.startTime || "00:00:00"}`
+                    );
+
+                return secondDate - firstDate;
+            }
         );
 
-    consultations.sort(
-        function (
-            first,
-            second
-        ) {
-            return (
-                new Date(
-                    `${first.date}T${first.startTime}`
-                ) -
-                new Date(
-                    `${second.date}T${second.startTime}`
+        await loadMeetingStates();
+
+        applyFilters();
+
+    } catch (allError) {
+        console.warn(
+            "All-consultations API failed. Falling back to pending and upcoming endpoints:",
+            allError
+        );
+
+        /*
+         * Fallback keeps the page usable if the backend currently
+         * restricts /admin/getAll to ADMIN users.
+         */
+        const results =
+            await Promise.allSettled([
+                api(
+                    "/api/consultations/doctor/requests"
+                ),
+
+                api(
+                    "/api/consultations/doctor/upcoming"
                 )
+            ]);
+
+        const errors = [];
+        const consultationMap =
+            new Map();
+
+        results.forEach(
+            function (
+                result,
+                index
+            ) {
+                if (
+                    result.status ===
+                    "fulfilled"
+                ) {
+                    extractArray(
+                        result.value
+                    ).forEach(
+                        function (item) {
+                            const normalized =
+                                normalizeConsultation(
+                                    item
+                                );
+
+                            if (normalized.id) {
+                                consultationMap.set(
+                                    String(
+                                        normalized.id
+                                    ),
+                                    normalized
+                                );
+                            }
+                        }
+                    );
+
+                } else {
+                    errors.push(
+                        result.reason?.message ||
+                        (
+                            index === 0
+                                ? "Pending requests could not be loaded."
+                                : "Upcoming consultations could not be loaded."
+                        )
+                    );
+                }
+            }
+        );
+
+        consultations =
+            Array.from(
+                consultationMap.values()
+            );
+
+        consultations.sort(
+            function (
+                first,
+                second
+            ) {
+                const firstDate =
+                    new Date(
+                        `${first.date || "1970-01-01"}T${first.startTime || "00:00:00"}`
+                    );
+
+                const secondDate =
+                    new Date(
+                        `${second.date || "1970-01-01"}T${second.startTime || "00:00:00"}`
+                    );
+
+                return secondDate - firstDate;
+            }
+        );
+
+        await loadMeetingStates();
+
+        applyFilters();
+
+        if (errors.length) {
+            showAlert(
+                "The backend did not allow the all-consultations API, so only pending and upcoming consultations are currently shown.",
+                "info"
             );
         }
-    );
-
-    applyFilters();
-
-    if (
-        errors.length &&
-        consultations.length
-    ) {
-        showAlert(
-            "Some consultation records could not be loaded.",
-            "info"
-        );
-
-    } else if (
-        errors.length &&
-        !consultations.length
-    ) {
-        showAlert(
-            errors.join(" "),
-            "error"
-        );
     }
 }
+
 
 function extractArray(result) {
     if (Array.isArray(result)) {
@@ -1982,6 +2159,11 @@ function normalizeConsultation(item) {
         patientId:
             item.patientId ??
             item.patient?.id ??
+            null,
+
+        doctorId:
+            item.doctorId ??
+            item.doctor?.id ??
             null,
 
         patientName:
@@ -2033,10 +2215,10 @@ function normalizeConsultation(item) {
             ).toUpperCase(),
 
         paymentStatus:
-            String(
+            normalizePaymentStatus(
                 item.paymentStatus ||
                 "NOT_REQUIRED_YET"
-            ).toUpperCase(),
+            ),
 
         consultationFee:
             item.consultationFee ??
@@ -2049,6 +2231,15 @@ function normalizeConsultation(item) {
             item.meetingLinkExpiresAt ||
             null,
 
+        meetingCreated:
+            Boolean(item.roomId || item.meetingStatus || item.videoMeetingStatus || item.meetingLink),
+
+        meetingStatus:
+            String(item.meetingStatus || item.videoMeetingStatus || "").toUpperCase(),
+
+        roomId:
+            item.roomId || null,
+
         cancellationReason:
             item.cancellationReason ||
             "",
@@ -2057,6 +2248,32 @@ function normalizeConsultation(item) {
             item.rescheduleReason ||
             ""
     };
+}
+
+function normalizePaymentStatus(value) {
+    const status =
+        String(value || "")
+            .trim()
+            .toUpperCase();
+
+    if (
+        [
+            "SUCCESS",
+            "PAID",
+            "PAYMENT_SUCCESS",
+            "PAYMENT_SUCCESSFUL",
+            "COMPLETED"
+        ].includes(status)
+    ) {
+        return "PAYMENT_SUCCESS";
+    }
+
+    return status || "NOT_REQUIRED_YET";
+}
+
+function isPaymentSuccessful(value) {
+    return normalizePaymentStatus(value) ===
+        "PAYMENT_SUCCESS";
 }
 
 /* =========================
@@ -2144,26 +2361,43 @@ function updateSummary() {
                 "PENDING_DOCTOR_CONFIRMATION"
         ).length;
 
+    const now =
+        new Date();
+
     upcomingCount.textContent =
         consultations.filter(
-            item =>
-                ![
-                    "PENDING_DOCTOR_CONFIRMATION",
-                    "REJECTED",
-                    "CANCELLED",
-                    "COMPLETED"
-                ].includes(
-                    item.status
-                )
+            item => {
+                if (
+                    [
+                        "REJECTED",
+                        "CANCELLED",
+                        "COMPLETED",
+                        "NO_SHOW"
+                    ].includes(
+                        item.status
+                    )
+                ) {
+                    return false;
+                }
+
+                const scheduledAt =
+                    new Date(
+                        `${item.date || "1970-01-01"}T${item.startTime || "00:00:00"}`
+                    );
+
+                return (
+                    !Number.isNaN(
+                        scheduledAt.getTime()
+                    ) &&
+                    scheduledAt >= now
+                );
+            }
         ).length;
 
     paidCount.textContent =
         consultations.filter(
             item =>
-                [
-                    "SUCCESS",
-                    "PAID"
-                ].includes(
+                isPaymentSuccessful(
                     item.paymentStatus
                 )
         ).length;
@@ -2293,21 +2527,7 @@ function renderConsultations() {
                             </td>
 
                             <td>
-                                ${
-                                    item.meetingLink
-                                        ? `
-                                            <button
-                                                class="action view"
-                                                title="Open meeting"
-                                                onclick="openMeeting('${escapeJs(
-                                                    item.meetingLink
-                                                )}')"
-                                            >
-                                                <i class="fa-solid fa-video"></i>
-                                            </button>
-                                          `
-                                        : "Not available"
-                                }
+                                ${createMeetingAction(item)}
                             </td>
 
                             <td>
@@ -2375,6 +2595,171 @@ function renderConsultations() {
                 }
             )
             .join("");
+}
+
+
+/* =========================
+   VIDEO MEETING ROOM
+========================== */
+async function loadMeetingStates() {
+    const paidConsultations = consultations.filter(item =>
+        isPaymentSuccessful(item.paymentStatus)
+    );
+
+    await Promise.allSettled(paidConsultations.map(async item => {
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/api/video-meetings/${encodeURIComponent(item.id)}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${getToken()}`
+                    }
+                }
+            );
+
+            if (response.status === 404) {
+                item.meetingCreated = false;
+                return;
+            }
+
+            const text = await response.text();
+            let result = {};
+            try { result = text ? JSON.parse(text) : {}; } catch { result = {}; }
+
+            if (!response.ok || result.success === false) {
+                const message = String(result.message || "").toLowerCase();
+                if (message.includes("not found") || message.includes("does not exist")) {
+                    item.meetingCreated = false;
+                    return;
+                }
+                throw new Error(result.message || "Unable to check video room.");
+            }
+
+            const meeting = result.data || {};
+            item.meetingCreated = true;
+            item.meetingStatus = String(meeting.status || "CREATED").toUpperCase();
+            item.roomId = meeting.roomId || null;
+        } catch (error) {
+            console.warn(`Meeting check failed for consultation ${item.id}:`, error);
+        }
+    }));
+}
+
+function createMeetingAction(item) {
+    const paid =
+        isPaymentSuccessful(
+            item.paymentStatus
+        );
+
+    const closed =
+        [
+            "COMPLETED",
+            "CANCELLED",
+            "REJECTED",
+            "NO_SHOW"
+        ].includes(item.status);
+
+    const ended =
+        [
+            "ENDED",
+            "EXPIRED",
+            "CANCELLED"
+        ].includes(item.meetingStatus);
+
+    if (closed) {
+        return `
+            <span class="badge status-default">
+                ${escapeHtml(
+                    formatLabel(item.status)
+                )}
+            </span>
+        `;
+    }
+
+    if (!paid) {
+        return `
+            <span class="badge status-pending">
+                Payment Pending
+            </span>
+        `;
+    }
+
+    if (!item.meetingCreated) {
+        return `
+            <button
+                class="action treatment"
+                title="Create Video Room"
+                onclick="createVideoRoom(
+                    ${Number(item.id)},
+                    this
+                )"
+            >
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        `;
+    }
+
+    if (ended) {
+        return `
+            <span class="badge status-default">
+                ${escapeHtml(
+                    formatLabel(
+                        item.meetingStatus
+                    )
+                )}
+            </span>
+        `;
+    }
+
+    return `
+        <button
+            class="action accept"
+            title="Start Consultation"
+            onclick="startConsultation(
+                ${Number(item.id)}
+            )"
+        >
+            <i class="fa-solid fa-video"></i>
+        </button>
+    `;
+}
+
+async function createVideoRoom(consultationId, button) {
+    const consultation = consultations.find(item => Number(item.id) === Number(consultationId));
+    if (!consultation || !isPaymentSuccessful(consultation.paymentStatus)) {
+        showAlert("The patient must complete payment before creating the room.", "error");
+        return;
+    }
+    if (!confirm("Create the secure video consultation room?")) return;
+
+    const originalHtml = button ? button.innerHTML : "";
+    try {
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        }
+        const result = await api(`/api/video-meetings/create/${encodeURIComponent(consultationId)}`, { method: "POST" });
+        const meeting = result.data || {};
+        consultation.meetingCreated = true;
+        consultation.meetingStatus = String(meeting.status || "CREATED").toUpperCase();
+        consultation.roomId = meeting.roomId || null;
+        showAlert(result.message || "Video room created successfully.", "success");
+        applyFilters();
+    } catch (error) {
+        showAlert(error.message || "Unable to create video room.", "error");
+        if (button) { button.disabled = false; button.innerHTML = originalHtml; }
+    }
+}
+
+function startConsultation(consultationId) {
+    const consultation = consultations.find(item => Number(item.id) === Number(consultationId));
+    if (!consultation || !consultation.meetingCreated) {
+        showAlert("Create the video room before starting the consultation.", "error");
+        return;
+    }
+    window.location.href = `${CONSULTATION_ROOM_URL}?consultationId=${encodeURIComponent(consultationId)}`;
 }
 
 /* =========================
@@ -3312,22 +3697,7 @@ function showAlert(
         );
 }
 
-function openMeeting(link) {
-    if (!link) {
-        showAlert(
-            "Meeting link is not available.",
-            "error"
-        );
 
-        return;
-    }
-
-    window.open(
-        link,
-        "_blank",
-        "noopener,noreferrer"
-    );
-}
 
 function normalizeDate(value) {
     if (!value) {

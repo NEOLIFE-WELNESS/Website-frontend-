@@ -2073,15 +2073,13 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                /*
-                Backend/login calls are disabled temporarily.
+            async function () {
+                if (!requireAdminLogin()) {
+                    return;
+                }
 
-                requireAdminLogin();
                 loadAdminProfile();
-                */
-
-                loadMedicalStaff();
+                await loadMedicalStaff();
             }
         );
 
@@ -2089,10 +2087,13 @@
            LOAD STAFF
         ========================== */
 
-        function loadMedicalStaff() {
-            document.getElementById(
-                "staffTableBody"
-            ).innerHTML = `
+        async function loadMedicalStaff() {
+            const tableBody =
+                document.getElementById(
+                    "staffTableBody"
+                );
+
+            tableBody.innerHTML = `
                 <tr>
                     <td
                         colspan="10"
@@ -2104,156 +2105,352 @@
                 </tr>
             `;
 
-            /*
-            Enable this API code later:
-
             try {
-                const token =
-                    localStorage.getItem("token");
-
-                const response =
-                    await fetch(
-                        API_BASE_URL +
-                        "/api/admin/medical-staff",
+                const result =
+                    await apiRequest(
+                        "/api/medical-staff/getAll",
                         {
-                            headers: {
-                                "Authorization":
-                                    "Bearer " + token
-                            }
+                            method: "GET"
                         }
                     );
 
-                const result =
-                    await response.json();
-
                 allStaff =
-                    (result.data || [])
-                    .map(normalizeStaff);
+                    Array.isArray(result.data)
+                        ? result.data.map(
+                            normalizeMedicalStaff
+                          )
+                        : [];
+
+                populateFilters();
+                updateSummary();
+                applyFilters();
+
+                if (!allStaff.length) {
+                    showAlert(
+                        "No medical staff records were found.",
+                        "info"
+                    );
+                }
 
             } catch (error) {
-                console.error(error);
+                console.error(
+                    "Medical staff loading failed:",
+                    error
+                );
 
-                allStaff =
-                    getDemoMedicalStaff();
+                allStaff = [];
+                filteredStaff = [];
+
+                populateFilters();
+                updateSummary();
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="10"
+                            class="table-message"
+                        >
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            ${escapeHtml(
+                                error.message ||
+                                "Unable to load medical staff."
+                            )}
+                        </td>
+                    </tr>
+                `;
+
+                setText(
+                    "resultCount",
+                    "0 Staff"
+                );
+
+                updatePaginationInfo(
+                    0,
+                    0,
+                    0
+                );
+
+                renderPaginationButtons(1);
+
+                showAlert(
+                    error.message ||
+                    "Unable to load medical staff.",
+                    "error"
+                );
             }
-            */
+        }
 
-            allStaff =
-                getDemoMedicalStaff();
+        function normalizeMedicalStaff(staff = {}) {
+            const id =
+                staff.id ??
+                staff.medicalStaffId ??
+                staff.userId ??
+                "";
 
-            populateFilters();
-            updateSummary();
-            applyFilters();
+            const experienceYears =
+                Number(
+                    staff.experienceYears ??
+                    staff.experience ??
+                    0
+                );
 
-            showAlert(
-                "Demo medical staff data loaded.",
-                "info"
+            return {
+                id:
+                    id,
+
+                userId:
+                    staff.userId ?? "",
+
+                staffCode:
+                    staff.staffCode ||
+                    staff.medicalStaffCode ||
+                    (
+                        id !== ""
+                            ? `MED-${String(id).padStart(4, "0")}`
+                            : "-"
+                    ),
+
+                name:
+                    staff.name ||
+                    "Medical Staff",
+
+                email:
+                    staff.email ||
+                    "-",
+
+                phone:
+                    staff.phoneNumber ||
+                    staff.phone ||
+                    "-",
+
+                gender:
+                    staff.gender ||
+                    "-",
+
+                age:
+                    staff.age ??
+                    "-",
+
+                department:
+                    staff.department ||
+                    "Not Assigned",
+
+                designation:
+                    staff.designation ||
+                    "Not Assigned",
+
+                qualification:
+                    staff.qualification ||
+                    "-",
+
+                experience:
+                    experienceYears > 0
+                        ? `${experienceYears} Year${
+                            experienceYears === 1
+                                ? ""
+                                : "s"
+                          }`
+                        : "-",
+
+                joiningDate:
+                    staff.joiningDate ||
+                    staff.createdAt ||
+                    null,
+
+                shift:
+                    staff.shift ||
+                    "-",
+
+                address:
+                    staff.address ||
+                    "-",
+
+                emergencyContact:
+                    staff.emergencyContact ||
+                    "-",
+
+                status:
+                    staff.active === true
+                        ? "ACTIVE"
+                        : staff.active === false
+                            ? "INACTIVE"
+                            : String(
+                                staff.status ||
+                                "INACTIVE"
+                              ).toUpperCase(),
+
+                lastLogin:
+                    staff.lastLogin ||
+                    null,
+
+                notes:
+                    staff.notes ||
+                    staff.about ||
+                    "-",
+
+                profileImage:
+                    staff.profileImage ||
+                    staff.imageUrl ||
+                    ""
+            };
+        }
+
+        function getToken() {
+            return (
+                localStorage.getItem("adminToken") ||
+                localStorage.getItem("token") ||
+                localStorage.getItem("accessToken") ||
+                ""
             );
         }
 
-        function getDemoMedicalStaff() {
-            return [
-                {
-                    id: 1,
-                    staffCode: "MED-1001",
-                    name: "Nisha Shetty",
-                    email: "nisha.staff@neolife.com",
-                    phone: "9876543210",
-                    gender: "FEMALE",
-                    age: 29,
-                    department: "Pharmacy",
-                    designation: "Pharmacist",
-                    qualification: "B.Pharm",
-                    experience: "5 Years",
-                    joiningDate: "2025-04-10",
-                    shift: "Morning",
-                    address: "Udupi, Karnataka",
-                    emergencyContact: "9876500001",
-                    status: "ACTIVE",
-                    lastLogin: "2026-07-15T08:45:00",
-                    notes: "Handles prescriptions and medicine packing."
-                },
-                {
-                    id: 2,
-                    staffCode: "MED-1002",
-                    name: "Raghavendra Pai",
-                    email: "raghavendra@neolife.com",
-                    phone: "9876543211",
-                    gender: "MALE",
-                    age: 34,
-                    department: "Inventory",
-                    designation: "Inventory Executive",
-                    qualification: "B.Com",
-                    experience: "7 Years",
-                    joiningDate: "2024-09-18",
-                    shift: "General",
-                    address: "Manipal, Karnataka",
-                    emergencyContact: "9876500002",
-                    status: "ACTIVE",
-                    lastLogin: "2026-07-14T17:20:00",
-                    notes: "Manages stock, batches and expiry tracking."
-                },
-                {
-                    id: 3,
-                    staffCode: "MED-1003",
-                    name: "Sahana Rao",
-                    email: "sahana@neolife.com",
-                    phone: "9876543212",
-                    gender: "FEMALE",
-                    age: 31,
-                    department: "Order Fulfillment",
-                    designation: "Order Coordinator",
-                    qualification: "BBA",
-                    experience: "4 Years",
-                    joiningDate: "2025-01-06",
-                    shift: "General",
-                    address: "Brahmavar, Karnataka",
-                    emergencyContact: "9876500003",
-                    status: "ACTIVE",
-                    lastLogin: "2026-07-15T09:10:00",
-                    notes: "Coordinates order packing and Shiprocket handoff."
-                },
-                {
-                    id: 4,
-                    staffCode: "MED-1004",
-                    name: "Ganesh Acharya",
-                    email: "ganesh@neolife.com",
-                    phone: "9876543213",
-                    gender: "MALE",
-                    age: 38,
-                    department: "Patient Services",
-                    designation: "Patient Coordinator",
-                    qualification: "BA",
-                    experience: "9 Years",
-                    joiningDate: "2023-11-15",
-                    shift: "Morning",
-                    address: "Kundapura, Karnataka",
-                    emergencyContact: "9876500004",
-                    status: "ON_LEAVE",
-                    lastLogin: "2026-07-10T11:00:00",
-                    notes: "Coordinates patients and prescription downloads."
-                },
-                {
-                    id: 5,
-                    staffCode: "MED-1005",
-                    name: "Megha K",
-                    email: "megha@neolife.com",
-                    phone: "9876543214",
-                    gender: "FEMALE",
-                    age: 27,
-                    department: "Pharmacy",
-                    designation: "Pharmacy Assistant",
-                    qualification: "D.Pharm",
-                    experience: "3 Years",
-                    joiningDate: "2025-07-01",
-                    shift: "Evening",
-                    address: "Udupi, Karnataka",
-                    emergencyContact: "9876500005",
-                    status: "INACTIVE",
-                    lastLogin: "2026-06-28T15:45:00",
-                    notes: "Assists with medicine packing and dispatch."
-                }
-            ];
+        function requireAdminLogin() {
+            const token =
+                getToken();
+
+            const role =
+                String(
+                    localStorage.getItem("role") ||
+                    ""
+                ).toUpperCase();
+
+            if (!token) {
+                window.location.href =
+                    "../patient/login.html";
+
+                return false;
+            }
+
+            if (
+                role &&
+                role !== "ADMIN"
+            ) {
+                window.alert(
+                    "Only administrators can access this page."
+                );
+
+                window.location.href =
+                    "../patient/login.html";
+
+                return false;
+            }
+
+            return true;
+        }
+
+        function loadAdminProfile() {
+            const name =
+                localStorage.getItem("adminName") ||
+                localStorage.getItem("name") ||
+                "Admin";
+
+            document
+                .querySelectorAll(
+                    ".admin-profile-text strong"
+                )
+                .forEach(
+                    element =>
+                        element.textContent =
+                            name
+                );
+
+            document
+                .querySelectorAll(
+                    ".admin-avatar"
+                )
+                .forEach(
+                    element =>
+                        element.textContent =
+                            String(name)
+                                .trim()
+                                .charAt(0)
+                                .toUpperCase() ||
+                            "A"
+                );
+        }
+
+        async function apiRequest(
+            endpoint,
+            options = {}
+        ) {
+            const headers = {
+                "Accept":
+                    "application/json",
+
+                ...(options.headers || {}),
+
+                "Authorization":
+                    "Bearer " + getToken()
+            };
+
+            if (
+                options.body &&
+                !(
+                    options.body instanceof
+                    FormData
+                )
+            ) {
+                headers["Content-Type"] =
+                    "application/json";
+            }
+
+            const response =
+                await fetch(
+                    API_BASE_URL + endpoint,
+                    {
+                        ...options,
+                        headers
+                    }
+                );
+
+            const responseText =
+                await response.text();
+
+            let result = {};
+
+            try {
+                result =
+                    responseText
+                        ? JSON.parse(
+                            responseText
+                          )
+                        : {};
+
+            } catch (error) {
+                result = {
+                    success: false,
+                    message:
+                        responseText ||
+                        "Invalid server response."
+                };
+            }
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+                clearSession();
+
+                window.location.href =
+                    "../patient/login.html";
+
+                throw new Error(
+                    result.message ||
+                    "Admin session expired."
+                );
+            }
+
+            if (
+                !response.ok ||
+                result.success === false
+            ) {
+                throw new Error(
+                    result.message ||
+                    `Request failed (${response.status})`
+                );
+            }
+
+            return result;
         }
 
         /* =========================
@@ -2389,16 +2586,16 @@
                     function (staff) {
                         const matchesSearch =
                             !search ||
-                            staff.name
+                            String(staff.name || "")
                                 .toLowerCase()
                                 .includes(search) ||
-                            staff.email
+                            String(staff.email || "")
                                 .toLowerCase()
                                 .includes(search) ||
-                            staff.phone
+                            String(staff.phone || "")
                                 .toLowerCase()
                                 .includes(search) ||
-                            staff.staffCode
+                            String(staff.staffCode || "")
                                 .toLowerCase()
                                 .includes(search);
 
@@ -2931,30 +3128,10 @@
                 return;
             }
 
-            staff.status =
-                staff.status === "ACTIVE"
-                    ? "INACTIVE"
-                    : "ACTIVE";
-
-            updateSummary();
-            applyFilters();
-
             showAlert(
-                `${staff.name} is now ${formatStatus(
-                    staff.status
-                )}.`,
-                "success"
+                "No medical-staff activate/deactivate API was provided. The status was not changed.",
+                "info"
             );
-
-            /*
-            Enable backend later:
-
-            PUT /api/admin/medical-staff/{id}/status
-
-            {
-                "active": true
-            }
-            */
         }
 
         /* =========================
@@ -3006,41 +3183,49 @@
             );
         }
 
-        function confirmDeleteStaff() {
+        async function confirmDeleteStaff() {
             if (!selectedStaff) {
                 return;
             }
 
-            const name =
+            const staffId =
+                selectedStaff.id;
+
+            const staffName =
                 selectedStaff.name;
 
-            allStaff =
-                allStaff.filter(
-                    staff =>
-                        String(staff.id) !==
-                        String(selectedStaff.id)
+            try {
+                const result =
+                    await apiRequest(
+                        `/api/medical-staff/delete/${encodeURIComponent(
+                            staffId
+                        )}`,
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+                closeModal(
+                    "deleteModal"
                 );
 
-            closeModal(
-                "deleteModal"
-            );
+                selectedStaff = null;
 
-            selectedStaff = null;
+                showAlert(
+                    result.message ||
+                    `${staffName} was removed successfully.`,
+                    "success"
+                );
 
-            populateFilters();
-            updateSummary();
-            applyFilters();
+                await loadMedicalStaff();
 
-            showAlert(
-                `${name} was removed successfully.`,
-                "success"
-            );
-
-            /*
-            Enable backend later:
-
-            DELETE /api/admin/medical-staff/{id}
-            */
+            } catch (error) {
+                showAlert(
+                    error.message ||
+                    "Unable to remove medical staff.",
+                    "error"
+                );
+            }
         }
 
         /* =========================
@@ -3328,7 +3513,7 @@
             localStorage.removeItem("userId");
 
             window.location.href =
-                "../frontend/login.html";
+                "../patient/login.html";
         }
 
         function showAlert(

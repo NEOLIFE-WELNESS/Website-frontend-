@@ -2032,6 +2032,47 @@
             dateInput.min = `${year}-${month}-${day}`;
         }
 
+        function buildBackendFileUrl(fileUrl){
+            if(!fileUrl){
+                return "../assets/main_logo.jpeg";
+            }
+
+            const value = String(fileUrl).trim();
+
+            if(
+                value.startsWith("http://") ||
+                value.startsWith("https://") ||
+                value.startsWith("data:") ||
+                value.startsWith("blob:")
+            ){
+                return value;
+            }
+
+            if(value.startsWith("/")){
+                return API_BASE_URL + value;
+            }
+
+            if(
+                value.startsWith("../") ||
+                value.startsWith("./")
+            ){
+                return value;
+            }
+
+            return `${API_BASE_URL}/${value}`;
+        }
+
+        function getDoctorImageUrl(doctor = {}){
+            return buildBackendFileUrl(
+                doctor.imageUrl ||
+                doctor.profileImage ||
+                doctor.profileImageUrl ||
+                doctor.photoUrl ||
+                doctor.image?.fileUrl ||
+                ""
+            );
+        }
+
         async function loadDoctors(){
             const doctorGrid = document.getElementById("doctorGrid");
             doctorGrid.innerHTML = `
@@ -2086,7 +2127,7 @@
             }
 
             doctorGrid.innerHTML = doctors.map(doctor => {
-                const image = doctor.imageUrl || doctor.profileImage || "../assets/main_logo.jpeg";
+                const image = getDoctorImageUrl(doctor);
                 const experience = doctor.experience ?? doctor.experienceYears;
                 const experienceText = experience
                     ? `${experience} ${String(experience).includes("Year") ? "" : "Years Experience"}`
@@ -2105,7 +2146,7 @@
                             src="${escapeHtml(image)}"
                             alt="${escapeHtml(doctor.name || "Doctor")}" 
                             class="doctor-image"
-                            onerror="this.src='../assets/main_logo.jpeg'"
+                            onerror="this.onerror=null;this.src='../assets/main_logo.jpeg'"
                         >
 
                         <div class="doctor-info">
@@ -2130,7 +2171,7 @@
             bookingData.doctorId = Number(doctor.id);
             bookingData.doctorName = doctor.name || "Doctor";
             bookingData.doctorSpecialization = doctor.specialization || "";
-            bookingData.doctorImage = doctor.imageUrl || doctor.profileImage || "../assets/main_logo.jpeg";
+            bookingData.doctorImage = getDoctorImageUrl(doctor);
             bookingData.appointmentDate = null;
             bookingData.appointmentTime = null;
             bookingData.appointmentEndTime = null;
@@ -2166,7 +2207,7 @@
                 <img
                     src="${escapeHtml(bookingData.doctorImage)}"
                     alt="${escapeHtml(bookingData.doctorName)}"
-                    onerror="this.src='../assets/main_logo.jpeg'"
+                    onerror="this.onerror=null;this.src='../assets/main_logo.jpeg'"
                 >
                 <div>
                     <h3>${escapeHtml(bookingData.doctorName)}</h3>

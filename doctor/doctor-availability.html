@@ -584,6 +584,7 @@
         justify-content: flex-end;
       }
     }
+    
 
     /* =========================
        DOCTOR PORTAL LAYOUT
@@ -1077,97 +1078,102 @@
   <div class="doctor-layout">
 
     <aside
-      class="doctor-sidebar"
-      id="doctorSidebar"
-    >
-
-      <div class="doctor-brand">
-
-        <img
-          src="../assets/main_logo.jpeg"
-          alt="Neolife Logo"
+            class="doctor-sidebar"
+            id="doctorSidebar"
         >
 
-        <div>
-          <h2>Neolife</h2>
-          <span>Doctor Portal</span>
-        </div>
+            <div class="doctor-brand">
 
-      </div>
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
 
-      <nav class="doctor-menu">
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Doctor Portal</span>
+                </div>
 
-        <span class="menu-label">
-          Main
-        </span>
+            </div>
 
-        <a href="doctor-dashboard.html">
-          <i class="fa-solid fa-chart-line"></i>
-          Dashboard
-        </a>
+            <nav class="doctor-menu">
 
-        <a href="patients.html">
-          <i class="fa-solid fa-users"></i>
-          Patient Dashboard
-        </a>
+                <span class="menu-label">
+                    Main
+                </span>
 
-        <a href="appointment-calendar.html">
-          <i class="fa-solid fa-calendar-days"></i>
-          Appointment Calendar
-        </a>
+                <a
+                    href="doctor-dashboard.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
 
-        <a
-          href="doctor-availability.html"
-          class="active"
-        >
-          <i class="fa-solid fa-clock"></i>
-          Manage Availability
-        </a>
+                <a href="patients.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patient Dashboard
+                </a>
 
-        <span class="menu-label">
-          Clinical
-        </span>
+                <a href="appointment-calendar.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Appointment Calendar
+                </a>
+                <a href="doctor-availability.html">
+                    <i class="fa-solid fa-users"></i>
+                    Manage Availability
+                </a>
 
-        <a href="doctor-appointments.html">
-          <i class="fa-solid fa-clipboard-list"></i>
-          Appointment Details
-        </a>
+                <span class="menu-label">
+                    Clinical
+                </span>
 
-        <a href="video-recordings.html">
-          <i class="fa-solid fa-video"></i>
-          Video Recordings
-        </a>
+                
 
-        <span class="menu-label">
-          Finance
-        </span>
+                <a href="doctor-appointments.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Appointment Details
+                </a>
+                <a href="online-consultation.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Consultation Details
+                </a>
 
-        <a href="transactions.html">
-          <i class="fa-solid fa-indian-rupee-sign"></i>
-          Transactions
-        </a>
+                <a href="video-recordings.html">
+                    <i class="fa-solid fa-video"></i>
+                    Video Recordings
+                </a>
 
-        <a href="doctor-profile.html">
-          <i class="fa-solid fa-user-doctor"></i>
-          My Profile
-        </a>
+                <span class="menu-label">
+                    Finance
+                </span>
 
-      </nav>
+                <a href="transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
 
-      <div class="sidebar-footer">
+                <a href="doctor-profile.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    My Profile
+                </a>
 
-        <button
-          type="button"
-          class="sidebar-logout"
-          onclick="logoutDoctor()"
-        >
-          <i class="fa-solid fa-right-from-bracket"></i>
-          Logout
-        </button>
+            </nav>
 
-      </div>
+            <div class="sidebar-footer">
 
-    </aside>
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="doctorLogout()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
 
     <main class="doctor-main">
 

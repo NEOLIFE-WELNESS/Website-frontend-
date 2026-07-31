@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Complete Therapist Profile - Neolife Wellness Center</title>
+    <title id="documentTitle">Therapist Profile - Neolife Wellness Center</title>
 
     <link rel="icon" href="../assets/main_logo.jpeg">
     <link
@@ -710,7 +710,7 @@
                 </div>
             </div>
 
-            <nav class="menu">
+            <nav class="menu" id="therapistMenu">
 
                 <span class="menu-label">Account Setup</span>
 
@@ -749,8 +749,8 @@
                     </button>
 
                     <div class="title">
-                        <h1>Complete Profile</h1>
-                        <p>Add your professional therapist information.</p>
+                        <h1 id="pageHeading">Complete Profile</h1>
+                        <p id="pageSubheading">Add your professional therapist information.</p>
                     </div>
 
                 </div>
@@ -760,7 +760,7 @@
 
                     <div>
                         <strong id="topbarName">Therapist</strong>
-                        <span>Profile Setup</span>
+                        <span id="topbarRole">Profile Setup</span>
                     </div>
                 </div>
 
@@ -776,9 +776,9 @@
                             Therapist Account
                         </span>
 
-                        <h2>Complete Your Professional Profile</h2>
+                        <h2 id="bannerHeading">Complete Your Professional Profile</h2>
 
-                        <p>
+                        <p id="bannerDescription">
                             Enter your qualification, specialization,
                             experience and professional introduction before
                             accessing the therapist dashboard.
@@ -828,7 +828,7 @@
                                 Account Activated
                             </span>
 
-                            <div class="notice">
+                            <div class="notice" id="profileNotice">
                                 <strong>Important:</strong>
                                 Your name, email, phone, age and gender were
                                 already saved when the administrator created
@@ -843,8 +843,8 @@
                     <section class="card">
 
                         <div class="card-header">
-                            <h2>Professional Information</h2>
-                            <p>
+                            <h2 id="formHeading">Professional Information</h2>
+                            <p id="formDescription">
                                 All required fields must be completed before submission.
                             </p>
                         </div>
@@ -952,7 +952,8 @@
                                 <button
                                     type="button"
                                     class="btn cancel"
-                                    onclick="resetForm()"
+                                    id="secondaryButton"
+                                    onclick="handleSecondaryAction()"
                                 >
                                     Reset
                                 </button>
@@ -981,477 +982,1280 @@
     </div>
 
     <script>
-        const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                const authToken = getToken();
+let therapistProfile = null;
+let profileMode = "LOADING";
+let originalFormData = null;
 
-                if (!authToken) {
-                    window.location.href =
-                        "therapist-login.html";
-                    return;
-                }
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireTherapistLogin()) {
+            return;
+        }
 
-                loadBasicUserInformation();
+        document
+            .getElementById("completeProfileForm")
+            .addEventListener(
+                "submit",
+                saveTherapistProfile
+            );
 
-                document
-                    .getElementById("completeProfileForm")
-                    .addEventListener(
-                        "submit",
-                        completeTherapistProfile
-                    );
+        document
+            .getElementById("profileImageUrl")
+            .addEventListener(
+                "input",
+                previewProfileImage
+            );
 
-                document
-                    .getElementById("profileImageUrl")
-                    .addEventListener(
-                        "input",
-                        previewProfileImage
-                    );
-            }
+        loadStoredBasicInformation();
+        setLoadingMode();
+
+        await loadTherapistProfile();
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getToken() {
+    return (
+        localStorage.getItem("therapistToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
+
+function requireTherapistLogin() {
+    const token = getToken();
+
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    if (!token) {
+        window.location.replace(
+            "../patient/login.html"
+        );
+        return false;
+    }
+
+    if (role && role !== "THERAPIST") {
+        alert("Only therapists can access this page.");
+        clearAuthentication();
+
+        window.location.replace(
+            "../patient/login.html"
+        );
+        return false;
+    }
+
+    return true;
+}
+
+async function therapistApiRequest(
+    endpoint,
+    options = {},
+    settings = {}
+) {
+    const token = getToken();
+
+    if (!token) {
+        clearAuthentication();
+
+        window.location.replace(
+            "../patient/login.html"
         );
 
-        async function completeTherapistProfile(event) {
-            event.preventDefault();
+        throw new Error(
+            "Therapist login required."
+        );
+    }
 
-            const payload = getPayload();
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {}),
+        "Authorization": `Bearer ${token}`
+    };
 
-            if (!validatePayload(payload)) {
-                return;
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
+
+    const result =
+        await safelyReadResponse(
+            response
+        );
+
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearAuthentication();
+
+        window.location.replace(
+            "../patient/login.html"
+        );
+
+        throw new Error(
+            result?.message ||
+            "Your session has expired."
+        );
+    }
+
+    if (
+        settings.allowNotFound &&
+        response.status === 404
+    ) {
+        return {
+            notFound: true,
+            result
+        };
+    }
+
+    if (
+        !response.ok ||
+        result?.success === false
+    ) {
+        throw new Error(
+            result?.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return result;
+}
+
+function clearAuthentication() {
+    [
+        "therapistToken",
+        "therapistRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "therapistId",
+        "therapistName",
+        "therapistProfile",
+        "therapistProfileCompleted",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key => localStorage.removeItem(key)
+    );
+
+    sessionStorage.clear();
+}
+
+function therapistLogout() {
+    clearAuthentication();
+
+    window.location.replace(
+        "../patient/login.html"
+    );
+}
+
+/* =========================
+   LOAD PROFILE AND MODE
+========================= */
+
+async function loadTherapistProfile() {
+    try {
+        const response =
+            await therapistApiRequest(
+                "/api/therapists/me",
+                {},
+                {
+                    allowNotFound: true
+                }
+            );
+
+        if (
+            response?.notFound ||
+            !response?.data
+        ) {
+            therapistProfile = null;
+            setCompleteMode();
+            return;
+        }
+
+        therapistProfile =
+            normalizeProfile(
+                response.data
+            );
+
+        const completed =
+            isProfileComplete(
+                therapistProfile
+            );
+
+        if (completed) {
+            setExistingProfileMode(
+                therapistProfile
+            );
+        } else {
+            setCompleteMode(
+                therapistProfile
+            );
+        }
+
+    } catch (error) {
+        const message =
+            String(
+                error.message || ""
+            ).toLowerCase();
+
+        /*
+         * Some backends return 400 or a normal error message when the
+         * therapist account exists but the professional profile has not
+         * been completed yet. Treat those messages as incomplete profile.
+         */
+        if (
+            message.includes(
+                "profile not found"
+            ) ||
+            message.includes(
+                "therapist not found"
+            ) ||
+            message.includes(
+                "complete profile"
+            )
+        ) {
+            therapistProfile = null;
+            setCompleteMode();
+            return;
+        }
+
+        console.error(
+            "Therapist profile loading failed:",
+            error
+        );
+
+        setCompleteMode();
+
+        showAlert(
+            error.message ||
+            "Unable to check your therapist profile.",
+            "error"
+        );
+    }
+}
+
+function normalizeProfile(item) {
+    return {
+        id:
+            item.id ??
+            item.therapistId ??
+            null,
+
+        userId:
+            item.userId ?? null,
+
+        name:
+            item.name ||
+            item.therapistName ||
+            localStorage.getItem(
+                "therapistName"
+            ) ||
+            localStorage.getItem(
+                "name"
+            ) ||
+            "Therapist",
+
+        email:
+            item.email ||
+            localStorage.getItem(
+                "email"
+            ) ||
+            "",
+
+        phoneNumber:
+            item.phoneNumber ||
+            item.phone ||
+            localStorage.getItem(
+                "phoneNumber"
+            ) ||
+            "",
+
+        qualification:
+            item.qualification || "",
+
+        specialization:
+            item.specialization || "",
+
+        experienceYears:
+            Number(
+                item.experienceYears ??
+                item.experience ??
+                0
+            ),
+
+        about:
+            item.about || "",
+
+        profileImage:
+            item.profileImage ||
+            item.profileImageUrl ||
+            item.imageUrl ||
+            "",
+
+        active:
+            item.active !== false,
+
+        profileCompleted:
+            item.profileCompleted === true
+    };
+}
+
+function isProfileComplete(profile) {
+    if (!profile) {
+        return false;
+    }
+
+    return Boolean(
+        profile.profileCompleted ||
+        (
+            profile.id &&
+            profile.qualification &&
+            profile.specialization &&
+            profile.about &&
+            Number.isFinite(
+                Number(
+                    profile.experienceYears
+                )
+            )
+        )
+    );
+}
+
+/* =========================
+   PAGE MODES
+========================= */
+
+function setLoadingMode() {
+    profileMode = "LOADING";
+
+    setText(
+        "pageHeading",
+        "Therapist Profile"
+    );
+
+    setText(
+        "pageSubheading",
+        "Checking your therapist profile..."
+    );
+
+    const saveButton =
+        document.getElementById(
+            "saveButton"
+        );
+
+    saveButton.disabled = true;
+    saveButton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Loading Profile...
+    `;
+}
+
+function setCompleteMode(
+    partialProfile = null
+) {
+    profileMode = "CREATE";
+    therapistProfile =
+        partialProfile || null;
+
+    document.title =
+        "Complete Therapist Profile - Neolife Wellness Center";
+
+    setText(
+        "pageHeading",
+        "Complete Profile"
+    );
+
+    setText(
+        "pageSubheading",
+        "Add your professional therapist information."
+    );
+
+    setText(
+        "topbarRole",
+        "Profile Setup"
+    );
+
+    setText(
+        "bannerHeading",
+        "Complete Your Professional Profile"
+    );
+
+    setText(
+        "bannerDescription",
+        "Enter your qualification, specialization, experience and professional introduction before accessing the therapist dashboard."
+    );
+
+    setText(
+        "cardRole",
+        "Therapist Profile Setup"
+    );
+
+    setText(
+        "formHeading",
+        "Professional Information"
+    );
+
+    setText(
+        "formDescription",
+        "All required fields must be completed before submission."
+    );
+
+    document.getElementById(
+        "profileNotice"
+    ).innerHTML = `
+        <strong>Important:</strong>
+        Your basic account details were already saved when the
+        administrator created your account. Complete only your
+        professional information here.
+    `;
+
+    document.getElementById(
+        "saveButton"
+    ).innerHTML = `
+        <i class="fa-solid fa-circle-check"></i>
+        Complete Profile
+    `;
+
+    document.getElementById(
+        "saveButton"
+    ).disabled = false;
+
+    setText(
+        "secondaryButton",
+        "Reset"
+    );
+
+    renderSetupMenu();
+
+    if (partialProfile) {
+        fillProfileForm(
+            partialProfile
+        );
+    }
+
+    originalFormData =
+        getPayload();
+
+    localStorage.setItem(
+        "therapistProfileCompleted",
+        "false"
+    );
+}
+
+function setExistingProfileMode(
+    profile
+) {
+    profileMode = "EDIT";
+
+    document.title =
+        "My Therapist Profile - Neolife Wellness Center";
+
+    setText(
+        "pageHeading",
+        "My Profile"
+    );
+
+    setText(
+        "pageSubheading",
+        "View and update your professional therapist information."
+    );
+
+    setText(
+        "topbarRole",
+        profile.specialization ||
+        "Therapist"
+    );
+
+    setText(
+        "bannerHeading",
+        "Your Professional Profile"
+    );
+
+    setText(
+        "bannerDescription",
+        "Your therapist profile is complete. Review your information and update it whenever required."
+    );
+
+    setText(
+        "cardRole",
+        profile.specialization ||
+        "Therapist"
+    );
+
+    setText(
+        "formHeading",
+        "Edit Professional Information"
+    );
+
+    setText(
+        "formDescription",
+        "Update the fields below and save your changes."
+    );
+
+    document.getElementById(
+        "profileNotice"
+    ).innerHTML = `
+        <strong>Profile completed:</strong>
+        Your therapist account is ready. You can access the dashboard,
+        manage availability and handle assigned treatment sessions.
+    `;
+
+    document.getElementById(
+        "saveButton"
+    ).innerHTML = `
+        <i class="fa-solid fa-floppy-disk"></i>
+        Save Changes
+    `;
+
+    document.getElementById(
+        "saveButton"
+    ).disabled = false;
+
+    setText(
+        "secondaryButton",
+        "Cancel Changes"
+    );
+
+    renderFullMenu();
+    fillProfileForm(profile);
+    updateBasicProfileDisplay(profile);
+
+    originalFormData =
+        getPayload();
+
+    localStorage.setItem(
+        "therapistProfileCompleted",
+        "true"
+    );
+
+    if (profile.id) {
+        localStorage.setItem(
+            "therapistId",
+            String(profile.id)
+        );
+    }
+
+    localStorage.setItem(
+        "therapistName",
+        profile.name
+    );
+
+    localStorage.setItem(
+        "therapistProfile",
+        JSON.stringify(profile)
+    );
+}
+
+function renderSetupMenu() {
+    document.getElementById(
+        "therapistMenu"
+    ).innerHTML = `
+        <span class="menu-label">
+            Account Setup
+        </span>
+
+        <a href="therapist-profile.html" class="active">
+            <i class="fa-solid fa-user-check"></i>
+            Complete Profile
+        </a>
+    `;
+}
+
+function renderFullMenu() {
+    document.getElementById(
+        "therapistMenu"
+    ).innerHTML = `
+        <span class="menu-label">
+            Main
+        </span>
+
+        <a href="therapist-dashboard.html">
+            <i class="fa-solid fa-chart-line"></i>
+            Dashboard
+        </a>
+
+        <a href="manage-availability.html">
+            <i class="fa-solid fa-clock"></i>
+            Manage Availability
+        </a>
+
+        <a href="booking-requests.html">
+            <i class="fa-solid fa-calendar-plus"></i>
+            Booking Requests
+        </a>
+
+        <a href="daily-schedule.html">
+            <i class="fa-solid fa-calendar-days"></i>
+            Daily Schedule
+        </a>
+
+        <span class="menu-label">
+            Treatment Operations
+        </span>
+
+        <a href="attendance.html">
+            <i class="fa-solid fa-user-check"></i>
+            Attendance & Sessions
+        </a>
+
+        <a href="patient-history.html">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Patient History
+        </a>
+
+        <a href="therapist-profile.html" class="active">
+            <i class="fa-solid fa-user-gear"></i>
+            My Profile
+        </a>
+    `;
+}
+
+/* =========================
+   SAVE CREATE OR UPDATE
+========================= */
+
+async function saveTherapistProfile(
+    event
+) {
+    event.preventDefault();
+
+    const payload =
+        getPayload();
+
+    if (!validatePayload(payload)) {
+        return;
+    }
+
+    const saveButton =
+        document.getElementById(
+            "saveButton"
+        );
+
+    const originalButtonContent =
+        saveButton.innerHTML;
+
+    try {
+        saveButton.disabled = true;
+
+        saveButton.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            ${
+                profileMode === "EDIT"
+                    ? "Saving Changes..."
+                    : "Completing Profile..."
             }
+        `;
 
-            const saveButton =
-                document.getElementById("saveButton");
+        let result;
 
-            const originalButtonContent =
-                saveButton.innerHTML;
-
-            saveButton.disabled = true;
-            saveButton.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                Saving Profile...
-            `;
-
-            try {
-                const response = await fetch(
-                    API_BASE_URL +
-                    "/api/therapists/complete-profile",
+        if (
+            profileMode === "EDIT" &&
+            therapistProfile?.id
+        ) {
+            result =
+                await therapistApiRequest(
+                    `/api/therapists/update/${encodeURIComponent(
+                        therapistProfile.id
+                    )}`,
                     {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-
-                            "Accept":
-                                "application/json",
-
-                            "Authorization":
-                                "Bearer " + getToken()
-                        },
-
-                        body: JSON.stringify(payload)
+                        method: "PUT",
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
                     }
                 );
 
-                const result =
-                    await safelyReadResponse(response);
+        } else {
+            result =
+                await therapistApiRequest(
+                    "/api/therapists/complete-profile",
+                    {
+                        method: "POST",
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
+                    }
+                );
+        }
 
-                if (response.status === 401) {
-                    clearAuthentication();
-
-                    throw new Error(
-                        "Your session has expired. Please login again."
-                    );
+        const returnedProfile =
+            normalizeProfile(
+                result?.data || {
+                    ...therapistProfile,
+                    ...payload
                 }
-
-                if (response.status === 403) {
-                    throw new Error(
-                        result?.message ||
-                        "Only a therapist account can complete this profile."
-                    );
-                }
-
-                if (!response.ok) {
-                    throw new Error(
-                        result?.message ||
-                        "Unable to complete therapist profile."
-                    );
-                }
-
-                if (
-                    result &&
-                    result.success === false
-                ) {
-                    throw new Error(
-                        result.message ||
-                        "Unable to complete therapist profile."
-                    );
-                }
-
-                showAlert(
-                    result?.message ||
-                    "Therapist profile completed successfully.",
-                    "success"
-                );
-
-                localStorage.setItem(
-                    "therapistProfileCompleted",
-                    "true"
-                );
-
-                setTimeout(
-                    function () {
-                        window.location.href =
-                            "therapist-dashboard.html";
-                    },
-                    1500
-                );
-
-            } catch (error) {
-                console.error(
-                    "Complete therapist profile error:",
-                    error
-                );
-
-                showAlert(
-                    error.message ||
-                    "Something went wrong. Please try again.",
-                    "error"
-                );
-
-            } finally {
-                saveButton.disabled = false;
-                saveButton.innerHTML =
-                    originalButtonContent;
-            }
-        }
-
-        function getPayload() {
-            return {
-                qualification:
-                    getValue("qualification"),
-
-                specialization:
-                    getValue("specialization"),
-
-                experienceYears:
-                    Number(
-                        getValue("experienceYears")
-                    ),
-
-                about:
-                    getValue("about"),
-
-                profileImage:
-                    getValue("profileImageUrl")
-            };
-        }
-
-        function validatePayload(payload) {
-            if (
-                !payload.qualification ||
-                payload.qualification.length < 2
-            ) {
-                showAlert(
-                    "Please enter your qualification.",
-                    "error"
-                );
-
-                document
-                    .getElementById("qualification")
-                    .focus();
-
-                return false;
-            }
-
-            if (
-                !payload.specialization ||
-                payload.specialization.length < 2
-            ) {
-                showAlert(
-                    "Please enter your specialization.",
-                    "error"
-                );
-
-                document
-                    .getElementById("specialization")
-                    .focus();
-
-                return false;
-            }
-
-            if (
-                Number.isNaN(payload.experienceYears) ||
-                payload.experienceYears < 0 ||
-                payload.experienceYears > 60
-            ) {
-                showAlert(
-                    "Enter valid experience between 0 and 60 years.",
-                    "error"
-                );
-
-                document
-                    .getElementById("experienceYears")
-                    .focus();
-
-                return false;
-            }
-
-            if (
-                !payload.about ||
-                payload.about.length < 10
-            ) {
-                showAlert(
-                    "About therapist must contain at least 10 characters.",
-                    "error"
-                );
-
-                document
-                    .getElementById("about")
-                    .focus();
-
-                return false;
-            }
-
-            if (
-                payload.profileImage &&
-                !isValidUrl(payload.profileImage)
-            ) {
-                showAlert(
-                    "Enter a valid profile image URL.",
-                    "error"
-                );
-
-                document
-                    .getElementById("profileImageUrl")
-                    .focus();
-
-                return false;
-            }
-
-            return true;
-        }
-
-        async function safelyReadResponse(response) {
-            const responseText =
-                await response.text();
-
-            if (!responseText) {
-                return null;
-            }
-
-            try {
-                return JSON.parse(responseText);
-
-            } catch (error) {
-                console.error(
-                    "Invalid JSON response:",
-                    responseText
-                );
-
-                return {
-                    success: false,
-                    message: responseText
-                };
-            }
-        }
-
-        function loadBasicUserInformation() {
-            const name =
-                localStorage.getItem("name") ||
-                localStorage.getItem("userName") ||
-                "Therapist";
-
-            const firstLetter =
-                name.charAt(0).toUpperCase();
-
-            document.getElementById(
-                "topbarName"
-            ).textContent = name;
-
-            document.getElementById(
-                "cardName"
-            ).textContent = name;
-
-            document.getElementById(
-                "topbarInitial"
-            ).textContent = firstLetter;
-
-            document.getElementById(
-                "profilePlaceholder"
-            ).textContent = firstLetter;
-        }
-
-        function previewProfileImage() {
-            const url =
-                getValue("profileImageUrl");
-
-            const image =
-                document.getElementById(
-                    "profileImage"
-                );
-
-            const placeholder =
-                document.getElementById(
-                    "profilePlaceholder"
-                );
-
-            if (!url) {
-                image.style.display = "none";
-                placeholder.style.display = "flex";
-                return;
-            }
-
-            image.src = url;
-            image.style.display = "block";
-            placeholder.style.display = "none";
-
-            image.onerror = function () {
-                image.style.display = "none";
-                placeholder.style.display = "flex";
-            };
-        }
-
-        function resetForm() {
-            document
-                .getElementById(
-                    "completeProfileForm"
-                )
-                .reset();
-
-            previewProfileImage();
-
-            showAlert(
-                "Form reset successfully.",
-                "info"
             );
-        }
 
-        function getToken() {
-            return (
-                localStorage.getItem(
-                    "therapistToken"
-                ) ||
-                localStorage.getItem(
-                    "token"
-                ) ||
-                ""
-            );
-        }
+        showAlert(
+            result?.message ||
+            (
+                profileMode === "EDIT"
+                    ? "Therapist profile updated successfully."
+                    : "Therapist profile completed successfully."
+            ),
+            "success"
+        );
 
-        function clearAuthentication() {
-            [
-                "therapistToken",
-                "therapistRefreshToken",
-                "token",
-                "refreshToken",
-                "role",
+        therapistProfile =
+            returnedProfile;
+
+        localStorage.setItem(
+            "therapistProfileCompleted",
+            "true"
+        );
+
+        localStorage.setItem(
+            "therapistProfile",
+            JSON.stringify(
+                returnedProfile
+            )
+        );
+
+        if (
+            returnedProfile.id
+        ) {
+            localStorage.setItem(
                 "therapistId",
-                "userId"
-            ].forEach(
-                function (key) {
-                    localStorage.removeItem(key);
-                }
+                String(
+                    returnedProfile.id
+                )
             );
         }
 
-        function therapistLogout() {
-            clearAuthentication();
-
-            window.location.href =
-                "therapist-login.html";
+        if (
+            profileMode === "CREATE"
+        ) {
+            setTimeout(
+                function () {
+                    window.location.href =
+                        "therapist-dashboard.html";
+                },
+                1200
+            );
+        } else {
+            setExistingProfileMode(
+                returnedProfile
+            );
         }
 
-        function getValue(id) {
-            return document
-                .getElementById(id)
-                .value
-                .trim();
-        }
+    } catch (error) {
+        console.error(
+            "Save therapist profile error:",
+            error
+        );
 
-        function isValidUrl(value) {
-            try {
-                new URL(value);
-                return true;
-            } catch (error) {
-                return false;
+        showAlert(
+            error.message ||
+            "Unable to save therapist profile.",
+            "error"
+        );
+
+    } finally {
+        saveButton.disabled = false;
+        saveButton.innerHTML =
+            originalButtonContent;
+
+        if (
+            profileMode === "EDIT"
+        ) {
+            saveButton.innerHTML = `
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Changes
+            `;
+        }
+    }
+}
+
+/* =========================
+   FORM
+========================= */
+
+function fillProfileForm(profile) {
+    setValue(
+        "qualification",
+        profile.qualification
+    );
+
+    setValue(
+        "specialization",
+        profile.specialization
+    );
+
+    setValue(
+        "experienceYears",
+        profile.experienceYears
+    );
+
+    setValue(
+        "profileImageUrl",
+        profile.profileImage
+    );
+
+    setValue(
+        "about",
+        profile.about
+    );
+
+    previewProfileImage();
+}
+
+function getPayload() {
+    return {
+        qualification:
+            getValue("qualification"),
+
+        specialization:
+            getValue("specialization"),
+
+        experienceYears:
+            Number(
+                getValue(
+                    "experienceYears"
+                )
+            ),
+
+        about:
+            getValue("about"),
+
+        profileImage:
+            getValue(
+                "profileImageUrl"
+            )
+    };
+}
+
+function validatePayload(payload) {
+    if (
+        !payload.qualification ||
+        payload.qualification.length < 2
+    ) {
+        showAlert(
+            "Please enter your qualification.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "qualification"
+            )
+            .focus();
+
+        return false;
+    }
+
+    if (
+        !payload.specialization ||
+        payload.specialization.length < 2
+    ) {
+        showAlert(
+            "Please enter your specialization.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "specialization"
+            )
+            .focus();
+
+        return false;
+    }
+
+    if (
+        Number.isNaN(
+            payload.experienceYears
+        ) ||
+        payload.experienceYears < 0 ||
+        payload.experienceYears > 60
+    ) {
+        showAlert(
+            "Enter valid experience between 0 and 60 years.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "experienceYears"
+            )
+            .focus();
+
+        return false;
+    }
+
+    if (
+        !payload.about ||
+        payload.about.length < 10
+    ) {
+        showAlert(
+            "About therapist must contain at least 10 characters.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "about"
+            )
+            .focus();
+
+        return false;
+    }
+
+    if (
+        payload.profileImage &&
+        !isValidUrl(
+            payload.profileImage
+        )
+    ) {
+        showAlert(
+            "Enter a valid profile image URL.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "profileImageUrl"
+            )
+            .focus();
+
+        return false;
+    }
+
+    return true;
+}
+
+function handleSecondaryAction() {
+    if (
+        profileMode === "EDIT" &&
+        originalFormData
+    ) {
+        fillProfileForm(
+            {
+                ...therapistProfile,
+                ...originalFormData
             }
+        );
+
+        showAlert(
+            "Unsaved changes were cancelled.",
+            "info"
+        );
+
+        return;
+    }
+
+    resetForm();
+}
+
+function resetForm() {
+    document
+        .getElementById(
+            "completeProfileForm"
+        )
+        .reset();
+
+    previewProfileImage();
+
+    showAlert(
+        "Form reset successfully.",
+        "info"
+    );
+}
+
+/* =========================
+   DISPLAY
+========================= */
+
+function loadStoredBasicInformation() {
+    const name =
+        localStorage.getItem(
+            "therapistName"
+        ) ||
+        localStorage.getItem(
+            "name"
+        ) ||
+        localStorage.getItem(
+            "userName"
+        ) ||
+        "Therapist";
+
+    updateBasicProfileDisplay(
+        {
+            name,
+            specialization:
+                "Therapist",
+            profileImage:
+                ""
         }
+    );
+}
 
-        function showAlert(message, type) {
-            const alertBox =
-                document.getElementById(
-                    "pageAlert"
-                );
+function updateBasicProfileDisplay(
+    profile
+) {
+    const name =
+        profile.name ||
+        "Therapist";
 
-            const alertIcon =
-                document.getElementById(
-                    "alertIcon"
-                );
+    const firstLetter =
+        name.charAt(0)
+            .toUpperCase();
 
-            document.getElementById(
-                "alertMessage"
-            ).textContent = message;
+    setText(
+        "topbarName",
+        name
+    );
 
-            alertBox.className =
-                "alert show " + type;
+    setText(
+        "cardName",
+        name
+    );
 
-            alertIcon.className =
-                type === "success"
-                    ? "fa-solid fa-circle-check"
-                    : type === "error"
-                        ? "fa-solid fa-circle-exclamation"
-                        : "fa-solid fa-circle-info";
+    setText(
+        "topbarInitial",
+        firstLetter
+    );
 
-            clearTimeout(
-                window.profileAlertTimer
-            );
+    setText(
+        "profilePlaceholder",
+        firstLetter
+    );
 
-            window.profileAlertTimer =
-                setTimeout(
-                    function () {
-                        alertBox.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
-        }
+    if (
+        profile.specialization
+    ) {
+        setText(
+            "topbarRole",
+            profile.specialization
+        );
 
-        function toggleSidebar() {
-            document
-                .getElementById(
-                    "therapistSidebar"
-                )
-                .classList
-                .toggle("open");
+        setText(
+            "cardRole",
+            profile.specialization
+        );
+    }
 
-            document
-                .getElementById(
-                    "sidebarOverlay"
-                )
-                .classList
-                .toggle("show");
-        }
+    if (
+        profile.profileImage
+    ) {
+        setValue(
+            "profileImageUrl",
+            profile.profileImage
+        );
 
-        function closeSidebar() {
-            document
-                .getElementById(
-                    "therapistSidebar"
-                )
-                .classList
-                .remove("open");
+        previewProfileImage();
+    }
+}
 
-            document
-                .getElementById(
-                    "sidebarOverlay"
-                )
-                .classList
-                .remove("show");
-        }
-    </script>
+function previewProfileImage() {
+    const url =
+        getValue(
+            "profileImageUrl"
+        );
+
+    const image =
+        document.getElementById(
+            "profileImage"
+        );
+
+    const placeholder =
+        document.getElementById(
+            "profilePlaceholder"
+        );
+
+    if (!url) {
+        image.style.display =
+            "none";
+
+        placeholder.style.display =
+            "flex";
+
+        return;
+    }
+
+    image.src = url;
+    image.style.display =
+        "block";
+
+    placeholder.style.display =
+        "none";
+
+    image.onerror =
+        function () {
+            image.style.display =
+                "none";
+
+            placeholder.style.display =
+                "flex";
+        };
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+async function safelyReadResponse(
+    response
+) {
+    const responseText =
+        await response.text();
+
+    if (!responseText) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(
+            responseText
+        );
+
+    } catch {
+        return {
+            success: false,
+            message: responseText
+        };
+    }
+}
+
+function getValue(id) {
+    return document
+        .getElementById(id)
+        .value
+        .trim();
+}
+
+function setValue(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.value =
+            value ?? "";
+    }
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+function isValidUrl(value) {
+    try {
+        new URL(value);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const alertBox =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const alertIcon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    setText(
+        "alertMessage",
+        message
+    );
+
+    alertBox.className =
+        `alert show ${type}`;
+
+    alertIcon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.profileAlertTimer
+    );
+
+    window.profileAlertTimer =
+        setTimeout(
+            function () {
+                alertBox.classList
+                    .remove("show");
+            },
+            4000
+        );
+}
+
+function toggleSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList
+        .toggle("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList
+        .toggle("show");
+}
+
+function closeSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList
+        .remove("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList
+        .remove("show");
+}
+</script>
 
 </body>
 </html>

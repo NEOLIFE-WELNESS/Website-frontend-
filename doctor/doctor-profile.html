@@ -760,6 +760,95 @@ textarea.control{
         width:100%;
     }
 }
+
+
+/* PROFILE IMAGE UPLOAD */
+.image-upload-box{
+    padding:18px;
+    display:grid;
+    grid-template-columns:92px 1fr;
+    gap:16px;
+    align-items:center;
+    border:1px dashed #bfcfc4;
+    border-radius:14px;
+    background:#f8fbf8;
+}
+.image-upload-preview{
+    width:92px;
+    height:92px;
+    overflow:hidden;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    border:3px solid #e4c45e;
+    color:#fff;
+    background:#1f5b3a;
+    font-size:30px;
+    font-weight:800;
+}
+.image-upload-preview img{
+    width:100%;
+    height:100%;
+    display:none;
+    object-fit:cover;
+}
+.image-upload-actions{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:9px;
+}
+.file-input-hidden{display:none}
+.choose-image-btn,
+.remove-image-btn{
+    min-height:40px;
+    padding:9px 14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border-radius:9px;
+    font-size:12px;
+    font-weight:800;
+}
+.choose-image-btn{
+    color:#fff;
+    border:1px solid #153d29;
+    background:#153d29;
+}
+.remove-image-btn{
+    color:#b33f3f;
+    border:1px solid #ebcccc;
+    background:#fff;
+}
+.upload-file-name{
+    color:#66736b;
+    font-size:11px;
+    overflow-wrap:anywhere;
+}
+.upload-progress{
+    width:100%;
+    display:none;
+    align-items:center;
+    gap:8px;
+    color:#2d6844;
+    font-size:11px;
+    font-weight:700;
+}
+.upload-progress.show{display:flex}
+.image-upload-box.disabled{
+    opacity:.72;
+    pointer-events:none;
+}
+@media(max-width:600px){
+    .image-upload-box{
+        grid-template-columns:1fr;
+        text-align:center;
+    }
+    .image-upload-preview{margin:auto}
+    .image-upload-actions{align-items:center}
+}
+
 </style>
 </head>
 
@@ -1200,20 +1289,86 @@ textarea.control{
 
                     <div class="group full">
 
-                        <label for="imageUrl">
-                            Profile Image URL
+                        <label for="profileImageFile">
+                            Profile Image
                         </label>
+
+                        <div
+                            class="image-upload-box editable-upload"
+                            id="imageUploadBox"
+                        >
+                            <div class="image-upload-preview">
+                                <img
+                                    id="uploadPreviewImage"
+                                    src=""
+                                    alt="Selected doctor profile"
+                                >
+
+                                <span id="uploadPreviewPlaceholder">
+                                    D
+                                </span>
+                            </div>
+
+                            <div class="image-upload-actions">
+                                <input
+                                    id="profileImageFile"
+                                    class="file-input-hidden"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    disabled
+                                >
+
+                                <button
+                                    type="button"
+                                    class="choose-image-btn"
+                                    id="chooseImageButton"
+                                    onclick="openImagePicker()"
+                                    disabled
+                                >
+                                    <i class="fa-solid fa-camera"></i>
+                                    Choose Image
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="remove-image-btn"
+                                    id="removeImageButton"
+                                    onclick="removeSelectedImage()"
+                                    disabled
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                    Remove Selection
+                                </button>
+
+                                <span
+                                    class="upload-file-name"
+                                    id="selectedImageName"
+                                >
+                                    No new image selected
+                                </span>
+
+                                <div
+                                    class="upload-progress"
+                                    id="imageUploadProgress"
+                                >
+                                    <i class="fa-solid fa-spinner fa-spin"></i>
+                                    Uploading profile image...
+                                </div>
+                            </div>
+                        </div>
 
                         <input
                             id="imageUrl"
-                            class="control editable-field"
-                            type="url"
-                            placeholder="https://example.com/doctor.jpg"
-                            disabled
+                            type="hidden"
+                        >
+
+                        <input
+                            id="imageId"
+                            type="hidden"
                         >
 
                         <p class="help">
-                            Enter a public image URL or leave this field blank.
+                            Select a JPG, PNG or WEBP image. Maximum size: 5 MB.
                         </p>
 
                     </div>
@@ -1276,6 +1431,24 @@ const API_BASE_URL =
 let doctorProfile = null;
 let editing = false;
 let profileExists = false;
+let selectedProfileImageFile = null;
+let removeExistingProfileImage = false;
+
+function resolveDoctorProfileImage(doctor = {}) {
+    return (
+        doctor.imageUrl ||
+        localStorage.getItem("doctorProfileImageUrl") ||
+        ""
+    );
+}
+
+function resolveRegistrationNumber(doctor = {}) {
+    return (
+        doctor.registrationNumber ||
+        localStorage.getItem("doctorRegistrationNumber") ||
+        ""
+    );
+}
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -1295,11 +1468,11 @@ document.addEventListener(
 
         document
             .getElementById(
-                "imageUrl"
+                "profileImageFile"
             )
             .addEventListener(
-                "input",
-                previewImageFromInput
+                "change",
+                handleProfileImageSelection
             );
 
         await loadDoctorProfile();
@@ -1416,67 +1589,37 @@ async function apiRequest(
 }
 
 async function loadDoctorProfile() {
+    let userProfile = {};
+    let professionalProfile = null;
+    let professionalProfileError = null;
+
+    /*
+     * Load the basic account first. Name, email, phone,
+     * age and gender belong to the User account and must
+     * be visible even before the doctor completes the
+     * professional profile.
+     */
     try {
-        const result =
+        const userResult =
             await apiRequest(
-                "/api/doctors/my-profile"
+                "/api/users/getProfile"
             );
 
-        doctorProfile =
-            result.data || {};
-
-        profileExists =
-            Boolean(
-                doctorProfile.id
-            );
-
-        localStorage.setItem(
-            "profileCompleted",
-            profileExists
-                ? "true"
-                : "false"
-        );
-
-        if (
-            doctorProfile.id !== null &&
-            doctorProfile.id !== undefined
-        ) {
-            localStorage.setItem(
-                "doctorId",
-                String(
-                    doctorProfile.id
-                )
-            );
-        }
-
-        localStorage.setItem(
-            "doctorName",
-            doctorProfile.name ||
-            "Doctor"
-        );
-
-        localStorage.setItem(
-            "doctor",
-            JSON.stringify(
-                doctorProfile
-            )
-        );
-
-        populateProfile(
-            doctorProfile
-        );
+        userProfile =
+            userResult.data || {};
 
     } catch (error) {
         console.error(
-            "Load doctor profile error:",
+            "Load user account error:",
             error
         );
 
-        /*
-         * A 404 or profile-not-created backend response may mean
-         * that this doctor still needs to complete the profile.
-         */
-        doctorProfile = {
+        userProfile = {
+            id:
+                localStorage.getItem(
+                    "userId"
+                ) || "",
+
             name:
                 localStorage.getItem(
                     "doctorName"
@@ -1489,25 +1632,220 @@ async function loadDoctorProfile() {
             email:
                 localStorage.getItem(
                     "email"
+                ) || "",
+
+            phoneNumber:
+                localStorage.getItem(
+                    "phoneNumber"
                 ) ||
-                "",
-
-            phoneNumber: "",
-            qualification: "",
-            specialization: "",
-            experience: "",
-            registrationNumber: "",
-            imageUrl: "",
-            about: "",
-            active: true
+                localStorage.getItem(
+                    "phone"
+                ) || ""
         };
+    }
 
-        profileExists = false;
+    /*
+     * Load professional doctor information separately.
+     * A 404 here normally means the doctor has not yet
+     * completed the professional profile.
+     */
+    try {
+        const doctorResult =
+            await apiRequest(
+                "/api/doctors/my-profile"
+            );
 
-        populateProfile(
-            doctorProfile
+        professionalProfile =
+            doctorResult.data || null;
+
+
+    } catch (error) {
+        professionalProfileError = error;
+
+        console.warn(
+            "Doctor professional profile is not available:",
+            error
+        );
+    }
+
+    const savedDoctor =
+        safelyParseJson(
+            localStorage.getItem(
+                "doctor"
+            )
+        ) || {};
+
+    doctorProfile = {
+        ...savedDoctor,
+        ...(professionalProfile || {}),
+
+        userId:
+            professionalProfile?.userId ||
+            userProfile.id ||
+            userProfile.userId ||
+            savedDoctor.userId ||
+            "",
+
+        name:
+            professionalProfile?.name ||
+            userProfile.name ||
+            userProfile.fullName ||
+            localStorage.getItem(
+                "doctorName"
+            ) ||
+            localStorage.getItem(
+                "name"
+            ) ||
+            "Doctor",
+
+        email:
+            professionalProfile?.email ||
+            userProfile.email ||
+            localStorage.getItem(
+                "email"
+            ) ||
+            "",
+
+        phoneNumber:
+            professionalProfile?.phoneNumber ||
+            professionalProfile?.phone ||
+            userProfile.phoneNumber ||
+            userProfile.phone ||
+            localStorage.getItem(
+                "phoneNumber"
+            ) ||
+            localStorage.getItem(
+                "phone"
+            ) ||
+            "",
+
+        age:
+            professionalProfile?.age ??
+            userProfile.age ??
+            "",
+
+        gender:
+            professionalProfile?.gender ||
+            userProfile.gender ||
+            "",
+
+        registrationNumber:
+            resolveRegistrationNumber(
+                professionalProfile || savedDoctor
+            ),
+
+        imageUrl:
+            resolveDoctorProfileImage(
+                professionalProfile || savedDoctor
+            ),
+
+        profileImage:
+            resolveDoctorProfileImage(
+                professionalProfile || savedDoctor
+            ),
+
+        active:
+            professionalProfile?.active ??
+            true
+    };
+
+    profileExists =
+        Boolean(
+            professionalProfile &&
+            professionalProfile.id
         );
 
+    localStorage.setItem(
+        "profileCompleted",
+        profileExists
+            ? "true"
+            : "false"
+    );
+
+    if (doctorProfile.userId) {
+        localStorage.setItem(
+            "userId",
+            String(
+                doctorProfile.userId
+            )
+        );
+    }
+
+    if (profileExists) {
+        localStorage.setItem(
+            "doctorId",
+            String(
+                professionalProfile.id
+            )
+        );
+    }
+
+    if (doctorProfile.phoneNumber) {
+        localStorage.setItem(
+            "phoneNumber",
+            String(
+                doctorProfile.phoneNumber
+            )
+        );
+    }
+
+    if (resolveRegistrationNumber(doctorProfile)) {
+        localStorage.setItem(
+            "doctorRegistrationNumber",
+            resolveRegistrationNumber(
+                doctorProfile
+            )
+        );
+    }
+
+    if (resolveDoctorProfileImage(doctorProfile)) {
+        localStorage.setItem(
+            "doctorProfileImageUrl",
+            resolveDoctorProfileImage(
+                doctorProfile
+            )
+        );
+    }
+
+    localStorage.setItem(
+        "doctorName",
+        doctorProfile.name ||
+        "Doctor"
+    );
+
+    localStorage.setItem(
+        "doctor",
+        JSON.stringify(
+            doctorProfile
+        )
+    );
+
+    selectedProfileImageFile = null;
+    removeExistingProfileImage = false;
+
+    populateProfile(
+        doctorProfile
+    );
+
+    if (profileExists) {
+        document.getElementById(
+            "formHeading"
+        ).textContent =
+            "Profile Information";
+
+        document.getElementById(
+            "formSubheading"
+        ).textContent =
+            "Your saved doctor profile information.";
+
+        document.getElementById(
+            "editButton"
+        ).style.display =
+            "inline-flex";
+
+        cancelEditing();
+
+    } else {
         enterEditMode();
 
         document.getElementById(
@@ -1525,25 +1863,49 @@ async function loadDoctorProfile() {
         ).style.display =
             "none";
 
-        showAlert(
-            error.message ||
-            "Complete your professional profile.",
-            "info"
-        );
-    } finally {
-        document.getElementById(
-            "profileLoading"
-        ).style.display =
-            "none";
+        if (professionalProfileError) {
+            showAlert(
+                "Your account information was loaded. Complete the professional fields to create your doctor profile.",
+                "info"
+            );
+        }
+    }
 
-        document.getElementById(
-            "doctorProfileForm"
-        ).style.display =
-            "block";
+    document.getElementById(
+        "profileLoading"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "doctorProfileForm"
+    ).style.display =
+        "block";
+}
+
+function safelyParseJson(value) {
+    if (!value) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(value);
+
+    } catch (error) {
+        return null;
     }
 }
 
 function populateProfile(doctor) {
+    const resolvedProfileImage =
+        resolveDoctorProfileImage(doctor);
+
+    if (resolvedProfileImage) {
+        localStorage.setItem(
+            "doctorProfileImageUrl",
+            resolvedProfileImage
+        );
+    }
+
     setValue(
         "name",
         doctor.name || ""
@@ -1581,21 +1943,48 @@ function populateProfile(doctor) {
 
     setValue(
         "registrationNumber",
-        doctor.registrationNumber || ""
+        resolveRegistrationNumber(
+            doctor
+        )
     );
 
     setValue(
         "imageUrl",
-        doctor.imageUrl || ""
+        resolvedProfileImage
     );
+
+    setValue(
+        "imageId",
+        doctor.imageId ||
+        doctor.profileImageId ||
+        localStorage.getItem(
+            "doctorProfileImageId"
+        ) ||
+        ""
+    );
+
+    selectedProfileImageFile = null;
+    removeExistingProfileImage = false;
+
+    const name =
+        doctor.name || "Doctor";
+
+    updateUploadPreview(
+        resolvedProfileImage,
+        name
+    );
+
+    document.getElementById(
+        "selectedImageName"
+    ).textContent =
+        resolvedProfileImage
+            ? "Current profile image"
+            : "No image uploaded";
 
     setValue(
         "about",
         doctor.about || ""
     );
-
-    const name =
-        doctor.name || "Doctor";
 
     const initial =
         (
@@ -1687,7 +2076,7 @@ function populateProfile(doctor) {
     }
 
     showProfileImage(
-        doctor.imageUrl || ""
+        resolvedProfileImage
     );
 }
 
@@ -1712,6 +2101,18 @@ function enterEditMode() {
                 field.disabled = false;
             }
         );
+
+    document.getElementById(
+        "profileImageFile"
+    ).disabled = !editing;
+
+    document.getElementById(
+        "chooseImageButton"
+    ).disabled = !editing;
+
+    document.getElementById(
+        "removeImageButton"
+    ).disabled = !editing;
 
     document.getElementById(
         "formActions"
@@ -1783,6 +2184,20 @@ function cancelEditing() {
 async function saveDoctorProfile(event) {
     event.preventDefault();
 
+    let uploadedImage = null;
+
+    const selectedRegistrationNumber =
+        getValue(
+            "registrationNumber"
+        );
+
+    const currentProfileImage =
+        getValue("imageUrl") ||
+        resolveDoctorProfileImage(
+            doctorProfile || {}
+        ) ||
+        null;
+
     const payload = {
         qualification:
             getValue("qualification"),
@@ -1798,14 +2213,13 @@ async function saveDoctorProfile(event) {
         about:
             getValue("about"),
 
+        /* Exact Doctor API request field */
         imageUrl:
-            getValue("imageUrl") ||
-            null,
+            currentProfileImage,
 
+        /* Exact Doctor API request field */
         registrationNumber:
-            getValue(
-                "registrationNumber"
-            )
+            selectedRegistrationNumber
     };
 
     if (!validatePayload(payload)) {
@@ -1830,6 +2244,45 @@ async function saveDoctorProfile(event) {
 
     try {
         let result;
+
+        if (selectedProfileImageFile) {
+            uploadedImage =
+                await uploadDoctorProfileImage(
+                    selectedProfileImageFile
+                );
+
+            payload.imageUrl =
+                uploadedImage.fileUrl;
+
+
+            setValue(
+                "imageUrl",
+                uploadedImage.fileUrl
+            );
+
+            localStorage.setItem(
+                "doctorProfileImageUrl",
+                uploadedImage.fileUrl
+            );
+
+            if (uploadedImage.id) {
+                setValue(
+                    "imageId",
+                    uploadedImage.id
+                );
+
+                localStorage.setItem(
+                    "doctorProfileImageId",
+                    String(uploadedImage.id)
+                );
+            }
+        } else if (removeExistingProfileImage) {
+            payload.imageUrl = null;
+
+            localStorage.removeItem(
+                "doctorProfileImageUrl"
+            );
+        }
 
         if (
             profileExists &&
@@ -1863,12 +2316,65 @@ async function saveDoctorProfile(event) {
                 );
         }
 
-        doctorProfile =
-            result.data ||
-            {
-                ...doctorProfile,
-                ...payload
-            };
+        const responseDoctor =
+            result.data || {};
+
+        doctorProfile = {
+            ...(doctorProfile || {}),
+            ...responseDoctor,
+
+            /* Preserve values because the documented response currently
+               omits registrationNumber and may return imageUrl as null. */
+            registrationNumber:
+                responseDoctor.registrationNumber ||
+                payload.registrationNumber,
+
+            imageUrl:
+                responseDoctor.imageUrl ||
+                payload.imageUrl
+        };
+
+        const savedRegistrationNumber =
+            resolveRegistrationNumber(
+                doctorProfile
+            ) ||
+            selectedRegistrationNumber;
+
+        if (savedRegistrationNumber) {
+            doctorProfile.registrationNumber =
+                savedRegistrationNumber;
+
+            localStorage.setItem(
+                "doctorRegistrationNumber",
+                savedRegistrationNumber
+            );
+
+            setValue(
+                "registrationNumber",
+                savedRegistrationNumber
+            );
+        }
+
+        const savedProfileImage =
+            resolveDoctorProfileImage(
+                doctorProfile
+            );
+
+        if (savedProfileImage) {
+            doctorProfile.imageUrl =
+                savedProfileImage;
+
+
+            localStorage.setItem(
+                "doctorProfileImageUrl",
+                savedProfileImage
+            );
+
+            setValue(
+                "imageUrl",
+                savedProfileImage
+            );
+        }
 
         profileExists =
             Boolean(
@@ -2037,33 +2543,216 @@ function validatePayload(payload) {
         return false;
     }
 
-    if (
-        payload.imageUrl &&
-        !isValidUrl(
-            payload.imageUrl
-        )
-    ) {
-        showAlert(
-            "Enter a valid profile image URL.",
-            "error"
-        );
-
-        document
-            .getElementById(
-                "imageUrl"
-            )
-            .focus();
-
-        return false;
-    }
-
     return true;
 }
 
-function previewImageFromInput() {
-    showProfileImage(
-        getValue("imageUrl")
+function openImagePicker() {
+    if (!editing) {
+        return;
+    }
+
+    document.getElementById(
+        "profileImageFile"
+    ).click();
+}
+
+function handleProfileImageSelection(event) {
+    const file =
+        event.target.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        showAlert(
+            "Please select a JPG, PNG or WEBP image.",
+            "error"
+        );
+
+        event.target.value = "";
+        return;
+    }
+
+    const maximumSize =
+        5 * 1024 * 1024;
+
+    if (file.size > maximumSize) {
+        showAlert(
+            "Profile image must be smaller than 5 MB.",
+            "error"
+        );
+
+        event.target.value = "";
+        return;
+    }
+
+    selectedProfileImageFile = file;
+    removeExistingProfileImage = false;
+
+    document.getElementById(
+        "selectedImageName"
+    ).textContent =
+        `${file.name} (${formatFileSize(file.size)})`;
+
+    const previewUrl =
+        URL.createObjectURL(file);
+
+    updateUploadPreview(
+        previewUrl,
+        getValue("name") || "Doctor"
     );
+}
+
+function removeSelectedImage() {
+    if (!editing) {
+        return;
+    }
+
+    selectedProfileImageFile = null;
+    removeExistingProfileImage = true;
+
+    const input =
+        document.getElementById(
+            "profileImageFile"
+        );
+
+    input.value = "";
+
+    setValue("imageUrl", "");
+
+    document.getElementById(
+        "selectedImageName"
+    ).textContent =
+        "Profile image will be removed after saving";
+
+    updateUploadPreview(
+        "",
+        getValue("name") || "Doctor"
+    );
+}
+
+async function uploadDoctorProfileImage(file) {
+    const imageId =
+        getValue("imageId") ||
+        localStorage.getItem(
+            "doctorProfileImageId"
+        );
+
+    const formData =
+        new FormData();
+
+    /*
+     * These names must match the Spring controller's
+     * @RequestParam names. The common setup is:
+     * file + module.
+     */
+    formData.append("file", file);
+    formData.append("module", "DOCTOR");
+
+    const endpoint = imageId
+        ? `/api/images/update/${encodeURIComponent(imageId)}`
+        : "/api/images/upload";
+
+    const method = imageId
+        ? "PUT"
+        : "POST";
+
+    setImageUploading(true);
+
+    try {
+        const result =
+            await apiRequest(
+                endpoint,
+                {
+                    method,
+                    body: formData
+                }
+            );
+
+        if (!result.data?.fileUrl) {
+            throw new Error(
+                "The upload API did not return a file URL."
+            );
+        }
+
+        showAlert(
+            result.message ||
+            "Profile image uploaded successfully.",
+            "success"
+        );
+
+        return result.data;
+
+    } finally {
+        setImageUploading(false);
+    }
+}
+
+function setImageUploading(uploading) {
+    document.getElementById(
+        "imageUploadProgress"
+    ).classList.toggle(
+        "show",
+        uploading
+    );
+
+    document.getElementById(
+        "imageUploadBox"
+    ).classList.toggle(
+        "disabled",
+        uploading
+    );
+}
+
+function updateUploadPreview(url, name) {
+    const previewImage =
+        document.getElementById(
+            "uploadPreviewImage"
+        );
+
+    const placeholder =
+        document.getElementById(
+            "uploadPreviewPlaceholder"
+        );
+
+    const initial =
+        String(name || "Doctor")
+            .replace(/^Dr\.?\s*/i, "")
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "D";
+
+    placeholder.textContent = initial;
+
+    if (!url) {
+        previewImage.removeAttribute("src");
+        previewImage.style.display = "none";
+        placeholder.style.display = "inline";
+
+        showProfileImage("");
+        return;
+    }
+
+    const displayUrl =
+        buildFileUrl(url);
+
+    previewImage.src = displayUrl;
+    previewImage.style.display = "block";
+    placeholder.style.display = "none";
+
+    previewImage.onerror = function () {
+        previewImage.style.display = "none";
+        placeholder.style.display = "inline";
+    };
+
+    showProfileImage(url);
 }
 
 function showProfileImage(url) {
@@ -2078,40 +2767,59 @@ function showProfileImage(url) {
         );
 
     if (!url) {
-        image.style.display =
-            "none";
-
-        placeholder.style.display =
-            "grid";
-
+        image.style.display = "none";
+        placeholder.style.display = "grid";
         return;
     }
 
-    image.src = url;
-    image.style.display =
-        "block";
+    const displayUrl =
+        buildFileUrl(url);
 
-    placeholder.style.display =
-        "none";
+    image.src =
+        displayUrl.startsWith(API_BASE_URL)
+            ? `${displayUrl}${displayUrl.includes("?") ? "&" : "?"}v=${Date.now()}`
+            : displayUrl;
 
-    image.onerror =
-        function () {
-            image.style.display =
-                "none";
+    image.style.display = "block";
+    placeholder.style.display = "none";
 
-            placeholder.style.display =
-                "grid";
-        };
+    image.onerror = function () {
+        image.style.display = "none";
+        placeholder.style.display = "grid";
+    };
 }
 
-function isValidUrl(value) {
-    try {
-        new URL(value);
-        return true;
-
-    } catch (error) {
-        return false;
+function buildFileUrl(fileUrl) {
+    if (!fileUrl) {
+        return "";
     }
+
+    if (
+        /^https?:\/\//i.test(fileUrl) ||
+        fileUrl.startsWith("blob:") ||
+        fileUrl.startsWith("data:")
+    ) {
+        return fileUrl;
+    }
+
+    return fileUrl.startsWith("/")
+        ? API_BASE_URL + fileUrl
+        : `${API_BASE_URL}/${fileUrl}`;
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) {
+        return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(
+        bytes /
+        (1024 * 1024)
+    ).toFixed(1)} MB`;
 }
 
 function getValue(id) {
@@ -2198,6 +2906,9 @@ function clearSession() {
         "userId",
         "email",
         "profileCompleted",
+        "doctorProfileImageUrl",
+        "doctorProfileImageId",
+        "doctorRegistrationNumber",
         "isLoggedIn"
     ].forEach(
         function (key) {

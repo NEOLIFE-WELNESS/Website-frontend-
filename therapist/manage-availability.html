@@ -20,7 +20,7 @@
 .switch-row{min-height:47px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:11px;background:#fbfcfa}.switch{width:48px;height:26px;position:relative}.switch input{opacity:0}.slider{position:absolute;inset:0;border-radius:30px;background:#cdd6cf}.slider:before{content:"";width:20px;height:20px;position:absolute;left:3px;bottom:3px;border-radius:50%;background:#fff;transition:.25s}.switch input:checked+.slider{background:var(--success)}.switch input:checked+.slider:before{transform:translateX(22px)}
 .actions{margin-top:7px;display:flex;justify-content:flex-end;gap:10px}.btn{min-height:43px;padding:10px 20px;border-radius:10px;font-size:11px;font-weight:800}.reset{color:var(--dark);background:#fff;border:1px solid var(--border)}.save{color:#fff;background:var(--dark);border:1px solid var(--dark)}.btn:disabled{opacity:.65;cursor:not-allowed}
 .preview{padding:22px}.summary{margin-bottom:18px;padding:16px;border-radius:14px;background:var(--light)}.summary h3{margin-bottom:8px}.summary p{font-size:12px;line-height:1.7;color:var(--muted)}.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.slot{padding:10px 12px;border:1px solid #d4e3d8;border-radius:10px;text-align:center;font-size:11px;font-weight:800}.empty{padding:35px 15px;text-align:center;color:var(--muted)}.empty i{display:block;margin-bottom:12px;color:var(--gold);font-size:30px}
-.saved{margin-top:22px}.availability-list{padding:20px}.item{margin-bottom:12px;padding:15px;display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center;border:1px solid var(--border);border-radius:13px;background:#fbfcfa}.item h3{font-size:14px;margin-bottom:5px}.item p{font-size:11px;line-height:1.6;color:var(--muted)}.badge{padding:7px 11px;border-radius:20px;font-size:10px;font-weight:800}.active-badge{color:var(--success);background:#ebf7ef}.inactive-badge{color:var(--danger);background:#fff0f0}
+.saved{margin-top:22px}.availability-list{padding:20px}.item{margin-bottom:12px;padding:15px;display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center;border:1px solid var(--border);border-radius:13px;background:#fbfcfa}.item h3{font-size:14px;margin-bottom:5px}.item p{font-size:11px;line-height:1.6;color:var(--muted)}.badge{padding:7px 11px;border-radius:20px;font-size:10px;font-weight:800}.active-badge{color:var(--success);background:#ebf7ef}.inactive-badge{color:var(--danger);background:#fff0f0}.item-actions{display:flex;align-items:center;gap:8px}.icon-btn{width:35px;height:35px;border:none;border-radius:9px;display:flex;align-items:center;justify-content:center}.edit-btn{color:var(--info);background:#edf6fb}.delete-btn{color:var(--danger);background:#fff0f0}.icon-btn:hover{color:#fff;background:var(--dark)}
 .alert{width:min(390px,calc(100% - 35px));padding:15px 17px;position:fixed;top:102px;right:22px;z-index:5000;display:none;gap:11px;border-radius:13px;color:#fff}.alert.show{display:flex}.alert.success{background:var(--success)}.alert.error{background:var(--danger)}.alert.info{background:var(--info)}.overlay{position:fixed;inset:0;z-index:950;display:none;background:rgba(13,36,24,.58)}.overlay.show{display:block}
 @media(max-width:1050px){.grid{grid-template-columns:1fr}}@media(max-width:900px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;margin-left:0}.toggle{display:block}}@media(max-width:700px){.topbar{padding:13px 16px}.content{padding:20px 14px}.title h1{font-size:21px}.title p,.profile div{display:none}.banner{flex-direction:column-reverse;align-items:flex-start}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.actions{flex-direction:column-reverse}.btn{width:100%}.slots{grid-template-columns:1fr}}
 </style>
@@ -53,7 +53,7 @@
 <section class="banner"><div><span><i class="fa-solid fa-clock"></i> Weekly Schedule</span><h2>Create Your Available Working Hours</h2><p>Select a day, choose your working time and slot duration. Patients can book within the available time range.</p></div><div class="banner-icon"><i class="fa-solid fa-calendar-check"></i></div></section>
 <div class="grid">
 <section class="card">
-<div class="card-head"><h2>Create Availability</h2><p>Add availability for one weekday at a time.</p></div>
+<div class="card-head"><h2 id="formTitle">Create Availability</h2><p id="formSubtitle">Add availability for one weekday at a time.</p></div>
 <form class="form" id="availabilityForm" novalidate>
 <div class="form-grid">
 <div class="group full"><label>Day of Week <span class="required">*</span></label><select id="dayOfWeek" class="control" required><option value="">Select day</option><option value="MONDAY">Monday</option><option value="TUESDAY">Tuesday</option><option value="WEDNESDAY">Wednesday</option><option value="THURSDAY">Thursday</option><option value="FRIDAY">Friday</option><option value="SATURDAY">Saturday</option><option value="SUNDAY">Sunday</option></select></div>
@@ -71,76 +71,1217 @@
 </aside>
 </div>
 <section class="card saved">
-<div class="card-head"><h2>Created Availability</h2><p>Availability created during this browser session.</p></div>
+<div class="card-head"><h2>Created Availability</h2><p>Your saved weekly availability from the backend.</p></div>
 <div class="availability-list" id="availabilityList"><div class="empty"><i class="fa-solid fa-calendar-xmark"></i>No availability created yet.</div></div>
 </section>
 </section>
 </main>
 </div>
 <script>
-const API_BASE_URL="http://localhost:8085";
-let createdAvailability=[];
-document.addEventListener("DOMContentLoaded",()=>{
- if(!getToken()){location.href="therapist-login.html";return}
- loadLoggedInTherapist();
- document.getElementById("availabilityForm").addEventListener("submit",createAvailability);
- ["dayOfWeek","startTime","endTime","slotDurationMinutes"].forEach(id=>document.getElementById(id).addEventListener("change",previewSlots));
- document.getElementById("active").addEventListener("change",()=>document.getElementById("activeText").textContent=document.getElementById("active").checked?"Active":"Inactive");
- previewSlots();
-});
-async function createAvailability(e){
- e.preventDefault();
- const payload={dayOfWeek:v("dayOfWeek"),startTime:apiTime(v("startTime")),endTime:apiTime(v("endTime")),slotDurationMinutes:Number(v("slotDurationMinutes")),active:document.getElementById("active").checked};
- if(!validate(payload))return;
- const b=document.getElementById("saveButton"),old=b.innerHTML;b.disabled=true;b.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
- try{
-  const response=await fetch(API_BASE_URL+"/api/therapist-availability/create",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json","Authorization":"Bearer "+getToken()},body:JSON.stringify(payload)});
-  const result=await readResponse(response);
-  if(response.status===401){clearAuth();throw new Error("Your login session has expired.")}
-  if(!response.ok||result?.success===false)throw new Error(result?.message||"Unable to create availability.");
-  createdAvailability.unshift(result?.data||payload);
-  renderCreated();
-  alertBox(result?.message||"Therapist availability created successfully.","success");
- }catch(err){alertBox(err.message||"Unable to create availability.","error")}finally{b.disabled=false;b.innerHTML=old}
+const API_BASE_URL = "http://localhost:8085";
+
+let therapistProfile = null;
+let savedAvailability = [];
+let editingAvailabilityId = null;
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireTherapistLogin()) {
+            return;
+        }
+
+        document
+            .getElementById("availabilityForm")
+            .addEventListener(
+                "submit",
+                saveAvailability
+            );
+
+        [
+            "dayOfWeek",
+            "startTime",
+            "endTime",
+            "slotDurationMinutes"
+        ].forEach(
+            id => {
+                document
+                    .getElementById(id)
+                    .addEventListener(
+                        "change",
+                        previewSlots
+                    );
+            }
+        );
+
+        document
+            .getElementById("active")
+            .addEventListener(
+                "change",
+                updateActiveText
+            );
+
+        previewSlots();
+
+        await loadTherapistAndAvailability();
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getToken() {
+    return (
+        localStorage.getItem("therapistToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
 }
-function validate(p){
- if(!p.dayOfWeek){alertBox("Please select a day.","error");return false}
- const s=toMinutes(p.startTime),e=toMinutes(p.endTime);
- if(e<=s){alertBox("End time must be later than start time.","error");return false}
- if(e-s<p.slotDurationMinutes){alertBox("Time range must contain at least one complete slot.","error");return false}
- return true;
+
+function requireTherapistLogin() {
+    const token = getToken();
+
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    if (!token) {
+        window.location.replace(
+            "../patient/login.html"
+        );
+        return false;
+    }
+
+    if (role && role !== "THERAPIST") {
+        alert(
+            "Only therapists can access this page."
+        );
+
+        therapistLogout();
+        return false;
+    }
+
+    return true;
 }
-function previewSlots(){
- const day=v("dayOfWeek"),start=v("startTime"),end=v("endTime"),duration=Number(v("slotDurationMinutes")),box=document.getElementById("slotPreview");
- if(!day||!start||!end||!duration){box.innerHTML='<div class="empty"><i class="fa-solid fa-clock"></i>Select a day and time range.</div>';return}
- const s=toMinutes(start),e=toMinutes(end);
- if(e<=s){box.innerHTML='<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i>End time must be later than start time.</div>';return}
- const slots=[];for(let t=s;t+duration<=e;t+=duration)slots.push(displayMinutes(t)+" - "+displayMinutes(t+duration));
- box.innerHTML='<div class="summary"><h3>'+formatStatus(day)+'</h3><p>'+displayTime(start)+' to '+displayTime(end)+' · '+duration+' minute slots · '+slots.length+' total</p></div><div class="slots">'+slots.map(x=>'<div class="slot">'+x+'</div>').join("")+'</div>';
+
+async function therapistApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token = getToken();
+
+    if (!token) {
+        therapistLogout();
+
+        throw new Error(
+            "Therapist login required."
+        );
+    }
+
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {}),
+        "Authorization":
+            `Bearer ${token}`
+    };
+
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
+
+    const result =
+        await readResponse(response);
+
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearAuth();
+
+        window.location.replace(
+            "../patient/login.html"
+        );
+
+        throw new Error(
+            result?.message ||
+            "Therapist session expired."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result?.success === false
+    ) {
+        throw new Error(
+            result?.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return result;
 }
-function renderCreated(){
- const list=document.getElementById("availabilityList");
- if(!createdAvailability.length){list.innerHTML='<div class="empty"><i class="fa-solid fa-calendar-xmark"></i>No availability created yet.</div>';return}
- list.innerHTML=createdAvailability.map(x=>'<article class="item"><div><h3>'+escapeHtml(formatStatus(x.dayOfWeek))+'</h3><p>'+escapeHtml(displayTime(x.startTime))+' - '+escapeHtml(displayTime(x.endTime))+' · '+escapeHtml(x.slotDurationMinutes)+' minute slots</p></div><span class="badge '+(x.active?'active-badge':'inactive-badge')+'">'+(x.active?'Active':'Inactive')+'</span></article>').join("");
+
+function clearAuth() {
+    [
+        "therapistToken",
+        "therapistRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "therapistId",
+        "therapistName",
+        "therapistProfile",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key => localStorage.removeItem(key)
+    );
+
+    sessionStorage.clear();
 }
-async function loadLoggedInTherapist(){
- const name=localStorage.getItem("name")||localStorage.getItem("userName")||"Therapist";setHeader(name,"Therapist");
- try{const r=await fetch(API_BASE_URL+"/api/users/getProfile",{headers:{"Authorization":"Bearer "+getToken()}});const j=await readResponse(r);if(r.ok&&j?.data)setHeader(j.data.name||name,j.data.specialization||formatStatus(j.data.role||"THERAPIST"))}catch(e){}
+
+function therapistLogout() {
+    clearAuth();
+
+    window.location.replace(
+        "../patient/login.html"
+    );
 }
-function setHeader(name,spec){document.getElementById("therapistName").textContent=name;document.getElementById("therapistSpecialization").textContent=spec;document.getElementById("therapistAvatar").textContent=String(name).charAt(0).toUpperCase()}
-function resetForm(){document.getElementById("availabilityForm").reset();document.getElementById("startTime").value="09:00";document.getElementById("endTime").value="13:00";document.getElementById("slotDurationMinutes").value="30";document.getElementById("active").checked=true;document.getElementById("activeText").textContent="Active";previewSlots()}
-function getToken(){return localStorage.getItem("therapistToken")||localStorage.getItem("token")||""}
-function clearAuth(){["therapistToken","therapistRefreshToken","token","refreshToken","role","therapistId","userId"].forEach(k=>localStorage.removeItem(k))}
-function therapistLogout(){clearAuth();location.href="therapist-login.html"}
-function v(id){return document.getElementById(id).value.trim()}function apiTime(x){return x&&x.length===5?x+":00":x}
-function toMinutes(x){const p=String(x).split(":");return Number(p[0])*60+Number(p[1])}
-function displayMinutes(m){return displayTime(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"))}
-function displayTime(x){if(!x)return"-";const p=String(x).split(":"),d=new Date();d.setHours(Number(p[0]),Number(p[1]),0,0);return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:true})}
-function formatStatus(x){return String(x||"").replaceAll("_"," ").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}
-async function readResponse(r){const t=await r.text();if(!t)return null;try{return JSON.parse(t)}catch{return{success:false,message:t}}}
-function escapeHtml(x){return String(x??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function alertBox(m,t){const b=document.getElementById("pageAlert");document.getElementById("alertMessage").textContent=m;b.className="alert show "+t;document.getElementById("alertIcon").className=t==="success"?"fa-solid fa-circle-check":t==="error"?"fa-solid fa-circle-exclamation":"fa-solid fa-circle-info";setTimeout(()=>b.classList.remove("show"),4000)}
-function toggleSidebar(){document.getElementById("therapistSidebar").classList.toggle("open");document.getElementById("sidebarOverlay").classList.toggle("show")}function closeSidebar(){document.getElementById("therapistSidebar").classList.remove("open");document.getElementById("sidebarOverlay").classList.remove("show")}
+
+/* =========================
+   INITIAL DATA
+========================= */
+
+async function loadTherapistAndAvailability() {
+    try {
+        const profileResult =
+            await therapistApiRequest(
+                "/api/therapists/me"
+            );
+
+        therapistProfile =
+            profileResult.data || {};
+
+        const therapistName =
+            therapistProfile.name ||
+            therapistProfile.therapistName ||
+            localStorage.getItem(
+                "therapistName"
+            ) ||
+            "Therapist";
+
+        const specialization =
+            therapistProfile.specialization ||
+            "Therapist";
+
+        setHeader(
+            therapistName,
+            specialization
+        );
+
+        if (
+            therapistProfile.id === null ||
+            therapistProfile.id === undefined
+        ) {
+            throw new Error(
+                "Therapist ID was not returned by the profile API."
+            );
+        }
+
+        localStorage.setItem(
+            "therapistId",
+            String(therapistProfile.id)
+        );
+
+        localStorage.setItem(
+            "therapistName",
+            therapistName
+        );
+
+        localStorage.setItem(
+            "therapistProfile",
+            JSON.stringify(
+                therapistProfile
+            )
+        );
+
+        await loadAvailability();
+
+    } catch (error) {
+        console.error(
+            "Therapist availability page loading failed:",
+            error
+        );
+
+        alertBox(
+            error.message ||
+            "Unable to load therapist details.",
+            "error"
+        );
+
+        renderAvailability();
+    }
+}
+
+async function loadAvailability() {
+    const therapistId =
+        therapistProfile?.id ||
+        localStorage.getItem(
+            "therapistId"
+        );
+
+    if (!therapistId) {
+        throw new Error(
+            "Therapist ID is missing."
+        );
+    }
+
+    const list =
+        document.getElementById(
+            "availabilityList"
+        );
+
+    list.innerHTML = `
+        <div class="empty">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Loading saved availability...
+        </div>
+    `;
+
+    try {
+        const result =
+            await therapistApiRequest(
+                `/api/therapist-availability/therapist/${encodeURIComponent(
+                    therapistId
+                )}`
+            );
+
+        savedAvailability =
+            extractArray(result.data)
+                .map(
+                    normalizeAvailability
+                )
+                .sort(
+                    compareAvailability
+                );
+
+        renderAvailability();
+
+    } catch (error) {
+        savedAvailability = [];
+        renderAvailability();
+
+        throw error;
+    }
+}
+
+function extractArray(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    return [];
+}
+
+function normalizeAvailability(item) {
+    return {
+        id:
+            item.id ??
+            item.availabilityId ??
+            null,
+
+        therapistId:
+            item.therapistId ??
+            therapistProfile?.id ??
+            null,
+
+        therapistName:
+            item.therapistName ||
+            therapistProfile?.name ||
+            "Therapist",
+
+        specialization:
+            item.specialization ||
+            therapistProfile?.specialization ||
+            "Therapist",
+
+        dayOfWeek:
+            String(
+                item.dayOfWeek || ""
+            ).toUpperCase(),
+
+        startTime:
+            item.startTime || "",
+
+        endTime:
+            item.endTime || "",
+
+        slotDurationMinutes:
+            Number(
+                item.slotDurationMinutes || 30
+            ),
+
+        active:
+            item.active !== false,
+
+        createdAt:
+            item.createdAt || null,
+
+        updatedAt:
+            item.updatedAt || null
+    };
+}
+
+function compareAvailability(
+    first,
+    second
+) {
+    const order = {
+        MONDAY: 1,
+        TUESDAY: 2,
+        WEDNESDAY: 3,
+        THURSDAY: 4,
+        FRIDAY: 5,
+        SATURDAY: 6,
+        SUNDAY: 7
+    };
+
+    return (
+        (order[first.dayOfWeek] || 99) -
+        (order[second.dayOfWeek] || 99)
+    );
+}
+
+/* =========================
+   CREATE / UPDATE
+========================= */
+
+async function saveAvailability(event) {
+    event.preventDefault();
+
+    const payload = {
+        dayOfWeek:
+            valueOf("dayOfWeek"),
+
+        startTime:
+            apiTime(
+                valueOf("startTime")
+            ),
+
+        endTime:
+            apiTime(
+                valueOf("endTime")
+            ),
+
+        slotDurationMinutes:
+            Number(
+                valueOf(
+                    "slotDurationMinutes"
+                )
+            ),
+
+        active:
+            document
+                .getElementById("active")
+                .checked
+    };
+
+    if (!validate(payload)) {
+        return;
+    }
+
+    const duplicate =
+        savedAvailability.find(
+            item =>
+                item.dayOfWeek ===
+                    payload.dayOfWeek &&
+                String(item.id) !==
+                    String(
+                        editingAvailabilityId
+                    )
+        );
+
+    if (duplicate) {
+        alertBox(
+            `Availability for ${formatStatus(
+                payload.dayOfWeek
+            )} already exists. Edit the existing entry instead.`,
+            "error"
+        );
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "saveButton"
+        );
+
+    const oldHtml =
+        button.innerHTML;
+
+    try {
+        button.disabled = true;
+        button.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            ${
+                editingAvailabilityId
+                    ? "Updating..."
+                    : "Creating..."
+            }
+        `;
+
+        const isEditing =
+            editingAvailabilityId !== null;
+
+        const endpoint =
+            isEditing
+                ? `/api/therapist-availability/update/${encodeURIComponent(
+                    editingAvailabilityId
+                  )}`
+                : "/api/therapist-availability/create";
+
+        const result =
+            await therapistApiRequest(
+                endpoint,
+                {
+                    method:
+                        isEditing
+                            ? "PUT"
+                            : "POST",
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
+            );
+
+        alertBox(
+            result.message ||
+            (
+                isEditing
+                    ? "Therapist availability updated successfully."
+                    : "Therapist availability created successfully."
+            ),
+            "success"
+        );
+
+        resetForm();
+        await loadAvailability();
+
+    } catch (error) {
+        alertBox(
+            error.message ||
+            (
+                editingAvailabilityId
+                    ? "Unable to update availability."
+                    : "Unable to create availability."
+            ),
+            "error"
+        );
+
+    } finally {
+        button.disabled = false;
+        updateFormMode();
+    }
+}
+
+/* =========================
+   EDIT / DELETE
+========================= */
+
+function editAvailability(id) {
+    const availability =
+        savedAvailability.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!availability) {
+        alertBox(
+            "Availability record not found.",
+            "error"
+        );
+        return;
+    }
+
+    editingAvailabilityId =
+        availability.id;
+
+    document.getElementById(
+        "dayOfWeek"
+    ).value =
+        availability.dayOfWeek;
+
+    document.getElementById(
+        "startTime"
+    ).value =
+        String(
+            availability.startTime
+        ).substring(0, 5);
+
+    document.getElementById(
+        "endTime"
+    ).value =
+        String(
+            availability.endTime
+        ).substring(0, 5);
+
+    document.getElementById(
+        "slotDurationMinutes"
+    ).value =
+        String(
+            availability.slotDurationMinutes
+        );
+
+    document.getElementById(
+        "active"
+    ).checked =
+        availability.active;
+
+    updateActiveText();
+    updateFormMode();
+    previewSlots();
+
+    document
+        .getElementById(
+            "availabilityForm"
+        )
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+async function deleteAvailability(id) {
+    const availability =
+        savedAvailability.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!availability) {
+        alertBox(
+            "Availability record not found.",
+            "error"
+        );
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            `Delete ${formatStatus(
+                availability.dayOfWeek
+            )} availability?`
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const result =
+            await therapistApiRequest(
+                `/api/therapist-availability/delete/${encodeURIComponent(
+                    id
+                )}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+        alertBox(
+            result.message ||
+            "Therapist availability deleted successfully.",
+            "success"
+        );
+
+        if (
+            String(editingAvailabilityId) ===
+            String(id)
+        ) {
+            resetForm();
+        }
+
+        await loadAvailability();
+
+    } catch (error) {
+        alertBox(
+            error.message ||
+            "Unable to delete availability.",
+            "error"
+        );
+    }
+}
+
+/* =========================
+   FORM / PREVIEW
+========================= */
+
+function validate(payload) {
+    if (!payload.dayOfWeek) {
+        alertBox(
+            "Please select a day.",
+            "error"
+        );
+        return false;
+    }
+
+    const start =
+        toMinutes(
+            payload.startTime
+        );
+
+    const end =
+        toMinutes(
+            payload.endTime
+        );
+
+    if (end <= start) {
+        alertBox(
+            "End time must be later than start time.",
+            "error"
+        );
+        return false;
+    }
+
+    if (
+        end - start <
+        payload.slotDurationMinutes
+    ) {
+        alertBox(
+            "Time range must contain at least one complete slot.",
+            "error"
+        );
+        return false;
+    }
+
+    return true;
+}
+
+function previewSlots() {
+    const day =
+        valueOf("dayOfWeek");
+
+    const start =
+        valueOf("startTime");
+
+    const end =
+        valueOf("endTime");
+
+    const duration =
+        Number(
+            valueOf(
+                "slotDurationMinutes"
+            )
+        );
+
+    const box =
+        document.getElementById(
+            "slotPreview"
+        );
+
+    if (
+        !day ||
+        !start ||
+        !end ||
+        !duration
+    ) {
+        box.innerHTML = `
+            <div class="empty">
+                <i class="fa-solid fa-clock"></i>
+                Select a day and time range.
+            </div>
+        `;
+        return;
+    }
+
+    const startMinutes =
+        toMinutes(start);
+
+    const endMinutes =
+        toMinutes(end);
+
+    if (
+        endMinutes <= startMinutes
+    ) {
+        box.innerHTML = `
+            <div class="empty">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                End time must be later than start time.
+            </div>
+        `;
+        return;
+    }
+
+    const slots = [];
+
+    for (
+        let time = startMinutes;
+        time + duration <= endMinutes;
+        time += duration
+    ) {
+        slots.push(
+            `${displayMinutes(time)} - ${displayMinutes(
+                time + duration
+            )}`
+        );
+    }
+
+    box.innerHTML = `
+        <div class="summary">
+            <h3>
+                ${escapeHtml(
+                    formatStatus(day)
+                )}
+            </h3>
+
+            <p>
+                ${escapeHtml(
+                    displayTime(start)
+                )}
+                to
+                ${escapeHtml(
+                    displayTime(end)
+                )}
+                ·
+                ${escapeHtml(duration)}
+                minute slots
+                ·
+                ${escapeHtml(slots.length)}
+                total
+            </p>
+        </div>
+
+        <div class="slots">
+            ${slots
+                .map(
+                    slot => `
+                        <div class="slot">
+                            ${escapeHtml(slot)}
+                        </div>
+                    `
+                )
+                .join("")}
+        </div>
+    `;
+}
+
+function resetForm() {
+    editingAvailabilityId = null;
+
+    document
+        .getElementById(
+            "availabilityForm"
+        )
+        .reset();
+
+    document.getElementById(
+        "startTime"
+    ).value = "09:00";
+
+    document.getElementById(
+        "endTime"
+    ).value = "13:00";
+
+    document.getElementById(
+        "slotDurationMinutes"
+    ).value = "30";
+
+    document.getElementById(
+        "active"
+    ).checked = true;
+
+    updateActiveText();
+    updateFormMode();
+    previewSlots();
+}
+
+function updateFormMode() {
+    const isEditing =
+        editingAvailabilityId !== null;
+
+    setText(
+        "formTitle",
+        isEditing
+            ? "Update Availability"
+            : "Create Availability"
+    );
+
+    setText(
+        "formSubtitle",
+        isEditing
+            ? "Edit the selected weekly availability."
+            : "Add availability for one weekday at a time."
+    );
+
+    document.getElementById(
+        "saveButton"
+    ).innerHTML = isEditing
+        ? `
+            <i class="fa-solid fa-pen"></i>
+            Update Availability
+          `
+        : `
+            <i class="fa-solid fa-floppy-disk"></i>
+            Create Availability
+          `;
+}
+
+function updateActiveText() {
+    const active =
+        document
+            .getElementById(
+                "active"
+            )
+            .checked;
+
+    setText(
+        "activeText",
+        active
+            ? "Active"
+            : "Inactive"
+    );
+}
+
+/* =========================
+   RENDER SAVED AVAILABILITY
+========================= */
+
+function renderAvailability() {
+    const list =
+        document.getElementById(
+            "availabilityList"
+        );
+
+    if (!savedAvailability.length) {
+        list.innerHTML = `
+            <div class="empty">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                No availability created yet.
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML =
+        savedAvailability
+            .map(
+                item => `
+                    <article class="item">
+
+                        <div>
+                            <h3>
+                                ${escapeHtml(
+                                    formatStatus(
+                                        item.dayOfWeek
+                                    )
+                                )}
+                            </h3>
+
+                            <p>
+                                ${escapeHtml(
+                                    displayTime(
+                                        item.startTime
+                                    )
+                                )}
+                                -
+                                ${escapeHtml(
+                                    displayTime(
+                                        item.endTime
+                                    )
+                                )}
+                                ·
+                                ${escapeHtml(
+                                    item.slotDurationMinutes
+                                )}
+                                minute slots
+                            </p>
+                        </div>
+
+                        <div class="item-actions">
+
+                            <span
+                                class="badge ${
+                                    item.active
+                                        ? "active-badge"
+                                        : "inactive-badge"
+                                }"
+                            >
+                                ${
+                                    item.active
+                                        ? "Active"
+                                        : "Inactive"
+                                }
+                            </span>
+
+                            <button
+                                type="button"
+                                class="icon-btn edit-btn"
+                                title="Edit availability"
+                                onclick="editAvailability(${Number(
+                                    item.id
+                                )})"
+                            >
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="icon-btn delete-btn"
+                                title="Delete availability"
+                                onclick="deleteAvailability(${Number(
+                                    item.id
+                                )})"
+                            >
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+
+                        </div>
+
+                    </article>
+                `
+            )
+            .join("");
+}
+
+/* =========================
+   HEADER / SIDEBAR
+========================= */
+
+function setHeader(
+    name,
+    specialization
+) {
+    const cleanName =
+        String(
+            name || "Therapist"
+        ).trim();
+
+    setText(
+        "therapistName",
+        cleanName
+    );
+
+    setText(
+        "therapistSpecialization",
+        specialization || "Therapist"
+    );
+
+    setText(
+        "therapistAvatar",
+        cleanName.charAt(0).toUpperCase() || "T"
+    );
+}
+
+function toggleSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.toggle("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.toggle("show");
+}
+
+function closeSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.remove("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.remove("show");
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function valueOf(id) {
+    return document
+        .getElementById(id)
+        .value
+        .trim();
+}
+
+function apiTime(value) {
+    return (
+        value &&
+        value.length === 5
+    )
+        ? `${value}:00`
+        : value;
+}
+
+function toMinutes(value) {
+    const parts =
+        String(value).split(":");
+
+    return (
+        Number(parts[0]) * 60 +
+        Number(parts[1])
+    );
+}
+
+function displayMinutes(minutes) {
+    return displayTime(
+        `${String(
+            Math.floor(minutes / 60)
+        ).padStart(2, "0")}:${String(
+            minutes % 60
+        ).padStart(2, "0")}`
+    );
+}
+
+function displayTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const parts =
+        String(value).split(":");
+
+    const date = new Date();
+
+    date.setHours(
+        Number(parts[0]),
+        Number(parts[1]),
+        0,
+        0
+    );
+
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        }
+    );
+}
+
+function formatStatus(value) {
+    return String(value || "")
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+async function readResponse(response) {
+    const text =
+        await response.text();
+
+    if (!text) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        return {
+            success: false,
+            message: text
+        };
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function alertBox(
+    message,
+    type = "info"
+) {
+    const box =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    setText(
+        "alertMessage",
+        message
+    );
+
+    box.className =
+        `alert show ${type}`;
+
+    document.getElementById(
+        "alertIcon"
+    ).className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.availabilityAlertTimer
+    );
+
+    window.availabilityAlertTimer =
+        setTimeout(
+            () =>
+                box.classList.remove(
+                    "show"
+                ),
+            4000
+        );
+}
 </script>
 </body>
 </html>

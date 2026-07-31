@@ -1870,7 +1870,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    "/api/users/getProfile",
+                    "/api/medical-staff/me",
                     {
                         method: "GET",
                         headers:
@@ -1883,12 +1883,43 @@
                         response
                     );
 
-                if (response.status === 401) {
+                if (
+                    response.status === 401 ||
+                    response.status === 403
+                ) {
                     clearAuthentication();
 
                     window.location.href =
                         "staff-login.html";
 
+                    return;
+                }
+
+                /*
+                 * When the professional profile has not been created,
+                 * the backend may return 404 or a profile-not-found
+                 * message. In that case, keep the page in Complete
+                 * Profile mode.
+                 */
+                if (
+                    response.status === 404 ||
+                    (
+                        !response.ok &&
+                        String(
+                            result?.message || ""
+                        )
+                            .toLowerCase()
+                            .includes("profile")
+                    )
+                ) {
+                    currentMedicalStaffId = null;
+                    isProfileCompleted = false;
+
+                    localStorage.removeItem(
+                        "medicalStaffId"
+                    );
+
+                    setPageMode();
                     return;
                 }
 
@@ -1902,32 +1933,36 @@
                     );
                 }
 
-                const data =
-                    result?.data || {};
-
-                /*
-                 * Some backends return the medical-staff
-                 * professional fields inside getProfile.
-                 * This page supports that response when present.
-                 */
                 const profile =
-                    normalizeProfile(data);
+                    normalizeProfile(
+                        result?.data || {}
+                    );
 
-                if (
-                    profile.id &&
-                    profile.designation
-                ) {
-                    currentMedicalStaffId =
-                        profile.id;
+                currentMedicalStaffId =
+                    profile.id || null;
 
-                    isProfileCompleted =
-                        true;
+                isProfileCompleted =
+                    Boolean(
+                        profile.id &&
+                        profile.designation &&
+                        profile.department &&
+                        profile.about
+                    );
 
+                if (currentMedicalStaffId) {
                     localStorage.setItem(
                         "medicalStaffId",
-                        profile.id
+                        String(
+                            currentMedicalStaffId
+                        )
                     );
                 }
+
+                localStorage.setItem(
+                    "staffName",
+                    profile.name ||
+                    "Medical Staff"
+                );
 
                 displayBasicProfile(
                     profile
@@ -1962,6 +1997,10 @@
                     error
                 );
 
+                currentMedicalStaffId = null;
+                isProfileCompleted = false;
+                setPageMode();
+
                 showAlert(
                     error.message ||
                     "Unable to load profile information.",
@@ -1973,13 +2012,10 @@
         function normalizeProfile(data) {
             return {
                 id:
+                    data.id ||
                     data.medicalStaffId ||
                     data.staffId ||
-                    (
-                        data.designation
-                            ? data.id
-                            : currentMedicalStaffId
-                    ) ||
+                    currentMedicalStaffId ||
                     "",
 
                 userId:

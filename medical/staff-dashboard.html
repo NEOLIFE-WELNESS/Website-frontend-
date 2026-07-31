@@ -1537,9 +1537,8 @@
                         </h2>
 
                         <p>
-                            Monitor today’s consultations, treatments,
-                            product stock, prescription orders and shipping
-                            activities from one dashboard.
+                            Monitor patients, prescriptions, consultations, daily
+                            treatments and inventory alerts from one dashboard.
                         </p>
 
                     </div>
@@ -1563,107 +1562,63 @@
                 <section class="summary-grid">
 
                     <article class="summary-card">
-
                         <div class="summary-icon icon-green">
                             <i class="fa-solid fa-users"></i>
                         </div>
-
                         <div class="summary-info">
                             <p>Total Patients</p>
                             <h3 id="totalPatients">0</h3>
                         </div>
-
                     </article>
 
                     <article class="summary-card">
-
                         <div class="summary-icon icon-blue">
-                            <i class="fa-solid fa-stethoscope"></i>
+                            <i class="fa-solid fa-file-prescription"></i>
                         </div>
-
                         <div class="summary-info">
-                            <p>Today's Consultations</p>
-                            <h3 id="todayConsultations">0</h3>
+                            <p>Total Prescriptions</p>
+                            <h3 id="totalPrescriptions">0</h3>
                         </div>
-
                     </article>
 
                     <article class="summary-card">
-
-                        <div class="summary-icon icon-purple">
-                            <i class="fa-solid fa-spa"></i>
-                        </div>
-
-                        <div class="summary-info">
-                            <p>Today's Treatments</p>
-                            <h3 id="todayTreatments">0</h3>
-                        </div>
-
-                    </article>
-
-                    <article class="summary-card">
-
                         <div class="summary-icon icon-warning">
                             <i class="fa-solid fa-cart-shopping"></i>
                         </div>
-
                         <div class="summary-info">
                             <p>Pending Orders</p>
                             <h3 id="pendingOrders">0</h3>
                         </div>
-
                     </article>
 
                     <article class="summary-card">
-
-                        <div class="summary-icon icon-red">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-
-                        <div class="summary-info">
-                            <p>Low Stock Products</p>
-                            <h3 id="lowStockProducts">0</h3>
-                        </div>
-
-                    </article>
-
-                    <article class="summary-card">
-
-                        <div class="summary-icon icon-gold">
-                            <i class="fa-solid fa-box"></i>
-                        </div>
-
-                        <div class="summary-info">
-                            <p>Total Products</p>
-                            <h3 id="totalProducts">0</h3>
-                        </div>
-
-                    </article>
-
-                    <article class="summary-card">
-
                         <div class="summary-icon icon-blue">
-                            <i class="fa-solid fa-truck-fast"></i>
+                            <i class="fa-solid fa-video"></i>
                         </div>
-
                         <div class="summary-info">
-                            <p>Ready to Ship</p>
-                            <h3 id="readyToShip">0</h3>
+                            <p>Active Consultations</p>
+                            <h3 id="activeConsultations">0</h3>
                         </div>
-
                     </article>
 
                     <article class="summary-card">
-
-                        <div class="summary-icon icon-green">
-                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                        <div class="summary-icon icon-purple">
+                            <i class="fa-solid fa-spa"></i>
                         </div>
-
                         <div class="summary-info">
-                            <p>Today's Product Sales</p>
-                            <h3 id="todayRevenue">₹0</h3>
+                            <p>Today's Daily Treatments</p>
+                            <h3 id="todayDailyTreatments">0</h3>
                         </div>
+                    </article>
 
+                    <article class="summary-card">
+                        <div class="summary-icon icon-gold">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+                        <div class="summary-info">
+                            <p>Pending Daily Treatments</p>
+                            <h3 id="pendingDailyTreatments">0</h3>
+                        </div>
                     </article>
 
                 </section>
@@ -1727,18 +1682,18 @@
                     </a>
 
                     <a
-                        href="orders.html"
+                        href="consultation-management.html"
                         class="quick-action"
                     >
 
                         <span class="quick-action-icon">
-                            <i class="fa-solid fa-box-open"></i>
+                            <i class="fa-solid fa-stethoscope"></i>
                         </span>
 
                         <div>
-                            <h3>Process Orders</h3>
+                            <h3>View Consultations</h3>
                             <p>
-                                Pack medicines and hand off to Shiprocket.
+                                Review active and scheduled consultations.
                             </p>
                         </div>
 
@@ -1750,25 +1705,25 @@
 
                 <div class="dashboard-grid">
 
-                    <!-- RECENT ORDERS -->
+                    <!-- RECENT PRESCRIPTIONS -->
 
                     <section class="dashboard-panel">
 
                         <div class="panel-header">
 
                             <div class="panel-title">
-                                <h2>Recent Orders</h2>
+                                <h2>Recent Prescriptions</h2>
 
                                 <p>
-                                    Incoming patient and prescription orders.
+                                    Latest finalized prescriptions requiring staff attention.
                                 </p>
                             </div>
 
                             <a
-                                href="orders.html"
+                                href="prescriptions.html"
                                 class="view-all-link"
                             >
-                                View Orders
+                                View Prescriptions
                                 <i class="fa-solid fa-arrow-right"></i>
                             </a>
 
@@ -1778,13 +1733,13 @@
 
                             <div
                                 class="order-list"
-                                id="recentOrdersList"
+                                id="recentPrescriptionsList"
                             >
                                 <div class="panel-message">
 
                                     <i class="fa-solid fa-spinner fa-spin"></i>
 
-                                    Loading recent orders...
+                                    Loading recent prescriptions...
 
                                 </div>
                             </div>
@@ -1898,25 +1853,25 @@
 
                     </section>
 
-                    <!-- RECENT TRANSACTIONS -->
+                    <!-- ACTIVE CONSULTATIONS -->
 
                     <section class="dashboard-panel">
 
                         <div class="panel-header">
 
                             <div class="panel-title">
-                                <h2>Recent Product Sales</h2>
+                                <h2>Active Consultations</h2>
 
                                 <p>
-                                    Latest successful PayU transactions.
+                                    Current and upcoming online consultations.
                                 </p>
                             </div>
 
                             <a
-                                href="transactions.html"
+                                href="consultation-management.html"
                                 class="view-all-link"
                             >
-                                Transactions
+                                Consultations
                                 <i class="fa-solid fa-arrow-right"></i>
                             </a>
 
@@ -1929,20 +1884,20 @@
                                 <thead>
                                     <tr>
                                         <th>Patient</th>
-                                        <th>Order</th>
-                                        <th>Amount</th>
+                                        <th>Doctor</th>
+                                        <th>Date & Time</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
 
-                                <tbody id="recentTransactionsBody">
+                                <tbody id="activeConsultationsBody">
 
                                     <tr>
                                         <td
                                             colspan="4"
                                             class="panel-message"
                                         >
-                                            Loading transactions...
+                                            Loading consultations...
                                         </td>
                                     </tr>
 
@@ -1963,484 +1918,545 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                requireStaffLogin();
-                setCurrentDate();
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireStaffLogin()) {
+            return;
+        }
 
-                loadStaffProfile();
-                loadDashboardSummary();
-                loadRecentOrders();
-                loadLowStockProducts();
-                loadTodayTreatments();
-                loadRecentTransactions();
-            }
+        setCurrentDate();
+
+        const results =
+            await Promise.allSettled([
+                loadStaffProfile(),
+                loadDashboardSummary(),
+                loadRecentPrescriptions(),
+                loadLowStockProducts(),
+                loadTodayTreatments(),
+                loadActiveConsultations()
+            ]);
+
+        const failed =
+            results.filter(
+                result =>
+                    result.status === "rejected"
+            );
+
+        if (failed.length) {
+            console.warn(
+                "Some medical staff dashboard requests failed:",
+                failed
+            );
+        }
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getStaffToken() {
+    return (
+        localStorage.getItem("staffToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
+
+function requireStaffLogin() {
+    const token = getStaffToken();
+
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    if (!token) {
+        window.location.replace(
+            "staff-login.html"
+        );
+        return false;
+    }
+
+    if (
+        role &&
+        role !== "MEDICAL_STAFF" &&
+        role !== "STAFF" &&
+        role !== "ADMIN"
+    ) {
+        alert(
+            "Only medical staff can access this portal."
         );
 
-        /* =========================
-           AUTH
-        ========================== */
+        staffLogout();
+        return false;
+    }
 
-        function getStaffToken() {
-            return (
-                localStorage.getItem("staffToken") ||
-                localStorage.getItem("token")
-            );
+    return true;
+}
+
+async function staffApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token = getStaffToken();
+
+    if (!token) {
+        staffLogout();
+
+        throw new Error(
+            "Medical staff login required."
+        );
+    }
+
+    const headers = {
+        Accept: "application/json",
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+    };
+
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
         }
+    );
 
-        function requireStaffLogin() {
-            const token =
-                getStaffToken();
+    const responseText =
+        await response.text();
 
-            if (!token) {
-                window.location.href =
-                    "staff-login.html";
+    let result = {};
 
-                return;
-            }
+    try {
+        result =
+            responseText
+                ? JSON.parse(responseText)
+                : {};
+    } catch {
+        result = {
+            success: false,
+            message:
+                responseText ||
+                `Invalid server response (${response.status}).`
+        };
+    }
 
-            const role =
-                localStorage.getItem("role");
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearStaffSession();
 
-            if (
-                role &&
-                role !== "MEDICAL_STAFF" &&
-                role !== "STAFF" &&
-                role !== "ADMIN"
-            ) {
-                showAlert(
-                    "Only medical staff can access this portal.",
-                    "error"
-                );
+        window.location.replace(
+            "staff-login.html"
+        );
 
-                setTimeout(function () {
-                    window.location.href =
-                        "../pages/homepage.html";
-                }, 1300);
-            }
-        }
+        throw new Error(
+            result.message ||
+            "Your medical staff session has expired."
+        );
+    }
 
-        async function staffApiRequest(
-            endpoint,
-            options = {}
-        ) {
-            const token =
-                getStaffToken();
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status}).`
+        );
+    }
 
-            if (!token) {
-                window.location.href =
-                    "staff-login.html";
+    return result;
+}
 
-                throw new Error(
-                    "Medical staff login required."
-                );
-            }
+function clearStaffSession() {
+    [
+        "staffToken",
+        "staffRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "medicalStaffId",
+        "staffName",
+        "staffProfile",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key =>
+            localStorage.removeItem(key)
+    );
 
-            const headers = {
-                ...(options.headers || {})
-            };
+    sessionStorage.clear();
+}
 
-            if (
-                options.body &&
-                !(options.body instanceof FormData)
-            ) {
-                headers["Content-Type"] =
-                    "application/json";
-            }
+function staffLogout() {
+    clearStaffSession();
 
-            headers.Authorization =
-                "Bearer " + token;
+    window.location.replace(
+        "staff-login.html"
+    );
+}
 
-            const response =
-                await fetch(
-                    API_BASE_URL + endpoint,
-                    {
-                        ...options,
-                        headers
-                    }
-                );
+/* =========================
+   PROFILE
+========================= */
 
-            let result;
-
-            try {
-                result =
-                    await response.json();
-
-            } catch (error) {
-                result = {
-                    success: false,
-                    message:
-                        "Invalid response from server."
-                };
-            }
-
-            if (
-                response.status === 401 ||
-                response.status === 403
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Medical staff session expired."
-                );
-            }
-
-            if (
-                !response.ok ||
-                result.success === false
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Request failed."
-                );
-            }
-
-            return result;
-        }
-
-        function staffLogout() {
-            localStorage.removeItem(
-                "staffToken"
+async function loadStaffProfile() {
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/medical-staff/me"
             );
 
-            localStorage.removeItem(
-                "staffRefreshToken"
-            );
+        const staff =
+            result.data || {};
 
-            localStorage.removeItem("token");
-            localStorage.removeItem(
-                "refreshToken"
-            );
+        const name =
+            staff.name ||
+            "Medical Staff";
 
-            localStorage.removeItem("role");
-            localStorage.removeItem(
-                "staffId"
-            );
+        const designation =
+            staff.designation ||
+            staff.department ||
+            "Medical Staff";
 
-            localStorage.removeItem(
-                "userId"
-            );
-
-            window.location.href =
-                "staff-login.html";
-        }
-
-        /* =========================
-           PROFILE
-        ========================== */
-
-        async function loadStaffProfile() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/users/getProfile"
-                    );
-
-                const staff =
-                    result.data || {};
-
-                const name =
-                    staff.name ||
-                    staff.staffName ||
-                    "Medical Staff";
-
-                const role =
-                    staff.role ||
-                    "MEDICAL_STAFF";
-
-                updateStaffProfile(
-                    name,
-                    role
-                );
-
-            } catch (error) {
-                console.error(
-                    "Staff profile loading failed:",
-                    error
-                );
-
-                const name =
-                    localStorage.getItem(
-                        "staffName"
-                    ) ||
-                    "Medical Staff";
-
-                updateStaffProfile(
-                    name,
-                    "MEDICAL_STAFF"
-                );
-            }
-        }
-
-        function updateStaffProfile(
+        updateStaffProfile(
             name,
-            role
+            designation
+        );
+
+        if (
+            staff.id !== null &&
+            staff.id !== undefined
         ) {
-            const cleanName =
-                String(
-                    name || "Medical Staff"
-                ).trim();
-
-            document.getElementById(
-                "staffTopbarName"
-            ).textContent =
-                cleanName;
-
-            document.getElementById(
-                "welcomeStaffName"
-            ).textContent =
-                `Welcome back, ${cleanName}`;
-
-            document.getElementById(
-                "staffInitial"
-            ).textContent =
-                cleanName
-                    .charAt(0)
-                    .toUpperCase();
-
-            document.getElementById(
-                "staffRoleText"
-            ).textContent =
-                formatStatus(role);
+            localStorage.setItem(
+                "medicalStaffId",
+                String(staff.id)
+            );
         }
 
-        /* =========================
-           SUMMARY
-        ========================== */
+        localStorage.setItem(
+            "staffName",
+            name
+        );
 
-        async function loadDashboardSummary() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/medical-staff/dashboard/summary"
-                    );
+        localStorage.setItem(
+            "staffProfile",
+            JSON.stringify(staff)
+        );
 
-                updateSummaryCards(
-                    result.data || {}
-                );
+    } catch (error) {
+        console.error(
+            "Medical staff profile loading failed:",
+            error
+        );
 
-            } catch (error) {
-                console.error(
-                    "Staff summary loading failed:",
-                    error
-                );
+        const name =
+            localStorage.getItem(
+                "staffName"
+            ) ||
+            "Medical Staff";
 
-                updateSummaryCards({
-                    totalPatients: 248,
-                    todayConsultations: 12,
-                    todayTreatments: 9,
-                    pendingOrders: 7,
-                    lowStockProducts: 4,
-                    totalProducts: 36,
-                    readyToShip: 3,
-                    todayRevenue: 4850
-                });
-            }
-        }
+        updateStaffProfile(
+            name,
+            "Medical Staff"
+        );
 
-        function updateSummaryCards(
-            summary
-        ) {
-            setText(
-                "totalPatients",
-                summary.totalPatients || 0
+        showAlert(
+            error.message ||
+            "Unable to load medical staff profile.",
+            "error"
+        );
+
+        throw error;
+    }
+}
+
+function updateStaffProfile(
+    name,
+    designation
+) {
+    const cleanName =
+        String(name || "Medical Staff")
+            .trim();
+
+    setText(
+        "staffTopbarName",
+        cleanName
+    );
+
+    setText(
+        "welcomeStaffName",
+        `Welcome back, ${cleanName}`
+    );
+
+    setText(
+        "staffInitial",
+        cleanName
+            .charAt(0)
+            .toUpperCase() || "M"
+    );
+
+    setText(
+        "staffRoleText",
+        designation ||
+        "Medical Staff"
+    );
+}
+
+/* =========================
+   DASHBOARD SUMMARY
+========================= */
+
+async function loadDashboardSummary() {
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/medical-staff/dashboard"
             );
 
-            setText(
-                "todayConsultations",
-                summary.todayConsultations || 0
-            );
+        const summary =
+            result.data || {};
 
-            setText(
-                "todayTreatments",
-                summary.todayTreatments || 0
-            );
+        setText(
+            "totalPatients",
+            summary.totalPatients ?? 0
+        );
 
-            setText(
-                "pendingOrders",
+        setText(
+            "totalPrescriptions",
+            summary.totalPrescriptions ?? 0
+        );
+
+        setText(
+            "pendingOrders",
+            summary.pendingOrders ?? 0
+        );
+
+        setText(
+            "activeConsultations",
+            summary.activeConsultations ?? 0
+        );
+
+        setText(
+            "todayDailyTreatments",
+            summary.todayDailyTreatments ?? 0
+        );
+
+        setText(
+            "pendingDailyTreatments",
+            summary.pendingDailyTreatments ?? 0
+        );
+
+        setText(
+            "notificationCount",
+            Number(
                 summary.pendingOrders || 0
+            ) +
+            Number(
+                summary.pendingDailyTreatments || 0
+            )
+        );
+
+    } catch (error) {
+        console.error(
+            "Dashboard summary loading failed:",
+            error
+        );
+
+        [
+            "totalPatients",
+            "totalPrescriptions",
+            "pendingOrders",
+            "activeConsultations",
+            "todayDailyTreatments",
+            "pendingDailyTreatments",
+            "notificationCount"
+        ].forEach(
+            id => setText(id, 0)
+        );
+
+        showAlert(
+            error.message ||
+            "Unable to load dashboard summary.",
+            "error"
+        );
+
+        throw error;
+    }
+}
+
+/* =========================
+   RECENT PRESCRIPTIONS
+========================= */
+
+async function loadRecentPrescriptions() {
+    const container =
+        document.getElementById(
+            "recentPrescriptionsList"
+        );
+
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/medical-staff/prescriptions"
             );
 
-            setText(
-                "lowStockProducts",
-                summary.lowStockProducts || 0
-            );
-
-            setText(
-                "totalProducts",
-                summary.totalProducts || 0
-            );
-
-            setText(
-                "readyToShip",
-                summary.readyToShip || 0
-            );
-
-            setText(
-                "todayRevenue",
-                "₹" +
-                Number(
-                    summary.todayRevenue || 0
-                ).toLocaleString("en-IN")
-            );
-
-            setText(
-                "notificationCount",
-                Number(
-                    summary.pendingOrders || 0
-                ) +
-                Number(
-                    summary.lowStockProducts || 0
+        const prescriptions =
+            extractArray(result.data)
+                .map(
+                    normalizePrescription
                 )
-            );
-        }
+                .sort(
+                    (first, second) =>
+                        new Date(
+                            second.finalizedAt ||
+                            second.createdAt ||
+                            0
+                        ) -
+                        new Date(
+                            first.finalizedAt ||
+                            first.createdAt ||
+                            0
+                        )
+                )
+                .slice(0, 5);
 
-        /* =========================
-           RECENT ORDERS
-        ========================== */
+        renderRecentPrescriptions(
+            prescriptions
+        );
 
-        async function loadRecentOrders() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/orders/getAll"
-                    );
+    } catch (error) {
+        console.error(
+            "Prescriptions loading failed:",
+            error
+        );
 
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
+        container.innerHTML = `
+            <div class="panel-message">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                ${escapeHtml(
+                    error.message ||
+                    "Unable to load prescriptions."
+                )}
+            </div>
+        `;
 
-                renderRecentOrders(
-                    data
-                        .map(normalizeOrder)
-                        .slice(0, 5)
-                );
+        throw error;
+    }
+}
 
-            } catch (error) {
-                console.error(
-                    "Orders loading failed:",
-                    error
-                );
+function normalizePrescription(item) {
+    return {
+        id:
+            item.id ??
+            item.prescriptionId ??
+            null,
 
-                renderRecentOrders([
-                    {
-                        id: 101,
-                        orderNumber:
-                            "NL-3DFE8F6C",
-                        patientName:
-                            "Nisha Rao",
-                        totalAmount: 650,
-                        itemCount: 2,
-                        status:
-                            "PENDING"
-                    },
-                    {
-                        id: 102,
-                        orderNumber:
-                            "NL-7FGH92JK",
-                        patientName:
-                            "Raghavendra Bhat",
-                        totalAmount: 900,
-                        itemCount: 3,
-                        status:
-                            "PROCESSING"
-                    },
-                    {
-                        id: 103,
-                        orderNumber:
-                            "NL-88KLP21M",
-                        patientName:
-                            "Anitha Shetty",
-                        totalAmount: 350,
-                        itemCount: 1,
-                        status:
-                            "READY_TO_SHIP"
-                    }
-                ]);
-            }
-        }
+        patientName:
+            item.patientName ||
+            "Patient",
 
-        function normalizeOrder(order) {
-            return {
-                id:
-                    order.id,
+        doctorName:
+            item.doctorName ||
+            "Doctor",
 
-                orderNumber:
-                    order.orderNumber ||
-                    `ORD-${order.id}`,
+        diagnosis:
+            item.diagnosis ||
+            "Diagnosis not added",
 
-                patientName:
-                    order.patientName ||
-                    order.userName ||
-                    order.customerName ||
-                    "Patient",
+        itemCount:
+            Array.isArray(item.items)
+                ? item.items.length
+                : 0,
 
-                totalAmount:
-                    Number(
-                        order.totalAmount || 0
-                    ),
+        status:
+            String(
+                item.status ||
+                "FINALIZED"
+            ).toUpperCase(),
 
-                itemCount:
-                    Array.isArray(order.items)
-                        ? order.items.length
-                        : order.itemCount || 0,
+        finalizedAt:
+            item.finalizedAt || null,
 
-                status:
-                    String(
-                        order.status ||
-                        "PENDING"
-                    ).toUpperCase()
-            };
-        }
+        createdAt:
+            item.createdAt || null
+    };
+}
 
-        function renderRecentOrders(
-            orders
-        ) {
-            const container =
-                document.getElementById(
-                    "recentOrdersList"
-                );
+function renderRecentPrescriptions(
+    prescriptions
+) {
+    const container =
+        document.getElementById(
+            "recentPrescriptionsList"
+        );
 
-            if (!orders.length) {
-                container.innerHTML = `
-                    <div class="panel-message">
-                        <i class="fa-solid fa-box-open"></i>
-                        No recent orders found.
-                    </div>
-                `;
+    if (!prescriptions.length) {
+        container.innerHTML = `
+            <div class="panel-message">
+                <i class="fa-solid fa-file-circle-xmark"></i>
+                No prescriptions found.
+            </div>
+        `;
+        return;
+    }
 
-                return;
-            }
-
-            container.innerHTML = "";
-
-            orders.forEach(function (order) {
-                container.insertAdjacentHTML(
-                    "beforeend",
-                    `
+    container.innerHTML =
+        prescriptions
+            .map(
+                prescription => `
                     <a
-                        href="order-details.html?id=${encodeURIComponent(order.id)}"
+                        href="prescriptions.html?id=${encodeURIComponent(
+                            prescription.id ?? ""
+                        )}"
                         class="order-item"
                     >
 
                         <span class="order-icon">
-                            <i class="fa-solid fa-box"></i>
+                            <i class="fa-solid fa-file-prescription"></i>
                         </span>
 
                         <div class="order-info">
 
                             <h3>
-                                ${escapeHtml(order.orderNumber)}
+                                ${escapeHtml(
+                                    prescription.patientName
+                                )}
                             </h3>
 
                             <p>
-                                ${escapeHtml(order.patientName)}
+                                ${escapeHtml(
+                                    prescription.doctorName
+                                )}
                                 ·
-                                ${escapeHtml(order.itemCount)} item(s)
+                                ${escapeHtml(
+                                    prescription.itemCount
+                                )}
+                                medicine(s)
+                                ·
+                                ${escapeHtml(
+                                    prescription.diagnosis
+                                )}
                             </p>
 
                         </div>
@@ -2448,120 +2464,114 @@
                         <div class="order-meta">
 
                             <strong>
-                                ₹${Number(
-                                    order.totalAmount
-                                ).toLocaleString("en-IN")}
+                                ${escapeHtml(
+                                    formatDate(
+                                        prescription.finalizedAt ||
+                                        prescription.createdAt
+                                    )
+                                )}
                             </strong>
 
                             ${createStatusBadge(
-                                order.status
+                                prescription.status
                             )}
 
                         </div>
 
                     </a>
-                    `
-                );
-            });
-        }
+                `
+            )
+            .join("");
+}
 
-        /* =========================
-           LOW STOCK
-        ========================== */
+/* =========================
+   LOW STOCK
+========================= */
 
-        async function loadLowStockProducts() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/inventory/low-stock"
-                    );
+async function loadLowStockProducts() {
+    const container =
+        document.getElementById(
+            "lowStockList"
+        );
 
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/inventory/low-stock"
+            );
 
-                renderLowStock(
-                    data.slice(0, 5)
-                );
+        const products =
+            extractArray(result.data)
+                .slice(0, 6);
 
-            } catch (error) {
-                console.error(
-                    "Low stock loading failed:",
-                    error
-                );
-
-                renderLowStock([
-                    {
-                        productId: 1,
-                        productName:
-                            "NeoPainil Capsule",
-                        currentStock: 4,
-                        minimumStock: 10
-                    },
-                    {
-                        productId: 2,
-                        productName:
-                            "Neodia Kashayam",
-                        currentStock: 6,
-                        minimumStock: 12
-                    },
-                    {
-                        productId: 3,
-                        productName:
-                            "Neo9 KH Syrup",
-                        currentStock: 3,
-                        minimumStock: 10
-                    }
-                ]);
-            }
-        }
-
-        function renderLowStock(
+        renderLowStock(
             products
-        ) {
-            const container =
-                document.getElementById(
-                    "lowStockList"
-                );
+        );
 
-            if (!products.length) {
-                container.innerHTML = `
-                    <div class="panel-message">
-                        <i class="fa-solid fa-circle-check"></i>
-                        All products have sufficient stock.
-                    </div>
-                `;
+    } catch (error) {
+        console.error(
+            "Low stock loading failed:",
+            error
+        );
 
-                return;
-            }
+        container.innerHTML = `
+            <div class="panel-message">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                ${escapeHtml(
+                    error.message ||
+                    "Unable to load stock alerts."
+                )}
+            </div>
+        `;
 
-            container.innerHTML = "";
+        throw error;
+    }
+}
 
-            products.forEach(
-                function (product) {
+function renderLowStock(products) {
+    const container =
+        document.getElementById(
+            "lowStockList"
+        );
+
+    if (!products.length) {
+        container.innerHTML = `
+            <div class="panel-message">
+                <i class="fa-solid fa-circle-check"></i>
+                All products have sufficient stock.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML =
+        products
+            .map(
+                product => {
                     const productName =
                         product.productName ||
                         product.name ||
                         "Product";
 
                     const currentStock =
-                        product.currentStock ??
-                        product.stock ??
-                        0;
+                        Number(
+                            product.currentStock ??
+                            product.stock ??
+                            0
+                        );
 
-                    const minimumStock =
-                        product.minimumStock ??
-                        product.lowStockThreshold ??
-                        10;
+                    const lowStockLimit =
+                        Number(
+                            product.lowStockLimit ??
+                            product.minimumStock ??
+                            0
+                        );
 
-                    container.insertAdjacentHTML(
-                        "beforeend",
-                        `
+                    return `
                         <a
                             href="inventory.html?productId=${encodeURIComponent(
-                                product.productId ||
-                                product.id ||
+                                product.productId ??
+                                product.id ??
                                 ""
                             )}"
                             class="stock-item"
@@ -2574,291 +2584,313 @@
                             <div class="stock-info">
 
                                 <h3>
-                                    ${escapeHtml(productName)}
+                                    ${escapeHtml(
+                                        productName
+                                    )}
                                 </h3>
 
                                 <p>
-                                    Minimum required:
-                                    ${escapeHtml(minimumStock)}
+                                    Low stock limit:
+                                    ${escapeHtml(
+                                        lowStockLimit
+                                    )}
                                 </p>
 
                             </div>
 
                             <strong class="stock-count">
-                                ${escapeHtml(currentStock)} left
+                                ${escapeHtml(
+                                    currentStock
+                                )}
+                                left
                             </strong>
 
                         </a>
-                        `
-                    );
+                    `;
                 }
+            )
+            .join("");
+}
+
+/* =========================
+   TODAY'S DAILY TREATMENTS
+========================= */
+
+async function loadTodayTreatments() {
+    const body =
+        document.getElementById(
+            "todayTreatmentsBody"
+        );
+
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/daily-treatments/admin/getAll"
             );
-        }
 
-        /* =========================
-           TREATMENTS
-        ========================== */
+        const today =
+            getTodayString();
 
-        async function loadTodayTreatments() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/treatments/today"
-                    );
+        const sessions =
+            extractArray(result.data)
+                .filter(
+                    item =>
+                        String(
+                            item.sessionDate || ""
+                        ).substring(0, 10) ===
+                        today
+                )
+                .sort(
+                    (first, second) =>
+                        String(
+                            first.startTime || ""
+                        ).localeCompare(
+                            String(
+                                second.startTime || ""
+                            )
+                        )
+                )
+                .slice(0, 6);
 
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
+        renderTreatments(
+            sessions
+        );
 
-                renderTreatments(
-                    data.slice(0, 5)
-                );
+    } catch (error) {
+        console.error(
+            "Daily treatments loading failed:",
+            error
+        );
 
-            } catch (error) {
-                console.error(
-                    "Treatments loading failed:",
-                    error
-                );
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="4"
+                    class="panel-message"
+                >
+                    ${escapeHtml(
+                        error.message ||
+                        "Unable to load daily treatments."
+                    )}
+                </td>
+            </tr>
+        `;
 
-                renderTreatments([
-                    {
-                        id: 1,
-                        patientName:
-                            "Nisha Rao",
-                        therapyName:
-                            "Panchakarma",
-                        time: "09:00",
-                        status:
-                            "SCHEDULED"
-                    },
-                    {
-                        id: 2,
-                        patientName:
-                            "Raghavendra Bhat",
-                        therapyName:
-                            "Acupuncture",
-                        time: "10:30",
-                        status:
-                            "IN_PROGRESS"
-                    },
-                    {
-                        id: 3,
-                        patientName:
-                            "Anitha Shetty",
-                        therapyName:
-                            "Yoga Therapy",
-                        time: "12:00",
-                        status:
-                            "COMPLETED"
-                    }
-                ]);
-            }
-        }
+        throw error;
+    }
+}
 
-        function renderTreatments(
-            treatments
-        ) {
-            const body =
-                document.getElementById(
-                    "todayTreatmentsBody"
-                );
+function renderTreatments(sessions) {
+    const body =
+        document.getElementById(
+            "todayTreatmentsBody"
+        );
 
-            if (!treatments.length) {
-                body.innerHTML = `
-                    <tr>
-                        <td
-                            colspan="4"
-                            class="panel-message"
-                        >
-                            No treatments scheduled today.
-                        </td>
-                    </tr>
-                `;
+    if (!sessions.length) {
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="4"
+                    class="panel-message"
+                >
+                    No daily treatments scheduled today.
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-                return;
-            }
-
-            body.innerHTML = "";
-
-            treatments.forEach(
-                function (treatment) {
-                    const name =
-                        treatment.patientName ||
+    body.innerHTML =
+        sessions
+            .map(
+                session => {
+                    const patientName =
+                        session.patientName ||
                         "Patient";
 
-                    body.insertAdjacentHTML(
-                        "beforeend",
-                        `
+                    return `
                         <tr>
 
                             <td>
-
                                 <div class="patient-cell">
 
                                     <span class="patient-avatar">
                                         ${escapeHtml(
-                                            name
+                                            patientName
                                                 .charAt(0)
                                                 .toUpperCase()
                                         )}
                                     </span>
 
                                     <div>
-
                                         <strong>
-                                            ${escapeHtml(name)}
+                                            ${escapeHtml(
+                                                patientName
+                                            )}
                                         </strong>
 
                                         <small>
                                             Session
                                             ${escapeHtml(
-                                                treatment.sessionNumber ||
+                                                session.sessionNumber ??
+                                                "-"
+                                            )}
+                                            of
+                                            ${escapeHtml(
+                                                session.totalSessions ??
                                                 "-"
                                             )}
                                         </small>
-
                                     </div>
 
                                 </div>
-
                             </td>
 
                             <td>
                                 ${escapeHtml(
-                                    treatment.therapyName ||
-                                    treatment.treatmentName ||
-                                    "-"
+                                    session.treatmentName ||
+                                    "Treatment"
                                 )}
                             </td>
 
                             <td>
                                 ${escapeHtml(
-                                    formatTime(
-                                        treatment.time ||
-                                        treatment.treatmentTime
+                                    formatTimeRange(
+                                        session.startTime,
+                                        session.endTime
                                     )
                                 )}
                             </td>
 
                             <td>
                                 ${createStatusBadge(
-                                    treatment.status ||
-                                    "SCHEDULED"
+                                    session.status ||
+                                    "PENDING_APPROVAL"
                                 )}
                             </td>
 
                         </tr>
-                        `
-                    );
+                    `;
                 }
+            )
+            .join("");
+}
+
+/* =========================
+   ACTIVE CONSULTATIONS
+========================= */
+
+async function loadActiveConsultations() {
+    const body =
+        document.getElementById(
+            "activeConsultationsBody"
+        );
+
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/consultations/admin/getAll"
             );
-        }
 
-        /* =========================
-           TRANSACTIONS
-        ========================== */
+        const activeStatuses =
+            new Set([
+                "PAYMENT_PENDING",
+                "SCHEDULED",
+                "CONFIRMED",
+                "RESCHEDULED",
+                "MEETING_CREATED",
+                "MEETING_LINK_SENT",
+                "IN_PROGRESS"
+            ]);
 
-        async function loadRecentTransactions() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/medical-staff/transactions/recent"
-                    );
+        const consultations =
+            extractArray(result.data)
+                .filter(
+                    item =>
+                        activeStatuses.has(
+                            String(
+                                item.status || ""
+                            ).toUpperCase()
+                        )
+                )
+                .sort(
+                    (first, second) =>
+                        createConsultationDate(
+                            first
+                        ) -
+                        createConsultationDate(
+                            second
+                        )
+                )
+                .slice(0, 6);
 
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
+        renderActiveConsultations(
+            consultations
+        );
 
-                renderTransactions(
-                    data.slice(0, 5)
-                );
+    } catch (error) {
+        console.error(
+            "Consultations loading failed:",
+            error
+        );
 
-            } catch (error) {
-                console.error(
-                    "Transactions loading failed:",
-                    error
-                );
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="4"
+                    class="panel-message"
+                >
+                    ${escapeHtml(
+                        error.message ||
+                        "Unable to load consultations."
+                    )}
+                </td>
+            </tr>
+        `;
 
-                renderTransactions([
-                    {
-                        id: 1,
-                        patientName:
-                            "Nisha Rao",
-                        orderNumber:
-                            "NL-3DFE8F6C",
-                        amount: 650,
-                        status:
-                            "SUCCESS"
-                    },
-                    {
-                        id: 2,
-                        patientName:
-                            "Raghavendra Bhat",
-                        orderNumber:
-                            "NL-7FGH92JK",
-                        amount: 900,
-                        status:
-                            "SUCCESS"
-                    },
-                    {
-                        id: 3,
-                        patientName:
-                            "Anitha Shetty",
-                        orderNumber:
-                            "NL-88KLP21M",
-                        amount: 350,
-                        status:
-                            "PENDING"
-                    }
-                ]);
-            }
-        }
+        throw error;
+    }
+}
 
-        function renderTransactions(
-            transactions
-        ) {
-            const body =
-                document.getElementById(
-                    "recentTransactionsBody"
-                );
+function renderActiveConsultations(
+    consultations
+) {
+    const body =
+        document.getElementById(
+            "activeConsultationsBody"
+        );
 
-            if (!transactions.length) {
-                body.innerHTML = `
-                    <tr>
-                        <td
-                            colspan="4"
-                            class="panel-message"
-                        >
-                            No recent transactions found.
-                        </td>
-                    </tr>
-                `;
+    if (!consultations.length) {
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="4"
+                    class="panel-message"
+                >
+                    No active consultations found.
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-                return;
-            }
-
-            body.innerHTML = "";
-
-            transactions.forEach(
-                function (transaction) {
-                    const name =
-                        transaction.patientName ||
+    body.innerHTML =
+        consultations
+            .map(
+                consultation => {
+                    const patientName =
+                        consultation.patientName ||
                         "Patient";
 
-                    body.insertAdjacentHTML(
-                        "beforeend",
-                        `
+                    return `
                         <tr>
 
                             <td>
-
                                 <div class="patient-cell">
 
                                     <span class="patient-avatar">
                                         ${escapeHtml(
-                                            name
+                                            patientName
                                                 .charAt(0)
                                                 .toUpperCase()
                                         )}
@@ -2866,282 +2898,383 @@
 
                                     <div>
                                         <strong>
-                                            ${escapeHtml(name)}
+                                            ${escapeHtml(
+                                                patientName
+                                            )}
                                         </strong>
 
                                         <small>
-                                            PayU
+                                            ${escapeHtml(
+                                                consultation.phoneNumber ||
+                                                "-"
+                                            )}
                                         </small>
                                     </div>
 
                                 </div>
-
                             </td>
 
                             <td>
                                 ${escapeHtml(
-                                    transaction.orderNumber ||
-                                    "-"
+                                    consultation.doctorName ||
+                                    "Doctor"
                                 )}
                             </td>
 
                             <td>
-                                ₹${Number(
-                                    transaction.amount || 0
-                                ).toLocaleString("en-IN")}
+                                ${escapeHtml(
+                                    formatDate(
+                                        consultation.consultationDate
+                                    )
+                                )}
+                                <br>
+                                <small>
+                                    ${escapeHtml(
+                                        formatTimeRange(
+                                            consultation.startTime,
+                                            consultation.endTime
+                                        )
+                                    )}
+                                </small>
                             </td>
 
                             <td>
                                 ${createStatusBadge(
-                                    transaction.status ||
-                                    transaction.paymentStatus ||
-                                    "PENDING"
+                                    consultation.status ||
+                                    "SCHEDULED"
                                 )}
                             </td>
 
                         </tr>
-                        `
-                    );
+                    `;
                 }
-            );
-        }
+            )
+            .join("");
+}
 
-        /* =========================
-           HELPERS
-        ========================== */
+/* =========================
+   UI HELPERS
+========================= */
 
-        function setCurrentDate() {
-            const now =
-                new Date();
+function createStatusBadge(status) {
+    const normalized =
+        String(status || "")
+            .toUpperCase();
 
-            setText(
-                "currentDay",
-                now.toLocaleDateString(
-                    "en-IN",
-                    {
-                        weekday: "long"
-                    }
-                )
-            );
+    return `
+        <span
+            class="status-badge ${statusClass(
+                normalized
+            )}"
+        >
+            ${escapeHtml(
+                formatStatus(normalized)
+            )}
+        </span>
+    `;
+}
 
-            setText(
-                "currentDate",
-                now.toLocaleDateString(
-                    "en-IN",
-                    {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric"
-                    }
-                )
-            );
-        }
+function statusClass(status) {
+    switch (
+        String(status || "")
+            .toUpperCase()
+    ) {
+        case "COMPLETED":
+        case "FINALIZED":
+        case "SUCCESS":
+        case "PAID":
+        case "CONFIRMED":
+            return "status-completed";
 
-        function createStatusBadge(
-            status
-        ) {
-            const normalized =
-                String(
-                    status || "PENDING"
-                ).toUpperCase();
+        case "IN_PROGRESS":
+        case "PROCESSING":
+        case "MEETING_CREATED":
+        case "MEETING_LINK_SENT":
+            return "status-processing";
 
-            let className =
-                "status-pending";
+        case "LOW_STOCK":
+        case "CANCELLED":
+        case "REJECTED":
+        case "MISSED":
+            return "status-low";
 
-            if (
-                [
-                    "PAID",
-                    "SUCCESS",
-                    "READY_TO_SHIP",
-                    "COMPLETED",
-                    "DELIVERED"
-                ].includes(normalized)
-            ) {
-                className =
-                    "status-paid";
+        default:
+            return "status-pending";
+    }
+}
 
-            } else if (
-                [
-                    "PROCESSING",
-                    "PACKED",
-                    "IN_PROGRESS",
-                    "SHIPPED"
-                ].includes(normalized)
-            ) {
-                className =
-                    "status-processing";
+function extractArray(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
 
-            } else if (
-                [
-                    "LOW_STOCK",
-                    "OUT_OF_STOCK",
-                    "FAILED",
-                    "CANCELLED"
-                ].includes(normalized)
-            ) {
-                className =
-                    "status-low";
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    if (Array.isArray(data?.sessions)) {
+        return data.sessions;
+    }
+
+    return [];
+}
+
+function setCurrentDate() {
+    const now = new Date();
+
+    setText(
+        "currentDay",
+        now.toLocaleDateString(
+            "en-IN",
+            {
+                weekday: "long"
             }
+        )
+    );
 
-            return `
-                <span
-                    class="status-badge ${className}"
-                >
-                    ${escapeHtml(
-                        formatStatus(normalized)
-                    )}
-                </span>
-            `;
+    setText(
+        "currentDate",
+        now.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }
+        )
+    );
+}
+
+function getTodayString() {
+    const today = new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function createConsultationDate(
+    consultation
+) {
+    const date =
+        consultation.consultationDate ||
+        "2999-12-31";
+
+    const time =
+        consultation.startTime ||
+        "23:59:59";
+
+    return new Date(
+        `${date}T${time}`
+    );
+}
+
+function formatStatus(value) {
+    return String(value || "")
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            letter =>
+                letter.toUpperCase()
+        );
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(
+            String(value).includes("T")
+                ? value
+                : `${value}T00:00:00`
+        );
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
         }
+    );
+}
 
-        function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const parts =
+        String(value)
+            .split(":");
+
+    if (parts.length < 2) {
+        return String(value);
+    }
+
+    const date = new Date();
+
+    date.setHours(
+        Number(parts[0]),
+        Number(parts[1]),
+        0,
+        0
+    );
+
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        }
+    );
+}
+
+function formatTimeRange(
+    start,
+    end
+) {
+    const startText =
+        formatTime(start);
+
+    const endText =
+        formatTime(end);
+
+    if (
+        end &&
+        endText !== "-"
+    ) {
+        return `${startText} - ${endText}`;
+    }
+
+    return startText;
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const box =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const messageElement =
+        document.getElementById(
+            "alertMessage"
+        );
+
+    const icon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    if (
+        !box ||
+        !messageElement ||
+        !icon
+    ) {
+        return;
+    }
+
+    box.className =
+        `page-alert show ${type}`;
+
+    messageElement.textContent =
+        message;
+
+    icon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.staffAlertTimer
+    );
+
+    window.staffAlertTimer =
+        setTimeout(
+            () => {
+                box.classList.remove(
+                    "show"
                 );
-        }
+            },
+            4200
+        );
+}
 
-        function formatTime(value) {
-            if (!value) {
-                return "-";
-            }
+function toggleSidebar() {
+    document
+        .getElementById(
+            "staffSidebar"
+        )
+        .classList.toggle("open");
 
-            const clean =
-                String(value).substring(0, 5);
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.toggle("show");
+}
 
-            const parts =
-                clean.split(":");
+function closeSidebar() {
+    document
+        .getElementById(
+            "staffSidebar"
+        )
+        .classList.remove("open");
 
-            if (parts.length < 2) {
-                return value;
-            }
-
-            let hour =
-                Number(parts[0]);
-
-            const minute =
-                parts[1];
-
-            const period =
-                hour >= 12
-                    ? "PM"
-                    : "AM";
-
-            hour =
-                hour % 12 || 12;
-
-            return `${hour}:${minute} ${period}`;
-        }
-
-        function setText(
-            id,
-            value
-        ) {
-            document.getElementById(
-                id
-            ).textContent = value;
-        }
-
-        function escapeHtml(value) {
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return "";
-            }
-
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
-        }
-
-        /* =========================
-           SIDEBAR
-        ========================== */
-
-        function toggleSidebar() {
-            document.getElementById(
-                "staffSidebar"
-            ).classList.toggle("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.toggle("show");
-        }
-
-        function closeSidebar() {
-            document.getElementById(
-                "staffSidebar"
-            ).classList.remove("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.remove("show");
-        }
-
-        /* =========================
-           ALERT
-        ========================== */
-
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
-
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
-
-            setText(
-                "alertMessage",
-                message
-            );
-
-            box.className =
-                `page-alert show ${type}`;
-
-            if (type === "success") {
-                icon.className =
-                    "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
-
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
-
-            clearTimeout(
-                window.staffAlertTimer
-            );
-
-            window.staffAlertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
-        }
-    </script>
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.remove("show");
+}
+</script>
 
 </body>
 </html>

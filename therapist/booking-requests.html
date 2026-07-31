@@ -1733,7 +1733,7 @@
                     <button
                         type="button"
                         class="tab-button"
-                        data-status="PENDING"
+                        data-status="PENDING_APPROVAL"
                         onclick="setStatusTab(this)"
                     >
                         Pending
@@ -1875,7 +1875,7 @@
                             <h2>Therapy Requests</h2>
 
                             <p>
-                                Approve, reject or reschedule patient bookings.
+                                Approve or reschedule patient therapy sessions.
                             </p>
 
                         </div>
@@ -2167,733 +2167,832 @@
     </div>
 
     <script>
-        // const API_BASE_URL =
-        //     "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-        // let allBookings = [];
-        // let filteredBookings = [];
-        // let selectedBooking = null;
-        // let selectedStatus = "";
+let allBookings = [];
+let filteredBookings = [];
+let selectedBooking = null;
+let selectedStatus = "";
 
-        // let currentPage = 1;
-        // const pageSize = 8;
+let currentPage = 1;
+const pageSize = 8;
 
-        // document.addEventListener(
-        //     "DOMContentLoaded",
-        //     function () {
-        //         requireTherapistLogin();
-        //         loadTherapistProfile();
-        //         loadBookings();
-        //     }
-        // );
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireTherapistLogin()) {
+            return;
+        }
 
-        // function getTherapistToken() {
-        //     return (
-        //         localStorage.getItem("therapistToken") ||
-        //         localStorage.getItem("token")
-        //     );
-        // }
+        setMinimumRescheduleDate();
 
-        // function requireTherapistLogin() {
-        //     if (!getTherapistToken()) {
-        //         window.location.href =
-        //             "therapist-login.html";
-        //     }
-        // }
+        await Promise.allSettled([
+            loadTherapistProfile(),
+            loadBookings()
+        ]);
+    }
+);
 
-        // async function therapistApiRequest(
-        //     endpoint,
-        //     options = {}
-        // ) {
-        //     const token =
-        //         getTherapistToken();
+/* =========================
+   AUTHENTICATION
+========================= */
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "therapist-login.html";
+function getTherapistToken() {
+    return (
+        localStorage.getItem("therapistToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
 
-        //         throw new Error(
-        //             "Therapist login required."
-        //         );
-        //     }
+function requireTherapistLogin() {
+    const token = getTherapistToken();
 
-        //     const headers = {
-        //         ...(options.headers || {}),
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
 
-        //         "Authorization":
-        //             "Bearer " + token
-        //     };
+    if (!token) {
+        window.location.replace(
+            "../patient/login.html"
+        );
+        return false;
+    }
 
-        //     if (
-        //         options.body &&
-        //         !(options.body instanceof FormData)
-        //     ) {
-        //         headers["Content-Type"] =
-        //             "application/json";
-        //     }
+    if (role && role !== "THERAPIST") {
+        alert("Only therapists can access this page.");
+        therapistLogout();
+        return false;
+    }
 
-        //     const response =
-        //         await fetch(
-        //             API_BASE_URL + endpoint,
-        //             {
-        //                 ...options,
-        //                 headers
-        //             }
-        //         );
+    return true;
+}
 
-        //     let result;
+async function therapistApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token = getTherapistToken();
 
-        //     try {
-        //         result =
-        //             await response.json();
+    if (!token) {
+        therapistLogout();
+        throw new Error(
+            "Therapist login required."
+        );
+    }
 
-        //     } catch (error) {
-        //         result = {
-        //             success: false,
-        //             message:
-        //                 "Invalid server response."
-        //         };
-        //     }
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {}),
+        "Authorization": `Bearer ${token}`
+    };
 
-        //     if (
-        //         !response.ok ||
-        //         result.success === false
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Request failed."
-        //         );
-        //     }
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
 
-        //     return result;
-        // }
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
 
-        // function therapistLogout() {
-        //     localStorage.removeItem(
-        //         "therapistToken"
-        //     );
+    const text = await response.text();
+    let result = {};
 
-        //     localStorage.removeItem(
-        //         "therapistRefreshToken"
-        //     );
+    try {
+        result = text ? JSON.parse(text) : {};
+    } catch {
+        result = {
+            success: false,
+            message:
+                text ||
+                `Invalid server response (${response.status}).`
+        };
+    }
 
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem("refreshToken");
-        //     localStorage.removeItem("role");
-        //     localStorage.removeItem("therapistId");
-        //     localStorage.removeItem("userId");
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearTherapistSession();
 
-        //     window.location.href =
-        //         "therapist-login.html";
-        // }
+        window.location.replace(
+            "../patient/login.html"
+        );
 
-        async function loadTherapistProfile() {
-            try {
-                const result =
-                    await therapistApiRequest(
-                        "/api/users/getProfile"
-                    );
+        throw new Error(
+            result.message ||
+            "Therapist session expired."
+        );
+    }
 
-                const name =
-                    result.data?.name ||
-                    "Therapist";
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status}).`
+        );
+    }
 
-                const specialization =
-                    result.data?.specialization ||
-                    "Therapy Staff";
+    return result;
+}
 
-                setText(
-                    "therapistName",
-                    name
-                );
+function clearTherapistSession() {
+    [
+        "therapistToken",
+        "therapistRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "therapistId",
+        "therapistName",
+        "therapistProfile",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key => localStorage.removeItem(key)
+    );
 
-                setText(
-                    "therapistSpecialization",
-                    specialization
-                );
+    sessionStorage.clear();
+}
 
-                setText(
-                    "therapistInitial",
-                    name
-                        .charAt(0)
-                        .toUpperCase()
-                );
+function therapistLogout() {
+    clearTherapistSession();
 
-            } catch (error) {
-                console.error(
-                    "Profile loading failed:",
-                    error
+    window.location.replace(
+        "../patient/login.html"
+    );
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+async function loadTherapistProfile() {
+    const savedName =
+        localStorage.getItem("therapistName") ||
+        localStorage.getItem("userName") ||
+        localStorage.getItem("name") ||
+        "Therapist";
+
+    updateTherapistHeader(
+        savedName,
+        "Therapist"
+    );
+
+    try {
+        const result =
+            await therapistApiRequest(
+                "/api/therapists/me"
+            );
+
+        const therapist = result.data || {};
+
+        const name =
+            therapist.name ||
+            therapist.therapistName ||
+            savedName;
+
+        const specialization =
+            therapist.specialization ||
+            "Therapist";
+
+        updateTherapistHeader(
+            name,
+            specialization
+        );
+
+        if (
+            therapist.id !== null &&
+            therapist.id !== undefined
+        ) {
+            localStorage.setItem(
+                "therapistId",
+                String(therapist.id)
+            );
+        }
+
+        localStorage.setItem(
+            "therapistName",
+            name
+        );
+
+        localStorage.setItem(
+            "therapistProfile",
+            JSON.stringify(therapist)
+        );
+
+    } catch (error) {
+        console.error(
+            "Therapist profile loading failed:",
+            error
+        );
+
+        showAlert(
+            error.message ||
+            "Unable to load therapist profile.",
+            "error"
+        );
+    }
+}
+
+function updateTherapistHeader(
+    name,
+    specialization
+) {
+    const cleanName =
+        String(name || "Therapist").trim();
+
+    setText(
+        "therapistName",
+        cleanName
+    );
+
+    setText(
+        "therapistSpecialization",
+        specialization || "Therapist"
+    );
+
+    setText(
+        "therapistInitial",
+        cleanName.charAt(0).toUpperCase() || "T"
+    );
+}
+
+/* =========================
+   LOAD BOOKING REQUESTS
+========================= */
+
+async function loadBookings() {
+    showLoading();
+
+    try {
+        const result =
+            await therapistApiRequest(
+                "/api/daily-treatments/therapist/my-sessions"
+            );
+
+        allBookings =
+            extractArray(result.data)
+                .map(normalizeBooking)
+                .sort(sortByScheduleDescending);
+
+        populateTherapyFilter();
+        updateSummary();
+        applyFilters();
+
+    } catch (error) {
+        console.error(
+            "Booking requests loading failed:",
+            error
+        );
+
+        allBookings = [];
+        filteredBookings = [];
+
+        populateTherapyFilter();
+        updateSummary();
+        renderBookings();
+
+        showAlert(
+            error.message ||
+            "Unable to load booking requests.",
+            "error"
+        );
+    }
+}
+
+function extractArray(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    if (Array.isArray(data?.sessions)) {
+        return data.sessions;
+    }
+
+    return [];
+}
+
+function normalizeBooking(item) {
+    return {
+        id:
+            item.id ??
+            item.sessionId ??
+            null,
+
+        bookingNumber:
+            `SES-${item.id ?? item.sessionId ?? "-"}`,
+
+        treatmentPlanId:
+            item.treatmentPlanId ?? null,
+
+        patientId:
+            item.patientId ?? null,
+
+        patientName:
+            item.patientName ||
+            "Patient",
+
+        patientPhone:
+            item.phoneNumber ||
+            item.patientPhone ||
+            "-",
+
+        patientEmail:
+            item.email ||
+            item.patientEmail ||
+            "-",
+
+        patientAge:
+            item.age ?? "-",
+
+        patientGender:
+            String(
+                item.gender || "-"
+            ).toUpperCase(),
+
+        therapyName:
+            item.treatmentName ||
+            item.therapyName ||
+            "Therapy",
+
+        bookingDate:
+            item.sessionDate ||
+            item.bookingDate ||
+            item.date ||
+            "",
+
+        bookingTime:
+            item.startTime ||
+            item.bookingTime ||
+            item.time ||
+            "",
+
+        endTime:
+            item.endTime || "",
+
+        sessionNumber:
+            Number(
+                item.sessionNumber || 1
+            ),
+
+        totalSessions:
+            Number(
+                item.totalSessions || 1
+            ),
+
+        symptoms:
+            item.patientNotes ||
+            item.symptoms ||
+            "-",
+
+        medicalHistory:
+            "Refer to patient history",
+
+        paymentStatus:
+            "NOT_APPLICABLE",
+
+        status:
+            String(
+                item.status ||
+                "PENDING_APPROVAL"
+            ).toUpperCase(),
+
+        notes:
+            item.therapistNotes ||
+            item.patientNotes ||
+            "-",
+
+        rescheduleReason:
+            item.rescheduleReason || "",
+
+        approvedAt:
+            item.approvedAt || null,
+
+        completedAt:
+            item.completedAt || null,
+
+        missedAt:
+            item.missedAt || null,
+
+        createdAt:
+            item.createdAt || null,
+
+        updatedAt:
+            item.updatedAt || null
+    };
+}
+
+function sortByScheduleDescending(
+    first,
+    second
+) {
+    const firstDate = new Date(
+        `${first.bookingDate || "1970-01-01"}T${first.bookingTime || "00:00:00"}`
+    );
+
+    const secondDate = new Date(
+        `${second.bookingDate || "1970-01-01"}T${second.bookingTime || "00:00:00"}`
+    );
+
+    return secondDate - firstDate;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+function updateSummary() {
+    const pending =
+        allBookings.filter(
+            booking =>
+                booking.status ===
+                "PENDING_APPROVAL"
+        ).length;
+
+    const approved =
+        allBookings.filter(
+            booking =>
+                booking.status ===
+                "APPROVED"
+        ).length;
+
+    const rescheduled =
+        allBookings.filter(
+            booking =>
+                booking.status ===
+                "RESCHEDULED"
+        ).length;
+
+    /*
+     * The shared backend API does not provide a reject-session
+     * endpoint or a REJECTED session flow. This card remains zero
+     * unless the backend starts returning REJECTED records.
+     */
+    const rejected =
+        allBookings.filter(
+            booking =>
+                booking.status ===
+                "REJECTED"
+        ).length;
+
+    setText("pendingCount", pending);
+    setText("approvedCount", approved);
+    setText("rescheduledCount", rescheduled);
+    setText("rejectedCount", rejected);
+}
+
+/* =========================
+   FILTERS
+========================= */
+
+function setStatusTab(button) {
+    document
+        .querySelectorAll(".tab-button")
+        .forEach(
+            item =>
+                item.classList.remove("active")
+        );
+
+    button.classList.add("active");
+
+    selectedStatus =
+        String(
+            button.dataset.status || ""
+        ).toUpperCase();
+
+    if (selectedStatus === "PENDING") {
+        selectedStatus =
+            "PENDING_APPROVAL";
+    }
+
+    currentPage = 1;
+    applyFilters();
+}
+
+function applyFilters() {
+    const search =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const therapy =
+        document
+            .getElementById("therapyFilter")
+            .value;
+
+    const payment =
+        document
+            .getElementById("paymentFilter")
+            .value;
+
+    const date =
+        document
+            .getElementById("dateFilter")
+            .value;
+
+    filteredBookings =
+        allBookings.filter(
+            booking => {
+                const matchesSearch =
+                    !search ||
+                    booking.patientName
+                        .toLowerCase()
+                        .includes(search) ||
+                    booking.bookingNumber
+                        .toLowerCase()
+                        .includes(search) ||
+                    booking.therapyName
+                        .toLowerCase()
+                        .includes(search);
+
+                const matchesTherapy =
+                    !therapy ||
+                    booking.therapyName ===
+                    therapy;
+
+                /*
+                 * Daily-treatment sessions do not include payment
+                 * information. The payment filter only remains for
+                 * layout compatibility and does not exclude records.
+                 */
+                const matchesPayment =
+                    !payment ||
+                    booking.paymentStatus ===
+                    payment ||
+                    booking.paymentStatus ===
+                    "NOT_APPLICABLE";
+
+                const matchesDate =
+                    !date ||
+                    booking.bookingDate === date;
+
+                const matchesStatus =
+                    !selectedStatus ||
+                    booking.status ===
+                    selectedStatus;
+
+                return (
+                    matchesSearch &&
+                    matchesTherapy &&
+                    matchesPayment &&
+                    matchesDate &&
+                    matchesStatus
                 );
             }
-        }
+        );
 
-        async function loadBookings() {
-            document.getElementById(
-                "bookingTableBody"
-            ).innerHTML = `
-                <tr>
-                    <td
-                        colspan="10"
-                        class="table-message"
-                    >
-                        <i class="fa-solid fa-spinner fa-spin"></i>
-                        Loading booking requests...
-                    </td>
-                </tr>
-            `;
+    currentPage = 1;
+    renderBookings();
+}
 
-            try {
-                const result =
-                    await therapistApiRequest(
-                        "/api/therapist/bookings/requests"
-                    );
+function resetFilters() {
+    document.getElementById(
+        "searchInput"
+    ).value = "";
 
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : Array.isArray(
-                            result.data?.content
-                        )
-                            ? result.data.content
-                            : [];
+    document.getElementById(
+        "therapyFilter"
+    ).value = "";
 
-                allBookings =
-                    data.map(
-                        normalizeBooking
-                    );
+    document.getElementById(
+        "paymentFilter"
+    ).value = "";
 
-            } catch (error) {
-                allBookings =
-                    getDemoBookings();
+    document.getElementById(
+        "dateFilter"
+    ).value = "";
 
-                showAlert(
-                    "Booking API is not connected. Demo data is displayed.",
-                    "info"
-                );
-            }
+    selectedStatus = "";
 
-            populateTherapyFilter();
-            updateSummary();
-            applyFilters();
-        }
-
-        function normalizeBooking(item) {
-            return {
-                id:
-                    item.id ||
-                    item.bookingId,
-
-                bookingNumber:
-                    item.bookingNumber ||
-                    item.bookingCode ||
-                    `THR-${item.id || item.bookingId}`,
-
-                patientId:
-                    item.patientId ||
-                    item.patient?.id,
-
-                patientName:
-                    item.patientName ||
-                    item.patient?.name ||
-                    "Patient",
-
-                patientPhone:
-                    item.patientPhone ||
-                    item.patient?.phoneNumber ||
-                    "-",
-
-                patientEmail:
-                    item.patientEmail ||
-                    item.patient?.email ||
-                    "-",
-
-                patientAge:
-                    item.patientAge ||
-                    item.patient?.age ||
-                    "-",
-
-                patientGender:
-                    String(
-                        item.patientGender ||
-                        item.patient?.gender ||
-                        "-"
-                    ).toUpperCase(),
-
-                therapyName:
-                    item.therapyName ||
-                    item.therapy?.name ||
-                    "Therapy",
-
-                bookingDate:
-                    item.bookingDate ||
-                    item.sessionDate ||
-                    item.date,
-
-                bookingTime:
-                    item.bookingTime ||
-                    item.sessionTime ||
-                    item.time,
-
-                totalSessions:
-                    Number(
-                        item.totalSessions ||
-                        item.sessions ||
-                        1
-                    ),
-
-                symptoms:
-                    item.symptoms ||
-                    item.healthIssue ||
-                    "-",
-
-                medicalHistory:
-                    item.medicalHistory ||
-                    item.pastHistory ||
-                    "Not provided",
-
-                paymentStatus:
-                    String(
-                        item.paymentStatus ||
-                        "PAID"
-                    ).toUpperCase(),
-
-                status:
-                    String(
-                        item.status ||
-                        "PENDING"
-                    ).toUpperCase(),
-
-                notes:
-                    item.notes ||
-                    "-",
-
-                rejectionReason:
-                    item.rejectionReason ||
-                    null,
-
-                rescheduleReason:
-                    item.rescheduleReason ||
-                    null
-            };
-        }
-
-        function getDemoBookings() {
-            return [
-                {
-                    id: 1,
-                    bookingNumber: "THR-1001",
-                    patientId: 1,
-                    patientName: "Nisha Rao",
-                    patientPhone: "9876543210",
-                    patientEmail: "nisha@example.com",
-                    patientAge: 30,
-                    patientGender: "FEMALE",
-                    therapyName: "Panchakarma",
-                    bookingDate: getTodayString(),
-                    bookingTime: "09:00",
-                    totalSessions: 7,
-                    symptoms: "Stress, headache and body stiffness",
-                    medicalHistory: "Migraine and acidity",
-                    paymentStatus: "PAID",
-                    status: "PENDING",
-                    notes: "Patient prefers a morning slot"
-                },
-                {
-                    id: 2,
-                    bookingNumber: "THR-1002",
-                    patientId: 2,
-                    patientName: "Kiran Kumar",
-                    patientPhone: "9876543211",
-                    patientEmail: "kiran@example.com",
-                    patientAge: 40,
-                    patientGender: "MALE",
-                    therapyName: "Acupuncture",
-                    bookingDate: getOffsetDate(1),
-                    bookingTime: "11:00",
-                    totalSessions: 10,
-                    symptoms: "Neck and shoulder pain",
-                    medicalHistory: "No major illness",
-                    paymentStatus: "PAID",
-                    status: "APPROVED",
-                    notes: "-"
-                },
-                {
-                    id: 3,
-                    bookingNumber: "THR-1003",
-                    patientId: 3,
-                    patientName: "Anitha Shetty",
-                    patientPhone: "9876543212",
-                    patientEmail: "anitha@example.com",
-                    patientAge: 36,
-                    patientGender: "FEMALE",
-                    therapyName: "Yoga and Naturopathy",
-                    bookingDate: getOffsetDate(2),
-                    bookingTime: "15:00",
-                    totalSessions: 15,
-                    symptoms: "Stress and poor sleep",
-                    medicalHistory: "No major illness",
-                    paymentStatus: "PAID",
-                    status: "RESCHEDULED",
-                    notes: "Alternative slot suggested",
-                    rescheduleReason: "Original slot unavailable"
-                },
-                {
-                    id: 4,
-                    bookingNumber: "THR-1004",
-                    patientId: 4,
-                    patientName: "Ravi Bhat",
-                    patientPhone: "9876543213",
-                    patientEmail: "ravi@example.com",
-                    patientAge: 34,
-                    patientGender: "MALE",
-                    therapyName: "Beauty Therapy",
-                    bookingDate: getOffsetDate(3),
-                    bookingTime: "14:00",
-                    totalSessions: 6,
-                    symptoms: "Skin rejuvenation",
-                    medicalHistory: "Sensitive skin",
-                    paymentStatus: "PENDING",
-                    status: "REJECTED",
-                    notes: "-",
-                    rejectionReason: "Selected therapist unavailable"
-                }
-            ];
-        }
-
-        function populateTherapyFilter() {
-            const select =
-                document.getElementById(
-                    "therapyFilter"
-                );
-
-            const therapies = [
-                ...new Set(
-                    allBookings
-                        .map(
-                            booking =>
-                                booking.therapyName
-                        )
-                        .filter(Boolean)
+    document
+        .querySelectorAll(".tab-button")
+        .forEach(
+            (button, index) =>
+                button.classList.toggle(
+                    "active",
+                    index === 0
                 )
-            ].sort();
+        );
 
-            select.innerHTML = `
-                <option value="">
-                    All Therapies
-                </option>
-            `;
+    currentPage = 1;
+    applyFilters();
+}
 
-            therapies.forEach(
-                function (therapy) {
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
+function populateTherapyFilter() {
+    const select =
+        document.getElementById(
+            "therapyFilter"
+        );
 
-                    option.value = therapy;
-                    option.textContent = therapy;
+    const currentValue =
+        select.value;
 
-                    select.appendChild(option);
-                }
-            );
-        }
-
-        function updateSummary() {
-            setText(
-                "pendingCount",
-                countByStatus("PENDING")
-            );
-
-            setText(
-                "approvedCount",
-                countByStatus("APPROVED")
-            );
-
-            setText(
-                "rescheduledCount",
-                countByStatus("RESCHEDULED")
-            );
-
-            setText(
-                "rejectedCount",
-                countByStatus("REJECTED")
-            );
-        }
-
-        function countByStatus(status) {
-            return allBookings.filter(
-                booking =>
-                    booking.status === status
-            ).length;
-        }
-
-        function setStatusTab(button) {
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    tab =>
-                        tab.classList.remove(
-                            "active"
-                        )
-                );
-
-            button.classList.add("active");
-
-            selectedStatus =
-                button.dataset.status;
-
-            applyFilters();
-        }
-
-        function applyFilters() {
-            const search =
-                document.getElementById(
-                    "searchInput"
-                ).value
-                .trim()
-                .toLowerCase();
-
-            const therapy =
-                document.getElementById(
-                    "therapyFilter"
-                ).value;
-
-            const payment =
-                document.getElementById(
-                    "paymentFilter"
-                ).value;
-
-            const date =
-                document.getElementById(
-                    "dateFilter"
-                ).value;
-
-            filteredBookings =
-                allBookings.filter(
-                    function (booking) {
-                        const matchesSearch =
-                            !search ||
-                            booking.bookingNumber
-                                .toLowerCase()
-                                .includes(search) ||
-                            booking.patientName
-                                .toLowerCase()
-                                .includes(search) ||
+    const therapies =
+        [
+            ...new Set(
+                allBookings
+                    .map(
+                        booking =>
                             booking.therapyName
-                                .toLowerCase()
-                                .includes(search);
-
-                        const matchesStatus =
-                            !selectedStatus ||
-                            booking.status ===
-                                selectedStatus;
-
-                        const matchesTherapy =
-                            !therapy ||
-                            booking.therapyName ===
-                                therapy;
-
-                        const matchesPayment =
-                            !payment ||
-                            booking.paymentStatus ===
-                                payment;
-
-                        const matchesDate =
-                            !date ||
-                            String(
-                                booking.bookingDate
-                            ).substring(0, 10) ===
-                                date;
-
-                        return (
-                            matchesSearch &&
-                            matchesStatus &&
-                            matchesTherapy &&
-                            matchesPayment &&
-                            matchesDate
-                        );
-                    }
-                );
-
-            currentPage = 1;
-            renderBookings();
-        }
-
-        function resetFilters() {
-            document.getElementById(
-                "searchInput"
-            ).value = "";
-
-            document.getElementById(
-                "therapyFilter"
-            ).value = "";
-
-            document.getElementById(
-                "paymentFilter"
-            ).value = "";
-
-            document.getElementById(
-                "dateFilter"
-            ).value = "";
-
-            selectedStatus = "";
-
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    (tab, index) =>
-                        tab.classList.toggle(
-                            "active",
-                            index === 0
-                        )
-                );
-
-            applyFilters();
-        }
-
-        function renderBookings() {
-            const body =
-                document.getElementById(
-                    "bookingTableBody"
-                );
-
-            const totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        filteredBookings.length /
-                        pageSize
                     )
-                );
+                    .filter(Boolean)
+            )
+        ].sort();
 
-            const startIndex =
-                (currentPage - 1) *
-                pageSize;
+    select.innerHTML = `
+        <option value="">
+            All Therapies
+        </option>
 
-            const pageItems =
-                filteredBookings.slice(
-                    startIndex,
-                    startIndex + pageSize
-                );
+        ${therapies
+            .map(
+                therapy => `
+                    <option value="${escapeHtml(therapy)}">
+                        ${escapeHtml(therapy)}
+                    </option>
+                `
+            )
+            .join("")}
+    `;
 
-            setText(
-                "resultCount",
-                `${filteredBookings.length} Request${
-                    filteredBookings.length === 1
-                        ? ""
-                        : "s"
-                }`
-            );
+    if (therapies.includes(currentValue)) {
+        select.value = currentValue;
+    }
+}
 
-            if (!pageItems.length) {
-                body.innerHTML = `
+/* =========================
+   RENDER TABLE
+========================= */
+
+function showLoading() {
+    document.getElementById(
+        "bookingTableBody"
+    ).innerHTML = `
+        <tr>
+            <td
+                colspan="10"
+                class="table-message"
+            >
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading booking requests...
+            </td>
+        </tr>
+    `;
+}
+
+function renderBookings() {
+    const body =
+        document.getElementById(
+            "bookingTableBody"
+        );
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredBookings.length /
+                pageSize
+            )
+        );
+
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+
+    const start =
+        (currentPage - 1) * pageSize;
+
+    const pageBookings =
+        filteredBookings.slice(
+            start,
+            start + pageSize
+        );
+
+    setText(
+        "resultCount",
+        `${filteredBookings.length} Request${
+            filteredBookings.length === 1
+                ? ""
+                : "s"
+        }`
+    );
+
+    if (!pageBookings.length) {
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="10"
+                    class="table-message"
+                >
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    No therapy sessions found.
+                </td>
+            </tr>
+        `;
+
+        updatePagination(0, 0, 0);
+        renderPaginationButtons(1);
+        return;
+    }
+
+    body.innerHTML =
+        pageBookings
+            .map(
+                booking => `
                     <tr>
-                        <td
-                            colspan="10"
-                            class="table-message"
-                        >
-                            <i class="fa-solid fa-calendar-xmark"></i>
-                            No booking requests matched the filters.
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    booking.bookingNumber
+                                )}
+                            </strong>
                         </td>
-                    </tr>
-                `;
 
-                updatePaginationInfo(
-                    0,
-                    0,
-                    0
-                );
-
-                renderPaginationButtons(1);
-                return;
-            }
-
-            body.innerHTML = "";
-
-            pageItems.forEach(
-                function (booking) {
-                    body.insertAdjacentHTML(
-                        "beforeend",
-                        `
-                        <tr>
-
-                            <td>
-                                <strong>
+                        <td>
+                            <div class="patient-cell">
+                                <span class="patient-avatar">
                                     ${escapeHtml(
-                                        booking.bookingNumber
-                                    )}
-                                </strong>
-                            </td>
-
-                            <td>
-
-                                <div class="patient-cell">
-
-                                    <span class="patient-avatar">
-                                        ${escapeHtml(
-                                            booking.patientName
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        )}
-                                    </span>
-
-                                    <div>
-
-                                        <strong>
-                                            ${escapeHtml(
-                                                booking.patientName
-                                            )}
-                                        </strong>
-
-                                        <small>
-                                            ${escapeHtml(
-                                                booking.patientPhone
-                                            )}
-                                        </small>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-                            <td>
-                                <span class="therapy-badge">
-                                    <i class="fa-solid fa-spa"></i>
-
-                                    ${escapeHtml(
-                                        booking.therapyName
+                                        booking.patientName
+                                            .charAt(0)
+                                            .toUpperCase()
                                     )}
                                 </span>
-                            </td>
 
-                            <td>
+                                <div>
+                                    <strong>
+                                        ${escapeHtml(
+                                            booking.patientName
+                                        )}
+                                    </strong>
+
+                                    <small>
+                                        Patient ID:
+                                        ${escapeHtml(
+                                            booking.patientId ?? "-"
+                                        )}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="therapy-badge">
+                                <i class="fa-solid fa-spa"></i>
                                 ${escapeHtml(
-                                    formatDate(
-                                        booking.bookingDate
-                                    )
+                                    booking.therapyName
                                 )}
-                            </td>
+                            </span>
+                        </td>
 
-                            <td>
-                                ${escapeHtml(
-                                    formatTime(
-                                        booking.bookingTime
-                                    )
-                                )}
-                            </td>
+                        <td>
+                            ${escapeHtml(
+                                formatDate(
+                                    booking.bookingDate
+                                )
+                            )}
+                        </td>
 
-                            <td>
-                                ${escapeHtml(
-                                    booking.totalSessions
-                                )}
-                            </td>
+                        <td>
+                            ${escapeHtml(
+                                formatTimeRange(
+                                    booking.bookingTime,
+                                    booking.endTime
+                                )
+                            )}
+                        </td>
 
-                            <td
+                        <td>
+                            ${escapeHtml(
+                                `${booking.sessionNumber}/${booking.totalSessions}`
+                            )}
+                        </td>
+
+                        <td>
+                            <div
                                 class="symptoms-preview"
                                 title="${escapeHtml(
                                     booking.symptoms
@@ -2902,1038 +3001,1015 @@
                                 ${escapeHtml(
                                     booking.symptoms
                                 )}
-                            </td>
+                            </div>
+                        </td>
 
-                            <td>
-                                ${createPaymentBadge(
-                                    booking.paymentStatus
-                                )}
-                            </td>
+                        <td>
+                            <span class="payment-badge payment-pending">
+                                Not Applicable
+                            </span>
+                        </td>
 
-                            <td>
-                                ${createStatusBadge(
+                        <td>
+                            <span
+                                class="status-badge ${statusClass(
                                     booking.status
+                                )}"
+                            >
+                                ${escapeHtml(
+                                    formatLabel(
+                                        booking.status
+                                    )
                                 )}
-                            </td>
+                            </span>
+                        </td>
 
-                            <td>
+                        <td>
+                            <div class="action-buttons">
 
-                                <div class="action-buttons">
+                                <button
+                                    type="button"
+                                    class="action-button view-button"
+                                    title="View details"
+                                    onclick="openDetails(${Number(
+                                        booking.id
+                                    )})"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
 
-                                    <button
-                                        type="button"
-                                        class="action-button view-button"
-                                        onclick="openDetails('${booking.id}')"
-                                        title="View details"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                    ${
-                                        booking.status ===
-                                        "PENDING"
-                                            ? `
+                                ${
+                                    booking.status ===
+                                    "PENDING_APPROVAL"
+                                        ? `
                                             <button
                                                 type="button"
                                                 class="action-button approve-button"
-                                                onclick="approveBooking('${booking.id}')"
                                                 title="Approve"
+                                                onclick="approveBooking(${Number(
+                                                    booking.id
+                                                )})"
                                             >
                                                 <i class="fa-solid fa-check"></i>
                                             </button>
 
                                             <button
                                                 type="button"
-                                                class="action-button reject-button"
-                                                onclick="openRejectModal('${booking.id}')"
-                                                title="Reject"
-                                            >
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
-
-                                            <button
-                                                type="button"
                                                 class="action-button reschedule-button"
-                                                onclick="openRescheduleModal('${booking.id}')"
                                                 title="Reschedule"
+                                                onclick="openRescheduleModal(${Number(
+                                                    booking.id
+                                                )})"
                                             >
                                                 <i class="fa-solid fa-calendar-days"></i>
                                             </button>
-                                            `
-                                            : ""
-                                    }
+                                          `
+                                        : ""
+                                }
 
-                                </div>
+                                ${
+                                    booking.status ===
+                                    "APPROVED"
+                                        ? `
+                                            <button
+                                                type="button"
+                                                class="action-button reschedule-button"
+                                                title="Reschedule"
+                                                onclick="openRescheduleModal(${Number(
+                                                    booking.id
+                                                )})"
+                                            >
+                                                <i class="fa-solid fa-calendar-days"></i>
+                                            </button>
+                                          `
+                                        : ""
+                                }
 
-                            </td>
+                            </div>
+                        </td>
+                    </tr>
+                `
+            )
+            .join("");
 
-                        </tr>
-                        `
-                    );
-                }
+    updatePagination(
+        start + 1,
+        Math.min(
+            start + pageSize,
+            filteredBookings.length
+        ),
+        filteredBookings.length
+    );
+
+    renderPaginationButtons(
+        totalPages
+    );
+}
+
+/* =========================
+   PAGINATION
+========================= */
+
+function updatePagination(
+    start,
+    end,
+    total
+) {
+    setText(
+        "paginationInfo",
+        total
+            ? `Showing ${start}-${end} of ${total} requests`
+            : "Showing 0 requests"
+    );
+}
+
+function renderPaginationButtons(
+    totalPages
+) {
+    const container =
+        document.getElementById(
+            "paginationButtons"
+        );
+
+    container.innerHTML = "";
+
+    container.appendChild(
+        createPaginationButton(
+            '<i class="fa-solid fa-chevron-left"></i>',
+            currentPage === 1,
+            () => changePage(
+                currentPage - 1
+            )
+        )
+    );
+
+    for (
+        let page = 1;
+        page <= totalPages;
+        page++
+    ) {
+        if (
+            totalPages > 7 &&
+            page !== 1 &&
+            page !== totalPages &&
+            Math.abs(
+                page - currentPage
+            ) > 1
+        ) {
+            continue;
+        }
+
+        const button =
+            createPaginationButton(
+                String(page),
+                false,
+                () => changePage(page)
             );
 
-            updatePaginationInfo(
-                startIndex + 1,
-                Math.min(
-                    startIndex + pageSize,
-                    filteredBookings.length
-                ),
-                filteredBookings.length
-            );
-
-            renderPaginationButtons(
-                totalPages
+        if (page === currentPage) {
+            button.classList.add(
+                "active"
             );
         }
 
-        function openDetails(id) {
-            selectedBooking =
-                findBooking(id);
+        container.appendChild(button);
+    }
 
-            if (!selectedBooking) {
-                return;
+    container.appendChild(
+        createPaginationButton(
+            '<i class="fa-solid fa-chevron-right"></i>',
+            currentPage === totalPages,
+            () => changePage(
+                currentPage + 1
+            )
+        )
+    );
+}
+
+function createPaginationButton(
+    html,
+    disabled,
+    handler
+) {
+    const button =
+        document.createElement(
+            "button"
+        );
+
+    button.type = "button";
+    button.className =
+        "pagination-button";
+    button.innerHTML = html;
+    button.disabled = disabled;
+    button.onclick = handler;
+
+    return button;
+}
+
+function changePage(page) {
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredBookings.length /
+                pageSize
+            )
+        );
+
+    if (
+        page < 1 ||
+        page > totalPages
+    ) {
+        return;
+    }
+
+    currentPage = page;
+    renderBookings();
+
+    document
+        .querySelector(
+            ".booking-panel"
+        )
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+/* =========================
+   DETAILS MODAL
+========================= */
+
+function openDetails(id) {
+    selectedBooking =
+        allBookings.find(
+            booking =>
+                String(booking.id) ===
+                String(id)
+        ) || null;
+
+    if (!selectedBooking) {
+        showAlert(
+            "Session details not found.",
+            "error"
+        );
+        return;
+    }
+
+    const booking =
+        selectedBooking;
+
+    document.getElementById(
+        "detailsModalContent"
+    ).innerHTML = `
+        <div class="modal-patient-card">
+
+            <span class="patient-avatar">
+                ${escapeHtml(
+                    booking.patientName
+                        .charAt(0)
+                        .toUpperCase()
+                )}
+            </span>
+
+            <div>
+                <h3>
+                    ${escapeHtml(
+                        booking.patientName
+                    )}
+                </h3>
+
+                <p>
+                    Patient ID:
+                    ${escapeHtml(
+                        booking.patientId ?? "-"
+                    )}
+                    · Session:
+                    ${escapeHtml(
+                        booking.bookingNumber
+                    )}
+                </p>
+            </div>
+
+        </div>
+
+        <div class="details-grid">
+
+            ${detailBox(
+                "Treatment",
+                booking.therapyName
+            )}
+
+            ${detailBox(
+                "Treatment Plan ID",
+                booking.treatmentPlanId ?? "-"
+            )}
+
+            ${detailBox(
+                "Date",
+                formatDate(
+                    booking.bookingDate
+                )
+            )}
+
+            ${detailBox(
+                "Time",
+                formatTimeRange(
+                    booking.bookingTime,
+                    booking.endTime
+                )
+            )}
+
+            ${detailBox(
+                "Session",
+                `${booking.sessionNumber} of ${booking.totalSessions}`
+            )}
+
+            ${detailBox(
+                "Status",
+                formatLabel(
+                    booking.status
+                )
+            )}
+
+            ${detailBox(
+                "Patient Notes",
+                booking.symptoms,
+                true
+            )}
+
+            ${detailBox(
+                "Therapist Notes",
+                booking.notes,
+                true
+            )}
+
+            ${
+                booking.rescheduleReason
+                    ? detailBox(
+                        "Reschedule Reason",
+                        booking.rescheduleReason,
+                        true
+                      )
+                    : ""
             }
 
-            document.getElementById(
-                "detailsModalContent"
-            ).innerHTML = `
-                ${createPatientCard(
-                    selectedBooking
-                )}
+        </div>
+    `;
 
-                <div class="details-grid">
+    document.getElementById(
+        "detailsModalActions"
+    ).innerHTML = `
+        <button
+            type="button"
+            class="modal-button modal-cancel-button"
+            onclick="closeModal('detailsModal')"
+        >
+            Close
+        </button>
 
-                    <div class="detail-box">
-                        <span>Booking ID</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedBooking.bookingNumber
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Therapy</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedBooking.therapyName
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Date</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedBooking.bookingDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Time</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatTime(
-                                    selectedBooking.bookingTime
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Total Sessions</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedBooking.totalSessions
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Payment</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedBooking.paymentStatus
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Age / Gender</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedBooking.patientAge
-                            )}
-                            /
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedBooking.patientGender
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Status</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedBooking.status
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Symptoms</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedBooking.symptoms
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Medical History</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedBooking.medicalHistory
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Notes</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedBooking.notes
-                            )}
-                        </p>
-                    </div>
-
-                </div>
-            `;
-
-            let actions = `
-                <button
-                    type="button"
-                    class="modal-button modal-cancel-button"
-                    onclick="closeModal('detailsModal')"
-                >
-                    Close
-                </button>
-            `;
-
-            if (
-                selectedBooking.status ===
-                "PENDING"
-            ) {
-                actions += `
+        ${
+            booking.status ===
+            "PENDING_APPROVAL"
+                ? `
                     <button
                         type="button"
-                        class="modal-button modal-reject-button"
-                        onclick="openRejectFromDetails()"
+                        class="modal-button modal-approve-button"
+                        onclick="approveBooking(${Number(
+                            booking.id
+                        )})"
                     >
-                        Reject
+                        <i class="fa-solid fa-check"></i>
+                        Approve
                     </button>
 
                     <button
                         type="button"
                         class="modal-button modal-reschedule-button"
-                        onclick="openRescheduleFromDetails()"
+                        onclick="
+                            closeModal('detailsModal');
+                            openRescheduleModal(${Number(
+                                booking.id
+                            )});
+                        "
                     >
+                        <i class="fa-solid fa-calendar-days"></i>
                         Reschedule
                     </button>
-
-                    <button
-                        type="button"
-                        class="modal-button modal-approve-button"
-                        onclick="approveFromDetails()"
-                    >
-                        Approve
-                    </button>
-                `;
-            }
-
-            document.getElementById(
-                "detailsModalActions"
-            ).innerHTML = actions;
-
-            openModal("detailsModal");
+                  `
+                : ""
         }
-
-        async function approveBooking(id) {
-            const booking =
-                findBooking(id);
-
-            if (!booking) {
-                return;
-            }
-
-            try {
-                await therapistApiRequest(
-                    `/api/therapist/bookings/${encodeURIComponent(
-                        booking.id
-                    )}/approve`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                notes:
-                                    "Therapy booking approved"
-                            })
-                    }
-                );
-
-                booking.status =
-                    "APPROVED";
-
-                showAlert(
-                    "Booking approved successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                showAlert(
-                    error.message ||
-                    "Booking could not be approved.",
-                    "error"
-                );
-
-                return;
-            }
-
-            updateSummary();
-            applyFilters();
-        }
-
-        function approveFromDetails() {
-            const id =
-                selectedBooking?.id;
-
-            closeModal("detailsModal");
-
-            if (id) {
-                approveBooking(id);
-            }
-        }
-
-        function openRejectModal(id) {
-            selectedBooking =
-                findBooking(id);
-
-            if (!selectedBooking) {
-                return;
-            }
-
-            document.getElementById(
-                "rejectPatientCard"
-            ).innerHTML =
-                createPatientCard(
-                    selectedBooking
-                );
-
-            document.getElementById(
-                "rejectReason"
-            ).value = "";
-
-            openModal("rejectModal");
-        }
-
-        function openRejectFromDetails() {
-            const id =
-                selectedBooking?.id;
-
-            closeModal("detailsModal");
-
-            if (id) {
-                openRejectModal(id);
-            }
-        }
-
-        async function submitReject() {
-            const reason =
-                document.getElementById(
-                    "rejectReason"
-                ).value.trim();
-
-            if (!reason) {
-                showAlert(
-                    "Please enter rejection reason.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const button =
-                document.getElementById(
-                    "rejectSubmitButton"
-                );
-
-            button.disabled = true;
-
-            try {
-                await therapistApiRequest(
-                    `/api/therapist/bookings/${encodeURIComponent(
-                        selectedBooking.id
-                    )}/reject`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                reason: reason
-                            })
-                    }
-                );
-
-                selectedBooking.status =
-                    "REJECTED";
-
-                selectedBooking.rejectionReason =
-                    reason;
-
-                closeModal("rejectModal");
-
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Booking rejected successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                showAlert(
-                    error.message ||
-                    "Booking could not be rejected.",
-                    "error"
-                );
-
-            } finally {
-                button.disabled = false;
-            }
-        }
-
-        function openRescheduleModal(id) {
-            selectedBooking =
-                findBooking(id);
-
-            if (!selectedBooking) {
-                return;
-            }
-
-            document.getElementById(
-                "reschedulePatientCard"
-            ).innerHTML =
-                createPatientCard(
-                    selectedBooking
-                );
-
-            document.getElementById(
-                "newDate"
-            ).value =
-                selectedBooking.bookingDate;
-
-            document.getElementById(
-                "newTime"
-            ).value =
-                String(
-                    selectedBooking.bookingTime
-                ).substring(0, 5);
-
-            document.getElementById(
-                "rescheduleReason"
-            ).value = "";
-
-            openModal("rescheduleModal");
-        }
-
-        function openRescheduleFromDetails() {
-            const id =
-                selectedBooking?.id;
-
-            closeModal("detailsModal");
-
-            if (id) {
-                openRescheduleModal(id);
-            }
-        }
-
-        async function submitReschedule() {
-            const date =
-                document.getElementById(
-                    "newDate"
-                ).value;
-
-            const time =
-                document.getElementById(
-                    "newTime"
-                ).value;
-
-            const reason =
-                document.getElementById(
-                    "rescheduleReason"
-                ).value.trim();
-
-            if (!date || !time) {
-                showAlert(
-                    "Please select new date and time.",
-                    "error"
-                );
-
-                return;
-            }
-
-            if (!reason) {
-                showAlert(
-                    "Please enter reschedule reason.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const button =
-                document.getElementById(
-                    "rescheduleSubmitButton"
-                );
-
-            button.disabled = true;
-
-            try {
-                await therapistApiRequest(
-                    `/api/therapist/bookings/${encodeURIComponent(
-                        selectedBooking.id
-                    )}/reschedule`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                date: date,
-                                time: time,
-                                reason: reason
-                            })
-                    }
-                );
-
-                selectedBooking.status =
-                    "RESCHEDULED";
-
-                selectedBooking.bookingDate =
-                    date;
-
-                selectedBooking.bookingTime =
-                    time;
-
-                selectedBooking.rescheduleReason =
-                    reason;
-
-                closeModal(
-                    "rescheduleModal"
-                );
-
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Alternative slot sent to patient.",
-                    "success"
-                );
-
-            } catch (error) {
-                showAlert(
-                    error.message ||
-                    "Booking could not be rescheduled.",
-                    "error"
-                );
-
-            } finally {
-                button.disabled = false;
-            }
-        }
-
-        function createPatientCard(booking) {
-            return `
-                <div class="modal-patient-card">
-
-                    <span class="patient-avatar">
-                        ${escapeHtml(
-                            booking.patientName
-                                .charAt(0)
-                                .toUpperCase()
-                        )}
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            ${escapeHtml(
-                                booking.patientName
-                            )}
-                        </h3>
-
+    `;
+
+    openModal("detailsModal");
+}
+
+function detailBox(
+    label,
+    value,
+    fullWidth = false
+) {
+    return `
+        <div
+            class="detail-box ${
+                fullWidth
+                    ? "full-width"
+                    : ""
+            }"
+        >
+            <span>
+                ${escapeHtml(label)}
+            </span>
+
+            ${
+                fullWidth
+                    ? `
                         <p>
                             ${escapeHtml(
-                                booking.patientPhone
-                            )}
-                            ·
-                            ${escapeHtml(
-                                booking.patientEmail
+                                value ?? "-"
                             )}
                         </p>
-
-                    </div>
-
-                </div>
-            `;
-        }
-
-        function createStatusBadge(status) {
-            const normalized =
-                String(
-                    status ||
-                    "PENDING"
-                ).toUpperCase();
-
-            const className = {
-                PENDING:
-                    "status-pending",
-
-                APPROVED:
-                    "status-approved",
-
-                REJECTED:
-                    "status-rejected",
-
-                RESCHEDULED:
-                    "status-rescheduled"
-            }[normalized] ||
-                "status-pending";
-
-            return `
-                <span
-                    class="status-badge ${className}"
-                >
-                    ${escapeHtml(
-                        formatStatus(
-                            normalized
-                        )
-                    )}
-                </span>
-            `;
-        }
-
-        function createPaymentBadge(status) {
-            const normalized =
-                String(
-                    status ||
-                    "PENDING"
-                ).toUpperCase();
-
-            const className = {
-                PAID:
-                    "payment-paid",
-
-                SUCCESS:
-                    "payment-paid",
-
-                PENDING:
-                    "payment-pending",
-
-                FAILED:
-                    "payment-failed"
-            }[normalized] ||
-                "payment-pending";
-
-            return `
-                <span
-                    class="payment-badge ${className}"
-                >
-                    ${escapeHtml(
-                        formatStatus(
-                            normalized
-                        )
-                    )}
-                </span>
-            `;
-        }
-
-        function findBooking(id) {
-            return allBookings.find(
-                booking =>
-                    String(booking.id) ===
-                    String(id)
-            );
-        }
-
-        function openModal(id) {
-            document.getElementById(
-                id
-            ).classList.add("show");
-        }
-
-        function closeModal(id) {
-            document.getElementById(
-                id
-            ).classList.remove("show");
-        }
-
-        function handleModalOutside(
-            event,
-            modalId
-        ) {
-            if (
-                event.target.id ===
-                modalId
-            ) {
-                closeModal(modalId);
+                      `
+                    : `
+                        <strong>
+                            ${escapeHtml(
+                                value ?? "-"
+                            )}
+                        </strong>
+                      `
             }
-        }
+        </div>
+    `;
+}
 
-        function updatePaginationInfo(
-            start,
-            end,
-            total
-        ) {
-            setText(
-                "paginationInfo",
-                total === 0
-                    ? "Showing 0 requests"
-                    : `Showing ${start}–${end} of ${total} requests`
-            );
-        }
+/* =========================
+   APPROVE
+========================= */
 
-        function renderPaginationButtons(
-            totalPages
-        ) {
-            const container =
-                document.getElementById(
-                    "paginationButtons"
-                );
+async function approveBooking(id) {
+    const booking =
+        allBookings.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
 
-            container.innerHTML = "";
+    if (!booking) {
+        showAlert(
+            "Session not found.",
+            "error"
+        );
+        return;
+    }
 
-            const previous =
-                document.createElement(
-                    "button"
-                );
+    if (
+        !confirm(
+            `Approve session ${booking.bookingNumber}?`
+        )
+    ) {
+        return;
+    }
 
-            previous.type = "button";
-
-            previous.className =
-                "pagination-button";
-
-            previous.innerHTML =
-                '<i class="fa-solid fa-chevron-left"></i>';
-
-            previous.disabled =
-                currentPage === 1;
-
-            previous.onclick =
-                function () {
-                    changePage(
-                        currentPage - 1
-                    );
-                };
-
-            container.appendChild(previous);
-
-            for (
-                let page = 1;
-                page <= totalPages;
-                page++
-            ) {
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-                button.type = "button";
-
-                button.className =
-                    `pagination-button ${
-                        page === currentPage
-                            ? "active"
-                            : ""
-                    }`;
-
-                button.textContent =
-                    page;
-
-                button.onclick =
-                    function () {
-                        changePage(page);
-                    };
-
-                container.appendChild(button);
-            }
-
-            const next =
-                document.createElement(
-                    "button"
-                );
-
-            next.type = "button";
-
-            next.className =
-                "pagination-button";
-
-            next.innerHTML =
-                '<i class="fa-solid fa-chevron-right"></i>';
-
-            next.disabled =
-                currentPage ===
-                totalPages;
-
-            next.onclick =
-                function () {
-                    changePage(
-                        currentPage + 1
-                    );
-                };
-
-            container.appendChild(next);
-        }
-
-        function changePage(page) {
-            const totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        filteredBookings.length /
-                        pageSize
-                    )
-                );
-
-            if (
-                page < 1 ||
-                page > totalPages
-            ) {
-                return;
-            }
-
-            currentPage = page;
-            renderBookings();
-        }
-
-        function getTodayString() {
-            const date =
-                new Date();
-
-            const year =
-                date.getFullYear();
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            return `${year}-${month}-${day}`;
-        }
-
-        function getOffsetDate(days) {
-            const date =
-                new Date();
-
-            date.setDate(
-                date.getDate() + days
-            );
-
-            return date
-                .toISOString()
-                .substring(0, 10);
-        }
-
-        function formatDate(value) {
-            if (!value) {
-                return "-";
-            }
-
-            const date =
-                new Date(
-                    String(value).includes("T")
-                        ? value
-                        : `${value}T00:00:00`
-                );
-
-            return date.toLocaleDateString(
-                "en-IN",
+    try {
+        const result =
+            await therapistApiRequest(
+                `/api/daily-treatments/${encodeURIComponent(
+                    booking.id
+                )}/approve`,
                 {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
+                    method: "PUT"
                 }
             );
-        }
 
-        function formatTime(value) {
-            if (!value) {
-                return "-";
-            }
+        showAlert(
+            result.message ||
+            "Daily treatment session approved successfully.",
+            "success"
+        );
 
-            const clean =
-                String(value).substring(
-                    0,
-                    5
-                );
+        closeModal("detailsModal");
+        await loadBookings();
 
-            const parts =
-                clean.split(":");
+    } catch (error) {
+        showAlert(
+            error.message ||
+            "Unable to approve the session.",
+            "error"
+        );
+    }
+}
 
-            let hour =
-                Number(parts[0]);
+/* =========================
+   RESCHEDULE
+========================= */
 
-            const minute =
-                parts[1];
+function openRescheduleModal(id) {
+    selectedBooking =
+        allBookings.find(
+            booking =>
+                String(booking.id) ===
+                String(id)
+        ) || null;
 
-            const period =
-                hour >= 12
-                    ? "PM"
-                    : "AM";
+    if (!selectedBooking) {
+        showAlert(
+            "Session not found.",
+            "error"
+        );
+        return;
+    }
 
-            hour =
-                hour % 12 || 12;
+    document.getElementById(
+        "reschedulePatientCard"
+    ).innerHTML = `
+        <span class="patient-avatar">
+            ${escapeHtml(
+                selectedBooking.patientName
+                    .charAt(0)
+                    .toUpperCase()
+            )}
+        </span>
 
-            return `${hour}:${minute} ${period}`;
-        }
+        <div>
+            <h3>
+                ${escapeHtml(
+                    selectedBooking.patientName
+                )}
+            </h3>
 
-        function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
-                );
-        }
+            <p>
+                ${escapeHtml(
+                    selectedBooking.therapyName
+                )}
+                ·
+                ${escapeHtml(
+                    selectedBooking.bookingNumber
+                )}
+            </p>
+        </div>
+    `;
 
-        function toggleSidebar() {
-            document.getElementById(
-                "therapistSidebar"
-            ).classList.toggle("open");
+    document.getElementById(
+        "newDate"
+    ).value =
+        selectedBooking.bookingDate || "";
 
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.toggle("show");
-        }
+    document.getElementById(
+        "newTime"
+    ).value =
+        String(
+            selectedBooking.bookingTime || ""
+        ).substring(0, 5);
 
-        function closeSidebar() {
-            document.getElementById(
-                "therapistSidebar"
-            ).classList.remove("open");
+    document.getElementById(
+        "rescheduleReason"
+    ).value =
+        selectedBooking.rescheduleReason || "";
 
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.remove("show");
-        }
+    openModal("rescheduleModal");
+}
 
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
+async function submitReschedule() {
+    if (!selectedBooking) {
+        showAlert(
+            "Select a session first.",
+            "error"
+        );
+        return;
+    }
 
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
+    const sessionDate =
+        document.getElementById(
+            "newDate"
+        ).value;
 
-            setText(
-                "alertMessage",
-                message
+    const startTime =
+        document.getElementById(
+            "newTime"
+        ).value;
+
+    const reason =
+        document.getElementById(
+            "rescheduleReason"
+        ).value.trim();
+
+    if (
+        !sessionDate ||
+        !startTime ||
+        !reason
+    ) {
+        showAlert(
+            "Enter the new date, time and reschedule reason.",
+            "error"
+        );
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "rescheduleSubmitButton"
+        );
+
+    const oldHtml =
+        button.innerHTML;
+
+    try {
+        button.disabled = true;
+        button.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Rescheduling...
+        `;
+
+        const result =
+            await therapistApiRequest(
+                `/api/daily-treatments/${encodeURIComponent(
+                    selectedBooking.id
+                )}/reschedule`,
+                {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        sessionDate,
+                        startTime:
+                            normalizeTimeForApi(
+                                startTime
+                            ),
+                        reason
+                    })
+                }
             );
 
-            box.className =
-                `page-alert show ${type}`;
+        showAlert(
+            result.message ||
+            "Daily treatment session rescheduled successfully.",
+            "success"
+        );
 
-            if (
-                type === "success"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-check";
+        closeModal(
+            "rescheduleModal"
+        );
 
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
+        await loadBookings();
 
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
+    } catch (error) {
+        showAlert(
+            error.message ||
+            "Unable to reschedule the session.",
+            "error"
+        );
 
-            clearTimeout(
-                window.bookingAlertTimer
-            );
+    } finally {
+        button.disabled = false;
+        button.innerHTML = oldHtml;
+    }
+}
 
-            window.bookingAlertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
+/*
+ * A reject-session endpoint was not included in the API document.
+ * The existing reject modal is therefore not used.
+ */
+function openRejectModal() {
+    showAlert(
+        "Reject session API is not available. You can approve or reschedule the request.",
+        "info"
+    );
+}
+
+function submitReject() {
+    showAlert(
+        "Reject session API is not available.",
+        "info"
+    );
+}
+
+/* =========================
+   MODALS
+========================= */
+
+function openModal(id) {
+    const modal =
+        document.getElementById(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add("show");
+    document.body.style.overflow =
+        "hidden";
+}
+
+function closeModal(id) {
+    const modal =
+        document.getElementById(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove("show");
+
+    if (
+        !document.querySelector(
+            ".modal-overlay.show"
+        )
+    ) {
+        document.body.style.overflow =
+            "";
+    }
+
+    if (
+        id === "detailsModal" ||
+        id === "rescheduleModal"
+    ) {
+        selectedBooking = null;
+    }
+}
+
+function handleModalOutside(
+    event,
+    modalId
+) {
+    if (event.target.id === modalId) {
+        closeModal(modalId);
+    }
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+function toggleSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.toggle("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.toggle("show");
+}
+
+function closeSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.remove("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.remove("show");
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function statusClass(status) {
+    switch (
+        String(status || "")
+            .toUpperCase()
+    ) {
+        case "APPROVED":
+            return "status-approved";
+
+        case "RESCHEDULED":
+            return "status-rescheduled";
+
+        case "REJECTED":
+        case "MISSED":
+            return "status-rejected";
+
+        case "PENDING":
+        case "PENDING_APPROVAL":
+        default:
+            return "status-pending";
+    }
+}
+
+function formatLabel(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "-";
+    }
+
+    return String(value)
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date = new Date(
+        String(value).includes("T")
+            ? value
+            : `${value}T00:00:00`
+    );
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
         }
+    );
+}
 
-        function setText(id, value) {
-            const element =
-                document.getElementById(id);
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
 
-            if (element) {
-                element.textContent =
-                    value;
-            }
+    const parts =
+        String(value).split(":");
+
+    if (parts.length < 2) {
+        return String(value);
+    }
+
+    const date = new Date();
+
+    date.setHours(
+        Number(parts[0]),
+        Number(parts[1]),
+        0,
+        0
+    );
+
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
         }
+    );
+}
 
-        function escapeHtml(value) {
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return "";
-            }
+function formatTimeRange(
+    start,
+    end
+) {
+    const formattedStart =
+        formatTime(start);
 
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
+    const formattedEnd =
+        formatTime(end);
+
+    if (
+        end &&
+        formattedEnd !== "-"
+    ) {
+        return `${formattedStart} - ${formattedEnd}`;
+    }
+
+    return formattedStart;
+}
+
+function normalizeTimeForApi(value) {
+    if (!value) {
+        return value;
+    }
+
+    return String(value).length === 5
+        ? `${value}:00`
+        : value;
+}
+
+function setMinimumRescheduleDate() {
+    const dateInput =
+        document.getElementById(
+            "newDate"
+        );
+
+    if (dateInput) {
+        dateInput.min =
+            getTodayString();
+    }
+}
+
+function getTodayString() {
+    const today = new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const alertBox =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const alertMessage =
+        document.getElementById(
+            "alertMessage"
+        );
+
+    const alertIcon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    alertBox.className =
+        `page-alert show ${type}`;
+
+    alertMessage.textContent =
+        message;
+
+    alertIcon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.bookingAlertTimer
+    );
+
+    window.bookingAlertTimer =
+        setTimeout(
+            () => {
+                alertBox.classList
+                    .remove("show");
+            },
+            4000
+        );
+}
+
+document.addEventListener(
+    "keydown",
+    event => {
+        if (event.key === "Escape") {
+            [
+                "detailsModal",
+                "rejectModal",
+                "rescheduleModal"
+            ].forEach(closeModal);
         }
-    </script>
+    }
+);
+</script>
 
 </body>
 </html>

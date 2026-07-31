@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consultation Details - Neolife Doctor Portal</title>
+<link rel="icon" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{--dark:#153d29;--green:#2d6844;--soft:#edf5ef;--gold:#c99a16;--cream:#f6f8f4;--white:#fff;--text:#173c29;--muted:#6e7871;--border:#dfe7e1;--danger:#c74747;--success:#287146;--info:#31708f;--side:270px}
+*{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:var(--cream)}
+button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}
+.sidebar{width:var(--side);height:100vh;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;color:#fff;background:linear-gradient(180deg,#123824,#1e5134)}
+.brand{min-height:100px;padding:19px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(255,255,255,.12)}
+.brand img{width:57px;height:57px;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}.brand h2{font-size:18px}.brand span{color:#f2cf69;font-size:10px;letter-spacing:1.3px;text-transform:uppercase}
+.menu{flex:1;padding:18px 13px;overflow-y:auto}.menu-label{display:block;margin:10px 12px;color:rgba(255,255,255,.48);font-size:10px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}
+.menu a{margin-bottom:7px;padding:12px 14px;display:flex;align-items:center;gap:12px;border-radius:12px;color:rgba(255,255,255,.84);font-size:14px;font-weight:700}.menu a:hover,.menu a.active{color:var(--dark);background:#fff}.menu a.active i{color:var(--gold)}
+.sidebar-footer{padding:15px 13px;border-top:1px solid rgba(255,255,255,.12)}.logout{width:100%;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:12px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}
+.main{min-height:100vh;margin-left:var(--side)}.topbar{min-height:86px;padding:14px 28px;position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--border)}
+.top-left{display:flex;align-items:center;gap:13px}.toggle{display:none;width:42px;height:42px;border:0;border-radius:10px;color:#fff;background:var(--dark)}.title h1{font-size:26px}.title p{color:var(--muted);font-size:12px}
+.profile{padding:6px 11px 6px 7px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:28px;background:#fff}.avatar{width:39px;height:39px;display:grid;place-items:center;border-radius:50%;color:#fff;background:var(--gold);font-weight:800}
+.content{padding:28px}.back-row{margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}.back-btn{padding:10px 15px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--dark);font-weight:800}
+.status-badge{padding:8px 12px;border-radius:30px;font-size:11px;font-weight:800}.status-success{color:var(--success);background:#ebf7ef}.status-warning{color:#946300;background:#fff6e8}.status-danger{color:var(--danger);background:#fff0f0}.status-info{color:var(--info);background:#edf6fb}.status-default{color:#667;background:#f1f3f1}
+.hero{margin-bottom:20px;padding:25px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;border-radius:22px;color:#fff;background:linear-gradient(120deg,var(--dark),#347650)}
+.patient-avatar{width:76px;height:76px;display:grid;place-items:center;border-radius:50%;color:var(--dark);background:#fff;border:3px solid var(--gold);font-size:27px;font-weight:900}.hero p{color:rgba(255,255,255,.8);font-size:12px}.hero-meta{text-align:right}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.75fr);gap:20px}.panel{margin-bottom:20px;border:1px solid var(--border);border-radius:20px;background:#fff;overflow:hidden}.panel-head{padding:18px 21px;border-bottom:1px solid var(--border)}.panel-body{padding:21px}
+.details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.detail{padding:14px;border:1px solid var(--border);border-radius:13px;background:#fbfcfa}.detail.full{grid-column:1/-1}.detail span{display:block;margin-bottom:6px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.detail strong,.detail p{font-size:12px;line-height:1.65}
+.actions{display:flex;flex-direction:column;gap:11px}.action-btn{width:100%;padding:13px 16px;border:0;border-radius:12px;font-weight:800}.primary{color:#fff;background:var(--dark)}.success{color:#fff;background:var(--success)}.info{color:#fff;background:var(--info)}.warning{color:#745200;background:#fff0bd}.danger{color:#fff;background:var(--danger)}.secondary{color:var(--dark);background:var(--soft)}
+.message{padding:55px 20px;text-align:center;color:var(--muted)}.message i{display:block;margin-bottom:12px;color:var(--gold);font-size:30px}
+.alert{width:min(390px,calc(100% - 35px));padding:14px 16px;position:fixed;top:102px;right:22px;z-index:5000;display:none;border-radius:12px;color:#fff}.alert.show{display:block}.alert.error{background:var(--danger)}.alert.success{background:var(--success)}.mobile-overlay{position:fixed;inset:0;z-index:950;display:none;background:rgba(13,36,24,.58)}.mobile-overlay.show{display:block}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.3s}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.toggle{display:block}}@media(max-width:650px){.content{padding:18px 13px}.hero{grid-template-columns:1fr;text-align:center}.patient-avatar{margin:auto}.hero-meta{text-align:center}.details-grid{grid-template-columns:1fr}.detail.full{grid-column:auto}}
+/* =========================
+   SIDEBAR
+========================= */
+
+.doctor-sidebar{
+    width:var(--sidebar-width);
+    height:100vh;
+
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    color:var(--white);
+
+    background:linear-gradient(
+        180deg,
+        #123824,
+        #1e5134
+    );
+
+    box-shadow:8px 0 30px rgba(18,56,36,.14);
+    transition:.3s;
+}
+
+.doctor-brand{
+    min-height:104px;
+    padding:20px 18px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.doctor-brand img{
+    width:58px;
+    height:58px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    background:#fff;
+}
+
+.doctor-brand h2{
+    margin-bottom:5px;
+    font-size:18px;
+    font-weight:800;
+}
+
+.doctor-brand span{
+    color:#f2cf69;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+}
+
+.doctor-menu{
+    flex:1;
+    padding:20px 13px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    scrollbar-width:thin;
+    scrollbar-color:#c99a16 transparent;
+}
+
+.doctor-menu::-webkit-scrollbar{
+    width:6px;
+}
+
+.doctor-menu::-webkit-scrollbar-thumb{
+    background:#c99a16;
+    border-radius:10px;
+}
+
+.doctor-menu::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.menu-label{
+    display:block;
+    margin:8px 12px 10px;
+
+    color:rgba(255,255,255,.48);
+
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+}
+
+.doctor-menu a{
+    min-height:49px;
+    margin-bottom:7px;
+    padding:12px 14px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    border-radius:12px;
+
+    color:rgba(255,255,255,.82);
+    text-decoration:none;
+
+    font-size:14px;
+    font-weight:700;
+
+    transition:.25s;
+}
+
+.doctor-menu a i{
+    width:21px;
+    text-align:center;
+    font-size:17px;
+}
+
+.doctor-menu a:hover,
+.doctor-menu a.active{
+    background:#fff;
+    color:var(--dark-green);
+    transform:translateX(3px);
+}
+
+.doctor-menu a.active i{
+    color:var(--gold);
+}
+
+.sidebar-footer{
+    padding:17px 13px;
+    border-top:1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-logout{
+    width:100%;
+    min-height:46px;
+    padding:11px 14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    border:1px solid rgba(255,255,255,.20);
+    border-radius:12px;
+
+    background:rgba(255,255,255,.08);
+    color:#fff;
+
+    font-size:14px;
+    font-weight:800;
+
+    transition:.25s;
+}
+
+.sidebar-logout:hover{
+    background:#fff;
+    color:var(--dark-green);
+}
+</style>
+</head>
+<body>
+<div id="alert" class="alert"></div>
+<div id="mobileOverlay" class="mobile-overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><img src="../assets/main_logo.jpeg"><div><h2>Neolife</h2><span>Doctor Portal</span></div></div>
+  <nav class="menu">
+    <span class="menu-label">Main</span>
+    <a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
+    <a href="patients.html"><i class="fa-solid fa-users"></i>Patient Dashboard</a>
+    <a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
+    <a href="doctor-availability.html"><i class="fa-solid fa-clock"></i>Manage Availability</a>
+    <span class="menu-label">Clinical</span>
+    <a href="doctor-appointments.html"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
+    <a class="active" href="doctor-online-consultations.html"><i class="fa-solid fa-video"></i>Consultation Details</a>
+    <a href="video-recordings.html"><i class="fa-solid fa-circle-play"></i>Video Recordings</a>
+    <span class="menu-label">Finance</span>
+    <a href="transactions.html"><i class="fa-solid fa-indian-rupee-sign"></i>Transactions</a>
+    <span class="menu-label">Account</span>
+    <a href="doctor-profile.html"><i class="fa-solid fa-user-doctor"></i>My Profile</a>
+  </nav>
+  <div class="sidebar-footer"><button class="logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="top-left"><button class="toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button><div class="title"><h1>Consultation Details</h1><p>Review the patient and manage the online consultation.</p></div></div>
+  <div class="profile"><span class="avatar" id="doctorInitial">D</span><div><strong id="doctorName">Doctor</strong><small>Doctor</small></div></div>
+</header>
+
+<section class="content">
+  <div class="back-row"><button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> Back</button><span id="pageStatus" class="status-badge status-default">Loading...</span></div>
+  <div id="pageContent"><div class="panel"><div class="message"><i class="fa-solid fa-spinner fa-spin"></i>Loading consultation details...</div></div></div>
+</section>
+</main>
+
+<script>
+const API_BASE_URL="http://localhost:8085";
+const CONSULTATION_ROOM_URL="http://127.0.0.1:5500/consultation-room.html";
+const params=new URLSearchParams(location.search);
+const consultationId=params.get("consultationId")||params.get("id");
+let consultation=null;
+let meeting=null;
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  if(!guardDoctor())return;
+  loadDoctorHeader();
+  if(!consultationId){renderError("Consultation ID is missing from the page URL.");return;}
+  await loadConsultationDetails();
+});
+
+function getToken(){return localStorage.getItem("doctorToken")||localStorage.getItem("token")||"";}
+function guardDoctor(){
+  const token=getToken();
+  const role=String(localStorage.getItem("role")||"").toUpperCase();
+  if(!token){location.href="../patient/login.html";return false;}
+  if(role&&role!=="DOCTOR"){alert("Only doctors can access this page.");location.href="../patient/login.html";return false;}
+  return true;
+}
+function authHeaders(){return{"Accept":"application/json","Authorization":`Bearer ${getToken()}`};}
+async function api(path,options={}){
+  const headers={...authHeaders(),...(options.headers||{})};
+  if(options.body&&!(options.body instanceof FormData))headers["Content-Type"]="application/json";
+  const response=await fetch(API_BASE_URL+path,{...options,headers});
+  const result=await safelyReadResponse(response);
+  if(response.status===401||response.status===403){clearSession();location.href="../patient/login.html";throw new Error(result?.message||"Doctor session expired.");}
+  if(!response.ok||result?.success===false)throw new Error(result?.message||`Request failed (${response.status})`);
+  return result;
+}
+
+async function loadConsultationDetails(){
+  try{
+    const result=await api(`/api/consultations/${encodeURIComponent(consultationId)}/get`);
+    consultation=normalizeConsultation(result.data||{});
+    await loadMeetingDetails();
+    renderPage();
+  }catch(error){console.error(error);renderError(error.message||"Unable to load consultation details.");}
+}
+async function loadMeetingDetails(){
+  if(!isPaid(consultation.paymentStatus)){meeting=null;return;}
+  try{
+    const response=await fetch(`${API_BASE_URL}/api/video-meetings/${encodeURIComponent(consultationId)}`,{headers:authHeaders()});
+    const result=await safelyReadResponse(response);
+    if(response.status===404||String(result?.message||"").toLowerCase().includes("not found")){meeting=null;return;}
+    if(!response.ok||result?.success===false)throw new Error(result?.message||"Unable to check video room.");
+    meeting=result.data||null;
+  }catch(error){console.warn(error);meeting=null;}
+}
+function normalizeConsultation(i){return{
+  id:i.id??i.consultationId??consultationId,patientId:i.patientId??null,patientName:i.patientName||"Patient",phoneNumber:i.phoneNumber||"-",age:i.age??"-",gender:i.gender||"-",
+  doctorName:i.doctorName||"Doctor",doctorSpecialization:i.doctorSpecialization||"Online Consultation",consultationDate:i.consultationDate||i.date||"",startTime:i.startTime||i.consultationTime||"",endTime:i.endTime||"",
+  symptoms:i.symptoms||"No symptoms provided.",pastMedicalHistory:i.pastMedicalHistory||"No past medical history provided.",status:String(i.status||"PENDING_DOCTOR_CONFIRMATION").toUpperCase(),
+  consultationFee:i.consultationFee??200,paymentStatus:String(i.paymentStatus||"NOT_REQUIRED_YET").toUpperCase(),cancellationReason:i.cancellationReason||"",rescheduleReason:i.rescheduleReason||"",createdAt:i.createdAt||null,updatedAt:i.updatedAt||null
+};}
+
+function renderPage(){
+  pageStatus.className=`status-badge ${statusClass(consultation.status)}`;
+  pageStatus.textContent=formatLabel(consultation.status);
+  const initial=String(consultation.patientName).trim().charAt(0).toUpperCase();
+  pageContent.innerHTML=`
+  <section class="hero">
+    <div class="patient-avatar">${escapeHtml(initial)}</div>
+    <div><h2>${escapeHtml(consultation.patientName)}</h2><p>Patient ID: ${escapeHtml(consultation.patientId??"-")} • ${escapeHtml(consultation.phoneNumber)} • ${escapeHtml(consultation.age)} years • ${escapeHtml(formatLabel(consultation.gender))}</p></div>
+    <div class="hero-meta"><strong>${escapeHtml(formatDate(consultation.consultationDate))}</strong><br><span>${escapeHtml(formatTime(consultation.startTime))}${consultation.endTime?` – ${escapeHtml(formatTime(consultation.endTime))}`:""}</span></div>
+  </section>
+  <div class="grid">
+    <div>
+      <section class="panel"><div class="panel-head"><h3><i class="fa-solid fa-clipboard-list"></i> Consultation Information</h3></div><div class="panel-body"><div class="details-grid">
+        ${detail("Consultation ID",`CON-${consultation.id}`)}
+        ${detail("Doctor",consultation.doctorName)}
+        ${detail("Specialization",consultation.doctorSpecialization)}
+        ${detail("Consultation Fee",`₹${formatMoney(consultation.consultationFee)}`)}
+        ${detail("Consultation Status",formatLabel(consultation.status))}
+        ${detail("Payment Status",formatLabel(consultation.paymentStatus))}
+        ${detail("Symptoms",consultation.symptoms,true)}
+        ${detail("Past Medical History",consultation.pastMedicalHistory,true)}
+        ${consultation.rescheduleReason?detail("Reschedule Reason",consultation.rescheduleReason,true):""}
+        ${consultation.cancellationReason?detail("Cancellation Reason",consultation.cancellationReason,true):""}
+      </div></div></section>
+      <section class="panel"><div class="panel-head"><h3><i class="fa-solid fa-video"></i> Video Consultation Room</h3></div><div class="panel-body"><div class="details-grid">
+        ${detail("Room Status",meeting?formatLabel(meeting.status||"CREATED"):(isPaid(consultation.paymentStatus)?"Room not created":"Waiting for payment"))}
+        ${detail("Room ID",meeting?.roomId||"-")}
+        ${detail("Doctor Joined",formatDateTime(meeting?.doctorJoinedAt))}
+        ${detail("Patient Joined",formatDateTime(meeting?.patientJoinedAt))}
+      </div></div></section>
+    </div>
+    <aside>
+      <section class="panel"><div class="panel-head"><h3><i class="fa-solid fa-bolt"></i> Actions</h3></div><div class="panel-body"><div class="actions">${buildActions()}</div></div></section>
+      <section class="panel"><div class="panel-head"><h3><i class="fa-solid fa-clock-rotate-left"></i> Activity</h3></div><div class="panel-body"><p><strong>Created:</strong> ${escapeHtml(formatDateTime(consultation.createdAt))}</p><br><p><strong>Updated:</strong> ${escapeHtml(formatDateTime(consultation.updatedAt))}</p></div></section>
+    </aside>
+  </div>`;
+}
+function detail(label,value,full=false){return `<div class="detail ${full?"full":""}"><span>${escapeHtml(label)}</span>${full?`<p>${escapeHtml(value)}</p>`:`<strong>${escapeHtml(value)}</strong>`}</div>`;}
+function buildActions(){
+  const paid=isPaid(consultation.paymentStatus),closed=["COMPLETED","CANCELLED","REJECTED","NO_SHOW"].includes(consultation.status);
+  let h="";
+  if(consultation.status==="PENDING_DOCTOR_CONFIRMATION")h+=`<button class="action-btn success" onclick="acceptConsultation()"><i class="fa-solid fa-check"></i> Accept Consultation</button><button class="action-btn danger" onclick="rejectConsultation()"><i class="fa-solid fa-xmark"></i> Reject Consultation</button>`;
+  if(paid&&!meeting&&!closed)h+=`<button class="action-btn info" onclick="createVideoRoom(this)"><i class="fa-solid fa-plus"></i> Create Video Room</button>`;
+  if(paid&&meeting&&!["ENDED","EXPIRED","CANCELLED"].includes(String(meeting.status||"").toUpperCase())&&!closed)h+=`<button class="action-btn success" onclick="startConsultation()"><i class="fa-solid fa-video"></i> Start Consultation</button>`;
+  if(!closed)h+=`<button class="action-btn warning" onclick="openPrescription()"><i class="fa-solid fa-prescription"></i> Open Prescription Pad</button><button class="action-btn secondary" onclick="openReschedule()"><i class="fa-solid fa-calendar-days"></i> Reschedule</button>`;
+  if(consultation.status==="IN_PROGRESS")h+=`<button class="action-btn primary" onclick="completeConsultation()"><i class="fa-solid fa-circle-check"></i> Complete Consultation</button>`;
+  return h||`<button class="action-btn secondary" disabled>No actions available</button>`;
+}
+
+async function acceptConsultation(){if(!confirm("Accept this consultation request?"))return;try{const r=await api(`/api/consultations/${consultationId}/accept`,{method:"PUT"});showAlert(r.message||"Consultation accepted.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
+async function rejectConsultation(){const reason=prompt("Enter rejection reason:");if(!reason)return;try{const r=await api(`/api/consultations/${consultationId}/reject`,{method:"PUT",body:JSON.stringify({reason})});showAlert(r.message||"Consultation rejected.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
+async function createVideoRoom(button){if(!confirm("Create the secure video consultation room?"))return;const old=button.innerHTML;try{button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating...';const r=await api(`/api/video-meetings/create/${consultationId}`,{method:"POST"});meeting=r.data||null;showAlert(r.message||"Video room created.","success");renderPage();}catch(e){button.disabled=false;button.innerHTML=old;showAlert(e.message,"error");}}
+function startConsultation(){location.href=`${CONSULTATION_ROOM_URL}?consultationId=${encodeURIComponent(consultationId)}`;}
+function openPrescription(){location.href=`prescription-pad.html?consultationId=${encodeURIComponent(consultationId)}&patientId=${encodeURIComponent(consultation.patientId||"")}`;}
+function openReschedule(){location.href=`doctor-online-consultations.html?openReschedule=${encodeURIComponent(consultationId)}`;}
+async function completeConsultation(){if(!confirm("Mark this consultation as completed?"))return;try{const r=await api(`/api/consultations/${consultationId}/complete`,{method:"PUT"});showAlert(r.message||"Consultation completed.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
+
+function isPaid(s){return["SUCCESS","PAID","PAYMENT_SUCCESS","PAYMENT_SUCCESSFUL","COMPLETED"].includes(String(s||"").toUpperCase());}
+function statusClass(s){s=String(s||"").toUpperCase();if(["SUCCESS","PAID","CONFIRMED","COMPLETED","ACTIVE","CREATED"].includes(s))return"status-success";if(["PENDING","PAYMENT_PENDING","PENDING_DOCTOR_CONFIRMATION","NOT_REQUIRED_YET"].includes(s))return"status-warning";if(["REJECTED","CANCELLED","EXPIRED","ENDED"].includes(s))return"status-danger";if(["IN_PROGRESS","RESCHEDULED"].includes(s))return"status-info";return"status-default";}
+function formatLabel(v){return String(v||"-").replaceAll("_"," ").toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());}
+function formatDate(v){if(!v)return"-";const d=new Date(String(v).includes("T")?v:`${v}T00:00:00`);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"});}
+function formatTime(v){if(!v)return"-";const p=String(v).split(":");if(p.length<2)return String(v);const d=new Date();d.setHours(Number(p[0]),Number(p[1]),0,0);return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:true});}
+function formatDateTime(v){if(!v)return"-";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});}
+function formatMoney(v){const n=Number(v);return Number.isNaN(n)?String(v??"0"):n.toLocaleString("en-IN",{maximumFractionDigits:2});}
+function escapeHtml(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
+async function safelyReadResponse(r){const t=await r.text();if(!t)return null;try{return JSON.parse(t)}catch{return{success:false,message:t}}}
+function renderError(m){pageStatus.className="status-badge status-danger";pageStatus.textContent="Unable to load";pageContent.innerHTML=`<div class="panel"><div class="message"><i class="fa-solid fa-triangle-exclamation"></i>${escapeHtml(m)}<br><br><button class="action-btn primary" style="max-width:220px;margin:auto" onclick="loadConsultationDetails()">Try Again</button></div></div>`;}
+function showAlert(m,type="info"){const a=document.getElementById("alert");a.className=`alert ${type} show`;a.textContent=m;clearTimeout(window.alertTimer);window.alertTimer=setTimeout(()=>a.classList.remove("show"),3500);}
+function loadDoctorHeader(){const n=localStorage.getItem("doctorName")||localStorage.getItem("name")||"Doctor";doctorName.textContent=n;doctorInitial.textContent=String(n).replace(/^Dr\.?\s*/i,"").trim().charAt(0).toUpperCase()||"D";}
+function goBack(){if(document.referrer&&document.referrer.includes(location.host))history.back();else location.href="doctor-dashboard.html";}
+function toggleSidebar(){sidebar.classList.toggle("open");mobileOverlay.classList.toggle("show");}
+function closeSidebar(){sidebar.classList.remove("open");mobileOverlay.classList.remove("show");}
+function clearSession(){["doctorToken","token","refreshToken","role","doctorId","doctorName"].forEach(k=>localStorage.removeItem(k));}
+function logout(){clearSession();location.href="../patient/login.html";}
+</script>
+</body>
+</html>

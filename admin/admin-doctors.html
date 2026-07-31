@@ -1330,103 +1330,10 @@
 
     </div>
 
-    <!-- EDIT DOCTOR MODAL -->
+    
 
-    <div class="modal" id="editDoctorModal">
-
-        <div class="modal-content">
-
-            <div class="modal-header">
-
-                <h2>Edit Doctor</h2>
-
-                <button
-                    type="button"
-                    class="close-btn"
-                    onclick="closeEditModal()"
-                >
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-
-            </div>
-
-            <input type="hidden" id="editRow">
-
-            <div class="modal-body">
-
-                <div class="form-group">
-                    <label>Doctor Name</label>
-                    <input type="text" id="editName">
-                </div>
-
-                <div class="form-group">
-                    <label>Qualification</label>
-                    <input type="text" id="editQualification">
-                </div>
-
-                <div class="form-group">
-                    <label>Specialization</label>
-                    <input type="text" id="editSpecialization">
-                </div>
-
-                <div class="form-group">
-                    <label>Experience</label>
-                    <input type="text" id="editExperience">
-                </div>
-
-                <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" id="editPhoneNumber">
-                </div>
-
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="editDoctorEmail">
-                </div>
-
-                <div class="form-group">
-                    <label>Status</label>
-
-                    <select id="editActive">
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
-                    </select>
-                </div>
-
-                <div class="form-group full-width">
-                    <label>Image URL</label>
-                    <input type="text" id="editImageUrl">
-                </div>
-
-                <div class="form-group full-width">
-                    <label>About</label>
-                    <textarea id="editAbout"></textarea>
-                </div>
-
-            </div>
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="cancel-btn"
-                    onclick="closeEditModal()"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="button"
-                    class="save-btn"
-                    onclick="updateDoctor()"
-                >
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    Update Doctor
-                </button>
-
-            </div>
-
-        </div>
+            
+       
 
     </div>
 
@@ -1481,6 +1388,47 @@ async function loadDoctors(){
     }
 }
 
+function buildBackendFileUrl(fileUrl){
+    if(!fileUrl){
+        return "../assets/main_logo.jpeg";
+    }
+
+    const value = String(fileUrl).trim();
+
+    if(
+        value.startsWith("http://") ||
+        value.startsWith("https://") ||
+        value.startsWith("data:") ||
+        value.startsWith("blob:")
+    ){
+        return value;
+    }
+
+    if(value.startsWith("/")){
+        return API_BASE_URL + value;
+    }
+
+    if(
+        value.startsWith("../") ||
+        value.startsWith("./")
+    ){
+        return value;
+    }
+
+    return `${API_BASE_URL}/${value}`;
+}
+
+function getDoctorImageUrl(doctor = {}){
+    return buildBackendFileUrl(
+        doctor.imageUrl ||
+        doctor.profileImage ||
+        doctor.profileImageUrl ||
+        doctor.photoUrl ||
+        doctor.image?.fileUrl ||
+        ""
+    );
+}
+
 function displayDoctors(doctors){
     const table = document.getElementById("doctorTable");
     table.innerHTML = "";
@@ -1516,8 +1464,9 @@ function displayDoctors(doctors){
 
     safeDoctors.forEach(doctor => {
         const image =
-            doctor.imageUrl ||
-            "https://via.placeholder.com/70?text=Doctor";
+            getDoctorImageUrl(
+                doctor
+            );
 
         const statusClass =
             doctor.active ? "status-active" : "status-inactive";
@@ -1532,7 +1481,7 @@ function displayDoctors(doctors){
                         src="${escapeHtml(image)}"
                         class="doctor-img"
                         alt="${escapeHtml(doctor.name || "Doctor")}"
-                        onerror="this.src='https://via.placeholder.com/70?text=Doctor'"
+                        onerror="this.onerror=null;this.src='../assets/main_logo.jpeg'"
                     >
                 </td>
 
@@ -1870,7 +1819,7 @@ function logoutAdmin(){
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
-    window.location.href = "../frontend/login.html";
+    window.location.href = "../patient/login.html";
 }
 
 function escapeHtml(value){

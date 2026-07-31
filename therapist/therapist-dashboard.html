@@ -2059,15 +2059,22 @@
         let bookingRequests = [];
         let scheduleSessions = [];
         let patientProgress = [];
+        let dashboardSummary = {};
         let selectedBooking = null;
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                requireTherapistLogin();
+            async function () {
+                if (!requireTherapistLogin()) {
+                    return;
+                }
+
                 setTodayDate();
-                loadTherapistProfile();
-                loadDashboardData();
+
+                await Promise.allSettled([
+                    loadTherapistProfile(),
+                    loadDashboardData()
+                ]);
             }
         );
 
@@ -2075,104 +2082,188 @@
            AUTHENTICATION
         ========================== */
 
-        // function getTherapistToken() {
-        //     return (
-        //         localStorage.getItem("therapistToken") ||
-        //         localStorage.getItem("token")
-        //     );
-        // }
+        function getTherapistToken() {
+            return (
+                localStorage.getItem(
+                    "therapistToken"
+                ) ||
+                localStorage.getItem(
+                    "token"
+                ) ||
+                localStorage.getItem(
+                    "accessToken"
+                ) ||
+                ""
+            );
+        }
 
-        // function requireTherapistLogin() {
-        //     if (!getTherapistToken()) {
-        //         window.location.href =
-        //             "therapist-login.html";
-        //     }
-        // }
+        function requireTherapistLogin() {
+            const token =
+                getTherapistToken();
 
-        // async function therapistApiRequest(
-        //     endpoint,
-        //     options = {}
-        // ) {
-        //     const token =
-        //         getTherapistToken();
+            const role =
+                String(
+                    localStorage.getItem(
+                        "role"
+                    ) || ""
+                ).toUpperCase();
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "therapist-login.html";
+            if (!token) {
+                window.location.replace(
+                    "../patient/login.html"
+                );
 
-        //         throw new Error(
-        //             "Therapist login required."
-        //         );
-        //     }
+                return false;
+            }
 
-        //     const headers = {
-        //         ...(options.headers || {}),
-        //         "Authorization":
-        //             "Bearer " + token
-        //     };
+            if (
+                role &&
+                role !== "THERAPIST"
+            ) {
+                window.alert(
+                    "Only therapists can access this page."
+                );
 
-        //     if (
-        //         options.body &&
-        //         !(options.body instanceof FormData)
-        //     ) {
-        //         headers["Content-Type"] =
-        //             "application/json";
-        //     }
+                therapistLogout();
 
-        //     const response =
-        //         await fetch(
-        //             API_BASE_URL + endpoint,
-        //             {
-        //                 ...options,
-        //                 headers
-        //             }
-        //         );
+                return false;
+            }
 
-        //     let result;
+            return true;
+        }
 
-        //     try {
-        //         result =
-        //             await response.json();
+        async function therapistApiRequest(
+            endpoint,
+            options = {}
+        ) {
+            const token =
+                getTherapistToken();
 
-        //     } catch (error) {
-        //         result = {
-        //             success: false,
-        //             message:
-        //                 "Invalid server response."
-        //         };
-        //     }
+            if (!token) {
+                therapistLogout();
 
-        //     if (
-        //         !response.ok ||
-        //         result.success === false
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Request failed."
-        //         );
-        //     }
+                throw new Error(
+                    "Therapist login required."
+                );
+            }
 
-        //     return result;
-        // }
+            const headers = {
+                "Accept":
+                    "application/json",
 
-        // function therapistLogout() {
-        //     localStorage.removeItem(
-        //         "therapistToken"
-        //     );
+                ...(options.headers || {}),
 
-        //     localStorage.removeItem(
-        //         "therapistRefreshToken"
-        //     );
+                "Authorization":
+                    "Bearer " + token
+            };
 
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem("refreshToken");
-        //     localStorage.removeItem("role");
-        //     localStorage.removeItem("therapistId");
-        //     localStorage.removeItem("userId");
+            if (
+                options.body &&
+                !(
+                    options.body instanceof
+                    FormData
+                )
+            ) {
+                headers["Content-Type"] =
+                    "application/json";
+            }
 
-        //     window.location.href =
-        //         "therapist-login.html";
-        // }
+            const response =
+                await fetch(
+                    API_BASE_URL + endpoint,
+                    {
+                        ...options,
+                        headers
+                    }
+                );
+
+            const responseText =
+                await response.text();
+
+            let result = {};
+
+            try {
+                result =
+                    responseText
+                        ? JSON.parse(
+                            responseText
+                          )
+                        : {};
+
+            } catch (error) {
+                result = {
+                    success: false,
+                    message:
+                        responseText ||
+                        "Invalid server response."
+                };
+            }
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+                clearTherapistSession();
+
+                window.location.replace(
+                    "../patient/login.html"
+                );
+
+                throw new Error(
+                    result.message ||
+                    "Therapist session expired."
+                );
+            }
+
+            if (
+                !response.ok ||
+                result.success === false
+            ) {
+                throw new Error(
+                    result.message ||
+                    `Request failed (${response.status})`
+                );
+            }
+
+            return result;
+        }
+
+        function clearTherapistSession() {
+            [
+                "therapistToken",
+                "therapistRefreshToken",
+                "token",
+                "accessToken",
+                "refreshToken",
+                "role",
+                "therapistId",
+                "therapistName",
+                "therapistProfile",
+                "userId",
+                "userName",
+                "name",
+                "email",
+                "phoneNumber",
+                "profileCompleted",
+                "isLoggedIn"
+            ].forEach(
+                function (key) {
+                    localStorage.removeItem(
+                        key
+                    );
+                }
+            );
+
+            sessionStorage.clear();
+        }
+
+        function therapistLogout() {
+            clearTherapistSession();
+
+            window.location.replace(
+                "../patient/login.html"
+            );
+        }
 
         /* =========================
            PROFILE
@@ -2190,7 +2281,7 @@
             try {
                 const result =
                     await therapistApiRequest(
-                        "/api/users/getProfile"
+                        "/api/therapists/me"
                     );
 
                 therapistProfile =
@@ -2201,7 +2292,11 @@
                     therapistProfile.therapistName ||
                     storedName;
 
-                updateTherapistHeader(name);
+                updateTherapistHeader(
+                    name,
+                    therapistProfile.specialization ||
+                    "Therapist"
+                );
 
                 if (
                     therapistProfile.id !== null &&
@@ -2241,7 +2336,7 @@
             }
         }
 
-        function updateTherapistHeader(name) {
+        function updateTherapistHeader(name, specialization = "Therapist") {
             const cleanName =
                 String(name || "Therapist").trim();
 
@@ -2255,7 +2350,7 @@
 
             setText(
                 "therapistSpecialization",
-                "Therapist"
+                specialization || "Therapist"
             );
 
             setText(
@@ -2282,82 +2377,113 @@
             const results =
                 await Promise.allSettled([
                     therapistApiRequest(
-                        "/api/therapist/bookings/requests"
+                        "/api/therapist-dashboard/summary"
                     ),
 
                     therapistApiRequest(
-                        "/api/therapist/schedule"
+                        "/api/daily-treatments/therapist/my-sessions"
                     ),
 
                     therapistApiRequest(
-                        "/api/therapist/patients"
+                        "/api/therapist-dashboard/today"
+                    ),
+
+                    therapistApiRequest(
+                        "/api/therapist-dashboard/upcoming"
+                    ),
+
+                    therapistApiRequest(
+                        "/api/therapist-dashboard/treatment-progress"
                     )
                 ]);
 
-            const bookingResult =
-                results[0];
+            const summaryResult = results[0];
+            const allSessionsResult = results[1];
+            const todayResult = results[2];
+            const upcomingResult = results[3];
+            const progressResult = results[4];
 
-            const scheduleResult =
-                results[1];
+            dashboardSummary =
+                summaryResult.status === "fulfilled"
+                    ? (summaryResult.value.data || {})
+                    : {};
 
-            const patientResult =
-                results[2];
+            const allSessions =
+                allSessionsResult.status === "fulfilled"
+                    ? extractArray(
+                        allSessionsResult.value.data
+                      ).map(normalizeSession)
+                    : [];
+
+            bookingRequests =
+                allSessions
+                    .filter(
+                        session =>
+                            session.status ===
+                            "PENDING_APPROVAL"
+                    )
+                    .map(normalizeBooking);
 
             if (
-                bookingResult.status ===
-                "fulfilled"
-            ) {
-                bookingRequests =
-                    extractArray(
-                        bookingResult.value.data
-                    ).map(
-                        normalizeBooking
-                    );
-
-            } else {
-                bookingRequests = [];
-            }
-
-            if (
-                scheduleResult.status ===
-                "fulfilled"
+                todayResult.status === "fulfilled"
             ) {
                 scheduleSessions =
-                    extractArray(
-                        scheduleResult.value.data
-                    ).map(
-                        normalizeSession
-                    );
-
+                    extractSessions(
+                        todayResult.value.data
+                    ).map(normalizeSession);
             } else {
-                scheduleSessions = [];
+                scheduleSessions =
+                    allSessions.filter(
+                        session =>
+                            String(
+                                session.sessionDate || ""
+                            ).substring(0, 10) ===
+                            getTodayString()
+                    );
             }
 
             if (
-                patientResult.status ===
-                "fulfilled"
+                upcomingResult.status === "fulfilled"
+            ) {
+                const upcomingSessions =
+                    extractSessions(
+                        upcomingResult.value.data
+                    ).map(normalizeSession);
+
+                scheduleSessions =
+                    mergeSessions(
+                        scheduleSessions,
+                        upcomingSessions
+                    );
+            }
+
+            if (
+                progressResult.status === "fulfilled"
             ) {
                 patientProgress =
                     extractArray(
-                        patientResult.value.data
+                        progressResult.value.data
                     ).map(
                         normalizePatientProgress
                     );
-
             } else {
-                patientProgress =
-                    getDemoPatientProgress();
+                patientProgress = [];
             }
 
-            if (
-                results.some(
+            const failedResults =
+                results.filter(
                     result =>
-                        result.status ===
-                        "rejected"
-                )
-            ) {
+                        result.status === "rejected"
+                );
+
+            if (failedResults.length) {
+                console.warn(
+                    "Some therapist dashboard APIs failed:",
+                    failedResults
+                );
+
                 showAlert(
-                    "Some therapist APIs are not connected. Demo data is displayed.",
+                    "Some dashboard information could not be loaded.",
                     "info"
                 );
             }
@@ -2366,6 +2492,48 @@
             renderBookingRequests();
             renderTodaySchedule();
             renderPatientProgress();
+        }
+
+        function extractSessions(data) {
+            if (Array.isArray(data)) {
+                return data;
+            }
+
+            if (Array.isArray(data?.sessions)) {
+                return data.sessions;
+            }
+
+            if (Array.isArray(data?.content)) {
+                return data.content;
+            }
+
+            return [];
+        }
+
+        function mergeSessions(firstList, secondList) {
+            const sessionMap = new Map();
+
+            [
+                ...(firstList || []),
+                ...(secondList || [])
+            ].forEach(
+                session => {
+                    if (
+                        session &&
+                        session.id !== null &&
+                        session.id !== undefined
+                    ) {
+                        sessionMap.set(
+                            String(session.id),
+                            session
+                        );
+                    }
+                }
+            );
+
+            return Array.from(
+                sessionMap.values()
+            );
         }
 
         function extractArray(data) {
@@ -2391,86 +2559,87 @@
         function normalizeBooking(item) {
             return {
                 id:
-                    item.id ||
-                    item.bookingId,
+                    item.id ??
+                    item.sessionId ??
+                    null,
 
                 bookingNumber:
-                    item.bookingNumber ||
-                    item.bookingCode ||
-                    `THR-${item.id || item.bookingId}`,
+                    `SES-${item.id ?? item.sessionId ?? "-"}`,
+
+                treatmentPlanId:
+                    item.treatmentPlanId ?? null,
 
                 patientId:
-                    item.patientId ||
-                    item.patient?.id,
+                    item.patientId ?? null,
 
                 patientName:
                     item.patientName ||
-                    item.patient?.name ||
                     "Patient",
 
                 patientPhone:
+                    item.phoneNumber ||
                     item.patientPhone ||
-                    item.patient?.phoneNumber ||
                     "-",
 
                 patientAge:
-                    item.patientAge ||
-                    item.patient?.age ||
-                    "-",
+                    item.age ?? "-",
 
                 patientGender:
                     String(
-                        item.patientGender ||
-                        item.patient?.gender ||
-                        "-"
+                        item.gender || "-"
                     ).toUpperCase(),
 
                 therapyName:
+                    item.treatmentName ||
                     item.therapyName ||
-                    item.therapy?.name ||
                     "Therapy",
 
                 bookingDate:
-                    item.bookingDate ||
                     item.sessionDate ||
-                    item.date,
+                    item.bookingDate ||
+                    item.date ||
+                    "",
 
                 bookingTime:
-                    item.bookingTime ||
+                    item.startTime ||
                     item.sessionTime ||
-                    item.time,
+                    item.bookingTime ||
+                    item.time ||
+                    "",
+
+                endTime:
+                    item.endTime || "",
+
+                sessionNumber:
+                    Number(
+                        item.sessionNumber || 1
+                    ),
 
                 totalSessions:
                     Number(
-                        item.totalSessions ||
-                        item.sessions ||
-                        1
+                        item.totalSessions || 1
                     ),
 
                 symptoms:
+                    item.patientNotes ||
                     item.symptoms ||
-                    item.healthIssue ||
                     "-",
 
                 medicalHistory:
-                    item.medicalHistory ||
-                    item.pastHistory ||
-                    "Not provided",
+                    "Refer to patient history",
 
                 paymentStatus:
-                    String(
-                        item.paymentStatus ||
-                        "PAID"
-                    ).toUpperCase(),
+                    "NOT_APPLICABLE",
 
                 status:
                     String(
                         item.status ||
-                        "PENDING"
+                        "PENDING_APPROVAL"
                     ).toUpperCase(),
 
                 notes:
-                    item.notes ||
+                    item.therapistNotes ||
+                    item.patientNotes ||
                     "-"
             };
         }
@@ -2478,99 +2647,136 @@
         function normalizeSession(item) {
             return {
                 id:
-                    item.id ||
-                    item.sessionId,
+                    item.id ??
+                    item.sessionId ??
+                    null,
+
+                treatmentPlanId:
+                    item.treatmentPlanId ?? null,
 
                 patientId:
-                    item.patientId ||
-                    item.patient?.id,
+                    item.patientId ?? null,
 
                 patientName:
                     item.patientName ||
-                    item.patient?.name ||
                     "Patient",
 
                 therapyName:
+                    item.treatmentName ||
                     item.therapyName ||
-                    item.therapy?.name ||
                     "Therapy",
 
                 sessionDate:
                     item.sessionDate ||
                     item.treatmentDate ||
-                    item.date,
+                    item.date ||
+                    "",
 
                 sessionTime:
+                    item.startTime ||
                     item.sessionTime ||
                     item.treatmentTime ||
-                    item.time,
+                    item.time ||
+                    "",
+
+                endTime:
+                    item.endTime || "",
 
                 sessionNumber:
                     Number(
-                        item.sessionNumber ||
-                        item.currentSession ||
-                        1
+                        item.sessionNumber || 1
                     ),
 
                 totalSessions:
                     Number(
-                        item.totalSessions ||
-                        1
+                        item.totalSessions || 1
                     ),
 
                 status:
                     String(
                         item.status ||
-                        "SCHEDULED"
+                        "PENDING_APPROVAL"
                     ).toUpperCase(),
 
                 attendance:
                     String(
-                        item.attendance ||
-                        "PENDING"
-                    ).toUpperCase()
+                        item.status === "MISSED"
+                            ? "ABSENT"
+                            : item.status === "COMPLETED"
+                                ? "PRESENT"
+                                : "PENDING"
+                    ).toUpperCase(),
+
+                patientNotes:
+                    item.patientNotes || "",
+
+                therapistNotes:
+                    item.therapistNotes || ""
             };
         }
 
         function normalizePatientProgress(item) {
             return {
+                treatmentPlanId:
+                    item.treatmentPlanId ?? null,
+
                 patientId:
-                    item.patientId ||
-                    item.id,
+                    item.patientId ?? null,
 
                 patientName:
                     item.patientName ||
-                    item.name ||
                     "Patient",
 
                 patientPhone:
-                    item.patientPhone ||
-                    item.phoneNumber ||
-                    "-",
+                    item.phoneNumber || "-",
 
                 therapyName:
+                    item.treatmentName ||
                     item.therapyName ||
-                    item.activeTherapy ||
                     "Therapy",
+
+                diagnosis:
+                    item.diagnosis || "-",
 
                 completedSessions:
                     Number(
-                        item.completedSessions ||
-                        item.sessionsCompleted ||
-                        0
+                        item.completedSessions || 0
                     ),
 
                 totalSessions:
                     Number(
-                        item.totalSessions ||
-                        item.planTotalSessions ||
-                        1
+                        item.totalSessions || 1
+                    ),
+
+                remainingSessions:
+                    Number(
+                        item.remainingSessions || 0
+                    ),
+
+                missedSessions:
+                    Number(
+                        item.missedSessions || 0
+                    ),
+
+                pendingSessions:
+                    Number(
+                        item.pendingSessions || 0
+                    ),
+
+                approvedSessions:
+                    Number(
+                        item.approvedSessions || 0
+                    ),
+
+                completionPercentage:
+                    Number(
+                        item.completionPercentage || 0
                     ),
 
                 planStatus:
                     String(
-                        item.planStatus ||
                         item.status ||
+                        item.planStatus ||
                         "ACTIVE"
                     ).toUpperCase()
             };
@@ -2801,33 +3007,44 @@
         ========================== */
 
         function updateSummary() {
-            const today =
-                getTodayString();
-
             const pending =
+                Number(
+                    dashboardSummary
+                        .pendingApprovalSessions
+                ) ||
                 bookingRequests.filter(
                     booking =>
                         booking.status ===
-                        "PENDING"
+                        "PENDING_APPROVAL"
                 ).length;
 
             const todayCount =
+                Number(
+                    dashboardSummary.todaySessions
+                ) ||
                 scheduleSessions.filter(
                     session =>
                         String(
-                            session.sessionDate
+                            session.sessionDate || ""
                         ).substring(0, 10) ===
-                        today
+                        getTodayString()
                 ).length;
 
             const approved =
-                bookingRequests.filter(
-                    booking =>
-                        booking.status ===
-                        "APPROVED"
+                scheduleSessions.filter(
+                    session =>
+                        [
+                            "APPROVED",
+                            "RESCHEDULED"
+                        ].includes(
+                            session.status
+                        )
                 ).length;
 
             const completed =
+                Number(
+                    dashboardSummary.completedSessions
+                ) ||
                 scheduleSessions.filter(
                     session =>
                         session.status ===
@@ -2835,67 +3052,35 @@
                 ).length;
 
             const missed =
+                Number(
+                    dashboardSummary.missedSessions
+                ) ||
                 scheduleSessions.filter(
                     session =>
                         session.status ===
-                            "MISSED" ||
-                        session.attendance ===
-                            "ABSENT"
+                        "MISSED"
                 ).length;
 
-            const patientIds =
+            const totalPatientCount =
+                Number(
+                    dashboardSummary.totalPatients
+                ) ||
                 new Set(
-                    [
-                        ...patientProgress.map(
-                            patient =>
-                                String(
-                                    patient.patientId
-                                )
-                        ),
+                    patientProgress.map(
+                        patient =>
+                            String(
+                                patient.patientId
+                            )
+                    )
+                ).size;
 
-                        ...scheduleSessions.map(
-                            session =>
-                                String(
-                                    session.patientId
-                                )
-                        )
-                    ]
-                );
-
-            setText(
-                "pendingRequests",
-                pending
-            );
-
-            setText(
-                "notificationCount",
-                pending
-            );
-
-            setText(
-                "todaySessions",
-                todayCount
-            );
-
-            setText(
-                "approvedBookings",
-                approved
-            );
-
-            setText(
-                "completedSessions",
-                completed
-            );
-
-            setText(
-                "missedSessions",
-                missed
-            );
-
-            setText(
-                "totalPatients",
-                patientIds.size
-            );
+            setText("pendingRequests", pending);
+            setText("notificationCount", pending);
+            setText("todaySessions", todayCount);
+            setText("approvedBookings", approved);
+            setText("completedSessions", completed);
+            setText("missedSessions", missed);
+            setText("totalPatients", totalPatientCount);
         }
 
         /* =========================
@@ -2913,7 +3098,7 @@
                     .filter(
                         booking =>
                             booking.status ===
-                                "PENDING" ||
+                                "PENDING_APPROVAL" ||
                             booking.status ===
                                 "APPROVED"
                     )
@@ -3037,15 +3222,6 @@
                                                 title="Approve booking"
                                             >
                                                 <i class="fa-solid fa-check"></i>
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                class="action-button reject-button"
-                                                onclick="rejectBooking('${booking.id}')"
-                                                title="Reject booking"
-                                            >
-                                                <i class="fa-solid fa-xmark"></i>
                                             </button>
                                             `
                                             : ""
@@ -3470,17 +3646,9 @@
 
             if (
                 selectedBooking.status ===
-                "PENDING"
+                "PENDING_APPROVAL"
             ) {
                 actions += `
-                    <button
-                        type="button"
-                        class="modal-button modal-reject-button"
-                        onclick="rejectSelectedBooking()"
-                    >
-                        <i class="fa-solid fa-xmark"></i>
-                        Reject
-                    </button>
 
                     <button
                         type="button"
@@ -3559,41 +3727,41 @@
             }
 
             try {
-                await therapistApiRequest(
-                    `/api/therapist/bookings/${encodeURIComponent(
-                        booking.id
-                    )}/approve`,
-                    {
-                        method: "PUT",
+                const result =
+                    await therapistApiRequest(
+                        `/api/daily-treatments/${encodeURIComponent(
+                            booking.id
+                        )}/approve`,
+                        {
+                            method: "PUT"
+                        }
+                    );
 
-                        body:
-                            JSON.stringify({
-                                notes:
-                                    "Therapy booking approved"
-                            })
-                    }
+                const updated =
+                    normalizeBooking(
+                        result.data || booking
+                    );
+
+                Object.assign(
+                    booking,
+                    updated
                 );
 
-                booking.status =
-                    "APPROVED";
-
                 showAlert(
-                    "Booking approved successfully. Patient notification will be sent.",
+                    result.message ||
+                    "Session approved successfully.",
                     "success"
                 );
 
-            } catch (error) {
-                booking.status =
-                    "APPROVED";
+                await loadDashboardData();
 
+            } catch (error) {
                 showAlert(
-                    "Booking updated locally. Connect the approval API for server update.",
-                    "info"
+                    error.message ||
+                    "Unable to approve the session.",
+                    "error"
                 );
             }
-
-            updateSummary();
-            renderBookingRequests();
         }
 
         async function rejectBooking(id) {

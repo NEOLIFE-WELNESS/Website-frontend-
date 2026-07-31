@@ -1510,6 +1510,11 @@
                     Dashboard
                 </a>
 
+                <a href="manage-availability.html">
+                    <i class="fa-solid fa-clock"></i>
+                    Manage Availability
+                </a>
+
                 <a href="booking-requests.html">
                     <i class="fa-solid fa-calendar-plus"></i>
                     Booking Requests
@@ -1641,7 +1646,7 @@
 
                         <p>
                             View today's and upcoming approved therapy sessions,
-                            update patient attendance, complete treatment
+                            complete treatment sessions or mark missed sessions
                             sessions and record missed appointments.
                         </p>
 
@@ -2356,1141 +2361,1043 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-        let allSessions = [];
-        let filteredSessions = [];
-        let selectedSession = null;
+let allSessions = [];
+let filteredSessions = [];
+let selectedSession = null;
+let selectedRange = "TODAY";
 
-        let selectedDateRange =
-            "TODAY";
+let currentPage = 1;
+const pageSize = 8;
 
-        let customDate =
-            "";
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireTherapistLogin()) {
+            return;
+        }
 
-        let currentPage = 1;
-        const pageSize = 8;
+        setTodayAsMinimumDate();
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                requireTherapistLogin();
-                loadTherapistProfile();
-                loadSchedule();
+        await Promise.allSettled([
+            loadTherapistProfile(),
+            loadSchedule()
+        ]);
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getTherapistToken() {
+    return (
+        localStorage.getItem("therapistToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
+
+function requireTherapistLogin() {
+    const token = getTherapistToken();
+
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    if (!token) {
+        window.location.replace(
+            "../patient/login.html"
+        );
+        return false;
+    }
+
+    if (role && role !== "THERAPIST") {
+        alert("Only therapists can access this page.");
+        therapistLogout();
+        return false;
+    }
+
+    return true;
+}
+
+async function therapistApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token = getTherapistToken();
+
+    if (!token) {
+        therapistLogout();
+        throw new Error(
+            "Therapist login required."
+        );
+    }
+
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {}),
+        "Authorization": `Bearer ${token}`
+    };
+
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
+
+    const responseText =
+        await response.text();
+
+    let result = {};
+
+    try {
+        result =
+            responseText
+                ? JSON.parse(responseText)
+                : {};
+    } catch {
+        result = {
+            success: false,
+            message:
+                responseText ||
+                `Invalid server response (${response.status}).`
+        };
+    }
+
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearTherapistSession();
+
+        window.location.replace(
+            "../patient/login.html"
+        );
+
+        throw new Error(
+            result.message ||
+            "Therapist session expired."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return result;
+}
+
+function clearTherapistSession() {
+    [
+        "therapistToken",
+        "therapistRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "therapistId",
+        "therapistName",
+        "therapistProfile",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key => localStorage.removeItem(key)
+    );
+
+    sessionStorage.clear();
+}
+
+function therapistLogout() {
+    clearTherapistSession();
+
+    window.location.replace(
+        "../patient/login.html"
+    );
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+async function loadTherapistProfile() {
+    const storedName =
+        localStorage.getItem("therapistName") ||
+        localStorage.getItem("userName") ||
+        localStorage.getItem("name") ||
+        "Therapist";
+
+    updateTherapistHeader(
+        storedName,
+        "Therapist"
+    );
+
+    try {
+        const result =
+            await therapistApiRequest(
+                "/api/therapists/me"
+            );
+
+        const therapist =
+            result.data || {};
+
+        const name =
+            therapist.name ||
+            therapist.therapistName ||
+            storedName;
+
+        const specialization =
+            therapist.specialization ||
+            "Therapist";
+
+        updateTherapistHeader(
+            name,
+            specialization
+        );
+
+        if (
+            therapist.id !== null &&
+            therapist.id !== undefined
+        ) {
+            localStorage.setItem(
+                "therapistId",
+                String(therapist.id)
+            );
+        }
+
+        localStorage.setItem(
+            "therapistName",
+            name
+        );
+
+        localStorage.setItem(
+            "therapistProfile",
+            JSON.stringify(therapist)
+        );
+
+    } catch (error) {
+        console.error(
+            "Profile loading failed:",
+            error
+        );
+
+        showAlert(
+            error.message ||
+            "Unable to load therapist profile.",
+            "error"
+        );
+    }
+}
+
+function updateTherapistHeader(
+    name,
+    specialization
+) {
+    const cleanName =
+        String(name || "Therapist").trim();
+
+    setText(
+        "therapistName",
+        cleanName
+    );
+
+    setText(
+        "therapistSpecialization",
+        specialization || "Therapist"
+    );
+
+    setText(
+        "therapistInitial",
+        cleanName.charAt(0).toUpperCase() || "T"
+    );
+}
+
+/* =========================
+   LOAD SCHEDULE
+========================= */
+
+async function loadSchedule() {
+    showLoading();
+
+    try {
+        const result =
+            await therapistApiRequest(
+                "/api/daily-treatments/therapist/my-sessions"
+            );
+
+        allSessions =
+            extractArray(result.data)
+                .map(normalizeSession)
+                .sort(sortByScheduleAscending);
+
+        populateTherapyFilter();
+        updateSummary();
+        applyFilters();
+
+    } catch (error) {
+        console.error(
+            "Schedule loading failed:",
+            error
+        );
+
+        allSessions = [];
+        filteredSessions = [];
+
+        populateTherapyFilter();
+        updateSummary();
+        renderSchedule();
+
+        showAlert(
+            error.message ||
+            "Unable to load therapy schedule.",
+            "error"
+        );
+    }
+}
+
+function extractArray(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    if (Array.isArray(data?.sessions)) {
+        return data.sessions;
+    }
+
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    return [];
+}
+
+function normalizeSession(item) {
+    const status =
+        String(
+            item.status ||
+            "PENDING_APPROVAL"
+        ).toUpperCase();
+
+    return {
+        id:
+            item.id ??
+            item.sessionId ??
+            null,
+
+        sessionNumberCode:
+            `SES-${item.id ?? item.sessionId ?? "-"}`,
+
+        treatmentPlanId:
+            item.treatmentPlanId ?? null,
+
+        patientId:
+            item.patientId ?? null,
+
+        patientName:
+            item.patientName ||
+            "Patient",
+
+        patientPhone:
+            item.phoneNumber ||
+            item.patientPhone ||
+            "-",
+
+        patientAge:
+            item.age ?? "-",
+
+        patientGender:
+            String(
+                item.gender || "-"
+            ).toUpperCase(),
+
+        therapyName:
+            item.treatmentName ||
+            item.therapyName ||
+            "Therapy",
+
+        sessionDate:
+            item.sessionDate ||
+            item.treatmentDate ||
+            item.date ||
+            "",
+
+        sessionTime:
+            item.startTime ||
+            item.sessionTime ||
+            item.treatmentTime ||
+            item.time ||
+            "",
+
+        endTime:
+            item.endTime || "",
+
+        sessionNumber:
+            Number(
+                item.sessionNumber || 1
+            ),
+
+        totalSessions:
+            Number(
+                item.totalSessions || 1
+            ),
+
+        attendance:
+            status === "COMPLETED"
+                ? "PRESENT"
+                : status === "MISSED"
+                    ? "ABSENT"
+                    : "PENDING",
+
+        status,
+
+        symptoms:
+            item.patientNotes ||
+            item.symptoms ||
+            "-",
+
+        medicalHistory:
+            "Refer to patient history",
+
+        treatmentPerformed:
+            item.therapistNotes || "-",
+
+        patientResponse:
+            "-",
+
+        progressNotes:
+            item.therapistNotes || "-",
+
+        advice:
+            "-",
+
+        nextSessionDate:
+            null,
+
+        missedReason:
+            item.rescheduleReason || null,
+
+        patientNotes:
+            item.patientNotes || "",
+
+        therapistNotes:
+            item.therapistNotes || "",
+
+        rescheduleReason:
+            item.rescheduleReason || "",
+
+        approvedAt:
+            item.approvedAt || null,
+
+        completedAt:
+            item.completedAt || null,
+
+        missedAt:
+            item.missedAt || null,
+
+        createdAt:
+            item.createdAt || null,
+
+        updatedAt:
+            item.updatedAt || null
+    };
+}
+
+function sortByScheduleAscending(
+    first,
+    second
+) {
+    const firstDate =
+        createScheduleDate(first);
+
+    const secondDate =
+        createScheduleDate(second);
+
+    return firstDate - secondDate;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+function updateSummary() {
+    const today =
+        getTodayString();
+
+    const todaySessions =
+        allSessions.filter(
+            session =>
+                session.sessionDate === today
+        ).length;
+
+    const upcomingSessions =
+        allSessions.filter(
+            session =>
+                createScheduleDate(session) >
+                endOfToday()
+        ).length;
+
+    const completed =
+        allSessions.filter(
+            session =>
+                session.status ===
+                "COMPLETED"
+        ).length;
+
+    const pending =
+        allSessions.filter(
+            session =>
+                [
+                    "PENDING_APPROVAL",
+                    "APPROVED",
+                    "RESCHEDULED"
+                ].includes(
+                    session.status
+                )
+        ).length;
+
+    const missed =
+        allSessions.filter(
+            session =>
+                session.status ===
+                "MISSED"
+        ).length;
+
+    setText("todayCount", todaySessions);
+    setText("upcomingCount", upcomingSessions);
+    setText("completedCount", completed);
+    setText("pendingCount", pending);
+    setText("missedCount", missed);
+}
+
+/* =========================
+   DATE RANGE AND FILTERS
+========================= */
+
+function setDateRange(button) {
+    document
+        .querySelectorAll(
+            "[data-range]"
+        )
+        .forEach(
+            item =>
+                item.classList.remove("active")
+        );
+
+    button.classList.add("active");
+
+    selectedRange =
+        String(
+            button.dataset.range || "TODAY"
+        ).toUpperCase();
+
+    currentPage = 1;
+    applyFilters();
+}
+
+function applyFilters() {
+    const search =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const therapy =
+        document
+            .getElementById("therapyFilter")
+            .value;
+
+    const status =
+        document
+            .getElementById("statusFilter")
+            .value
+            .toUpperCase();
+
+    const attendance =
+        document
+            .getElementById("attendanceFilter")
+            .value
+            .toUpperCase();
+
+    const customDate =
+        document
+            .getElementById("customDateFilter")
+            .value;
+
+    filteredSessions =
+        allSessions.filter(
+            session => {
+                const matchesSearch =
+                    !search ||
+                    session.patientName
+                        .toLowerCase()
+                        .includes(search) ||
+                    session.sessionNumberCode
+                        .toLowerCase()
+                        .includes(search) ||
+                    session.therapyName
+                        .toLowerCase()
+                        .includes(search);
+
+                const matchesTherapy =
+                    !therapy ||
+                    session.therapyName ===
+                    therapy;
+
+                const matchesStatus =
+                    !status ||
+                    session.status === status;
+
+                const matchesAttendance =
+                    !attendance ||
+                    session.attendance ===
+                    attendance;
+
+                const matchesDate =
+                    customDate
+                        ? session.sessionDate ===
+                          customDate
+                        : matchesSelectedRange(
+                            session
+                          );
+
+                return (
+                    matchesSearch &&
+                    matchesTherapy &&
+                    matchesStatus &&
+                    matchesAttendance &&
+                    matchesDate
+                );
             }
         );
 
-        // /* AUTH */
+    currentPage = 1;
+    updateHeading();
+    renderSchedule();
+}
 
-        // function getTherapistToken() {
-        //     return (
-        //         localStorage.getItem("therapistToken") ||
-        //         localStorage.getItem("token")
-        //     );
-        // }
+function matchesSelectedRange(session) {
+    const scheduledAt =
+        createScheduleDate(session);
 
-        // function requireTherapistLogin() {
-        //     if (!getTherapistToken()) {
-        //         window.location.href =
-        //             "therapist-login.html";
-        //     }
-        // }
+    const todayStart =
+        startOfToday();
 
-        // async function therapistApiRequest(
-        //     endpoint,
-        //     options = {}
-        // ) {
-        //     const token =
-        //         getTherapistToken();
+    const todayEnd =
+        endOfToday();
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "therapist-login.html";
+    switch (selectedRange) {
+        case "UPCOMING":
+            return scheduledAt > todayEnd;
 
-        //         throw new Error(
-        //             "Therapist login required."
-        //         );
-        //     }
+        case "COMPLETED":
+            return session.status ===
+                "COMPLETED";
 
-        //     const headers = {
-        //         ...(options.headers || {}),
+        case "MISSED":
+            return session.status ===
+                "MISSED";
 
-        //         "Authorization":
-        //             "Bearer " + token
-        //     };
+        case "ALL":
+            return true;
 
-        //     if (
-        //         options.body &&
-        //         !(options.body instanceof FormData)
-        //     ) {
-        //         headers["Content-Type"] =
-        //             "application/json";
-        //     }
+        case "TODAY":
+        default:
+            return (
+                scheduledAt >= todayStart &&
+                scheduledAt <= todayEnd
+            );
+    }
+}
 
-        //     const response =
-        //         await fetch(
-        //             API_BASE_URL + endpoint,
-        //             {
-        //                 ...options,
-        //                 headers
-        //             }
-        //         );
+function resetFilters() {
+    document.getElementById(
+        "searchInput"
+    ).value = "";
 
-        //     let result;
+    document.getElementById(
+        "therapyFilter"
+    ).value = "";
 
-        //     try {
-        //         result =
-        //             await response.json();
+    document.getElementById(
+        "statusFilter"
+    ).value = "";
 
-        //     } catch (error) {
-        //         result = {
-        //             success: false,
-        //             message:
-        //                 "Invalid server response."
-        //         };
-        //     }
+    document.getElementById(
+        "attendanceFilter"
+    ).value = "";
 
-        //     if (
-        //         !response.ok ||
-        //         result.success === false
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Request failed."
-        //         );
-        //     }
+    document.getElementById(
+        "customDateFilter"
+    ).value = "";
 
-        //     return result;
-        // }
+    selectedRange = "TODAY";
 
-        // function therapistLogout() {
-        //     localStorage.removeItem(
-        //         "therapistToken"
-        //     );
-
-        //     localStorage.removeItem(
-        //         "therapistRefreshToken"
-        //     );
-
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem("refreshToken");
-        //     localStorage.removeItem("role");
-        //     localStorage.removeItem("therapistId");
-        //     localStorage.removeItem("userId");
-
-        //     window.location.href =
-        //         "therapist-login.html";
-        // }
-
-        /* PROFILE */
-
-        async function loadTherapistProfile() {
-            try {
-                const result =
-                    await therapistApiRequest(
-                        "/api/users/getProfile"
-                    );
-
-                const name =
-                    result.data?.name ||
-                    "Therapist";
-
-                const specialization =
-                    result.data?.specialization ||
-                    result.data?.department ||
-                    "Therapy Staff";
-
-                setText(
-                    "therapistName",
-                    name
-                );
-
-                setText(
-                    "therapistSpecialization",
-                    specialization
-                );
-
-                setText(
-                    "therapistInitial",
-                    name
-                        .charAt(0)
-                        .toUpperCase()
-                );
-
-            } catch (error) {
-                console.error(
-                    "Profile loading failed:",
-                    error
-                );
-            }
-        }
-
-        /* LOAD SCHEDULE */
-
-        async function loadSchedule() {
-            document.getElementById(
-                "scheduleTableBody"
-            ).innerHTML = `
-                <tr>
-                    <td
-                        colspan="11"
-                        class="table-message"
-                    >
-                        <i class="fa-solid fa-spinner fa-spin"></i>
-                        Loading therapy schedule...
-                    </td>
-                </tr>
-            `;
-
-            try {
-                const result =
-                    await therapistApiRequest(
-                        "/api/therapist/schedule"
-                    );
-
-                const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : Array.isArray(
-                            result.data?.content
-                        )
-                            ? result.data.content
-                            : [];
-
-                allSessions =
-                    data.map(
-                        normalizeSession
-                    );
-
-            } catch (error) {
-                console.error(
-                    "Schedule loading failed:",
-                    error
-                );
-
-                allSessions =
-                    getDemoSchedule();
-
-                showAlert(
-                    "Schedule API is not connected. Demo data is displayed.",
-                    "info"
-                );
-            }
-
-            populateTherapyFilter();
-            updateSummary();
-            applyFilters();
-        }
-
-        function normalizeSession(item) {
-            return {
-                id:
-                    item.id ||
-                    item.sessionId,
-
-                sessionNumberCode:
-                    item.sessionNumberCode ||
-                    item.sessionCode ||
-                    `SES-${item.id || item.sessionId}`,
-
-                bookingId:
-                    item.bookingId ||
-                    item.therapyBookingId,
-
-                patientId:
-                    item.patientId ||
-                    item.patient?.id,
-
-                patientName:
-                    item.patientName ||
-                    item.patient?.name ||
-                    "Patient",
-
-                patientPhone:
-                    item.patientPhone ||
-                    item.patient?.phoneNumber ||
-                    "-",
-
-                patientAge:
-                    item.patientAge ||
-                    item.patient?.age ||
-                    "-",
-
-                patientGender:
+    document
+        .querySelectorAll(
+            "[data-range]"
+        )
+        .forEach(
+            button =>
+                button.classList.toggle(
+                    "active",
                     String(
-                        item.patientGender ||
-                        item.patient?.gender ||
-                        "-"
-                    ).toUpperCase(),
-
-                therapyName:
-                    item.therapyName ||
-                    item.therapy?.name ||
-                    "Therapy",
-
-                sessionDate:
-                    item.sessionDate ||
-                    item.treatmentDate ||
-                    item.date,
-
-                sessionTime:
-                    item.sessionTime ||
-                    item.treatmentTime ||
-                    item.time,
-
-                sessionNumber:
-                    Number(
-                        item.sessionNumber ||
-                        item.currentSession ||
-                        1
-                    ),
-
-                totalSessions:
-                    Number(
-                        item.totalSessions ||
-                        item.planTotalSessions ||
-                        1
-                    ),
-
-                attendance:
-                    String(
-                        item.attendance ||
-                        item.attendanceStatus ||
-                        "PENDING"
-                    ).toUpperCase(),
-
-                status:
-                    String(
-                        item.status ||
-                        "SCHEDULED"
-                    ).toUpperCase(),
-
-                symptoms:
-                    item.symptoms ||
-                    item.healthIssue ||
-                    "-",
-
-                medicalHistory:
-                    item.medicalHistory ||
-                    item.pastHistory ||
-                    "Not provided",
-
-                treatmentPerformed:
-                    item.treatmentPerformed ||
-                    "-",
-
-                patientResponse:
-                    item.patientResponse ||
-                    "-",
-
-                progressNotes:
-                    item.progressNotes ||
-                    item.notes ||
-                    "-",
-
-                advice:
-                    item.advice ||
-                    "-",
-
-                nextSessionDate:
-                    item.nextSessionDate ||
-                    null,
-
-                missedReason:
-                    item.missedReason ||
-                    null
-            };
-        }
-
-        function getDemoSchedule() {
-            return [
-                {
-                    id: 1,
-                    sessionNumberCode:
-                        "SES-1001",
-                    bookingId: 1,
-                    patientId: 1,
-                    patientName:
-                        "Nisha Rao",
-                    patientPhone:
-                        "9876543210",
-                    patientAge: 30,
-                    patientGender:
-                        "FEMALE",
-                    therapyName:
-                        "Panchakarma",
-                    sessionDate:
-                        getTodayString(),
-                    sessionTime:
-                        "09:00",
-                    sessionNumber: 2,
-                    totalSessions: 7,
-                    attendance:
-                        "PENDING",
-                    status:
-                        "SCHEDULED",
-                    symptoms:
-                        "Headache and body stiffness",
-                    medicalHistory:
-                        "Migraine and acidity",
-                    treatmentPerformed:
-                        "-",
-                    patientResponse:
-                        "-",
-                    progressNotes:
-                        "-",
-                    advice:
-                        "-",
-                    nextSessionDate:
-                        getOffsetDate(1)
-                },
-                {
-                    id: 2,
-                    sessionNumberCode:
-                        "SES-1002",
-                    bookingId: 2,
-                    patientId: 2,
-                    patientName:
-                        "Kiran Kumar",
-                    patientPhone:
-                        "9876543211",
-                    patientAge: 40,
-                    patientGender:
-                        "MALE",
-                    therapyName:
-                        "Acupuncture",
-                    sessionDate:
-                        getTodayString(),
-                    sessionTime:
-                        "11:30",
-                    sessionNumber: 5,
-                    totalSessions: 10,
-                    attendance:
-                        "PRESENT",
-                    status:
-                        "IN_PROGRESS",
-                    symptoms:
-                        "Neck and shoulder pain",
-                    medicalHistory:
-                        "No major illness",
-                    treatmentPerformed:
-                        "Needle therapy started",
-                    patientResponse:
-                        "Pain reduced slightly",
-                    progressNotes:
-                        "Good response",
-                    advice:
-                        "Avoid heavy lifting",
-                    nextSessionDate:
-                        getOffsetDate(2)
-                },
-                {
-                    id: 3,
-                    sessionNumberCode:
-                        "SES-1003",
-                    bookingId: 3,
-                    patientId: 3,
-                    patientName:
-                        "Anitha Shetty",
-                    patientPhone:
-                        "9876543212",
-                    patientAge: 36,
-                    patientGender:
-                        "FEMALE",
-                    therapyName:
-                        "Yoga and Naturopathy",
-                    sessionDate:
-                        getOffsetDate(1),
-                    sessionTime:
-                        "15:00",
-                    sessionNumber: 1,
-                    totalSessions: 15,
-                    attendance:
-                        "PENDING",
-                    status:
-                        "SCHEDULED",
-                    symptoms:
-                        "Stress and poor sleep",
-                    medicalHistory:
-                        "No major illness",
-                    treatmentPerformed:
-                        "-",
-                    patientResponse:
-                        "-",
-                    progressNotes:
-                        "-",
-                    advice:
-                        "-",
-                    nextSessionDate:
-                        getOffsetDate(2)
-                },
-                {
-                    id: 4,
-                    sessionNumberCode:
-                        "SES-1004",
-                    bookingId: 4,
-                    patientId: 4,
-                    patientName:
-                        "Ravi Bhat",
-                    patientPhone:
-                        "9876543213",
-                    patientAge: 34,
-                    patientGender:
-                        "MALE",
-                    therapyName:
-                        "Beauty Therapy",
-                    sessionDate:
-                        getOffsetDate(-1),
-                    sessionTime:
-                        "14:00",
-                    sessionNumber: 3,
-                    totalSessions: 6,
-                    attendance:
-                        "ABSENT",
-                    status:
-                        "MISSED",
-                    symptoms:
-                        "Skin rejuvenation",
-                    medicalHistory:
-                        "Sensitive skin",
-                    treatmentPerformed:
-                        "-",
-                    patientResponse:
-                        "-",
-                    progressNotes:
-                        "Patient did not attend",
-                    advice:
-                        "-",
-                    nextSessionDate:
-                        null,
-                    missedReason:
-                        "Patient did not arrive"
-                }
-            ];
-        }
-
-        /* SUMMARY */
-
-        function updateSummary() {
-            const today =
-                getTodayString();
-
-            setText(
-                "todayCount",
-                allSessions.filter(
-                    session =>
-                        dateOnly(
-                            session.sessionDate
-                        ) === today
-                ).length
-            );
-
-            setText(
-                "upcomingCount",
-                allSessions.filter(
-                    session =>
-                        dateOnly(
-                            session.sessionDate
-                        ) > today &&
-                        ![
-                            "COMPLETED",
-                            "CANCELLED",
-                            "MISSED"
-                        ].includes(
-                            session.status
-                        )
-                ).length
-            );
-
-            setText(
-                "completedCount",
-                allSessions.filter(
-                    session =>
-                        session.status ===
-                        "COMPLETED"
-                ).length
-            );
-
-            setText(
-                "pendingCount",
-                allSessions.filter(
-                    session =>
-                        [
-                            "SCHEDULED",
-                            "IN_PROGRESS"
-                        ].includes(
-                            session.status
-                        )
-                ).length
-            );
-
-            setText(
-                "missedCount",
-                allSessions.filter(
-                    session =>
-                        session.status ===
-                            "MISSED" ||
-                        session.attendance ===
-                            "ABSENT"
-                ).length
-            );
-        }
-
-        /* FILTERS */
-
-        function populateTherapyFilter() {
-            const select =
-                document.getElementById(
-                    "therapyFilter"
-                );
-
-            const therapies = [
-                ...new Set(
-                    allSessions
-                        .map(
-                            session =>
-                                session.therapyName
-                        )
-                        .filter(Boolean)
+                        button.dataset.range
+                    ).toUpperCase() ===
+                    "TODAY"
                 )
-            ].sort();
+        );
 
-            select.innerHTML = `
-                <option value="">
-                    All Therapies
-                </option>
-            `;
+    currentPage = 1;
+    applyFilters();
+}
 
-            therapies.forEach(
-                function (therapy) {
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value = therapy;
-                    option.textContent = therapy;
-
-                    select.appendChild(option);
-                }
-            );
-        }
-
-        function setDateRange(button) {
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    tab =>
-                        tab.classList.remove(
-                            "active"
-                        )
-                );
-
-            button.classList.add("active");
-
-            selectedDateRange =
-                button.dataset.range;
-
-            customDate = "";
-
-            document.getElementById(
+function updateHeading() {
+    const customDate =
+        document
+            .getElementById(
                 "customDateFilter"
-            ).value = "";
+            )
+            .value;
 
-            updateScheduleHeading();
-            applyFilters();
+    let heading =
+        "Today's Therapy Schedule";
+
+    let subheading =
+        "Treatment sessions scheduled for today.";
+
+    if (customDate) {
+        heading =
+            `Schedule for ${formatDate(
+                customDate
+            )}`;
+
+        subheading =
+            "Sessions scheduled for the selected date.";
+
+    } else {
+        switch (selectedRange) {
+            case "UPCOMING":
+                heading =
+                    "Upcoming Therapy Sessions";
+                subheading =
+                    "Future treatment sessions assigned to you.";
+                break;
+
+            case "COMPLETED":
+                heading =
+                    "Completed Therapy Sessions";
+                subheading =
+                    "Sessions already marked as completed.";
+                break;
+
+            case "MISSED":
+                heading =
+                    "Missed Therapy Sessions";
+                subheading =
+                    "Sessions marked as missed.";
+                break;
+
+            case "ALL":
+                heading =
+                    "All Therapy Sessions";
+                subheading =
+                    "Every treatment session assigned to you.";
+                break;
         }
+    }
 
-        function selectCustomDate() {
-            customDate =
-                document.getElementById(
-                    "customDateFilter"
-                ).value;
+    setText(
+        "scheduleHeading",
+        heading
+    );
 
-            if (!customDate) {
-                return;
-            }
+    setText(
+        "scheduleSubheading",
+        subheading
+    );
+}
 
-            selectedDateRange =
-                "CUSTOM";
+function populateTherapyFilter() {
+    const select =
+        document.getElementById(
+            "therapyFilter"
+        );
 
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    tab =>
-                        tab.classList.remove(
-                            "active"
-                        )
-                );
+    const currentValue =
+        select.value;
 
-            updateScheduleHeading();
-            applyFilters();
-        }
-
-        function updateScheduleHeading() {
-            const heading =
-                document.getElementById(
-                    "scheduleHeading"
-                );
-
-            const subheading =
-                document.getElementById(
-                    "scheduleSubheading"
-                );
-
-            const headingMap = {
-                TODAY:
-                    "Today's Sessions",
-
-                TOMORROW:
-                    "Tomorrow's Sessions",
-
-                WEEK:
-                    "This Week's Sessions",
-
-                UPCOMING:
-                    "Upcoming Sessions",
-
-                ALL:
-                    "All Therapy Sessions"
-            };
-
-            heading.textContent =
-                selectedDateRange ===
-                "CUSTOM"
-                    ? `Sessions on ${formatDate(
-                        customDate
-                    )}`
-                    : headingMap[
-                        selectedDateRange
-                    ] ||
-                    "Therapy Sessions";
-
-            subheading.textContent =
-                "View and manage therapy appointments.";
-        }
-
-        function applyFilters() {
-            const search =
-                document.getElementById(
-                    "searchInput"
-                ).value
-                .trim()
-                .toLowerCase();
-
-            const therapy =
-                document.getElementById(
-                    "therapyFilter"
-                ).value;
-
-            const status =
-                document.getElementById(
-                    "statusFilter"
-                ).value;
-
-            const attendance =
-                document.getElementById(
-                    "attendanceFilter"
-                ).value;
-
-            const today =
-                getTodayString();
-
-            const tomorrow =
-                getOffsetDate(1);
-
-            const weekEnd =
-                getOffsetDate(7);
-
-            filteredSessions =
-                allSessions.filter(
-                    function (session) {
-                        const sessionDate =
-                            dateOnly(
-                                session.sessionDate
-                            );
-
-                        const matchesSearch =
-                            !search ||
-                            session.patientName
-                                .toLowerCase()
-                                .includes(search) ||
+    const therapies =
+        [
+            ...new Set(
+                allSessions
+                    .map(
+                        session =>
                             session.therapyName
-                                .toLowerCase()
-                                .includes(search) ||
-                            session.sessionNumberCode
-                                .toLowerCase()
-                                .includes(search);
-
-                        const matchesTherapy =
-                            !therapy ||
-                            session.therapyName ===
-                                therapy;
-
-                        const matchesStatus =
-                            !status ||
-                            session.status ===
-                                status;
-
-                        const matchesAttendance =
-                            !attendance ||
-                            session.attendance ===
-                                attendance;
-
-                        let matchesDateRange =
-                            true;
-
-                        if (
-                            selectedDateRange ===
-                            "TODAY"
-                        ) {
-                            matchesDateRange =
-                                sessionDate === today;
-
-                        } else if (
-                            selectedDateRange ===
-                            "TOMORROW"
-                        ) {
-                            matchesDateRange =
-                                sessionDate === tomorrow;
-
-                        } else if (
-                            selectedDateRange ===
-                            "WEEK"
-                        ) {
-                            matchesDateRange =
-                                sessionDate >= today &&
-                                sessionDate <= weekEnd;
-
-                        } else if (
-                            selectedDateRange ===
-                            "UPCOMING"
-                        ) {
-                            matchesDateRange =
-                                sessionDate >= today;
-
-                        } else if (
-                            selectedDateRange ===
-                            "CUSTOM"
-                        ) {
-                            matchesDateRange =
-                                sessionDate === customDate;
-                        }
-
-                        return (
-                            matchesSearch &&
-                            matchesTherapy &&
-                            matchesStatus &&
-                            matchesAttendance &&
-                            matchesDateRange
-                        );
-                    }
-                );
-
-            filteredSessions.sort(
-                function (first, second) {
-                    const firstValue =
-                        `${dateOnly(
-                            first.sessionDate
-                        )} ${first.sessionTime}`;
-
-                    const secondValue =
-                        `${dateOnly(
-                            second.sessionDate
-                        )} ${second.sessionTime}`;
-
-                    return firstValue.localeCompare(
-                        secondValue
-                    );
-                }
-            );
-
-            currentPage = 1;
-            renderSchedule();
-        }
-
-        function resetFilters() {
-            document.getElementById(
-                "searchInput"
-            ).value = "";
-
-            document.getElementById(
-                "therapyFilter"
-            ).value = "";
-
-            document.getElementById(
-                "statusFilter"
-            ).value = "";
-
-            document.getElementById(
-                "attendanceFilter"
-            ).value = "";
-
-            document.getElementById(
-                "customDateFilter"
-            ).value = "";
-
-            selectedDateRange =
-                "TODAY";
-
-            customDate = "";
-
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    (tab, index) =>
-                        tab.classList.toggle(
-                            "active",
-                            index === 0
-                        )
-                );
-
-            updateScheduleHeading();
-            applyFilters();
-        }
-
-        /* TABLE */
-
-        function renderSchedule() {
-            const body =
-                document.getElementById(
-                    "scheduleTableBody"
-                );
-
-            const totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        filteredSessions.length /
-                        pageSize
                     )
-                );
+                    .filter(Boolean)
+            )
+        ].sort();
 
-            if (currentPage > totalPages) {
-                currentPage = totalPages;
-            }
+    select.innerHTML = `
+        <option value="">
+            All Therapies
+        </option>
 
-            const startIndex =
-                (currentPage - 1) *
-                pageSize;
+        ${therapies
+            .map(
+                therapy => `
+                    <option value="${escapeHtml(therapy)}">
+                        ${escapeHtml(therapy)}
+                    </option>
+                `
+            )
+            .join("")}
+    `;
 
-            const pageItems =
-                filteredSessions.slice(
-                    startIndex,
-                    startIndex + pageSize
-                );
+    if (therapies.includes(currentValue)) {
+        select.value = currentValue;
+    }
+}
 
-            setText(
-                "resultCount",
-                `${filteredSessions.length} Session${
-                    filteredSessions.length === 1
-                        ? ""
-                        : "s"
-                }`
-            );
+/* =========================
+   RENDER TABLE
+========================= */
 
-            if (!pageItems.length) {
-                body.innerHTML = `
+function showLoading() {
+    document.getElementById(
+        "scheduleTableBody"
+    ).innerHTML = `
+        <tr>
+            <td
+                colspan="11"
+                class="table-message"
+            >
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading therapy schedule...
+            </td>
+        </tr>
+    `;
+}
+
+function renderSchedule() {
+    const body =
+        document.getElementById(
+            "scheduleTableBody"
+        );
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredSessions.length /
+                pageSize
+            )
+        );
+
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+
+    const start =
+        (currentPage - 1) * pageSize;
+
+    const pageSessions =
+        filteredSessions.slice(
+            start,
+            start + pageSize
+        );
+
+    setText(
+        "resultCount",
+        `${filteredSessions.length} Session${
+            filteredSessions.length === 1
+                ? ""
+                : "s"
+        }`
+    );
+
+    if (!pageSessions.length) {
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="11"
+                    class="table-message"
+                >
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    No therapy sessions found.
+                </td>
+            </tr>
+        `;
+
+        updatePagination(0, 0, 0);
+        renderPaginationButtons(1);
+        return;
+    }
+
+    body.innerHTML =
+        pageSessions
+            .map(
+                session => `
                     <tr>
-                        <td
-                            colspan="11"
-                            class="table-message"
-                        >
-                            <i class="fa-solid fa-calendar-xmark"></i>
-                            No therapy sessions found.
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    session.sessionNumberCode
+                                )}
+                            </strong>
                         </td>
-                    </tr>
-                `;
 
-                updatePaginationInfo(
-                    0,
-                    0,
-                    0
-                );
-
-                renderPaginationButtons(1);
-
-                return;
-            }
-
-            body.innerHTML = "";
-
-            pageItems.forEach(
-                function (session) {
-                    const progress =
-                        calculateProgress(
-                            session.sessionNumber,
-                            session.totalSessions
-                        );
-
-                    const canUpdate =
-                        ![
-                            "COMPLETED",
-                            "MISSED",
-                            "CANCELLED"
-                        ].includes(
-                            session.status
-                        );
-
-                    body.insertAdjacentHTML(
-                        "beforeend",
-                        `
-                        <tr>
-
-                            <td>
-                                <strong>
+                        <td>
+                            <div class="patient-cell">
+                                <span class="patient-avatar">
                                     ${escapeHtml(
-                                        session.sessionNumberCode
-                                    )}
-                                </strong>
-                            </td>
-
-                            <td>
-
-                                <div class="patient-cell">
-
-                                    <span class="patient-avatar">
-                                        ${escapeHtml(
-                                            session.patientName
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        )}
-                                    </span>
-
-                                    <div>
-
-                                        <strong>
-                                            ${escapeHtml(
-                                                session.patientName
-                                            )}
-                                        </strong>
-
-                                        <small>
-                                            ${escapeHtml(
-                                                session.patientPhone
-                                            )}
-                                        </small>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-                            <td>
-                                <span class="therapy-badge">
-                                    <i class="fa-solid fa-spa"></i>
-
-                                    ${escapeHtml(
-                                        session.therapyName
+                                        session.patientName
+                                            .charAt(0)
+                                            .toUpperCase()
                                     )}
                                 </span>
-                            </td>
 
-                            <td>
-                                ${escapeHtml(
-                                    formatDate(
-                                        session.sessionDate
-                                    )
-                                )}
-                            </td>
+                                <div>
+                                    <strong>
+                                        ${escapeHtml(
+                                            session.patientName
+                                        )}
+                                    </strong>
 
-                            <td>
-                                ${escapeHtml(
-                                    formatTime(
-                                        session.sessionTime
-                                    )
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    session.sessionNumber
-                                )}
-                                /
-                                ${escapeHtml(
-                                    session.totalSessions
-                                )}
-                            </td>
-
-                            <td>
-
-                                <div class="progress-wrapper">
-
-                                    <div class="progress-text">
-                                        ${progress}%
-                                    </div>
-
-                                    <div class="progress-bar">
-
-                                        <div
-                                            class="progress-fill"
-                                            style="width:${progress}%"
-                                        ></div>
-
-                                    </div>
-
+                                    <small>
+                                        Patient ID:
+                                        ${escapeHtml(
+                                            session.patientId ?? "-"
+                                        )}
+                                    </small>
                                 </div>
+                            </div>
+                        </td>
 
-                            </td>
-
-                            <td>
-                                ${createAttendanceBadge(
-                                    session.attendance
-                                )}
-                            </td>
-
-                            <td>
-                                ${createStatusBadge(
-                                    session.status
-                                )}
-                            </td>
-
-                            <td>
+                        <td>
+                            <span class="therapy-badge">
+                                <i class="fa-solid fa-spa"></i>
                                 ${escapeHtml(
-                                    formatDate(
-                                        session.nextSessionDate
+                                    session.therapyName
+                                )}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                formatDate(
+                                    session.sessionDate
+                                )
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                formatTimeRange(
+                                    session.sessionTime,
+                                    session.endTime
+                                )
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                `${session.sessionNumber}/${session.totalSessions}`
+                            )}
+                        </td>
+
+                        <td>
+                            ${buildProgress(
+                                session.sessionNumber,
+                                session.totalSessions
+                            )}
+                        </td>
+
+                        <td>
+                            <span
+                                class="attendance-badge ${attendanceClass(
+                                    session.attendance
+                                )}"
+                            >
+                                ${escapeHtml(
+                                    formatLabel(
+                                        session.attendance
                                     )
                                 )}
-                            </td>
+                            </span>
+                        </td>
 
-                            <td>
+                        <td>
+                            <span
+                                class="status-badge ${statusClass(
+                                    session.status
+                                )}"
+                            >
+                                ${escapeHtml(
+                                    formatLabel(
+                                        session.status
+                                    )
+                                )}
+                            </span>
+                        </td>
 
-                                <div class="action-buttons">
+                        <td>
+                            -
+                        </td>
 
-                                    <button
-                                        type="button"
-                                        class="action-button view-button"
-                                        onclick="openDetailsModal('${session.id}')"
-                                        title="View details"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
+                        <td>
+                            <div class="action-buttons">
 
-                                    ${
-                                        canUpdate
-                                            ? `
-                                            <button
-                                                type="button"
-                                                class="action-button attendance-button"
-                                                onclick="openAttendanceModal('${session.id}')"
-                                                title="Update attendance"
-                                            >
-                                                <i class="fa-solid fa-user-check"></i>
-                                            </button>
+                                <button
+                                    type="button"
+                                    class="action-button view-button"
+                                    title="View details"
+                                    onclick="openDetailsModal(${Number(
+                                        session.id
+                                    )})"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
 
+                                ${
+                                    [
+                                        "APPROVED",
+                                        "RESCHEDULED"
+                                    ].includes(
+                                        session.status
+                                    )
+                                        ? `
                                             <button
                                                 type="button"
                                                 class="action-button complete-button"
-                                                onclick="openCompleteModal('${session.id}')"
                                                 title="Complete session"
+                                                onclick="openCompleteModal(${Number(
+                                                    session.id
+                                                )})"
                                             >
                                                 <i class="fa-solid fa-check"></i>
                                             </button>
@@ -3498,1287 +3405,1114 @@
                                             <button
                                                 type="button"
                                                 class="action-button missed-button"
-                                                onclick="openMissedModal('${session.id}')"
                                                 title="Mark missed"
+                                                onclick="openMissedModal(${Number(
+                                                    session.id
+                                                )})"
                                             >
                                                 <i class="fa-solid fa-user-xmark"></i>
                                             </button>
-                                            `
-                                            : ""
-                                    }
+                                          `
+                                        : ""
+                                }
 
-                                </div>
+                                ${
+                                    session.status ===
+                                    "PENDING_APPROVAL"
+                                        ? `
+                                            <a
+                                                class="action-button attendance-button"
+                                                href="booking-requests.html"
+                                                title="Approve or reschedule"
+                                            >
+                                                <i class="fa-solid fa-calendar-check"></i>
+                                            </a>
+                                          `
+                                        : ""
+                                }
 
-                            </td>
+                            </div>
+                        </td>
+                    </tr>
+                `
+            )
+            .join("");
 
-                        </tr>
-                        `
-                    );
-                }
-            );
+    updatePagination(
+        start + 1,
+        Math.min(
+            start + pageSize,
+            filteredSessions.length
+        ),
+        filteredSessions.length
+    );
 
-            updatePaginationInfo(
-                startIndex + 1,
-                Math.min(
-                    startIndex + pageSize,
-                    filteredSessions.length
-                ),
-                filteredSessions.length
-            );
+    renderPaginationButtons(
+        totalPages
+    );
+}
 
-            renderPaginationButtons(
-                totalPages
-            );
-        }
+function buildProgress(
+    current,
+    total
+) {
+    const safeTotal =
+        Math.max(
+            Number(total) || 1,
+            1
+        );
 
-        function createAttendanceBadge(
-            attendance
+    const percentage =
+        Math.min(
+            100,
+            Math.max(
+                0,
+                Math.round(
+                    (Number(current) /
+                    safeTotal) * 100
+                )
+            )
+        );
+
+    return `
+        <div class="progress-wrap">
+            <span>
+                ${percentage}%
+            </span>
+
+            <div class="progress-bar">
+                <div
+                    class="progress-fill"
+                    style="width:${percentage}%"
+                ></div>
+            </div>
+        </div>
+    `;
+}
+
+/* =========================
+   PAGINATION
+========================= */
+
+function updatePagination(
+    start,
+    end,
+    total
+) {
+    setText(
+        "paginationInfo",
+        total
+            ? `Showing ${start}-${end} of ${total} sessions`
+            : "Showing 0 sessions"
+    );
+}
+
+function renderPaginationButtons(
+    totalPages
+) {
+    const container =
+        document.getElementById(
+            "paginationButtons"
+        );
+
+    container.innerHTML = "";
+
+    container.appendChild(
+        createPaginationButton(
+            '<i class="fa-solid fa-chevron-left"></i>',
+            currentPage === 1,
+            () => changePage(
+                currentPage - 1
+            )
+        )
+    );
+
+    for (
+        let page = 1;
+        page <= totalPages;
+        page++
+    ) {
+        if (
+            totalPages > 7 &&
+            page !== 1 &&
+            page !== totalPages &&
+            Math.abs(
+                page - currentPage
+            ) > 1
         ) {
-            const normalized =
-                String(
-                    attendance ||
-                    "PENDING"
-                ).toUpperCase();
-
-            const className = {
-                PRESENT:
-                    "attendance-present",
-
-                ABSENT:
-                    "attendance-absent",
-
-                PENDING:
-                    "attendance-pending",
-
-                CANCELLED:
-                    "attendance-cancelled"
-            }[normalized] ||
-                "attendance-pending";
-
-            return `
-                <span
-                    class="attendance-badge ${className}"
-                >
-                    ${escapeHtml(
-                        formatStatus(
-                            normalized
-                        )
-                    )}
-                </span>
-            `;
+            continue;
         }
 
-        function createStatusBadge(status) {
-            const normalized =
-                String(
-                    status ||
-                    "SCHEDULED"
-                ).toUpperCase();
+        const button =
+            createPaginationButton(
+                String(page),
+                false,
+                () => changePage(page)
+            );
 
-            const className = {
-                SCHEDULED:
-                    "status-scheduled",
-
-                IN_PROGRESS:
-                    "status-in-progress",
-
-                COMPLETED:
-                    "status-completed",
-
-                MISSED:
-                    "status-missed",
-
-                CANCELLED:
-                    "status-cancelled"
-            }[normalized] ||
-                "status-scheduled";
-
-            return `
-                <span
-                    class="status-badge ${className}"
-                >
-                    ${escapeHtml(
-                        formatStatus(
-                            normalized
-                        )
-                    )}
-                </span>
-            `;
+        if (page === currentPage) {
+            button.classList.add(
+                "active"
+            );
         }
 
-        /* DETAILS */
+        container.appendChild(button);
+    }
 
-        function openDetailsModal(id) {
-            selectedSession =
-                findSession(id);
+    container.appendChild(
+        createPaginationButton(
+            '<i class="fa-solid fa-chevron-right"></i>',
+            currentPage === totalPages,
+            () => changePage(
+                currentPage + 1
+            )
+        )
+    );
+}
 
-            if (!selectedSession) {
-                return;
+function createPaginationButton(
+    html,
+    disabled,
+    handler
+) {
+    const button =
+        document.createElement(
+            "button"
+        );
+
+    button.type = "button";
+    button.className =
+        "pagination-button";
+    button.innerHTML = html;
+    button.disabled = disabled;
+    button.onclick = handler;
+
+    return button;
+}
+
+function changePage(page) {
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredSessions.length /
+                pageSize
+            )
+        );
+
+    if (
+        page < 1 ||
+        page > totalPages
+    ) {
+        return;
+    }
+
+    currentPage = page;
+    renderSchedule();
+
+    document
+        .querySelector(
+            ".schedule-panel"
+        )
+        ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+/* =========================
+   DETAILS
+========================= */
+
+function findSession(id) {
+    return (
+        allSessions.find(
+            session =>
+                String(session.id) ===
+                String(id)
+        ) || null
+    );
+}
+
+function openDetailsModal(id) {
+    selectedSession =
+        findSession(id);
+
+    if (!selectedSession) {
+        showAlert(
+            "Session details not found.",
+            "error"
+        );
+        return;
+    }
+
+    const session =
+        selectedSession;
+
+    document.getElementById(
+        "detailsModalContent"
+    ).innerHTML = `
+        <div class="modal-patient-card">
+
+            <span class="patient-avatar">
+                ${escapeHtml(
+                    session.patientName
+                        .charAt(0)
+                        .toUpperCase()
+                )}
+            </span>
+
+            <div>
+                <h3>
+                    ${escapeHtml(
+                        session.patientName
+                    )}
+                </h3>
+
+                <p>
+                    Patient ID:
+                    ${escapeHtml(
+                        session.patientId ?? "-"
+                    )}
+                    ·
+                    ${escapeHtml(
+                        session.sessionNumberCode
+                    )}
+                </p>
+            </div>
+
+        </div>
+
+        <div class="details-grid">
+
+            ${detailBox(
+                "Therapy",
+                session.therapyName
+            )}
+
+            ${detailBox(
+                "Treatment Plan ID",
+                session.treatmentPlanId ?? "-"
+            )}
+
+            ${detailBox(
+                "Date",
+                formatDate(
+                    session.sessionDate
+                )
+            )}
+
+            ${detailBox(
+                "Time",
+                formatTimeRange(
+                    session.sessionTime,
+                    session.endTime
+                )
+            )}
+
+            ${detailBox(
+                "Session",
+                `${session.sessionNumber} of ${session.totalSessions}`
+            )}
+
+            ${detailBox(
+                "Status",
+                formatLabel(
+                    session.status
+                )
+            )}
+
+            ${detailBox(
+                "Attendance",
+                formatLabel(
+                    session.attendance
+                )
+            )}
+
+            ${detailBox(
+                "Patient Notes",
+                session.patientNotes || "-",
+                true
+            )}
+
+            ${detailBox(
+                "Therapist Notes",
+                session.therapistNotes || "-",
+                true
+            )}
+
+            ${
+                session.rescheduleReason
+                    ? detailBox(
+                        "Reschedule Reason",
+                        session.rescheduleReason,
+                        true
+                      )
+                    : ""
             }
 
-            document.getElementById(
-                "detailsModalContent"
-            ).innerHTML = `
-                ${createPatientCard(
-                    selectedSession
-                )}
+        </div>
+    `;
 
-                <div class="details-grid">
+    document.getElementById(
+        "detailsModalActions"
+    ).innerHTML = `
+        <button
+            type="button"
+            class="modal-button modal-cancel-button"
+            onclick="closeModal('detailsModal')"
+        >
+            Close
+        </button>
 
-                    <div class="detail-box">
-                        <span>Session ID</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedSession.sessionNumberCode
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Therapy</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedSession.therapyName
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Date</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedSession.sessionDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Time</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatTime(
-                                    selectedSession.sessionTime
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Session Progress</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedSession.sessionNumber
-                            )}
-                            of
-                            ${escapeHtml(
-                                selectedSession.totalSessions
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Status</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedSession.status
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Attendance</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedSession.attendance
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Next Session</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedSession.nextSessionDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Symptoms</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedSession.symptoms
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Medical History</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedSession.medicalHistory
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Treatment Performed</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedSession.treatmentPerformed
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Patient Response</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedSession.patientResponse
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Progress Notes</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedSession.progressNotes
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Advice</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedSession.advice
-                            )}
-                        </p>
-                    </div>
-
-                </div>
-            `;
-
-            let actions = `
-                <button
-                    type="button"
-                    class="modal-button modal-cancel-button"
-                    onclick="closeModal('detailsModal')"
-                >
-                    Close
-                </button>
-            `;
-
-            if (
-                ![
-                    "COMPLETED",
-                    "MISSED",
-                    "CANCELLED"
-                ].includes(
-                    selectedSession.status
-                )
-            ) {
-                actions += `
-                    <button
-                        type="button"
-                        class="modal-button modal-submit-button"
-                        onclick="openAttendanceFromDetails()"
-                    >
-                        Attendance
-                    </button>
-
+        ${
+            [
+                "APPROVED",
+                "RESCHEDULED"
+            ].includes(
+                session.status
+            )
+                ? `
                     <button
                         type="button"
                         class="modal-button modal-complete-button"
-                        onclick="openCompleteFromDetails()"
+                        onclick="
+                            closeModal('detailsModal');
+                            openCompleteModal(${Number(
+                                session.id
+                            )});
+                        "
                     >
+                        <i class="fa-solid fa-check"></i>
                         Complete
                     </button>
 
                     <button
                         type="button"
                         class="modal-button modal-missed-button"
-                        onclick="openMissedFromDetails()"
+                        onclick="
+                            closeModal('detailsModal');
+                            openMissedModal(${Number(
+                                session.id
+                            )});
+                        "
                     >
+                        <i class="fa-solid fa-user-xmark"></i>
                         Mark Missed
                     </button>
-                `;
-            }
-
-            document.getElementById(
-                "detailsModalActions"
-            ).innerHTML = actions;
-
-            openModal("detailsModal");
+                  `
+                : ""
         }
-
-        /* ATTENDANCE */
-
-        function openAttendanceModal(id) {
-            selectedSession =
-                findSession(id);
-
-            if (!selectedSession) {
-                return;
-            }
-
-            document.getElementById(
-                "attendancePatientCard"
-            ).innerHTML =
-                createPatientCard(
-                    selectedSession
-                );
-
-            document.getElementById(
-                "attendanceStatus"
-            ).value =
-                selectedSession.attendance ===
-                "PENDING"
-                    ? ""
-                    : selectedSession.attendance;
-
-            document.getElementById(
-                "attendanceNotes"
-            ).value = "";
-
-            openModal("attendanceModal");
-        }
-
-        function openAttendanceFromDetails() {
-            const id =
-                selectedSession?.id;
-
-            closeModal("detailsModal");
-
-            if (id) {
-                openAttendanceModal(id);
-            }
-        }
-
-        async function submitAttendance() {
-            if (!selectedSession) {
-                return;
-            }
-
-            const attendance =
-                document.getElementById(
-                    "attendanceStatus"
-                ).value;
-
-            const notes =
-                document.getElementById(
-                    "attendanceNotes"
-                ).value.trim();
-
-            if (!attendance) {
-                showAlert(
-                    "Please select attendance.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const button =
-                document.getElementById(
-                    "attendanceSubmitButton"
-                );
-
-            setButtonLoading(
-                button,
-                true,
-                "Saving..."
-            );
-
-            try {
-                await therapistApiRequest(
-                    `/api/therapist/sessions/${encodeURIComponent(
-                        selectedSession.id
-                    )}/attendance`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                attendance:
-                                    attendance,
-
-                                notes:
-                                    notes
-                            })
-                    }
-                );
-
-                selectedSession.attendance =
-                    attendance;
-
-                if (
-                    attendance ===
-                    "PRESENT"
-                ) {
-                    selectedSession.status =
-                        "IN_PROGRESS";
-
-                } else if (
-                    attendance ===
-                    "ABSENT"
-                ) {
-                    selectedSession.status =
-                        "MISSED";
-
-                } else if (
-                    attendance ===
-                    "CANCELLED"
-                ) {
-                    selectedSession.status =
-                        "CANCELLED";
-                }
-
-                closeModal(
-                    "attendanceModal"
-                );
-
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Attendance updated successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                showAlert(
-                    error.message ||
-                    "Attendance could not be updated.",
-                    "error"
-                );
-
-            } finally {
-                setButtonLoading(
-                    button,
-                    false,
-                    "Save Attendance"
-                );
-            }
-        }
-
-        /* COMPLETE */
-
-        function openCompleteModal(id) {
-            selectedSession =
-                findSession(id);
-
-            if (!selectedSession) {
-                return;
-            }
-
-            document.getElementById(
-                "completePatientCard"
-            ).innerHTML =
-                createPatientCard(
-                    selectedSession
-                );
-
-            document.getElementById(
-                "treatmentPerformed"
-            ).value =
-                selectedSession.treatmentPerformed ===
-                "-"
-                    ? ""
-                    : selectedSession.treatmentPerformed;
-
-            document.getElementById(
-                "patientResponse"
-            ).value =
-                selectedSession.patientResponse ===
-                "-"
-                    ? ""
-                    : selectedSession.patientResponse;
-
-            document.getElementById(
-                "progressNotes"
-            ).value =
-                selectedSession.progressNotes ===
-                "-"
-                    ? ""
-                    : selectedSession.progressNotes;
-
-            document.getElementById(
-                "advice"
-            ).value =
-                selectedSession.advice ===
-                "-"
-                    ? ""
-                    : selectedSession.advice;
-
-            document.getElementById(
-                "nextSessionDate"
-            ).value =
-                selectedSession.nextSessionDate ||
-                "";
-
-            openModal("completeModal");
-        }
-
-        function openCompleteFromDetails() {
-            const id =
-                selectedSession?.id;
-
-            closeModal("detailsModal");
-
-            if (id) {
-                openCompleteModal(id);
-            }
-        }
-
-        async function submitCompletion() {
-            if (!selectedSession) {
-                return;
-            }
-
-            const treatmentPerformed =
-                document.getElementById(
-                    "treatmentPerformed"
-                ).value.trim();
-
-            const patientResponse =
-                document.getElementById(
-                    "patientResponse"
-                ).value.trim();
-
-            const progressNotes =
-                document.getElementById(
-                    "progressNotes"
-                ).value.trim();
-
-            const advice =
-                document.getElementById(
-                    "advice"
-                ).value.trim();
-
-            const nextSessionDate =
-                document.getElementById(
-                    "nextSessionDate"
-                ).value;
-
-            if (!treatmentPerformed) {
-                showAlert(
-                    "Please enter treatment performed.",
-                    "error"
-                );
-
-                return;
-            }
-
-            if (!progressNotes) {
-                showAlert(
-                    "Please enter progress notes.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const button =
-                document.getElementById(
-                    "completeSubmitButton"
-                );
-
-            setButtonLoading(
-                button,
-                true,
-                "Completing..."
-            );
-
-            try {
-                await therapistApiRequest(
-                    `/api/therapist/sessions/${encodeURIComponent(
-                        selectedSession.id
-                    )}/complete`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                treatmentPerformed:
-                                    treatmentPerformed,
-
-                                patientResponse:
-                                    patientResponse,
-
-                                progressNotes:
-                                    progressNotes,
-
-                                advice:
-                                    advice,
-
-                                nextSessionDate:
-                                    nextSessionDate ||
-                                    null
-                            })
-                    }
-                );
-
-                selectedSession.status =
-                    "COMPLETED";
-
-                selectedSession.attendance =
-                    "PRESENT";
-
-                selectedSession.treatmentPerformed =
-                    treatmentPerformed;
-
-                selectedSession.patientResponse =
-                    patientResponse || "-";
-
-                selectedSession.progressNotes =
-                    progressNotes;
-
-                selectedSession.advice =
-                    advice || "-";
-
-                selectedSession.nextSessionDate =
-                    nextSessionDate || null;
-
-                closeModal(
-                    "completeModal"
-                );
-
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Therapy session completed successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                showAlert(
-                    error.message ||
-                    "Session could not be completed.",
-                    "error"
-                );
-
-            } finally {
-                setButtonLoading(
-                    button,
-                    false,
-                    "Complete Session"
-                );
-            }
-        }
-
-        /* MISSED */
-
-        function openMissedModal(id) {
-            selectedSession =
-                findSession(id);
-
-            if (!selectedSession) {
-                return;
-            }
-
-            document.getElementById(
-                "missedPatientCard"
-            ).innerHTML =
-                createPatientCard(
-                    selectedSession
-                );
-
-            document.getElementById(
-                "missedReason"
-            ).value = "";
-
-            openModal("missedModal");
-        }
-
-        function openMissedFromDetails() {
-            const id =
-                selectedSession?.id;
-
-            closeModal("detailsModal");
-
-            if (id) {
-                openMissedModal(id);
-            }
-        }
-
-        async function submitMissedSession() {
-            if (!selectedSession) {
-                return;
-            }
-
-            const reason =
-                document.getElementById(
-                    "missedReason"
-                ).value.trim();
-
-            if (!reason) {
-                showAlert(
-                    "Please enter missed session reason.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const button =
-                document.getElementById(
-                    "missedSubmitButton"
-                );
-
-            setButtonLoading(
-                button,
-                true,
-                "Updating..."
-            );
-
-            try {
-                await therapistApiRequest(
-                    `/api/therapist/sessions/${encodeURIComponent(
-                        selectedSession.id
-                    )}/missed`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                reason:
-                                    reason
-                            })
-                    }
-                );
-
-                selectedSession.status =
-                    "MISSED";
-
-                selectedSession.attendance =
-                    "ABSENT";
-
-                selectedSession.missedReason =
-                    reason;
-
-                closeModal(
-                    "missedModal"
-                );
-
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Session marked as missed.",
-                    "success"
-                );
-
-            } catch (error) {
-                showAlert(
-                    error.message ||
-                    "Session could not be updated.",
-                    "error"
-                );
-
-            } finally {
-                setButtonLoading(
-                    button,
-                    false,
-                    "Mark Missed"
-                );
-            }
-        }
-
-        /* PAGINATION */
-
-        function updatePaginationInfo(
-            start,
-            end,
-            total
-        ) {
-            setText(
-                "paginationInfo",
-                total === 0
-                    ? "Showing 0 sessions"
-                    : `Showing ${start}–${end} of ${total} sessions`
-            );
-        }
-
-        function renderPaginationButtons(
-            totalPages
-        ) {
-            const container =
-                document.getElementById(
-                    "paginationButtons"
-                );
-
-            container.innerHTML = "";
-
-            const previous =
-                document.createElement(
-                    "button"
-                );
-
-            previous.type = "button";
-
-            previous.className =
-                "pagination-button";
-
-            previous.innerHTML =
-                '<i class="fa-solid fa-chevron-left"></i>';
-
-            previous.disabled =
-                currentPage === 1;
-
-            previous.onclick =
-                function () {
-                    changePage(
-                        currentPage - 1
-                    );
-                };
-
-            container.appendChild(
-                previous
-            );
-
-            for (
-                let page = 1;
-                page <= totalPages;
-                page++
-            ) {
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-                button.type = "button";
-
-                button.className =
-                    `pagination-button ${
-                        page === currentPage
-                            ? "active"
-                            : ""
-                    }`;
-
-                button.textContent =
-                    page;
-
-                button.onclick =
-                    function () {
-                        changePage(page);
-                    };
-
-                container.appendChild(
-                    button
-                );
-            }
-
-            const next =
-                document.createElement(
-                    "button"
-                );
-
-            next.type = "button";
-
-            next.className =
-                "pagination-button";
-
-            next.innerHTML =
-                '<i class="fa-solid fa-chevron-right"></i>';
-
-            next.disabled =
-                currentPage ===
-                totalPages;
-
-            next.onclick =
-                function () {
-                    changePage(
-                        currentPage + 1
-                    );
-                };
-
-            container.appendChild(
-                next
-            );
-        }
-
-        function changePage(page) {
-            const totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        filteredSessions.length /
-                        pageSize
-                    )
-                );
-
-            if (
-                page < 1 ||
-                page > totalPages
-            ) {
-                return;
-            }
-
-            currentPage = page;
-            renderSchedule();
-        }
-
-        /* HELPERS */
-
-        function findSession(id) {
-            return allSessions.find(
-                session =>
-                    String(session.id) ===
-                    String(id)
-            );
-        }
-
-        function createPatientCard(session) {
-            return `
-                <div class="modal-patient-card">
-
-                    <span class="patient-avatar">
-                        ${escapeHtml(
-                            session.patientName
-                                .charAt(0)
-                                .toUpperCase()
-                        )}
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            ${escapeHtml(
-                                session.patientName
-                            )}
-                        </h3>
-
+    `;
+
+    openModal("detailsModal");
+}
+
+function detailBox(
+    label,
+    value,
+    fullWidth = false
+) {
+    return `
+        <div
+            class="detail-box ${
+                fullWidth
+                    ? "full-width"
+                    : ""
+            }"
+        >
+            <span>
+                ${escapeHtml(label)}
+            </span>
+
+            ${
+                fullWidth
+                    ? `
                         <p>
                             ${escapeHtml(
-                                session.therapyName
-                            )}
-                            ·
-                            Session
-                            ${escapeHtml(
-                                session.sessionNumber
-                            )}
-                            /
-                            ${escapeHtml(
-                                session.totalSessions
+                                value ?? "-"
                             )}
                         </p>
-
-                    </div>
-
-                </div>
-            `;
-        }
-
-        function calculateProgress(
-            completed,
-            total
-        ) {
-            if (
-                Number(total) <= 0
-            ) {
-                return 0;
+                      `
+                    : `
+                        <strong>
+                            ${escapeHtml(
+                                value ?? "-"
+                            )}
+                        </strong>
+                      `
             }
+        </div>
+    `;
+}
 
-            return Math.min(
-                100,
-                Math.round(
-                    (
-                        Number(completed) /
-                        Number(total)
-                    ) * 100
-                )
-            );
-        }
+/* =========================
+   ATTENDANCE MODAL
+========================= */
 
-        function openModal(id) {
-            document.getElementById(
-                id
-            ).classList.add("show");
-        }
+function openAttendanceModal(id) {
+    selectedSession =
+        findSession(id);
 
-        function closeModal(id) {
-            document.getElementById(
-                id
-            ).classList.remove("show");
-        }
+    showAlert(
+        "A separate attendance-update API was not provided. Use Complete or Mark Missed.",
+        "info"
+    );
+}
 
-        function handleModalOutside(
-            event,
-            modalId
-        ) {
-            if (
-                event.target.id ===
-                modalId
-            ) {
-                closeModal(modalId);
-            }
-        }
+async function submitAttendance() {
+    showAlert(
+        "Attendance is derived from the session status. Use Complete or Mark Missed.",
+        "info"
+    );
+}
 
-        function setButtonLoading(
-            button,
-            loading,
-            text
-        ) {
-            button.disabled =
-                loading;
+function openAttendanceFromDetails() {
+    if (selectedSession) {
+        openAttendanceModal(
+            selectedSession.id
+        );
+    }
+}
 
-            button.innerHTML =
-                loading
-                    ? `
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    ${escapeHtml(text)}
-                    `
-                    : text;
-        }
+/* =========================
+   COMPLETE SESSION
+========================= */
 
-        function getTodayString() {
-            const date =
-                new Date();
+function openCompleteModal(id) {
+    selectedSession =
+        findSession(id);
 
-            const year =
-                date.getFullYear();
+    if (!selectedSession) {
+        showAlert(
+            "Session not found.",
+            "error"
+        );
+        return;
+    }
 
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
+    document.getElementById(
+        "completePatientCard"
+    ).innerHTML =
+        buildModalPatientCard(
+            selectedSession
+        );
 
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            return `${year}-${month}-${day}`;
-        }
-
-        function getOffsetDate(days) {
-            const date =
-                new Date();
-
-            date.setDate(
-                date.getDate() + days
-            );
-
-            const year =
-                date.getFullYear();
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            return `${year}-${month}-${day}`;
-        }
-
-        function dateOnly(value) {
-            return value
-                ? String(value)
-                    .substring(0, 10)
-                : "";
-        }
-
-        function formatDate(value) {
-            if (!value) {
-                return "-";
-            }
-
-            const date =
-                new Date(
-                    String(value).includes("T")
-                        ? value
-                        : `${value}T00:00:00`
-                );
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return String(value);
-            }
-
-            return date.toLocaleDateString(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                }
-            );
-        }
-
-        function formatTime(value) {
-            if (!value) {
-                return "-";
-            }
-
-            const clean =
-                String(value)
-                    .substring(0, 5);
-
-            const parts =
-                clean.split(":");
-
-            if (parts.length < 2) {
-                return clean;
-            }
-
-            let hour =
-                Number(parts[0]);
-
-            const minute =
-                parts[1];
-
-            const period =
-                hour >= 12
-                    ? "PM"
-                    : "AM";
-
-            hour =
-                hour % 12 || 12;
-
-            return `${hour}:${minute} ${period}`;
-        }
-
-        function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
-                );
-        }
-
-        function toggleSidebar() {
-            document.getElementById(
-                "therapistSidebar"
-            ).classList.toggle("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.toggle("show");
-        }
-
-        function closeSidebar() {
-            document.getElementById(
-                "therapistSidebar"
-            ).classList.remove("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.remove("show");
-        }
-
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
-
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
-
-            setText(
-                "alertMessage",
-                message
-            );
-
-            box.className =
-                `page-alert show ${type}`;
-
-            if (type === "success") {
-                icon.className =
-                    "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
-
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
-
-            clearTimeout(
-                window.scheduleAlertTimer
-            );
-
-            window.scheduleAlertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
-        }
-
-        function setText(id, value) {
+    [
+        "treatmentPerformed",
+        "patientResponse",
+        "progressNotes",
+        "advice",
+        "nextSessionDate"
+    ].forEach(
+        id => {
             const element =
                 document.getElementById(id);
 
             if (element) {
-                element.textContent =
-                    value;
+                element.value = "";
             }
         }
+    );
 
-        function escapeHtml(value) {
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return "";
-            }
+    openModal("completeModal");
+}
 
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
+function openCompleteFromDetails() {
+    if (selectedSession) {
+        const id =
+            selectedSession.id;
+
+        closeModal(
+            "detailsModal"
+        );
+
+        openCompleteModal(id);
+    }
+}
+
+async function submitCompletion() {
+    if (!selectedSession) {
+        showAlert(
+            "Select a session first.",
+            "error"
+        );
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "completeSubmitButton"
+        );
+
+    const originalHtml =
+        button.innerHTML;
+
+    try {
+        button.disabled = true;
+        button.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Completing...
+        `;
+
+        const result =
+            await therapistApiRequest(
+                `/api/daily-treatments/${encodeURIComponent(
+                    selectedSession.id
+                )}/complete`,
+                {
+                    method: "PUT"
+                }
+            );
+
+        showAlert(
+            result.message ||
+            "Daily treatment session completed successfully.",
+            "success"
+        );
+
+        closeModal(
+            "completeModal"
+        );
+
+        await loadSchedule();
+
+    } catch (error) {
+        showAlert(
+            error.message ||
+            "Session could not be completed.",
+            "error"
+        );
+
+    } finally {
+        button.disabled = false;
+        button.innerHTML =
+            originalHtml;
+    }
+}
+
+/* =========================
+   MARK MISSED
+========================= */
+
+function openMissedModal(id) {
+    selectedSession =
+        findSession(id);
+
+    if (!selectedSession) {
+        showAlert(
+            "Session not found.",
+            "error"
+        );
+        return;
+    }
+
+    document.getElementById(
+        "missedPatientCard"
+    ).innerHTML =
+        buildModalPatientCard(
+            selectedSession
+        );
+
+    const reason =
+        document.getElementById(
+            "missedReason"
+        );
+
+    if (reason) {
+        reason.value = "";
+    }
+
+    openModal("missedModal");
+}
+
+function openMissedFromDetails() {
+    if (selectedSession) {
+        const id =
+            selectedSession.id;
+
+        closeModal(
+            "detailsModal"
+        );
+
+        openMissedModal(id);
+    }
+}
+
+async function submitMissedSession() {
+    if (!selectedSession) {
+        showAlert(
+            "Select a session first.",
+            "error"
+        );
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "missedSubmitButton"
+        );
+
+    const originalHtml =
+        button.innerHTML;
+
+    try {
+        button.disabled = true;
+        button.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Updating...
+        `;
+
+        const result =
+            await therapistApiRequest(
+                `/api/daily-treatments/${encodeURIComponent(
+                    selectedSession.id
+                )}/mark-missed`,
+                {
+                    method: "PUT"
+                }
+            );
+
+        showAlert(
+            result.message ||
+            "Daily treatment session marked as missed.",
+            "success"
+        );
+
+        closeModal(
+            "missedModal"
+        );
+
+        await loadSchedule();
+
+    } catch (error) {
+        showAlert(
+            error.message ||
+            "Unable to mark the session as missed.",
+            "error"
+        );
+
+    } finally {
+        button.disabled = false;
+        button.innerHTML =
+            originalHtml;
+    }
+}
+
+function buildModalPatientCard(
+    session
+) {
+    return `
+        <span class="patient-avatar">
+            ${escapeHtml(
+                session.patientName
+                    .charAt(0)
+                    .toUpperCase()
+            )}
+        </span>
+
+        <div>
+            <h3>
+                ${escapeHtml(
+                    session.patientName
+                )}
+            </h3>
+
+            <p>
+                ${escapeHtml(
+                    session.therapyName
+                )}
+                ·
+                ${escapeHtml(
+                    session.sessionNumberCode
+                )}
+            </p>
+        </div>
+    `;
+}
+
+/* =========================
+   MODALS
+========================= */
+
+function openModal(id) {
+    const modal =
+        document.getElementById(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add("show");
+    document.body.style.overflow =
+        "hidden";
+}
+
+function closeModal(id) {
+    const modal =
+        document.getElementById(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove("show");
+
+    if (
+        !document.querySelector(
+            ".modal-overlay.show"
+        )
+    ) {
+        document.body.style.overflow =
+            "";
+    }
+
+    if (
+        [
+            "detailsModal",
+            "completeModal",
+            "missedModal",
+            "attendanceModal"
+        ].includes(id)
+    ) {
+        selectedSession = null;
+    }
+}
+
+function handleModalOutside(
+    event,
+    modalId
+) {
+    if (event.target.id === modalId) {
+        closeModal(modalId);
+    }
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+function toggleSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.toggle("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.toggle("show");
+}
+
+function closeSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.remove("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.remove("show");
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function statusClass(status) {
+    switch (
+        String(status || "")
+            .toUpperCase()
+    ) {
+        case "APPROVED":
+            return "status-approved";
+
+        case "COMPLETED":
+            return "status-completed";
+
+        case "MISSED":
+            return "status-missed";
+
+        case "RESCHEDULED":
+            return "status-rescheduled";
+
+        case "PENDING_APPROVAL":
+        default:
+            return "status-pending";
+    }
+}
+
+function attendanceClass(attendance) {
+    switch (
+        String(attendance || "")
+            .toUpperCase()
+    ) {
+        case "PRESENT":
+            return "attendance-present";
+
+        case "ABSENT":
+            return "attendance-absent";
+
+        default:
+            return "attendance-pending";
+    }
+}
+
+function formatLabel(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "-";
+    }
+
+    return String(value)
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            letter =>
+                letter.toUpperCase()
+        );
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(
+            String(value).includes("T")
+                ? value
+                : `${value}T00:00:00`
+        );
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
         }
-    </script>
+    );
+}
+
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const parts =
+        String(value).split(":");
+
+    if (parts.length < 2) {
+        return String(value);
+    }
+
+    const date = new Date();
+
+    date.setHours(
+        Number(parts[0]),
+        Number(parts[1]),
+        0,
+        0
+    );
+
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        }
+    );
+}
+
+function formatTimeRange(
+    start,
+    end
+) {
+    const startText =
+        formatTime(start);
+
+    const endText =
+        formatTime(end);
+
+    if (
+        end &&
+        endText !== "-"
+    ) {
+        return `${startText} - ${endText}`;
+    }
+
+    return startText;
+}
+
+function createScheduleDate(session) {
+    const date =
+        session.sessionDate ||
+        "1970-01-01";
+
+    const time =
+        session.sessionTime ||
+        "00:00:00";
+
+    return new Date(
+        `${date}T${time}`
+    );
+}
+
+function startOfToday() {
+    const date = new Date();
+
+    date.setHours(0, 0, 0, 0);
+
+    return date;
+}
+
+function endOfToday() {
+    const date = new Date();
+
+    date.setHours(
+        23,
+        59,
+        59,
+        999
+    );
+
+    return date;
+}
+
+function getTodayString() {
+    const today = new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function setTodayAsMinimumDate() {
+    [
+        "customDateFilter",
+        "nextSessionDate"
+    ].forEach(
+        id => {
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                element.min =
+                    getTodayString();
+            }
+        }
+    );
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const alertBox =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const alertMessage =
+        document.getElementById(
+            "alertMessage"
+        );
+
+    const alertIcon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    alertBox.className =
+        `page-alert show ${type}`;
+
+    alertMessage.textContent =
+        message;
+
+    alertIcon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.scheduleAlertTimer
+    );
+
+    window.scheduleAlertTimer =
+        setTimeout(
+            () => {
+                alertBox.classList
+                    .remove("show");
+            },
+            4000
+        );
+}
+
+document.addEventListener(
+    "keydown",
+    event => {
+        if (event.key === "Escape") {
+            [
+                "detailsModal",
+                "attendanceModal",
+                "completeModal",
+                "missedModal"
+            ].forEach(closeModal);
+        }
+    }
+);
+</script>
 
 </body>
 </html>

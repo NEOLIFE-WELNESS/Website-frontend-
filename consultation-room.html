@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Online Consultation | NeoLife Wellness</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="./assets/main_logo.jpeg"
+    >
+
+    <style>
+        :root {
+            --green-dark: #123c32;
+            --green: #216c55;
+            --cream: #f7f4eb;
+            --white: #ffffff;
+            --danger: #c33945;
+            --text: #1f302a;
+            --muted: #68756f;
+            --border: #dce7e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--cream);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .consultation-header {
+            min-height: 74px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .brand h1 {
+            color: var(--green-dark);
+            font-size: 20px;
+        }
+
+        .brand p {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .meeting-status {
+            padding: 9px 14px;
+            border-radius: 30px;
+            color: var(--green-dark);
+            background: #e8f4ee;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .consultation-room {
+            width: min(1500px, calc(100% - 30px));
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 360px;
+            gap: 18px;
+        }
+
+        .video-section {
+            min-height: 690px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 22px;
+            background: #10251f;
+        }
+
+        .video-grid {
+            flex: 1;
+            min-height: 580px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .participant-card {
+            min-height: 260px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            background: #20352e;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+
+        .participant-video {
+            width: 100%;
+            height: 100%;
+            min-height: 260px;
+            display: grid;
+            place-items: center;
+        }
+
+        .participant-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .participant-audio {
+            display: none;
+        }
+
+        .participant-name {
+            position: absolute;
+            left: 12px;
+            bottom: 12px;
+            padding: 6px 10px;
+            border-radius: 9px;
+            color: white;
+            background: rgba(0,0,0,.55);
+            font-size: 12px;
+        }
+
+        .waiting-message {
+            height: 100%;
+            min-height: 580px;
+            display: grid;
+            place-items: center;
+            color: rgba(255,255,255,.75);
+            text-align: center;
+        }
+
+        .video-controls {
+            min-height: 78px;
+            padding-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .control-button {
+            min-width: 130px;
+            padding: 13px 18px;
+            border: none;
+            border-radius: 14px;
+            color: white;
+            background: rgba(255,255,255,.13);
+            font-weight: 700;
+        }
+
+        .leave-button,
+        .end-button {
+            background: var(--danger);
+        }
+
+        .prescription-section {
+            padding: 22px;
+            border-radius: 22px;
+            background: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .prescription-section h2 {
+            margin-bottom: 16px;
+            color: var(--green-dark);
+        }
+
+        #prescriptionPad {
+            min-height: 560px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            color: var(--muted);
+            background: #fbfcfa;
+        }
+
+        .error-box {
+            width: min(700px, calc(100% - 30px));
+            margin: 20px auto;
+            padding: 15px 18px;
+            display: none;
+            border-radius: 13px;
+            color: #842f36;
+            background: #fde8ea;
+            border: 1px solid #edbdc1;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        @media (max-width: 1000px) {
+            .consultation-room {
+                grid-template-columns: 1fr;
+            }
+
+            .prescription-section {
+                min-height: auto;
+            }
+
+            #prescriptionPad {
+                min-height: 300px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .consultation-header {
+                padding: 10px 14px;
+            }
+
+            .brand h1 {
+                font-size: 16px;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .video-section {
+                min-height: calc(100vh - 115px);
+            }
+
+            .control-button {
+                min-width: 90px;
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="consultation-header">
+
+    <div class="brand">
+        <img
+            src="./assets/main_logo.jpeg"
+            alt="NeoLife Logo"
+        >
+
+        <div>
+            <h1>NeoLife Wellness Center</h1>
+            <p>Secure Online Consultation</p>
+        </div>
+    </div>
+
+    <div
+        id="meetingStatus"
+        class="meeting-status"
+    >
+        Connecting...
+    </div>
+
+</header>
+
+<div
+    id="errorBox"
+    class="error-box"
+></div>
+
+<main class="consultation-room">
+
+    <section class="video-section">
+
+        <div
+            id="videoGrid"
+            class="video-grid"
+        >
+            <div
+                id="waitingMessage"
+                class="waiting-message"
+            >
+                <div>
+                    <h2>Preparing consultation room</h2>
+                    <p>Please allow camera and microphone access.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-controls">
+
+            <button
+                id="microphoneButton"
+                class="control-button"
+                type="button"
+                disabled
+            >
+                Mute
+            </button>
+
+            <button
+                id="cameraButton"
+                class="control-button"
+                type="button"
+                disabled
+            >
+                Camera Off
+            </button>
+
+            <button
+                id="leaveButton"
+                class="control-button leave-button"
+                type="button"
+                disabled
+            >
+                Leave
+            </button>
+
+            <button
+                id="endConsultationButton"
+                class="control-button end-button"
+                type="button"
+                hidden
+                disabled
+            >
+                End Consultation
+            </button>
+
+        </div>
+
+    </section>
+
+    <section class="prescription-section">
+
+        <h2>Live Prescription</h2>
+
+        <div id="prescriptionPad">
+            The prescription will appear here during the consultation.
+        </div>
+
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
+<script>
+// const API_BASE_URL =
+//     "https://neolifeayush.com/api";
+
+
+// For local backend testing, use:
+
+const API_BASE_URL =
+    "http://localhost:8085/api";
+
+
+const consultationId =
+    new URLSearchParams(
+        window.location.search
+    ).get("consultationId");
+
+const authToken =
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken");
+
+let room = null;
+let participantRole = null;
+let meetingEndedByUser = false;
+
+const videoGrid =
+    document.getElementById(
+        "videoGrid"
+    );
+
+const waitingMessage =
+    document.getElementById(
+        "waitingMessage"
+    );
+
+const microphoneButton =
+    document.getElementById(
+        "microphoneButton"
+    );
+
+const cameraButton =
+    document.getElementById(
+        "cameraButton"
+    );
+
+const leaveButton =
+    document.getElementById(
+        "leaveButton"
+    );
+
+const endConsultationButton =
+    document.getElementById(
+        "endConsultationButton"
+    );
+
+const meetingStatus =
+    document.getElementById(
+        "meetingStatus"
+    );
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+async function joinConsultation() {
+
+    if (!consultationId) {
+        showError(
+            "Consultation ID is missing from the page URL."
+        );
+
+        return;
+    }
+
+    if (!authToken) {
+        window.location.href =
+            "/login.html";
+
+        return;
+    }
+
+    setMeetingStatus(
+        "Requesting secure access..."
+    );
+
+    const response = await fetch(
+        `${API_BASE_URL}/video-meetings/${encodeURIComponent(
+            consultationId
+        )}/join`,
+        {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Authorization":
+                    `Bearer ${authToken}`
+            }
+        }
+    );
+
+    const result =
+        await safelyReadResponse(
+            response
+        );
+
+    if (
+        !response.ok ||
+        result?.success === false
+    ) {
+        throw new Error(
+            result?.message ||
+            "Unable to join consultation."
+        );
+    }
+
+    const meeting =
+        result?.data || {};
+
+    participantRole =
+        String(
+            meeting.participantRole || ""
+        ).toUpperCase();
+
+    const serverUrl =
+        meeting.serverUrl;
+
+    const liveKitToken =
+        meeting.accessToken ||
+        meeting.token;
+
+    if (
+        !serverUrl ||
+        !liveKitToken
+    ) {
+        throw new Error(
+            "LiveKit access details are missing from the server response."
+        );
+    }
+
+    room = new LivekitClient.Room({
+        adaptiveStream: true,
+        dynacast: true
+    });
+
+    registerRoomListeners();
+
+    setMeetingStatus(
+        "Connecting..."
+    );
+
+    await room.connect(
+        serverUrl,
+        liveKitToken
+    );
+
+    await room.localParticipant
+        .setMicrophoneEnabled(true);
+
+    await room.localParticipant
+        .setCameraEnabled(true);
+
+    removeWaitingMessage();
+
+    renderLocalParticipant();
+
+    renderExistingRemoteParticipants();
+
+    enableMeetingControls();
+
+    if (
+        participantRole === "DOCTOR"
+    ) {
+        endConsultationButton.hidden =
+            false;
+    }
+
+    setMeetingStatus(
+        participantRole === "DOCTOR"
+            ? "Doctor connected"
+            : "Waiting for doctor..."
+    );
+}
+
+function registerRoomListeners() {
+
+    room.on(
+        LivekitClient.RoomEvent.TrackSubscribed,
+        (
+            track,
+            publication,
+            participant
+        ) => {
+            removeWaitingMessage();
+
+            attachTrack(
+                track,
+                participant.identity
+            );
+        }
+    );
+
+    room.on(
+        LivekitClient.RoomEvent.TrackUnsubscribed,
+        track => {
+            track.detach().forEach(
+                element => element.remove()
+            );
+        }
+    );
+
+    room.on(
+        LivekitClient.RoomEvent.ParticipantConnected,
+        participant => {
+            removeWaitingMessage();
+
+            setMeetingStatus(
+                participantRole === "DOCTOR"
+                    ? "Patient connected"
+                    : "Doctor connected"
+            );
+        }
+    );
+
+    room.on(
+        LivekitClient.RoomEvent.ParticipantDisconnected,
+        participant => {
+            removeParticipantContainer(
+                participant.identity
+            );
+
+            setMeetingStatus(
+                participantRole === "DOCTOR"
+                    ? "Patient disconnected"
+                    : "Doctor disconnected"
+            );
+        }
+    );
+
+    room.on(
+        LivekitClient.RoomEvent.LocalTrackPublished,
+        publication => {
+            if (publication.track) {
+                attachTrack(
+                    publication.track,
+                    room.localParticipant.identity
+                );
+            }
+        }
+    );
+
+    room.on(
+        LivekitClient.RoomEvent.LocalTrackUnpublished,
+        publication => {
+            if (publication.track) {
+                publication.track
+                    .detach()
+                    .forEach(
+                        element =>
+                            element.remove()
+                    );
+            }
+        }
+    );
+
+    room.on(
+        LivekitClient.RoomEvent.Disconnected,
+        () => {
+            if (!meetingEndedByUser) {
+                setMeetingStatus(
+                    "Disconnected"
+                );
+            }
+
+            disableMeetingControls();
+        }
+    );
+}
+
+function renderExistingRemoteParticipants() {
+
+    room.remoteParticipants.forEach(
+        participant => {
+            participant.trackPublications
+                .forEach(publication => {
+                    if (
+                        publication.track &&
+                        publication.isSubscribed
+                    ) {
+                        attachTrack(
+                            publication.track,
+                            participant.identity
+                        );
+                    }
+                });
+        }
+    );
+}
+
+function renderLocalParticipant() {
+
+    const localParticipant =
+        room.localParticipant;
+
+    localParticipant.trackPublications
+        .forEach(publication => {
+            if (publication.track) {
+                attachTrack(
+                    publication.track,
+                    localParticipant.identity
+                );
+            }
+        });
+}
+
+function attachTrack(
+    track,
+    participantIdentity
+) {
+
+    const container =
+        getOrCreateParticipantContainer(
+            participantIdentity
+        );
+
+    const attachedElements =
+        track.attach();
+
+    const elements =
+        Array.isArray(attachedElements)
+            ? attachedElements
+            : [attachedElements];
+
+    elements.forEach(element => {
+
+        element.autoplay = true;
+        element.playsInline = true;
+
+        if (
+            track.kind ===
+            LivekitClient.Track.Kind.Video
+        ) {
+            const videoContainer =
+                container.querySelector(
+                    ".participant-video"
+                );
+
+            videoContainer.innerHTML = "";
+            videoContainer.appendChild(
+                element
+            );
+
+        } else {
+            container
+                .querySelector(
+                    ".participant-audio"
+                )
+                .appendChild(
+                    element
+                );
+        }
+    });
+}
+
+function getOrCreateParticipantContainer(
+    participantIdentity
+) {
+
+    const safeIdentity =
+        createSafeElementId(
+            participantIdentity
+        );
+
+    let container =
+        document.getElementById(
+            `participant-${safeIdentity}`
+        );
+
+    if (container) {
+        return container;
+    }
+
+    container =
+        document.createElement(
+            "article"
+        );
+
+    container.id =
+        `participant-${safeIdentity}`;
+
+    container.className =
+        "participant-card";
+
+    container.dataset.identity =
+        participantIdentity;
+
+    container.innerHTML = `
+        <div class="participant-video"></div>
+        <div class="participant-audio"></div>
+
+        <span class="participant-name">
+            ${escapeHtml(
+                getParticipantDisplayName(
+                    participantIdentity
+                )
+            )}
+        </span>
+    `;
+
+    videoGrid.appendChild(
+        container
+    );
+
+    return container;
+}
+
+function removeParticipantContainer(
+    participantIdentity
+) {
+
+    const safeIdentity =
+        createSafeElementId(
+            participantIdentity
+        );
+
+    document
+        .getElementById(
+            `participant-${safeIdentity}`
+        )
+        ?.remove();
+}
+
+async function toggleMicrophone() {
+
+    if (!room) {
+        return;
+    }
+
+    try {
+        const enabled =
+            room.localParticipant
+                .isMicrophoneEnabled;
+
+        await room.localParticipant
+            .setMicrophoneEnabled(
+                !enabled
+            );
+
+        microphoneButton.textContent =
+            enabled
+                ? "Unmute"
+                : "Mute";
+
+    } catch (error) {
+        showError(
+            error.message ||
+            "Unable to change microphone."
+        );
+    }
+}
+
+async function toggleCamera() {
+
+    if (!room) {
+        return;
+    }
+
+    try {
+        const enabled =
+            room.localParticipant
+                .isCameraEnabled;
+
+        await room.localParticipant
+            .setCameraEnabled(
+                !enabled
+            );
+
+        cameraButton.textContent =
+            enabled
+                ? "Camera On"
+                : "Camera Off";
+
+    } catch (error) {
+        showError(
+            error.message ||
+            "Unable to change camera."
+        );
+    }
+}
+
+function leaveConsultation() {
+
+    meetingEndedByUser = true;
+
+    if (room) {
+        room.disconnect();
+    }
+
+    redirectToDashboard();
+}
+
+async function endConsultation() {
+
+    if (
+        participantRole !== "DOCTOR"
+    ) {
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to end this consultation?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    endConsultationButton.disabled =
+        true;
+
+    endConsultationButton.textContent =
+        "Ending...";
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/video-meetings/${encodeURIComponent(
+                consultationId
+            )}/end`,
+            {
+                method: "PUT",
+                headers: {
+                    "Accept":
+                        "application/json",
+                    "Authorization":
+                        `Bearer ${authToken}`
+                }
+            }
+        );
+
+        const result =
+            await safelyReadResponse(
+                response
+            );
+
+        if (
+            !response.ok ||
+            result?.success === false
+        ) {
+            throw new Error(
+                result?.message ||
+                "Unable to end consultation."
+            );
+        }
+
+        meetingEndedByUser = true;
+
+        if (room) {
+            room.disconnect();
+        }
+
+        alert(
+            result?.message ||
+            "Consultation ended successfully."
+        );
+
+        redirectToDashboard();
+
+    } catch (error) {
+        endConsultationButton.disabled =
+            false;
+
+        endConsultationButton.textContent =
+            "End Consultation";
+
+        showError(
+            error.message ||
+            "Unable to end consultation."
+        );
+    }
+}
+
+function redirectToDashboard() {
+
+    if (
+        participantRole === "DOCTOR"
+    ) {
+        window.location.href =
+            "/doctor/doctor-dashboard.html";
+
+        return;
+    }
+
+    window.location.href =
+        "/patient/my-appointments.html";
+}
+
+function enableMeetingControls() {
+
+    microphoneButton.disabled =
+        false;
+
+    cameraButton.disabled =
+        false;
+
+    leaveButton.disabled =
+        false;
+
+    if (
+        participantRole === "DOCTOR"
+    ) {
+        endConsultationButton.disabled =
+            false;
+    }
+}
+
+function disableMeetingControls() {
+
+    microphoneButton.disabled =
+        true;
+
+    cameraButton.disabled =
+        true;
+
+    leaveButton.disabled =
+        true;
+
+    endConsultationButton.disabled =
+        true;
+}
+
+function removeWaitingMessage() {
+    waitingMessage?.remove();
+}
+
+function setMeetingStatus(message) {
+    meetingStatus.textContent =
+        message;
+}
+
+function showError(message) {
+
+    errorBox.textContent =
+        message;
+
+    errorBox.classList.add(
+        "show"
+    );
+
+    setMeetingStatus(
+        "Unable to connect"
+    );
+}
+
+function createSafeElementId(value) {
+    return String(value || "participant")
+        .replace(
+            /[^a-zA-Z0-9_-]/g,
+            "-"
+        );
+}
+
+function getParticipantDisplayName(
+    identity
+) {
+    const value =
+        String(identity || "");
+
+    if (
+        value.toUpperCase()
+            .startsWith("DOCTOR")
+    ) {
+        return "Doctor";
+    }
+
+    if (
+        value.toUpperCase()
+            .startsWith("PATIENT")
+    ) {
+        return "Patient";
+    }
+
+    return value || "Participant";
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+async function safelyReadResponse(
+    response
+) {
+    const text =
+        await response.text();
+
+    if (!text) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(text);
+
+    } catch {
+        return {
+            success: false,
+            message: text
+        };
+    }
+}
+
+microphoneButton.addEventListener(
+    "click",
+    toggleMicrophone
+);
+
+cameraButton.addEventListener(
+    "click",
+    toggleCamera
+);
+
+leaveButton.addEventListener(
+    "click",
+    leaveConsultation
+);
+
+endConsultationButton.addEventListener(
+    "click",
+    endConsultation
+);
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+        if (room) {
+            room.disconnect();
+        }
+    }
+);
+
+joinConsultation().catch(error => {
+    console.error(
+        "Consultation connection error:",
+        error
+    );
+
+    showError(
+        error.message ||
+        "Unable to join consultation."
+    );
+});
+</script>
+
+</body>
+</html>

@@ -2165,10 +2165,15 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                requireStaffLogin();
-                loadStaffProfile();
-                loadConsultations();
+            async function () {
+                if (!requireStaffLogin()) {
+                    return;
+                }
+
+                await Promise.allSettled([
+                    loadStaffProfile(),
+                    loadConsultations()
+                ]);
             }
         );
 
@@ -2177,15 +2182,43 @@
         function getStaffToken() {
             return (
                 localStorage.getItem("staffToken") ||
-                localStorage.getItem("token")
+                localStorage.getItem("token") ||
+                localStorage.getItem("accessToken") ||
+                ""
             );
         }
 
         function requireStaffLogin() {
-            if (!getStaffToken()) {
-                window.location.href =
-                    "staff-login.html";
+            const token =
+                getStaffToken();
+
+            const role =
+                String(
+                    localStorage.getItem("role") || ""
+                ).toUpperCase();
+
+            if (!token) {
+                window.location.replace(
+                    "staff-login.html"
+                );
+
+                return false;
             }
+
+            if (
+                role &&
+                role !== "MEDICAL_STAFF" &&
+                role !== "STAFF"
+            ) {
+                alert(
+                    "Only medical staff can access this page."
+                );
+
+                staffLogout();
+                return false;
+            }
+
+            return true;
         }
 
         async function staffApiRequest(
@@ -2196,8 +2229,7 @@
                 getStaffToken();
 
             if (!token) {
-                window.location.href =
-                    "staff-login.html";
+                staffLogout();
 
                 throw new Error(
                     "Medical staff login required."
@@ -2205,6 +2237,7 @@
             }
 
             const headers = {
+                "Accept": "application/json",
                 ...(options.headers || {}),
                 "Authorization":
                     "Bearer " + token
@@ -2227,18 +2260,47 @@
                     }
                 );
 
-            let result;
+            const responseText =
+                await response.text();
+
+            let result = {};
 
             try {
                 result =
-                    await response.json();
+                    responseText
+                        ? JSON.parse(responseText)
+                        : {};
 
             } catch (error) {
                 result = {
                     success: false,
                     message:
-                        "Invalid response from server."
+                        responseText ||
+                        `Invalid response (${response.status}).`
                 };
+            }
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+                /*
+                 * Do not automatically log out for every 403.
+                 * Some backend endpoints are admin-only. Preserve
+                 * the staff login and show the actual permission error.
+                 */
+                if (response.status === 401) {
+                    staffLogout();
+                }
+
+                throw new Error(
+                    result.message ||
+                    (
+                        response.status === 403
+                            ? "You do not have permission to access this API."
+                            : "Your login session has expired."
+                    )
+                );
             }
 
             if (
@@ -2247,7 +2309,7 @@
             ) {
                 throw new Error(
                     result.message ||
-                    "Request failed."
+                    `Request failed (${response.status}).`
                 );
             }
 
@@ -2273,7 +2335,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/users/getProfile"
+                        "/api/medical-staff/me"
                     );
 
                 const name =
@@ -2303,66 +2365,164 @@
         /* LOAD CONSULTATIONS */
 
         async function loadConsultations() {
+            showConsultationLoading();
+
             try {
-                const [
-                    appointmentResult,
-                    consultationResult
-                ] =
-                    await Promise.allSettled([
-                        staffApiRequest(
-                            "/api/appointments/admin/getAll"
-                        ),
+                /*
+                 * The API document does not include a medical-staff
+                 * endpoint for listing every appointment/consultation.
+                 *
+                 * Admin endpoints such as:
+                 * /api/appointments/admin/getAll
+                 * /api/consultations/admin/getAll
+                 * return "Only admin can access this API".
+                 *
+                 * Therefore this page starts with the documented
+                 * medical-staff prescription endpoint, extracts the
+                 * patient IDs and then loads each patient's complete
+                 * medical record.
+                 */
+                const prescriptionResult =
+                    await staffApiRequest(
+                        "/api/medical-staff/prescriptions"
+                    );
 
-                        staffApiRequest(
-                            "/api/consultations/getAll"
-                        )
-                    ]);
+                const prescriptions =
+                    extractArray(
+                        prescriptionResult.data
+                    );
 
-                let appointments = [];
-                let consultations = [];
-
-                if (
-                    appointmentResult.status ===
-                    "fulfilled"
-                ) {
-                    appointments =
-                        extractArray(
-                            appointmentResult.value.data
-                        ).map(
-                            item =>
-                                normalizeRecord(
-                                    item,
-                                    item.type ||
-                                    item.appointmentType ||
-                                    "OFFLINE"
-                                )
-                        );
-                }
-
-                if (
-                    consultationResult.status ===
-                    "fulfilled"
-                ) {
-                    consultations =
-                        extractArray(
-                            consultationResult.value.data
-                        ).map(
-                            item =>
-                                normalizeRecord(
-                                    item,
-                                    "ONLINE"
-                                )
-                        );
-                }
-
-                allConsultations = [
-                    ...appointments,
-                    ...consultations
+                const patientIds = [
+                    ...new Set(
+                        prescriptions
+                            .map(
+                                item =>
+                                    item.patientId
+                            )
+                            .filter(
+                                id =>
+                                    id !== null &&
+                                    id !== undefined
+                            )
+                    )
                 ];
 
-                if (!allConsultations.length) {
-                    throw new Error(
-                        "No consultation records returned."
+                if (!patientIds.length) {
+                    allConsultations = [];
+
+                    populateDoctorFilter();
+                    updateSummary();
+                    applyFilters();
+
+                    showAlert(
+                        "No patient consultation records were discovered from the available medical-staff APIs.",
+                        "info"
+                    );
+
+                    return;
+                }
+
+                const recordResults =
+                    await Promise.allSettled(
+                        patientIds.map(
+                            patientId =>
+                                staffApiRequest(
+                                    `/api/patient-records/patient/${encodeURIComponent(
+                                        patientId
+                                    )}`
+                                )
+                        )
+                    );
+
+                const records =
+                    recordResults
+                        .filter(
+                            result =>
+                                result.status ===
+                                "fulfilled"
+                        )
+                        .map(
+                            result =>
+                                result.value.data || {}
+                        );
+
+                const appointments = [];
+                const consultations = [];
+                const therapies = [];
+
+                records.forEach(
+                    record => {
+                        extractArray(
+                            record.appointments
+                        ).forEach(
+                            item =>
+                                appointments.push(
+                                    normalizeRecord(
+                                        item,
+                                        "OFFLINE"
+                                    )
+                                )
+                        );
+
+                        extractArray(
+                            record.consultations
+                        ).forEach(
+                            item =>
+                                consultations.push(
+                                    normalizeRecord(
+                                        item,
+                                        "ONLINE"
+                                    )
+                                )
+                        );
+
+                        extractArray(
+                            record.therapies
+                        ).forEach(
+                            item =>
+                                therapies.push(
+                                    normalizeRecord(
+                                        item,
+                                        "THERAPY"
+                                    )
+                                )
+                        );
+                    }
+                );
+
+                allConsultations =
+                    removeDuplicateRecords([
+                        ...appointments,
+                        ...consultations,
+                        ...therapies
+                    ]).sort(
+                        (
+                            first,
+                            second
+                        ) =>
+                            createRecordDate(
+                                second
+                            ) -
+                            createRecordDate(
+                                first
+                            )
+                    );
+
+                populateDoctorFilter();
+                updateSummary();
+                applyFilters();
+
+                const failedRecords =
+                    recordResults.filter(
+                        result =>
+                            result.status ===
+                            "rejected"
+                    );
+
+                if (failedRecords.length) {
+                    showAlert(
+                        "Some patient medical records could not be loaded.",
+                        "info"
                     );
                 }
 
@@ -2372,18 +2532,85 @@
                     error
                 );
 
-                allConsultations =
-                    getDemoConsultations();
+                allConsultations = [];
+                filteredConsultations = [];
+
+                populateDoctorFilter();
+                updateSummary();
+                applyFilters();
 
                 showAlert(
-                    "Consultation APIs are not connected. Demo data is displayed.",
-                    "info"
+                    error.message ||
+                    "Unable to load consultation records.",
+                    "error"
                 );
             }
+        }
 
-            populateDoctorFilter();
-            updateSummary();
-            applyFilters();
+        function showConsultationLoading() {
+            const tableBody =
+                document.getElementById(
+                    "consultationTableBody"
+                );
+
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="13"
+                            class="table-message"
+                        >
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            Loading consultation records...
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function removeDuplicateRecords(
+            records
+        ) {
+            const map = new Map();
+
+            records.forEach(
+                (
+                    item,
+                    index
+                ) => {
+                    const key =
+                        `${item.type}-${item.id ?? index}`;
+
+                    map.set(
+                        key,
+                        item
+                    );
+                }
+            );
+
+            return [
+                ...map.values()
+            ];
+        }
+
+        function createRecordDate(record) {
+            const date =
+                record.date ||
+                record.appointmentDate ||
+                record.consultationDate ||
+                record.sessionDate ||
+                "1970-01-01";
+
+            const time =
+                record.startTime ||
+                "00:00:00";
+
+            return new Date(
+                `${String(date).substring(
+                    0,
+                    10
+                )}T${time}`
+            );
         }
 
         function extractArray(data) {
@@ -2399,6 +2626,30 @@
                 return data.content;
             }
 
+            if (
+                Array.isArray(
+                    data?.appointments
+                )
+            ) {
+                return data.appointments;
+            }
+
+            if (
+                Array.isArray(
+                    data?.consultations
+                )
+            ) {
+                return data.consultations;
+            }
+
+            if (
+                Array.isArray(
+                    data?.therapies
+                )
+            ) {
+                return data.therapies;
+            }
+
             return [];
         }
 
@@ -2410,6 +2661,7 @@
                 String(
                     item.type ||
                     item.appointmentType ||
+                    item.appointmentMode ||
                     item.consultationType ||
                     defaultType ||
                     "OFFLINE"
@@ -2548,160 +2800,7 @@
         }
 
         function getDemoConsultations() {
-            return [
-                {
-                    id: 1,
-                    appointmentNumber:
-                        "APT-1001",
-                    patientId: 1,
-                    patientName:
-                        "Nisha Rao",
-                    patientPhone:
-                        "9876543210",
-                    patientAge: 30,
-                    patientGender:
-                        "FEMALE",
-                    doctorId: 1,
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    type:
-                        "ONLINE",
-                    serviceName:
-                        "Ayurvedic Consultation",
-                    appointmentDate:
-                        "2026-07-14",
-                    appointmentTime:
-                        "10:00",
-                    symptoms:
-                        "Headache, stress and low concentration",
-                    pastHistory:
-                        "Migraine and acidity",
-                    status:
-                        "CONFIRMED",
-                    paymentStatus:
-                        "PAID",
-                    amount: 200,
-                    prescriptionId: 101,
-                    notes:
-                        "Online session completed",
-                    meetingLink:
-                        "https://meet.example.com/room-1001"
-                },
-                {
-                    id: 2,
-                    appointmentNumber:
-                        "APT-1002",
-                    patientId: 2,
-                    patientName:
-                        "Raghavendra Bhat",
-                    patientPhone:
-                        "9876543211",
-                    patientAge: 42,
-                    patientGender:
-                        "MALE",
-                    doctorId: 1,
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    type:
-                        "OFFLINE",
-                    serviceName:
-                        "Ayurvedic Consultation",
-                    appointmentDate:
-                        "2026-07-14",
-                    appointmentTime:
-                        "11:00",
-                    symptoms:
-                        "Joint pain and stiffness",
-                    pastHistory:
-                        "Previous Panchakarma therapy",
-                    status:
-                        "CONFIRMED",
-                    paymentStatus:
-                        "PAID",
-                    amount: 50,
-                    prescriptionId: null,
-                    notes:
-                        "-",
-                    meetingLink:
-                        null
-                },
-                {
-                    id: 3,
-                    appointmentNumber:
-                        "THR-1003",
-                    patientId: 3,
-                    patientName:
-                        "Anitha Shetty",
-                    patientPhone:
-                        "9876543212",
-                    patientAge: 36,
-                    patientGender:
-                        "FEMALE",
-                    doctorId: 2,
-                    doctorName:
-                        "Dr. Aditi",
-                    type:
-                        "THERAPY",
-                    serviceName:
-                        "Yoga and Naturopathy",
-                    appointmentDate:
-                        "2026-07-15",
-                    appointmentTime:
-                        "09:30",
-                    symptoms:
-                        "Stress and sleep difficulty",
-                    pastHistory:
-                        "No major illness",
-                    status:
-                        "PENDING",
-                    paymentStatus:
-                        "PAID",
-                    amount: 50,
-                    prescriptionId: null,
-                    notes:
-                        "Waiting for doctor approval",
-                    meetingLink:
-                        null
-                },
-                {
-                    id: 4,
-                    appointmentNumber:
-                        "CON-1004",
-                    patientId: 4,
-                    patientName:
-                        "Kiran Kumar",
-                    patientPhone:
-                        "9876543213",
-                    patientAge: 40,
-                    patientGender:
-                        "MALE",
-                    doctorId: 1,
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    type:
-                        "ONLINE",
-                    serviceName:
-                        "Online Consultation",
-                    appointmentDate:
-                        "2026-07-16",
-                    appointmentTime:
-                        "15:00",
-                    symptoms:
-                        "Digestive discomfort",
-                    pastHistory:
-                        "No major illness",
-                    status:
-                        "PENDING_DOCTOR_CONFIRMATION",
-                    paymentStatus:
-                        "PENDING",
-                    amount: 200,
-                    prescriptionId: null,
-                    notes:
-                        "Doctor confirmation pending",
-                    meetingLink:
-                        null
-                }
-            ];
+            return [];
         }
 
         /* SUMMARY */
@@ -3633,81 +3732,12 @@
         }
 
         async function confirmCompleteConsultation() {
-            if (!selectedConsultation) {
-                return;
-            }
+            closeCompleteModal();
 
-            const button =
-                document.getElementById(
-                    "completeConfirmButton"
-                );
-
-            const originalHtml =
-                button.innerHTML;
-
-            button.disabled = true;
-
-            button.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                Updating...
-            `;
-
-            try {
-                let endpoint;
-
-                if (
-                    selectedConsultation.type ===
-                    "ONLINE"
-                ) {
-                    endpoint =
-                        `/api/consultations/${encodeURIComponent(
-                            selectedConsultation.id
-                        )}/complete`;
-
-                } else {
-                    endpoint =
-                        `/api/appointments/${encodeURIComponent(
-                            selectedConsultation.id
-                        )}/complete`;
-                }
-
-                await staffApiRequest(
-                    endpoint,
-                    {
-                        method: "PUT"
-                    }
-                );
-
-                selectedConsultation.status =
-                    "COMPLETED";
-
-                closeCompleteModal();
-
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Consultation marked as completed.",
-                    "success"
-                );
-
-            } catch (error) {
-                console.error(
-                    "Complete consultation failed:",
-                    error
-                );
-
-                showAlert(
-                    error.message ||
-                    "Consultation could not be completed.",
-                    "error"
-                );
-
-            } finally {
-                button.disabled = false;
-                button.innerHTML =
-                    originalHtml;
-            }
+            showAlert(
+                "The API document does not provide a medical-staff-authorized endpoint to complete appointments or consultations. This action must be completed by the assigned doctor or an administrator.",
+                "info"
+            );
         }
 
         /* PAGINATION */

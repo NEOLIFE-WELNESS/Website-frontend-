@@ -1376,8 +1376,7 @@
 
                         <p>
                             Enter product information, pricing, stock,
-                            manufacturer, expiry details and select the
-                            product images already uploaded to the system.
+                            manufacturer, expiry details and select one primary product image already uploaded to the system.
                         </p>
 
                     </div>
@@ -1631,13 +1630,29 @@
 
                                     <div class="form-group">
 
-                                        <label for="expiryDate">
-                                            Expiry Month
+                                        <label for="manufacturingDate">
+                                            Manufacturing Date
                                             <span class="required">*</span>
                                         </label>
 
                                         <input
-                                            type="month"
+                                            type="date"
+                                            id="manufacturingDate"
+                                            class="form-control"
+                                            required
+                                        >
+
+                                    </div>
+
+                                    <div class="form-group">
+
+                                        <label for="expiryDate">
+                                            Expiry Date
+                                            <span class="required">*</span>
+                                        </label>
+
+                                        <input
+                                            type="date"
                                             id="expiryDate"
                                             class="form-control"
                                             required
@@ -1691,7 +1706,7 @@
 
                                 <div class="section-title">
                                     <i class="fa-solid fa-images"></i>
-                                    Product Images
+                                    Primary Product Image
                                 </div>
 
                                 <div
@@ -1711,7 +1726,7 @@
 
                                 <div class="selected-images-title">
 
-                                    Selected Images:
+                                    Selected Image:
 
                                     <span id="selectedImageCount">
                                         0
@@ -1725,7 +1740,7 @@
                                 >
 
                                     <div class="no-selected-images">
-                                        No product images selected.
+                                        No product image selected.
                                     </div>
 
                                 </div>
@@ -1768,1021 +1783,1148 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-        let selectedImageUrls = [];
-        let availableImages = [];
+let selectedImageUrl = "";
+let availableImages = [];
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                requireStaffLogin();
-                loadStaffProfile();
-                loadManufacturers();
-                loadProductImages();
-                setMinimumExpiryDate();
-            }
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireStaffLogin()) {
+            return;
+        }
+
+        setDateLimits();
+
+        await Promise.allSettled([
+            loadStaffProfile(),
+            loadManufacturers(),
+            loadProductImages()
+        ]);
+
+        document
+            .getElementById("productForm")
+            .addEventListener(
+                "submit",
+                submitProduct
+            );
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getStaffToken() {
+    return (
+        localStorage.getItem("staffToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
+
+function requireStaffLogin() {
+    const token = getStaffToken();
+
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    if (!token) {
+        window.location.replace(
+            "staff-login.html"
+        );
+        return false;
+    }
+
+    if (
+        role &&
+        role !== "MEDICAL_STAFF" &&
+        role !== "STAFF" &&
+        role !== "ADMIN"
+    ) {
+        alert(
+            "Only medical staff can access this page."
         );
 
-        /* =========================
-           AUTHENTICATION
-        ========================== */
+        staffLogout();
+        return false;
+    }
 
-        function getStaffToken() {
-            return (
-                localStorage.getItem("staffToken") ||
-                localStorage.getItem("token")
+    return true;
+}
+
+async function staffApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token = getStaffToken();
+
+    if (!token) {
+        staffLogout();
+
+        throw new Error(
+            "Medical staff login required."
+        );
+    }
+
+    const headers = {
+        Accept: "application/json",
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+    };
+
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
+
+    const responseText =
+        await response.text();
+
+    let result = {};
+
+    try {
+        result =
+            responseText
+                ? JSON.parse(responseText)
+                : {};
+    } catch {
+        result = {
+            success: false,
+            message:
+                responseText ||
+                `Invalid server response (${response.status}).`
+        };
+    }
+
+    if (response.status === 401) {
+        clearStaffSession();
+
+        window.location.replace(
+            "staff-login.html"
+        );
+
+        throw new Error(
+            result.message ||
+            "Your medical staff session has expired."
+        );
+    }
+
+    if (response.status === 403) {
+        throw new Error(
+            result.message ||
+            "You do not have permission to perform this action."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return result;
+}
+
+function clearStaffSession() {
+    [
+        "staffToken",
+        "staffRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "medicalStaffId",
+        "staffId",
+        "staffName",
+        "staffProfile",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key =>
+            localStorage.removeItem(key)
+    );
+
+    sessionStorage.clear();
+}
+
+function staffLogout() {
+    clearStaffSession();
+
+    window.location.replace(
+        "staff-login.html"
+    );
+}
+
+/* =========================
+   STAFF PROFILE
+========================= */
+
+async function loadStaffProfile() {
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/medical-staff/me"
+            );
+
+        const staff =
+            result.data || {};
+
+        const name =
+            staff.name ||
+            "Medical Staff";
+
+        setText(
+            "staffTopbarName",
+            name
+        );
+
+        setText(
+            "staffInitial",
+            name.charAt(0).toUpperCase() || "M"
+        );
+
+        if (staff.id) {
+            localStorage.setItem(
+                "medicalStaffId",
+                String(staff.id)
             );
         }
 
-        function requireStaffLogin() {
-            const token =
-                getStaffToken();
+        localStorage.setItem(
+            "staffName",
+            name
+        );
 
-            if (!token) {
-                window.location.href =
-                    "staff-login.html";
-            }
-        }
+        localStorage.setItem(
+            "staffProfile",
+            JSON.stringify(staff)
+        );
 
-        async function staffApiRequest(
-            endpoint,
-            options = {}
-        ) {
-            const token =
-                getStaffToken();
+    } catch (error) {
+        console.error(
+            "Staff profile loading failed:",
+            error
+        );
 
-            if (!token) {
-                window.location.href =
-                    "staff-login.html";
+        const storedName =
+            localStorage.getItem(
+                "staffName"
+            ) ||
+            "Medical Staff";
 
-                throw new Error(
-                    "Medical staff login required."
-                );
-            }
+        setText(
+            "staffTopbarName",
+            storedName
+        );
 
-            const headers = {
-                ...(options.headers || {})
-            };
+        setText(
+            "staffInitial",
+            storedName.charAt(0).toUpperCase() || "M"
+        );
 
-            if (
-                options.body &&
-                !(options.body instanceof FormData)
-            ) {
-                headers["Content-Type"] =
-                    "application/json";
-            }
+        showAlert(
+            error.message ||
+            "Unable to load medical staff profile.",
+            "error"
+        );
+    }
+}
 
-            headers.Authorization =
-                "Bearer " + token;
+/* =========================
+   MANUFACTURERS
+========================= */
 
-            const response =
-                await fetch(
-                    API_BASE_URL + endpoint,
-                    {
-                        ...options,
-                        headers
-                    }
-                );
+async function loadManufacturers() {
+    const select =
+        document.getElementById(
+            "manufacturer"
+        );
 
-            let result;
+    select.innerHTML = `
+        <option value="">
+            Loading manufacturers...
+        </option>
+    `;
 
-            try {
-                result =
-                    await response.json();
-
-            } catch (error) {
-                result = {
-                    success: false,
-                    message:
-                        "Invalid response from server."
-                };
-            }
-
-            if (
-                response.status === 401 ||
-                response.status === 403
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Medical staff session expired."
-                );
-            }
-
-            if (
-                !response.ok ||
-                result.success === false
-            ) {
-                throw new Error(
-                    result.message ||
-                    "Request failed."
-                );
-            }
-
-            return result;
-        }
-
-        function staffLogout() {
-            localStorage.removeItem(
-                "staffToken"
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/manufacturers/getAll"
             );
 
-            localStorage.removeItem(
-                "staffRefreshToken"
+        const manufacturers =
+            extractArray(
+                result.data
             );
 
-            localStorage.removeItem("token");
+        select.innerHTML = `
+            <option value="">
+                Select Manufacturer
+            </option>
+        `;
 
-            localStorage.removeItem(
-                "refreshToken"
-            );
-
-            localStorage.removeItem("role");
-
-            localStorage.removeItem(
-                "staffId"
-            );
-
-            localStorage.removeItem(
-                "userId"
-            );
-
-            window.location.href =
-                "staff-login.html";
-        }
-
-        /* =========================
-           STAFF PROFILE
-        ========================== */
-
-        async function loadStaffProfile() {
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/users/getProfile"
-                    );
-
-                const name =
-                    result.data?.name ||
-                    result.data?.staffName ||
-                    "Medical Staff";
-
-                updateStaffProfile(name);
-
-            } catch (error) {
-                console.error(
-                    "Staff profile loading failed:",
-                    error
-                );
-
-                updateStaffProfile(
-                    localStorage.getItem(
-                        "staffName"
-                    ) ||
-                    "Medical Staff"
-                );
-            }
-        }
-
-        function updateStaffProfile(name) {
-            const cleanName =
-                String(
-                    name || "Medical Staff"
-                ).trim();
-
-            document.getElementById(
-                "staffTopbarName"
-            ).textContent =
-                cleanName;
-
-            document.getElementById(
-                "staffInitial"
-            ).textContent =
-                cleanName
-                    .charAt(0)
-                    .toUpperCase();
-        }
-
-        /* =========================
-           MANUFACTURERS
-        ========================== */
-
-        async function loadManufacturers() {
-            const select =
-                document.getElementById(
-                    "manufacturer"
-                );
-
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/manufacturers/getAll"
-                    );
-
-                select.innerHTML = `
-                    <option value="">
-                        Select Manufacturer
+        if (!manufacturers.length) {
+            select.insertAdjacentHTML(
+                "beforeend",
+                `
+                    <option value="" disabled>
+                        No manufacturers found
                     </option>
-                `;
+                `
+            );
 
-                const manufacturers =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
+            return;
+        }
 
-                if (!manufacturers.length) {
-                    select.innerHTML += `
-                        <option value="" disabled>
-                            No manufacturers found
-                        </option>
-                    `;
+        manufacturers.forEach(
+            manufacturer => {
+                const name =
+                    manufacturer.name ||
+                    manufacturer.manufacturerName ||
+                    "";
 
+                if (!name) {
                     return;
                 }
 
-                manufacturers.forEach(
-                    function (manufacturer) {
-                        const option =
-                            document.createElement(
-                                "option"
-                            );
-
-                        option.value =
-                            manufacturer.name ||
-                            manufacturer.manufacturerName ||
-                            "";
-
-                        option.textContent =
-                            manufacturer.name ||
-                            manufacturer.manufacturerName ||
-                            "Manufacturer";
-
-                        select.appendChild(
-                            option
-                        );
-                    }
-                );
-
-            } catch (error) {
-                console.error(
-                    "Manufacturer loading failed:",
-                    error
-                );
-
-                select.innerHTML = `
-                    <option value="">
-                        Select Manufacturer
-                    </option>
-
-                    <option value="Neolife">
-                        Neolife
-                    </option>
-                `;
-
-                showAlert(
-                    "Manufacturers could not be loaded. Default manufacturer is available.",
-                    "info"
-                );
-            }
-        }
-
-        /* =========================
-           PRODUCT IMAGES
-        ========================== */
-
-        async function loadProductImages() {
-            const box =
-                document.getElementById(
-                    "uploadedImagesBox"
-                );
-
-            try {
-                const result =
-                    await staffApiRequest(
-                        "/api/images/module/PRODUCT"
+                const option =
+                    document.createElement(
+                        "option"
                     );
 
-                availableImages =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : [];
+                /*
+                 * The add-product request expects manufacturerName,
+                 * not manufacturer ID.
+                 */
+                option.value = name;
+                option.textContent = name;
 
-                renderAvailableImages();
-
-            } catch (error) {
-                console.error(
-                    "Product image loading failed:",
-                    error
-                );
-
-                box.innerHTML = `
-                    <div class="images-message">
-
-                        <i class="fa-solid fa-image"></i>
-
-                        Product images could not be loaded.
-
-                    </div>
-                `;
-
-                showAlert(
-                    "Product images could not be loaded.",
-                    "error"
+                select.appendChild(
+                    option
                 );
             }
-        }
+        );
 
-        function renderAvailableImages() {
-            const box =
-                document.getElementById(
-                    "uploadedImagesBox"
-                );
+    } catch (error) {
+        console.error(
+            "Manufacturer loading failed:",
+            error
+        );
 
-            if (!availableImages.length) {
-                box.innerHTML = `
-                    <div class="images-message">
+        select.innerHTML = `
+            <option value="">
+                Unable to load manufacturers
+            </option>
+        `;
 
-                        <i class="fa-solid fa-images"></i>
+        showAlert(
+            error.message ||
+            "Manufacturers could not be loaded.",
+            "error"
+        );
+    }
+}
 
-                        No product images have been uploaded.
+/* =========================
+   PRODUCT IMAGES
+========================= */
 
-                    </div>
-                `;
+async function loadProductImages() {
+    const box =
+        document.getElementById(
+            "uploadedImagesBox"
+        );
 
-                return;
-            }
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/images/module/PRODUCT"
+            );
 
-            box.innerHTML = "";
+        availableImages =
+            extractArray(
+                result.data
+            ).filter(
+                image =>
+                    String(
+                        image.contentType || ""
+                    ).startsWith("image/")
+            );
 
-            availableImages.forEach(
-                function (image) {
+        renderAvailableImages();
+
+    } catch (error) {
+        console.error(
+            "Product image loading failed:",
+            error
+        );
+
+        box.innerHTML = `
+            <div class="images-message">
+                <i class="fa-solid fa-image"></i>
+                ${escapeHtml(
+                    error.message ||
+                    "Product images could not be loaded."
+                )}
+            </div>
+        `;
+
+        showAlert(
+            error.message ||
+            "Product images could not be loaded.",
+            "error"
+        );
+    }
+}
+
+function renderAvailableImages() {
+    const box =
+        document.getElementById(
+            "uploadedImagesBox"
+        );
+
+    if (!availableImages.length) {
+        box.innerHTML = `
+            <div class="images-message">
+                <i class="fa-solid fa-images"></i>
+                No product images have been uploaded.
+            </div>
+        `;
+
+        renderSelectedImage();
+        return;
+    }
+
+    box.innerHTML =
+        availableImages
+            .map(
+                image => {
                     const fileUrl =
                         image.fileUrl ||
                         image.imageUrl ||
                         "";
 
                     const fullUrl =
-                        getImageUrl(fileUrl);
-
-                    const card =
-                        document.createElement(
-                            "label"
+                        getImageUrl(
+                            fileUrl
                         );
 
-                    card.className =
-                        "image-select-card";
-
-                    card.dataset.imageUrl =
-                        fileUrl;
-
-                    card.innerHTML = `
-                        <img
-                            src="${escapeHtml(fullUrl)}"
-                            alt="Product image"
-                            onerror="handleImageError(this)"
+                    return `
+                        <label
+                            class="image-select-card ${
+                                selectedImageUrl === fileUrl
+                                    ? "selected"
+                                    : ""
+                            }"
                         >
-
-                        <div class="image-select-footer">
-
-                            <input
-                                type="checkbox"
-                                value="${escapeHtml(fileUrl)}"
-                                onchange="toggleImageSelection(this)"
+                            <img
+                                src="${escapeHtml(
+                                    fullUrl
+                                )}"
+                                alt="${escapeHtml(
+                                    image.fileName ||
+                                    "Product image"
+                                )}"
+                                onerror="handleImageError(this)"
                             >
 
-                            <span>Select Image</span>
+                            <div class="image-select-footer">
 
-                        </div>
+                                <input
+                                    type="radio"
+                                    name="primaryProductImage"
+                                    value="${escapeHtml(
+                                        fileUrl
+                                    )}"
+                                    ${
+                                        selectedImageUrl === fileUrl
+                                            ? "checked"
+                                            : ""
+                                    }
+                                    onchange="selectProductImage(this)"
+                                >
+
+                                <span>Select Image</span>
+
+                            </div>
+                        </label>
                     `;
-
-                    box.appendChild(card);
                 }
-            );
-        }
+            )
+            .join("");
+}
 
-        function toggleImageSelection(
-            checkbox
-        ) {
-            const imageUrl =
-                checkbox.value;
+function selectProductImage(radio) {
+    selectedImageUrl =
+        radio.value;
 
-            if (checkbox.checked) {
-                if (
-                    !selectedImageUrls.includes(
-                        imageUrl
+    document
+        .querySelectorAll(
+            ".image-select-card"
+        )
+        .forEach(
+            card =>
+                card.classList.remove(
+                    "selected"
+                )
+        );
+
+    radio
+        .closest(
+            ".image-select-card"
+        )
+        ?.classList.add(
+            "selected"
+        );
+
+    renderSelectedImage();
+}
+
+function removeSelectedImage() {
+    selectedImageUrl = "";
+
+    document
+        .querySelectorAll(
+            'input[name="primaryProductImage"]'
+        )
+        .forEach(
+            radio => {
+                radio.checked = false;
+
+                radio
+                    .closest(
+                        ".image-select-card"
                     )
-                ) {
-                    selectedImageUrls.push(
-                        imageUrl
+                    ?.classList.remove(
+                        "selected"
                     );
-                }
-
-            } else {
-                selectedImageUrls =
-                    selectedImageUrls.filter(
-                        url =>
-                            url !== imageUrl
-                    );
-            }
-
-            const card =
-                checkbox.closest(
-                    ".image-select-card"
-                );
-
-            if (card) {
-                card.classList.toggle(
-                    "selected",
-                    checkbox.checked
-                );
-            }
-
-            renderSelectedImages();
-        }
-
-        function removeSelectedImage(
-            imageUrl
-        ) {
-            selectedImageUrls =
-                selectedImageUrls.filter(
-                    url =>
-                        url !== imageUrl
-                );
-
-            document
-                .querySelectorAll(
-                    ".image-select-card input"
-                )
-                .forEach(
-                    function (checkbox) {
-                        if (
-                            checkbox.value ===
-                            imageUrl
-                        ) {
-                            checkbox.checked =
-                                false;
-
-                            checkbox
-                                .closest(
-                                    ".image-select-card"
-                                )
-                                ?.classList.remove(
-                                    "selected"
-                                );
-                        }
-                    }
-                );
-
-            renderSelectedImages();
-        }
-
-        function renderSelectedImages() {
-            const previewBox =
-                document.getElementById(
-                    "imagePreviewBox"
-                );
-
-            document.getElementById(
-                "selectedImageCount"
-            ).textContent =
-                selectedImageUrls.length;
-
-            if (!selectedImageUrls.length) {
-                previewBox.innerHTML = `
-                    <div class="no-selected-images">
-                        No product images selected.
-                    </div>
-                `;
-
-                return;
-            }
-
-            previewBox.innerHTML = "";
-
-            selectedImageUrls.forEach(
-                function (imageUrl) {
-                    const fullUrl =
-                        getImageUrl(imageUrl);
-
-                    const previewCard =
-                        document.createElement(
-                            "div"
-                        );
-
-                    previewCard.className =
-                        "preview-card";
-
-                    previewCard.innerHTML = `
-                        <img
-                            src="${escapeHtml(fullUrl)}"
-                            alt="Selected product image"
-                            onerror="handleImageError(this)"
-                        >
-
-                        <button
-                            type="button"
-                            class="preview-remove"
-                            title="Remove image"
-                        >
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    `;
-
-                    previewCard
-                        .querySelector(
-                            ".preview-remove"
-                        )
-                        .onclick =
-                            function () {
-                                removeSelectedImage(
-                                    imageUrl
-                                );
-                            };
-
-                    previewBox.appendChild(
-                        previewCard
-                    );
-                }
-            );
-        }
-
-        function getImageUrl(imageUrl) {
-            if (
-                !imageUrl ||
-                String(imageUrl).trim() ===
-                    ""
-            ) {
-                return "";
-            }
-
-            if (
-                imageUrl.startsWith(
-                    "http"
-                ) ||
-                imageUrl.startsWith(
-                    "../"
-                ) ||
-                imageUrl.startsWith(
-                    "./"
-                )
-            ) {
-                return imageUrl;
-            }
-
-            if (
-                imageUrl.startsWith("/")
-            ) {
-                return (
-                    API_BASE_URL +
-                    imageUrl
-                );
-            }
-
-            return (
-                API_BASE_URL +
-                "/" +
-                imageUrl
-            );
-        }
-
-        function handleImageError(image) {
-            image.style.display =
-                "none";
-        }
-
-        /* =========================
-           FORM VALIDATION
-        ========================== */
-
-        function validateProductForm() {
-            const requiredFields = [
-                {
-                    id:
-                        "productNo",
-                    label:
-                        "Product code"
-                },
-                {
-                    id:
-                        "productName",
-                    label:
-                        "Product name"
-                },
-                {
-                    id:
-                        "description",
-                    label:
-                        "Product description"
-                },
-                {
-                    id:
-                        "price",
-                    label:
-                        "Price"
-                },
-                {
-                    id:
-                        "stock",
-                    label:
-                        "Stock"
-                },
-                {
-                    id:
-                        "netQty",
-                    label:
-                        "Net quantity"
-                },
-                {
-                    id:
-                        "expiryDate",
-                    label:
-                        "Expiry date"
-                },
-                {
-                    id:
-                        "indication",
-                    label:
-                        "Indication"
-                },
-                {
-                    id:
-                        "category",
-                    label:
-                        "Category"
-                },
-                {
-                    id:
-                        "manufacturer",
-                    label:
-                        "Manufacturer"
-                }
-            ];
-
-            for (
-                const field of requiredFields
-            ) {
-                const element =
-                    document.getElementById(
-                        field.id
-                    );
-
-                if (
-                    !String(
-                        element.value
-                    ).trim()
-                ) {
-                    showAlert(
-                        `${field.label} is required.`,
-                        "error"
-                    );
-
-                    element.focus();
-
-                    return false;
-                }
-            }
-
-            const price =
-                Number(
-                    document.getElementById(
-                        "price"
-                    ).value
-                );
-
-            const stock =
-                Number(
-                    document.getElementById(
-                        "stock"
-                    ).value
-                );
-
-            if (
-                Number.isNaN(price) ||
-                price <= 0
-            ) {
-                showAlert(
-                    "Enter a valid product price.",
-                    "error"
-                );
-
-                document.getElementById(
-                    "price"
-                ).focus();
-
-                return false;
-            }
-
-            if (
-                Number.isNaN(stock) ||
-                stock < 0
-            ) {
-                showAlert(
-                    "Enter a valid stock quantity.",
-                    "error"
-                );
-
-                document.getElementById(
-                    "stock"
-                ).focus();
-
-                return false;
-            }
-
-            if (
-                selectedImageUrls.length ===
-                0
-            ) {
-                showAlert(
-                    "Please select at least one product image.",
-                    "error"
-                );
-
-                document.getElementById(
-                    "uploadedImagesBox"
-                ).scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-                return false;
-            }
-
-            return true;
-        }
-
-        /* =========================
-           SUBMIT PRODUCT
-        ========================== */
-
-        document.getElementById(
-            "productForm"
-        ).addEventListener(
-            "submit",
-            async function (event) {
-                event.preventDefault();
-
-                if (!validateProductForm()) {
-                    return;
-                }
-
-                const button =
-                    document.getElementById(
-                        "saveProductButton"
-                    );
-
-                const originalHtml =
-                    button.innerHTML;
-
-                button.disabled = true;
-
-                button.innerHTML = `
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Saving Product...
-                `;
-
-                const expiryMonth =
-                    document.getElementById(
-                        "expiryDate"
-                    ).value;
-
-                const product = {
-                    productName:
-                        document.getElementById(
-                            "productName"
-                        ).value.trim(),
-
-                    category:
-                        document.getElementById(
-                            "category"
-                        ).value,
-
-                    productCode:
-                        document.getElementById(
-                            "productNo"
-                        ).value.trim(),
-
-                    description:
-                        document.getElementById(
-                            "description"
-                        ).value.trim(),
-
-                    price:
-                        Number(
-                            document.getElementById(
-                                "price"
-                            ).value
-                        ),
-
-                    stock:
-                        Number(
-                            document.getElementById(
-                                "stock"
-                            ).value
-                        ),
-
-                    netQty:
-                        document.getElementById(
-                            "netQty"
-                        ).value.trim(),
-
-                    indication:
-                        document.getElementById(
-                            "indication"
-                        ).value.trim(),
-
-                    manufacturerName:
-                        document.getElementById(
-                            "manufacturer"
-                        ).value,
-
-                    manufacturingDate:
-                        new Date()
-                            .toISOString()
-                            .split("T")[0],
-
-                    expiryDate:
-                        expiryMonth +
-                        "-01",
-
-                    imageUrls:
-                        selectedImageUrls.join(
-                            ","
-                        )
-                };
-
-                try {
-                    const result =
-                        await staffApiRequest(
-                            "/api/products/add",
-                            {
-                                method:
-                                    "POST",
-
-                                body:
-                                    JSON.stringify(
-                                        product
-                                    )
-                            }
-                        );
-
-                    showAlert(
-                        result.message ||
-                        "Product created successfully.",
-                        "success"
-                    );
-
-                    setTimeout(
-                        function () {
-                            window.location.href =
-                                "products.html";
-                        },
-                        1000
-                    );
-
-                } catch (error) {
-                    console.error(
-                        "Product creation failed:",
-                        error
-                    );
-
-                    showAlert(
-                        error.message ||
-                        "Product could not be created.",
-                        "error"
-                    );
-
-                    button.disabled =
-                        false;
-
-                    button.innerHTML =
-                        originalHtml;
-                }
             }
         );
 
-        /* =========================
-           EXPIRY DATE
-        ========================== */
+    renderSelectedImage();
+}
 
-        function setMinimumExpiryDate() {
-            const now =
-                new Date();
+function renderSelectedImage() {
+    const previewBox =
+        document.getElementById(
+            "imagePreviewBox"
+        );
 
-            const year =
-                now.getFullYear();
+    setText(
+        "selectedImageCount",
+        selectedImageUrl
+            ? 1
+            : 0
+    );
 
-            const month =
-                String(
-                    now.getMonth() + 1
-                ).padStart(2, "0");
+    if (!selectedImageUrl) {
+        previewBox.innerHTML = `
+            <div class="no-selected-images">
+                No product image selected.
+            </div>
+        `;
 
-            document.getElementById(
-                "expiryDate"
-            ).min =
-                `${year}-${month}`;
+        return;
+    }
+
+    previewBox.innerHTML = `
+        <div class="preview-card">
+
+            <img
+                src="${escapeHtml(
+                    getImageUrl(
+                        selectedImageUrl
+                    )
+                )}"
+                alt="Selected product image"
+                onerror="handleImageError(this)"
+            >
+
+            <button
+                type="button"
+                class="preview-remove"
+                title="Remove image"
+                onclick="removeSelectedImage()"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+    `;
+}
+
+function getImageUrl(imageUrl) {
+    if (!imageUrl) {
+        return "";
+    }
+
+    const value =
+        String(imageUrl).trim();
+
+    if (
+        value.startsWith("http://") ||
+        value.startsWith("https://") ||
+        value.startsWith("data:") ||
+        value.startsWith("blob:") ||
+        value.startsWith("../") ||
+        value.startsWith("./")
+    ) {
+        return value;
+    }
+
+    if (value.startsWith("/")) {
+        return API_BASE_URL + value;
+    }
+
+    return `${API_BASE_URL}/${value}`;
+}
+
+function handleImageError(image) {
+    image.style.display =
+        "none";
+}
+
+/* =========================
+   FORM VALIDATION
+========================= */
+
+function validateProductForm() {
+    const requiredFields = [
+        {
+            id: "productNo",
+            label: "Product code"
+        },
+        {
+            id: "productName",
+            label: "Product name"
+        },
+        {
+            id: "description",
+            label: "Product description"
+        },
+        {
+            id: "category",
+            label: "Category"
+        },
+        {
+            id: "manufacturer",
+            label: "Manufacturer"
+        },
+        {
+            id: "price",
+            label: "Price"
+        },
+        {
+            id: "stock",
+            label: "Stock"
+        },
+        {
+            id: "netQty",
+            label: "Net quantity"
+        },
+        {
+            id: "manufacturingDate",
+            label: "Manufacturing date"
+        },
+        {
+            id: "expiryDate",
+            label: "Expiry date"
+        },
+        {
+            id: "indication",
+            label: "Indication"
         }
+    ];
 
-        /* =========================
-           SIDEBAR
-        ========================== */
-
-        function toggleSidebar() {
+    for (
+        const field of requiredFields
+    ) {
+        const element =
             document.getElementById(
-                "staffSidebar"
-            ).classList.toggle("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.toggle("show");
-        }
-
-        function closeSidebar() {
-            document.getElementById(
-                "staffSidebar"
-            ).classList.remove("open");
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.remove("show");
-        }
-
-        /* =========================
-           ALERT
-        ========================== */
-
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
-
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
-
-            document.getElementById(
-                "alertMessage"
-            ).textContent =
-                message;
-
-            box.className =
-                `page-alert show ${type}`;
-
-            if (type === "success") {
-                icon.className =
-                    "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
-
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
-
-            clearTimeout(
-                window.staffProductAlertTimer
+                field.id
             );
 
-            window.staffProductAlertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
+        if (
+            !String(
+                element.value || ""
+            ).trim()
+        ) {
+            showAlert(
+                `${field.label} is required.`,
+                "error"
+            );
+
+            element.focus();
+            return false;
         }
+    }
 
-        /* =========================
-           HELPERS
-        ========================== */
+    const price =
+        Number(
+            getValue("price")
+        );
 
-        function escapeHtml(value) {
+    const stock =
+        Number(
+            getValue("stock")
+        );
+
+    if (
+        !Number.isFinite(price) ||
+        price <= 0
+    ) {
+        showAlert(
+            "Enter a valid product price greater than zero.",
+            "error"
+        );
+
+        document
+            .getElementById("price")
+            .focus();
+
+        return false;
+    }
+
+    if (
+        !Number.isInteger(stock) ||
+        stock < 0
+    ) {
+        showAlert(
+            "Stock must be a whole number of zero or more.",
+            "error"
+        );
+
+        document
+            .getElementById("stock")
+            .focus();
+
+        return false;
+    }
+
+    const manufacturingDate =
+        new Date(
+            `${getValue(
+                "manufacturingDate"
+            )}T00:00:00`
+        );
+
+    const expiryDate =
+        new Date(
+            `${getValue(
+                "expiryDate"
+            )}T00:00:00`
+        );
+
+    if (
+        expiryDate <=
+        manufacturingDate
+    ) {
+        showAlert(
+            "Expiry date must be later than the manufacturing date.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "expiryDate"
+            )
+            .focus();
+
+        return false;
+    }
+
+    if (!selectedImageUrl) {
+        showAlert(
+            "Please select one primary product image.",
+            "error"
+        );
+
+        document
+            .getElementById(
+                "uploadedImagesBox"
+            )
+            .scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+        return false;
+    }
+
+    return true;
+}
+
+/* =========================
+   SUBMIT PRODUCT
+========================= */
+
+async function submitProduct(event) {
+    event.preventDefault();
+
+    if (!validateProductForm()) {
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "saveProductButton"
+        );
+
+    const originalHtml =
+        button.innerHTML;
+
+    button.disabled = true;
+
+    button.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Saving Product...
+    `;
+
+    /*
+     * This payload exactly follows the documented
+     * POST /api/products/add request.
+     */
+    const payload = {
+        productName:
+            getValue("productName"),
+
+        category:
+            getValue("category"),
+
+        productCode:
+            getValue("productNo"),
+
+        description:
+            getValue("description"),
+
+        price:
+            Number(
+                getValue("price")
+            ),
+
+        stock:
+            Number(
+                getValue("stock")
+            ),
+
+        netQty:
+            getValue("netQty"),
+
+        indication:
+            getValue("indication"),
+
+        manufacturerName:
+            getValue("manufacturer"),
+
+        manufacturingDate:
+            getValue(
+                "manufacturingDate"
+            ),
+
+        expiryDate:
+            getValue("expiryDate"),
+
+        imageUrl:
+            selectedImageUrl
+    };
+
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/products/add",
+                {
+                    method: "POST",
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
+            );
+
+        showAlert(
+            result.message ||
+            "Product created successfully.",
+            "success"
+        );
+
+        setTimeout(
+            () => {
+                window.location.href =
+                    "products.html";
+            },
+            1000
+        );
+
+    } catch (error) {
+        console.error(
+            "Product creation failed:",
+            error
+        );
+
+        showAlert(
+            error.message ||
+            "Product could not be created.",
+            "error"
+        );
+
+        button.disabled = false;
+        button.innerHTML =
+            originalHtml;
+    }
+}
+
+/* =========================
+   DATE LIMITS
+========================= */
+
+function setDateLimits() {
+    const today =
+        getTodayString();
+
+    const manufacturingInput =
+        document.getElementById(
+            "manufacturingDate"
+        );
+
+    const expiryInput =
+        document.getElementById(
+            "expiryDate"
+        );
+
+    manufacturingInput.max =
+        today;
+
+    if (!manufacturingInput.value) {
+        manufacturingInput.value =
+            today;
+    }
+
+    expiryInput.min =
+        addDaysToDate(
+            today,
+            1
+        );
+
+    manufacturingInput.addEventListener(
+        "change",
+        () => {
             if (
-                value === null ||
-                value === undefined
+                manufacturingInput.value
             ) {
-                return "";
-            }
+                expiryInput.min =
+                    addDaysToDate(
+                        manufacturingInput.value,
+                        1
+                    );
 
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
+                if (
+                    expiryInput.value &&
+                    expiryInput.value <=
+                        manufacturingInput.value
+                ) {
+                    expiryInput.value =
+                        "";
+                }
+            }
         }
-    </script>
+    );
+}
+
+function getTodayString() {
+    const date = new Date();
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function addDaysToDate(
+    dateValue,
+    days
+) {
+    const date =
+        new Date(
+            `${dateValue}T00:00:00`
+        );
+
+    date.setDate(
+        date.getDate() +
+        days
+    );
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+/* =========================
+   GENERAL HELPERS
+========================= */
+
+function extractArray(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    return [];
+}
+
+function getValue(id) {
+    return document
+        .getElementById(id)
+        .value
+        .trim();
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function toggleSidebar() {
+    document
+        .getElementById(
+            "staffSidebar"
+        )
+        .classList.toggle(
+            "open"
+        );
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.toggle(
+            "show"
+        );
+}
+
+function closeSidebar() {
+    document
+        .getElementById(
+            "staffSidebar"
+        )
+        .classList.remove(
+            "open"
+        );
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.remove(
+            "show"
+        );
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const box =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const icon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    setText(
+        "alertMessage",
+        message
+    );
+
+    box.className =
+        `page-alert show ${type}`;
+
+    icon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.staffProductAlertTimer
+    );
+
+    window.staffProductAlertTimer =
+        setTimeout(
+            () => {
+                box.classList.remove(
+                    "show"
+                );
+            },
+            4200
+        );
+}
+</script>
 
 </body>
 </html>

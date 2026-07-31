@@ -1182,7 +1182,7 @@ tbody tr:hover{
                 <button
                     type="button"
                     class="topbar-button"
-                    onclick="resetFilters()"
+                    onclick="loadConsultations()"
                     title="Refresh"
                 >
                     <i class="fa-solid fa-rotate"></i>
@@ -1317,10 +1317,12 @@ tbody tr:hover{
                         onchange="applyFilters()"
                     >
                         <option value="">All Statuses</option>
-                        <option value="Pending">Pending</option>
+                        <option value="Pending Doctor Confirmation">Pending Doctor Confirmation</option>
+                        <option value="Payment Pending">Payment Pending</option>
                         <option value="Confirmed">Confirmed</option>
                         <option value="Meeting Link Sent">Meeting Link Sent</option>
                         <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
                     </select>
 
                 </div>
@@ -1385,7 +1387,7 @@ tbody tr:hover{
                                 <th>Time</th>
                                 <th>Meeting Link</th>
                                 <th>Status</th>
-                                <th>Change Status</th>
+                                <th>Payment Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -1448,82 +1450,415 @@ tbody tr:hover{
 </div>
 
 <script>
-const consultations = [
-    {
-        id:"C001",
-        patient:"Ramesh",
-        phone:"9876543210",
-        age:45,
-        healthIssue:"Knee Pain",
-        doctor:"Dr. N. G. Muraleedhara",
-        date:"20-06-2026",
-        time:"10:00 AM",
-        meetingLink:"",
-        status:"Pending",
-        paymentStatus:"Pending",
-        consultationFee:"₹200",
-        symptoms:"Knee pain, stiffness and difficulty walking.",
-        notes:"Awaiting doctor confirmation."
-    },
-    {
-        id:"C002",
-        patient:"Anitha",
-        phone:"9988776655",
-        age:39,
-        healthIssue:"Stress and Sleep Difficulty",
-        doctor:"Dr. Aditi",
-        date:"20-06-2026",
-        time:"01:30 PM",
-        meetingLink:"https://meet.google.com/neolife-demo-002",
-        status:"Meeting Link Sent",
-        paymentStatus:"Paid",
-        consultationFee:"₹200",
-        symptoms:"Stress, anxiety and disturbed sleep.",
-        notes:"Meeting link generated after successful payment."
-    },
-    {
-        id:"C003",
-        patient:"Priya",
-        phone:"9123456789",
-        age:34,
-        healthIssue:"Hair Fall",
-        doctor:"Dr. N. G. Muraleedhara",
-        date:"21-06-2026",
-        time:"03:00 PM",
-        meetingLink:"https://meet.google.com/abc-defg-hij",
-        status:"Completed",
-        paymentStatus:"Paid",
-        consultationFee:"₹200",
-        symptoms:"Hair fall and dry scalp.",
-        notes:"Consultation completed and prescription issued."
-    }
-];
+const API_BASE_URL =
+    "http://localhost:8085";
 
-let filteredConsultations = [
-    ...consultations
-];
+let consultations = [];
+let filteredConsultations = [];
 
 document.addEventListener(
     "DOMContentLoaded",
-    function(){
-        populateDoctorFilter();
-        updateSummary();
-        renderConsultations();
+    async function () {
+        if (!requireAdminLogin()) {
+            return;
+        }
+
+        loadAdminProfile();
+        await loadConsultations();
     }
 );
 
-function populateDoctorFilter(){
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getToken() {
+    return (
+        localStorage.getItem("adminToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
+
+function requireAdminLogin() {
+    const token =
+        getToken();
+
+    const role =
+        String(
+            localStorage.getItem("role") ||
+            ""
+        ).toUpperCase();
+
+    if (!token) {
+        window.location.href =
+            "../patient/login.html";
+
+        return false;
+    }
+
+    if (
+        role &&
+        role !== "ADMIN"
+    ) {
+        window.alert(
+            "Only administrators can access this page."
+        );
+
+        window.location.href =
+            "../patient/login.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+function loadAdminProfile() {
+    const name =
+        localStorage.getItem("adminName") ||
+        localStorage.getItem("name") ||
+        "Admin";
+
+    document
+        .querySelectorAll(
+            ".admin-profile-text strong"
+        )
+        .forEach(
+            element =>
+                element.textContent =
+                    name
+        );
+
+    document
+        .querySelectorAll(
+            ".admin-avatar"
+        )
+        .forEach(
+            element =>
+                element.textContent =
+                    String(name)
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase() ||
+                    "A"
+        );
+}
+
+async function apiRequest(
+    endpoint,
+    options = {}
+) {
+    const headers = {
+        "Accept":
+            "application/json",
+
+        ...(options.headers || {}),
+
+        "Authorization":
+            "Bearer " + getToken()
+    };
+
+    if (
+        options.body &&
+        !(
+            options.body instanceof
+            FormData
+        )
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response =
+        await fetch(
+            API_BASE_URL + endpoint,
+            {
+                ...options,
+                headers
+            }
+        );
+
+    const text =
+        await response.text();
+
+    let result = {};
+
+    try {
+        result =
+            text
+                ? JSON.parse(text)
+                : {};
+
+    } catch (error) {
+        result = {
+            success: false,
+            message:
+                text ||
+                "Invalid server response."
+        };
+    }
+
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearAdminSession();
+
+        window.location.href =
+            "../patient/login.html";
+
+        throw new Error(
+            result.message ||
+            "Admin session expired."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status})`
+        );
+    }
+
+    return result;
+}
+
+/* =========================
+   LOAD REAL CONSULTATIONS
+========================= */
+
+async function loadConsultations() {
+    const body =
+        document.getElementById(
+            "consultationTable"
+        );
+
+    body.innerHTML = `
+        <tr>
+            <td
+                colspan="11"
+                class="table-message"
+            >
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading consultation records...
+            </td>
+        </tr>
+    `;
+
+    try {
+        const result =
+            await apiRequest(
+                "/api/consultations/admin/getAll",
+                {
+                    method: "GET"
+                }
+            );
+
+        consultations =
+            Array.isArray(result.data)
+                ? result.data.map(
+                    normalizeConsultation
+                  )
+                : [];
+
+        populateDoctorFilter();
+        updateSummary();
+        applyFilters();
+
+    } catch (error) {
+        console.error(
+            "Consultation loading failed:",
+            error
+        );
+
+        consultations = [];
+        filteredConsultations = [];
+
+        updateSummary();
+
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="11"
+                    class="table-message"
+                >
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    ${escapeHtml(
+                        error.message ||
+                        "Unable to load consultations."
+                    )}
+                </td>
+            </tr>
+        `;
+
+        setText(
+            "resultCount",
+            "0 Consultations"
+        );
+
+        showAlert(
+            error.message ||
+            "Unable to load consultations.",
+            "error"
+        );
+    }
+}
+
+function normalizeConsultation(
+    consultation = {}
+) {
+    const rawStatus =
+        String(
+            consultation.status ||
+            "PENDING_DOCTOR_CONFIRMATION"
+        ).toUpperCase();
+
+    return {
+        id:
+            consultation.id ??
+            consultation.consultationId ??
+            "",
+
+        patientId:
+            consultation.patientId ??
+            "",
+
+        patient:
+            consultation.patientName ||
+            consultation.patient ||
+            "Patient",
+
+        phone:
+            consultation.phoneNumber ||
+            consultation.phone ||
+            "-",
+
+        age:
+            consultation.age ??
+            "-",
+
+        gender:
+            consultation.gender ||
+            "-",
+
+        healthIssue:
+            consultation.healthIssue ||
+            consultation.symptoms ||
+            "-",
+
+        symptoms:
+            consultation.symptoms ||
+            "-",
+
+        pastMedicalHistory:
+            consultation.pastMedicalHistory ||
+            consultation.pastHistory ||
+            "-",
+
+        doctorId:
+            consultation.doctorId ??
+            "",
+
+        doctor:
+            consultation.doctorName ||
+            consultation.doctor ||
+            "-",
+
+        doctorSpecialization:
+            consultation.doctorSpecialization ||
+            "-",
+
+        date:
+            consultation.consultationDate ||
+            consultation.preferredDate ||
+            consultation.date ||
+            null,
+
+        startTime:
+            consultation.startTime ||
+            consultation.preferredTime ||
+            consultation.time ||
+            null,
+
+        endTime:
+            consultation.endTime ||
+            null,
+
+        meetingLink:
+            consultation.meetingLink ||
+            "",
+
+        meetingLinkExpiresAt:
+            consultation.meetingLinkExpiresAt ||
+            null,
+
+        rawStatus:
+            rawStatus,
+
+        status:
+            formatStatusLabel(
+                rawStatus
+            ),
+
+        paymentStatus:
+            formatStatusLabel(
+                consultation.paymentStatus ||
+                "-"
+            ),
+
+        consultationFee:
+            Number(
+                consultation.consultationFee ??
+                0
+            ),
+
+        cancellationReason:
+            consultation.cancellationReason ||
+            "-",
+
+        rescheduleReason:
+            consultation.rescheduleReason ||
+            "-",
+
+        createdAt:
+            consultation.createdAt ||
+            null,
+
+        updatedAt:
+            consultation.updatedAt ||
+            null
+    };
+}
+
+/* =========================
+   FILTERS AND SUMMARY
+========================= */
+
+function populateDoctorFilter() {
     const select =
         document.getElementById(
             "doctorFilter"
         );
 
+    const previousValue =
+        select.value;
+
+    select.innerHTML =
+        '<option value="">All Doctors</option>';
+
     const doctors = [
         ...new Set(
-            consultations.map(
-                consultation =>
-                    consultation.doctor
-            )
+            consultations
+                .map(
+                    consultation =>
+                        consultation.doctor
+                )
+                .filter(Boolean)
         )
     ].sort();
 
@@ -1545,9 +1880,18 @@ function populateDoctorFilter(){
             );
         }
     );
+
+    if (
+        doctors.includes(
+            previousValue
+        )
+    ) {
+        select.value =
+            previousValue;
+    }
 }
 
-function updateSummary(){
+function updateSummary() {
     setText(
         "totalConsultations",
         consultations.length
@@ -1557,8 +1901,13 @@ function updateSummary(){
         "pendingConsultations",
         consultations.filter(
             consultation =>
-                consultation.status ===
-                "Pending"
+                [
+                    "PENDING_DOCTOR_CONFIRMATION",
+                    "PENDING",
+                    "PAYMENT_PENDING"
+                ].includes(
+                    consultation.rawStatus
+                )
         ).length
     );
 
@@ -1566,8 +1915,11 @@ function updateSummary(){
         "linkSentConsultations",
         consultations.filter(
             consultation =>
-                consultation.status ===
-                "Meeting Link Sent"
+                Boolean(
+                    consultation.meetingLink
+                ) ||
+                consultation.rawStatus ===
+                    "MEETING_LINK_SENT"
         ).length
     );
 
@@ -1575,51 +1927,65 @@ function updateSummary(){
         "completedConsultations",
         consultations.filter(
             consultation =>
-                consultation.status ===
-                "Completed"
+                consultation.rawStatus ===
+                    "COMPLETED"
         ).length
     );
 }
 
-function applyFilters(){
+function applyFilters() {
     const search =
         document.getElementById(
             "searchInput"
         ).value
-        .trim()
-        .toLowerCase();
+            .trim()
+            .toLowerCase();
 
-    const status =
+    const selectedStatus =
         document.getElementById(
             "statusFilter"
         ).value;
 
-    const doctor =
+    const selectedDoctor =
         document.getElementById(
             "doctorFilter"
         ).value;
 
     filteredConsultations =
         consultations.filter(
-            function(consultation){
+            function (consultation) {
                 const matchesSearch =
                     !search ||
-                    consultation.patient
-                        .toLowerCase()
-                        .includes(search) ||
-                    consultation.phone
-                        .includes(search) ||
-                    consultation.id
-                        .toLowerCase()
-                        .includes(search);
+                    String(
+                        consultation.patient ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(search) ||
+                    String(
+                        consultation.phone ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(search) ||
+                    String(
+                        consultation.id ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(search);
 
                 const matchesStatus =
-                    !status ||
-                    consultation.status === status;
+                    !selectedStatus ||
+                    consultation.status ===
+                        selectedStatus ||
+                    consultation.rawStatus ===
+                        selectedStatus;
 
                 const matchesDoctor =
-                    !doctor ||
-                    consultation.doctor === doctor;
+                    !selectedDoctor ||
+                    consultation.doctor ===
+                        selectedDoctor;
 
                 return (
                     matchesSearch &&
@@ -1632,7 +1998,7 @@ function applyFilters(){
     renderConsultations();
 }
 
-function resetFilters(){
+function resetFilters() {
     document.getElementById(
         "searchInput"
     ).value = "";
@@ -1645,14 +2011,14 @@ function resetFilters(){
         "doctorFilter"
     ).value = "";
 
-    filteredConsultations = [
-        ...consultations
-    ];
-
-    renderConsultations();
+    applyFilters();
 }
 
-function renderConsultations(){
+/* =========================
+   TABLE
+========================= */
+
+function renderConsultations() {
     const body =
         document.getElementById(
             "consultationTable"
@@ -1667,9 +2033,9 @@ function renderConsultations(){
         }`
     );
 
-    if(
+    if (
         filteredConsultations.length === 0
-    ){
+    ) {
         body.innerHTML = `
             <tr>
                 <td
@@ -1677,7 +2043,7 @@ function renderConsultations(){
                     class="table-message"
                 >
                     <i class="fa-solid fa-video-slash"></i>
-                    No consultations matched the selected filters.
+                    No real consultation records matched the selected filters.
                 </td>
             </tr>
         `;
@@ -1685,302 +2051,210 @@ function renderConsultations(){
         return;
     }
 
-    body.innerHTML = "";
+    body.innerHTML =
+        filteredConsultations
+            .map(
+                consultation => `
+                    <tr>
 
-    filteredConsultations.forEach(
-        function(consultation){
-            body.insertAdjacentHTML(
-                "beforeend",
-                `
-                <tr>
+                        <td>
+                            <strong>
+                                #${escapeHtml(
+                                    consultation.id
+                                )}
+                            </strong>
+                        </td>
 
-                    <td>
-                        <strong>
-                            ${escapeHtml(
-                                consultation.id
-                            )}
-                        </strong>
-                    </td>
+                        <td>
+                            <div class="patient-cell">
 
-                    <td>
-
-                        <div class="patient-cell">
-
-                            <span class="patient-avatar">
-                                ${escapeHtml(
-                                    consultation.patient
+                                <span class="patient-avatar">
+                                    ${escapeHtml(
+                                        String(
+                                            consultation.patient ||
+                                            "P"
+                                        )
                                         .charAt(0)
                                         .toUpperCase()
-                                )}
-                            </span>
-
-                            <div>
-
-                                <strong>
-                                    ${escapeHtml(
-                                        consultation.patient
                                     )}
-                                </strong>
+                                </span>
 
-                                <small>
-                                    ${escapeHtml(
-                                        consultation.phone
-                                    )}
-                                </small>
+                                <div>
+                                    <strong>
+                                        ${escapeHtml(
+                                            consultation.patient
+                                        )}
+                                    </strong>
+
+                                    <small>
+                                        ${escapeHtml(
+                                            consultation.phone
+                                        )}
+                                    </small>
+                                </div>
 
                             </div>
+                        </td>
 
-                        </div>
-
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            consultation.age
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            consultation.healthIssue
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            consultation.doctor
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            consultation.date
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            consultation.time
-                        )}
-                    </td>
-
-                    <td>
-
-                        <div class="link-box">
-
-                            <input
-                                type="text"
-                                class="link-input"
-                                id="link-${consultation.id}"
-                                value="${escapeHtml(
-                                    consultation.meetingLink
-                                )}"
-                                placeholder="Paste meeting link"
-                            >
-
-                            <button
-                                type="button"
-                                class="save-link-btn"
-                                onclick="saveMeetingLink('${consultation.id}')"
-                                title="Save meeting link"
-                            >
-                                <i class="fa-solid fa-floppy-disk"></i>
-                            </button>
-
-                            <button
-                                type="button"
-                                class="copy-btn"
-                                onclick="copyMeetingLink('${consultation.id}')"
-                                title="Copy meeting link"
-                            >
-                                <i class="fa-solid fa-copy"></i>
-                            </button>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        <span
-                            class="status ${getStatusClass(
-                                consultation.status
-                            )}"
-                        >
+                        <td>
                             ${escapeHtml(
-                                consultation.status
+                                consultation.age
                             )}
-                        </span>
-                    </td>
+                        </td>
 
-                    <td>
-
-                        <select
-                            class="status-select"
-                            onchange="changeStatus('${consultation.id}', this.value)"
-                        >
-                            ${createStatusOptions(
-                                consultation.status
+                        <td>
+                            ${escapeHtml(
+                                consultation.healthIssue
                             )}
-                        </select>
+                        </td>
 
-                    </td>
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    consultation.doctor
+                                )}
+                            </strong>
 
-                    <td>
+                            <br>
 
-                        <button
-                            type="button"
-                            class="view-btn"
-                            onclick="viewConsultation('${consultation.id}')"
-                            title="View consultation"
-                        >
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
+                            <small>
+                                ${escapeHtml(
+                                    consultation.doctorSpecialization
+                                )}
+                            </small>
+                        </td>
 
-                    </td>
+                        <td>
+                            ${escapeHtml(
+                                formatDate(
+                                    consultation.date
+                                )
+                            )}
+                        </td>
 
-                </tr>
+                        <td>
+                            ${escapeHtml(
+                                formatTime(
+                                    consultation.startTime
+                                )
+                            )}
+
+                            ${
+                                consultation.endTime
+                                    ? `<br><small>to ${escapeHtml(
+                                        formatTime(
+                                            consultation.endTime
+                                        )
+                                    )}</small>`
+                                    : ""
+                            }
+                        </td>
+
+                        <td>
+                            ${
+                                consultation.meetingLink
+                                    ? `
+                                        <div class="link-box">
+
+                                            <input
+                                                type="text"
+                                                class="link-input"
+                                                id="link-${consultation.id}"
+                                                value="${escapeHtml(
+                                                    consultation.meetingLink
+                                                )}"
+                                                readonly
+                                            >
+
+                                            <button
+                                                type="button"
+                                                class="copy-btn"
+                                                onclick="copyMeetingLink('${consultation.id}')"
+                                                title="Copy meeting link"
+                                            >
+                                                <i class="fa-solid fa-copy"></i>
+                                            </button>
+
+                                        </div>
+                                      `
+                                    : `
+                                        <span class="status pending">
+                                            Not generated
+                                        </span>
+                                      `
+                            }
+                        </td>
+
+                        <td>
+                            <span
+                                class="status ${getStatusClass(
+                                    consultation.status
+                                )}"
+                            >
+                                ${escapeHtml(
+                                    consultation.status
+                                )}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span
+                                class="status ${getPaymentStatusClass(
+                                    consultation.paymentStatus
+                                )}"
+                            >
+                                ${escapeHtml(
+                                    consultation.paymentStatus
+                                )}
+                            </span>
+                        </td>
+
+                        <td>
+                            <button
+                                type="button"
+                                class="view-btn"
+                                onclick="viewConsultation('${consultation.id}')"
+                                title="View consultation"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </td>
+
+                    </tr>
                 `
-            );
-        }
-    );
+            )
+            .join("");
 }
 
-function createStatusOptions(
-    currentStatus
-){
-    return [
-        "Pending",
-        "Confirmed",
-        "Meeting Link Sent",
-        "Completed"
-    ].map(
-        status => `
-            <option
-                value="${status}"
-                ${
-                    status === currentStatus
-                        ? "selected"
-                        : ""
-                }
-            >
-                ${status}
-            </option>
-        `
-    ).join("");
-}
-
-function getStatusClass(
-    status
-){
-    return String(status)
-        .toLowerCase()
-        .replaceAll(" ","-");
-}
-
-function changeStatus(
-    consultationId,
-    newStatus
-){
-    const consultation =
-        consultations.find(
-            item =>
-                item.id === consultationId
-        );
-
-    if(!consultation){
-        return;
-    }
-
-    consultation.status =
-        newStatus;
-
-    updateSummary();
-    applyFilters();
-
-    showAlert(
-        `Consultation status changed to ${newStatus}.`,
-        "success"
-    );
-}
-
-function saveMeetingLink(
-    consultationId
-){
-    const consultation =
-        consultations.find(
-            item =>
-                item.id === consultationId
-        );
-
-    const input =
-        document.getElementById(
-            `link-${consultationId}`
-        );
-
-    if(
-        !consultation ||
-        !input
-    ){
-        return;
-    }
-
-    const link =
-        input.value.trim();
-
-    if(!link){
-        showAlert(
-            "Please enter a meeting link.",
-            "error"
-        );
-
-        return;
-    }
-
-    consultation.meetingLink =
-        link;
-
-    if(
-        consultation.status ===
-        "Pending" ||
-        consultation.status ===
-        "Confirmed"
-    ){
-        consultation.status =
-            "Meeting Link Sent";
-    }
-
-    updateSummary();
-    applyFilters();
-
-    showAlert(
-        "Meeting link saved successfully.",
-        "success"
-    );
-}
+/* =========================
+   ACTIONS
+========================= */
 
 async function copyMeetingLink(
     consultationId
-){
-    const input =
-        document.getElementById(
-            `link-${consultationId}`
+) {
+    const consultation =
+        consultations.find(
+            item =>
+                String(item.id) ===
+                String(consultationId)
         );
 
-    if(
-        !input ||
-        !input.value.trim()
-    ){
+    if (
+        !consultation ||
+        !consultation.meetingLink
+    ) {
         showAlert(
-            "Please enter a meeting link first.",
+            "A meeting link has not been generated yet.",
             "error"
         );
 
         return;
     }
 
-    try{
+    try {
         await navigator.clipboard.writeText(
-            input.value.trim()
+            consultation.meetingLink
         );
 
         showAlert(
@@ -1988,9 +2262,18 @@ async function copyMeetingLink(
             "success"
         );
 
-    }catch(error){
-        input.select();
-        document.execCommand("copy");
+    } catch (error) {
+        const input =
+            document.getElementById(
+                `link-${consultationId}`
+            );
+
+        if (input) {
+            input.select();
+            document.execCommand(
+                "copy"
+            );
+        }
 
         showAlert(
             "Meeting link copied.",
@@ -2001,14 +2284,15 @@ async function copyMeetingLink(
 
 function viewConsultation(
     consultationId
-){
+) {
     const consultation =
         consultations.find(
             item =>
-                item.id === consultationId
+                String(item.id) ===
+                String(consultationId)
         );
 
-    if(!consultation){
+    if (!consultation) {
         return;
     }
 
@@ -2017,122 +2301,139 @@ function viewConsultation(
     ).innerHTML = `
         <div class="details-grid">
 
-            <div class="detail-card">
-                <span>Consultation ID</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.id
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Consultation ID",
+                `#${consultation.id}`
+            )}
 
-            <div class="detail-card">
-                <span>Patient</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.patient
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Patient",
+                consultation.patient
+            )}
 
-            <div class="detail-card">
-                <span>Phone</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.phone
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Phone",
+                consultation.phone
+            )}
 
-            <div class="detail-card">
-                <span>Age</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.age
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Age / Gender",
+                `${consultation.age} / ${consultation.gender}`
+            )}
 
-            <div class="detail-card">
-                <span>Doctor</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.doctor
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Doctor",
+                consultation.doctor
+            )}
 
-            <div class="detail-card">
-                <span>Date & Time</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.date
-                    )}
-                    ·
-                    ${escapeHtml(
-                        consultation.time
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Specialization",
+                consultation.doctorSpecialization
+            )}
 
-            <div class="detail-card">
-                <span>Status</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.status
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Consultation Date",
+                formatDate(
+                    consultation.date
+                )
+            )}
 
-            <div class="detail-card">
-                <span>Payment</span>
-                <strong>
-                    ${escapeHtml(
-                        consultation.paymentStatus
-                    )}
-                    ·
-                    ${escapeHtml(
-                        consultation.consultationFee
-                    )}
-                </strong>
-            </div>
+            ${detailCard(
+                "Time",
+                `${
+                    formatTime(
+                        consultation.startTime
+                    )
+                }${
+                    consultation.endTime
+                        ? ` – ${formatTime(
+                            consultation.endTime
+                          )}`
+                        : ""
+                }`
+            )}
 
-            <div class="detail-card full-width">
-                <span>Health Issue</span>
-                <p>
-                    ${escapeHtml(
-                        consultation.healthIssue
-                    )}
-                </p>
-            </div>
+            ${detailCard(
+                "Status",
+                consultation.status
+            )}
 
-            <div class="detail-card full-width">
-                <span>Symptoms</span>
-                <p>
-                    ${escapeHtml(
-                        consultation.symptoms
-                    )}
-                </p>
-            </div>
+            ${detailCard(
+                "Payment",
+                `${consultation.paymentStatus} · ${formatCurrency(
+                    consultation.consultationFee
+                )}`
+            )}
 
-            <div class="detail-card full-width">
-                <span>Meeting Link</span>
-                <p>
-                    ${escapeHtml(
-                        consultation.meetingLink ||
-                        "Not generated yet"
-                    )}
-                </p>
-            </div>
+            ${detailCard(
+                "Symptoms",
+                consultation.symptoms,
+                true,
+                true
+            )}
 
-            <div class="detail-card full-width">
-                <span>Notes</span>
-                <p>
-                    ${escapeHtml(
-                        consultation.notes
-                    )}
-                </p>
-            </div>
+            ${detailCard(
+                "Past Medical History",
+                consultation.pastMedicalHistory,
+                true,
+                true
+            )}
+
+            ${detailCard(
+                "Meeting Link",
+                consultation.meetingLink ||
+                "Not generated yet",
+                true,
+                true
+            )}
+
+            ${
+                consultation.meetingLinkExpiresAt
+                    ? detailCard(
+                        "Meeting Link Expiry",
+                        formatDateTime(
+                            consultation.meetingLinkExpiresAt
+                        ),
+                        true
+                      )
+                    : ""
+            }
+
+            ${
+                consultation.rescheduleReason !== "-"
+                    ? detailCard(
+                        "Reschedule Reason",
+                        consultation.rescheduleReason,
+                        true,
+                        true
+                      )
+                    : ""
+            }
+
+            ${
+                consultation.cancellationReason !== "-"
+                    ? detailCard(
+                        "Cancellation Reason",
+                        consultation.cancellationReason,
+                        true,
+                        true
+                      )
+                    : ""
+            }
+
+            ${detailCard(
+                "Created At",
+                formatDateTime(
+                    consultation.createdAt
+                )
+            )}
+
+            ${detailCard(
+                "Last Updated",
+                formatDateTime(
+                    consultation.updatedAt
+                )
+            )}
 
         </div>
     `;
@@ -2144,7 +2445,40 @@ function viewConsultation(
     );
 }
 
-function closeConsultationModal(){
+function detailCard(
+    label,
+    value,
+    fullWidth = false,
+    paragraph = false
+) {
+    return `
+        <div class="detail-card${
+            fullWidth
+                ? " full-width"
+                : ""
+        }">
+            <span>
+                ${escapeHtml(label)}
+            </span>
+
+            ${
+                paragraph
+                    ? `<p>${escapeHtml(
+                        value ?? "-"
+                      )}</p>`
+                    : `<strong>${escapeHtml(
+                        value ?? "-"
+                      )}</strong>`
+            }
+        </div>
+    `;
+}
+
+/* =========================
+   MODAL AND SIDEBAR
+========================= */
+
+function closeConsultationModal() {
     document.getElementById(
         "consultationModal"
     ).classList.remove(
@@ -2154,16 +2488,16 @@ function closeConsultationModal(){
 
 function handleModalOutside(
     event
-){
-    if(
+) {
+    if (
         event.target.id ===
         "consultationModal"
-    ){
+    ) {
         closeConsultationModal();
     }
 }
 
-function toggleSidebar(){
+function toggleSidebar() {
     document.getElementById(
         "adminSidebar"
     ).classList.toggle(
@@ -2177,7 +2511,7 @@ function toggleSidebar(){
     );
 }
 
-function closeSidebar(){
+function closeSidebar() {
     document.getElementById(
         "adminSidebar"
     ).classList.remove(
@@ -2191,20 +2525,201 @@ function closeSidebar(){
     );
 }
 
-function logoutAdmin(){
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("role");
-    localStorage.removeItem("userId");
+/* =========================
+   UTILITIES
+========================= */
+
+function formatStatusLabel(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "-";
+    }
+
+    return String(value)
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+}
+
+function getStatusClass(status) {
+    const value =
+        String(status)
+            .toLowerCase();
+
+    if (
+        value.includes("complete")
+    ) {
+        return "completed";
+    }
+
+    if (
+        value.includes("confirm") ||
+        value.includes("accept")
+    ) {
+        return "confirmed";
+    }
+
+    if (
+        value.includes("meeting") ||
+        value.includes("link")
+    ) {
+        return "meeting-link-sent";
+    }
+
+    return "pending";
+}
+
+function getPaymentStatusClass(status) {
+    const value =
+        String(status)
+            .toLowerCase();
+
+    if (
+        value.includes("success") ||
+        value.includes("paid")
+    ) {
+        return "confirmed";
+    }
+
+    if (
+        value.includes("fail") ||
+        value.includes("refund")
+    ) {
+        return "completed";
+    }
+
+    return "pending";
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(
+            `${String(value).substring(
+                0,
+                10
+            )}T00:00:00`
+        );
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? String(value)
+        : date.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+}
+
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const parts =
+        String(value)
+            .substring(0, 5)
+            .split(":");
+
+    let hour =
+        Number(parts[0]);
+
+    const minute =
+        parts[1] || "00";
+
+    const period =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+    hour =
+        hour % 12 || 12;
+
+    return `${hour}:${minute} ${period}`;
+}
+
+function formatDateTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(value);
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? String(value)
+        : date.toLocaleString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+}
+
+function formatCurrency(value) {
+    return new Intl.NumberFormat(
+        "en-IN",
+        {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 2
+        }
+    ).format(
+        Number(value || 0)
+    );
+}
+
+function clearAdminSession() {
+    [
+        "adminToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "userId",
+        "adminName",
+        "name",
+        "email",
+        "isLoggedIn"
+    ].forEach(
+        key =>
+            localStorage.removeItem(
+                key
+            )
+    );
+}
+
+function logoutAdmin() {
+    clearAdminSession();
 
     window.location.href =
-        "../frontend/login.html";
+        "../patient/login.html";
 }
 
 function showAlert(
     message,
-    type
-){
+    type = "info"
+) {
     const box =
         document.getElementById(
             "pageAlert"
@@ -2236,7 +2751,7 @@ function showAlert(
 
     window.consultationAlertTimer =
         setTimeout(
-            function(){
+            function () {
                 box.classList.remove(
                     "show"
                 );
@@ -2248,30 +2763,30 @@ function showAlert(
 function setText(
     id,
     value
-){
+) {
     const element =
         document.getElementById(id);
 
-    if(element){
+    if (element) {
         element.textContent =
             value;
     }
 }
 
-function escapeHtml(value){
-    if(
+function escapeHtml(value) {
+    if (
         value === null ||
         value === undefined
-    ){
+    ) {
         return "";
     }
 
     return String(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 </script>
 

@@ -18,6 +18,174 @@
 .modal-form select.control{padding:0 12px}
 .modal-note{margin-top:8px;color:var(--muted);font-size:10px;line-height:1.5}
 .modal-btn:disabled{opacity:.65;cursor:not-allowed}
+/* =========================
+   SIDEBAR
+========================= */
+
+.doctor-sidebar{
+    width:var(--sidebar-width);
+    height:100vh;
+
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    color:var(--white);
+
+    background:linear-gradient(
+        180deg,
+        #123824,
+        #1e5134
+    );
+
+    box-shadow:8px 0 30px rgba(18,56,36,.14);
+    transition:.3s;
+}
+
+.doctor-brand{
+    min-height:104px;
+    padding:20px 18px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.doctor-brand img{
+    width:58px;
+    height:58px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    background:#fff;
+}
+
+.doctor-brand h2{
+    margin-bottom:5px;
+    font-size:18px;
+    font-weight:800;
+}
+
+.doctor-brand span{
+    color:#f2cf69;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+}
+
+.doctor-menu{
+    flex:1;
+    padding:20px 13px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    scrollbar-width:thin;
+    scrollbar-color:#c99a16 transparent;
+}
+
+.doctor-menu::-webkit-scrollbar{
+    width:6px;
+}
+
+.doctor-menu::-webkit-scrollbar-thumb{
+    background:#c99a16;
+    border-radius:10px;
+}
+
+.doctor-menu::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.menu-label{
+    display:block;
+    margin:8px 12px 10px;
+
+    color:rgba(255,255,255,.48);
+
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+}
+
+.doctor-menu a{
+    min-height:49px;
+    margin-bottom:7px;
+    padding:12px 14px;
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    border-radius:12px;
+
+    color:rgba(255,255,255,.82);
+    text-decoration:none;
+
+    font-size:14px;
+    font-weight:700;
+
+    transition:.25s;
+}
+
+.doctor-menu a i{
+    width:21px;
+    text-align:center;
+    font-size:17px;
+}
+
+.doctor-menu a:hover,
+.doctor-menu a.active{
+    background:#fff;
+    color:var(--dark-green);
+    transform:translateX(3px);
+}
+
+.doctor-menu a.active i{
+    color:var(--gold);
+}
+
+.sidebar-footer{
+    padding:17px 13px;
+    border-top:1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-logout{
+    width:100%;
+    min-height:46px;
+    padding:11px 14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    border:1px solid rgba(255,255,255,.20);
+    border-radius:12px;
+
+    background:rgba(255,255,255,.08);
+    color:#fff;
+
+    font-size:14px;
+    font-weight:800;
+
+    transition:.25s;
+}
+
+.sidebar-logout:hover{
+    background:#fff;
+    color:var(--dark-green);
+}
 @media(max-width:650px){.modal-form{grid-template-columns:1fr}.modal-form .group.full{grid-column:auto}}
 
 @media(max-width:1200px){.summary{grid-template-columns:repeat(3,1fr)}.filters{grid-template-columns:repeat(2,1fr)}}
@@ -28,28 +196,103 @@
 <body>
 <div id="alert" class="alert"></div><div id="mobileOverlay" class="mobile-overlay" onclick="closeSidebar()"></div>
 <div class="layout">
-<aside class="sidebar" id="sidebar">
-<div class="brand"><img src="../assets/main_logo.jpeg" alt="Neolife"><div><h2>Neolife</h2><span>Doctor Portal</span></div></div>
-<nav class="menu">
-<span class="menu-label">Main</span>
-<a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
-<a href="patients.html"><i class="fa-solid fa-users"></i>Patient Dashboard</a>
-<a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
-<a href="doctor-availability.html">
-                    <i class="fa-solid fa-clock"></i>
+<aside
+            class="doctor-sidebar"
+            id="doctorSidebar"
+        >
+
+            <div class="doctor-brand">
+
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
+
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Doctor Portal</span>
+                </div>
+
+            </div>
+
+            <nav class="doctor-menu">
+
+                <span class="menu-label">
+                    Main
+                </span>
+
+                <a
+                    href="doctor-dashboard.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <a href="patients.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patient Dashboard
+                </a>
+
+                <a href="appointment-calendar.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Appointment Calendar
+                </a>
+                <a href="doctor-availability.html">
+                    <i class="fa-solid fa-users"></i>
                     Manage Availability
                 </a>
-<span class="menu-label">Clinical</span>
-<a class="active" href="doctor-appointments.html"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
 
-<a href="video-recordings.html"><i class="fa-solid fa-video"></i>Video Recordings</a>
-<span class="menu-label">Finance</span>
-<a href="transactions.html"><i class="fa-solid fa-indian-rupee-sign"></i>Transactions</a>
-<span class="menu-label">Account</span>
-<a href="doctor-profile.html"><i class="fa-solid fa-user-doctor"></i>My Profile</a>
-</nav>
-<div class="sidebar-footer"><button class="logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
-</aside>
+                <span class="menu-label">
+                    Clinical
+                </span>
+
+                
+
+                <a href="doctor-appointments.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Appointment Details
+                </a>
+                <a href="online-consultation.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Consultation Details
+                </a>
+
+                <a href="video-recordings.html">
+                    <i class="fa-solid fa-video"></i>
+                    Video Recordings
+                </a>
+
+                <span class="menu-label">
+                    Finance
+                </span>
+
+                <a href="transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="doctor-profile.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="doctorLogout()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
 <main class="main">
 <header class="topbar"><div class="top-left"><button class="toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button><div class="title"><h1>Appointment Details</h1><p>View and manage your assigned patient appointments.</p></div></div><div class="profile">
 <span class="avatar" id="doctorInitial">D</span>

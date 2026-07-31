@@ -1824,6 +1824,48 @@ function setMinimumDate() {
    GET /api/doctors/getAll
 ========================== */
 
+function buildBackendFileUrl(fileUrl) {
+    if (!fileUrl) {
+        return "../assets/main_logo.jpeg";
+    }
+
+    const value =
+        String(fileUrl).trim();
+
+    if (
+        value.startsWith("http://") ||
+        value.startsWith("https://") ||
+        value.startsWith("data:") ||
+        value.startsWith("blob:")
+    ) {
+        return value;
+    }
+
+    if (value.startsWith("/")) {
+        return API_BASE_URL + value;
+    }
+
+    if (
+        value.startsWith("../") ||
+        value.startsWith("./")
+    ) {
+        return value;
+    }
+
+    return `${API_BASE_URL}/${value}`;
+}
+
+function getDoctorImageUrl(doctor = {}) {
+    return buildBackendFileUrl(
+        doctor.imageUrl ||
+        doctor.profileImage ||
+        doctor.profileImageUrl ||
+        doctor.photoUrl ||
+        doctor.image?.fileUrl ||
+        ""
+    );
+}
+
 async function loadDoctors() {
     const grid =
         document.getElementById(
@@ -1902,8 +1944,9 @@ function displayDoctors() {
         doctors.map(
             function (doctor) {
                 const imageUrl =
-                    doctor.imageUrl ||
-                    "../assets/main_logo.jpeg";
+                    getDoctorImageUrl(
+                        doctor
+                    );
 
                 const experience =
                     doctor.experience !== null &&
@@ -1921,7 +1964,7 @@ function displayDoctors() {
                             src="${escapeHtml(imageUrl)}"
                             alt="${escapeHtml(doctor.name || "Doctor")}"
                             class="doctor-image"
-                            onerror="this.src='../assets/main_logo.jpeg'"
+                            onerror="this.onerror=null;this.src='../assets/main_logo.jpeg'"
                         >
 
                         <div class="doctor-info">
@@ -1987,8 +2030,9 @@ function selectDoctor(doctorId) {
         "Consultation";
 
     consultationData.doctorImage =
-        doctor.imageUrl ||
-        "../assets/main_logo.jpeg";
+        getDoctorImageUrl(
+            doctor
+        );
 
     consultationData.preferredDate =
         null;
@@ -2071,7 +2115,7 @@ function displaySelectedDoctor() {
         <img
             src="${escapeHtml(consultationData.doctorImage)}"
             alt="${escapeHtml(consultationData.doctorName)}"
-            onerror="this.src='../assets/main_logo.jpeg'"
+            onerror="this.onerror=null;this.src='../assets/main_logo.jpeg'"
         >
 
         <div>
@@ -2089,24 +2133,28 @@ function displaySelectedDoctor() {
 }
 
 /* =========================
-   GENERATED ONLINE SLOTS
+   ONLINE CONSULTATION SLOTS
 
-   GET /api/appointment-slots/available
+   GET /api/appointment-slots/consultation/available
        ?doctorId={doctorId}
        &date={date}
-       &type=ONLINE
 ========================== */
 
 async function loadAvailableSlots() {
-    const date =
+    const dateInput =
         document.getElementById(
             "preferredDate"
-        ).value;
+        );
 
     const slotGrid =
         document.getElementById(
             "slotGrid"
         );
+
+    const date =
+        dateInput
+            ? dateInput.value
+            : "";
 
     consultationData.preferredDate =
         date || null;
@@ -2119,6 +2167,16 @@ async function loadAvailableSlots() {
 
     consultationData.selectedSlot =
         null;
+
+    if (!consultationData.doctorId) {
+        slotGrid.innerHTML = `
+            <div class="slot-message">
+                Please select a doctor first.
+            </div>
+        `;
+
+        return;
+    }
 
     if (!date) {
         slotGrid.innerHTML = `
@@ -2133,18 +2191,23 @@ async function loadAvailableSlots() {
     slotGrid.innerHTML = `
         <div class="slot-message">
             <i class="fa-solid fa-spinner fa-spin"></i>
-            Loading available time slots...
+            Loading available online consultation slots...
         </div>
     `;
 
     try {
+        const endpoint =
+            `/api/appointment-slots/consultation/available` +
+            `?doctorId=${encodeURIComponent(
+                consultationData.doctorId
+            )}` +
+            `&date=${encodeURIComponent(
+                date
+            )}`;
+
         const result =
             await apiRequest(
-                `/api/appointment-slots/available?doctorId=${encodeURIComponent(
-                    consultationData.doctorId
-                )}&date=${encodeURIComponent(
-                    date
-                )}&type=ONLINE`,
+                endpoint,
                 {
                     method: "GET"
                 },
@@ -2160,26 +2223,27 @@ async function loadAvailableSlots() {
 
     } catch (error) {
         console.error(
-            "Slot loading failed:",
+            "Online consultation slot loading failed:",
             error
         );
 
+        const message =
+            error.message ||
+            "Unable to load available online consultation slots.";
+
         slotGrid.innerHTML = `
             <div class="slot-message">
-                ${escapeHtml(
-                    error.message ||
-                    "Unable to generate available online consultation slots."
-                )}
+                ${escapeHtml(message)}
             </div>
         `;
 
         showAlert(
-            error.message ||
-            "Unable to generate available online consultation slots.",
+            message,
             "error"
         );
     }
 }
+
 
 function renderSlots(slots) {
     const slotGrid =

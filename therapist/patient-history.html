@@ -2157,1291 +2157,1380 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-        let allPatients = [];
-        let filteredPatients = [];
-        let selectedPatient = null;
-        let selectedStatus = "";
+let allPatients = [];
+let filteredPatients = [];
+let allSessions = [];
+let progressRecords = [];
+let selectedPatient = null;
+let selectedStatus = "";
 
-        let currentPage = 1;
-        const pageSize = 8;
+let currentPage = 1;
+const pageSize = 8;
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                requireTherapistLogin();
-                loadTherapistProfile();
-                loadPatientHistory();
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+        if (!requireTherapistLogin()) {
+            return;
+        }
+
+        await Promise.allSettled([
+            loadTherapistProfile(),
+            loadPatientHistory()
+        ]);
+    }
+);
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+function getTherapistToken() {
+    return (
+        localStorage.getItem("therapistToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
+}
+
+function requireTherapistLogin() {
+    const token = getTherapistToken();
+
+    const role = String(
+        localStorage.getItem("role") || ""
+    ).toUpperCase();
+
+    if (!token) {
+        window.location.replace(
+            "../patient/login.html"
+        );
+        return false;
+    }
+
+    if (role && role !== "THERAPIST") {
+        alert("Only therapists can access this page.");
+        therapistLogout();
+        return false;
+    }
+
+    return true;
+}
+
+async function therapistApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token = getTherapistToken();
+
+    if (!token) {
+        therapistLogout();
+
+        throw new Error(
+            "Therapist login required."
+        );
+    }
+
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {}),
+        "Authorization":
+            `Bearer ${token}`
+    };
+
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response = await fetch(
+        API_BASE_URL + endpoint,
+        {
+            ...options,
+            headers
+        }
+    );
+
+    const responseText =
+        await response.text();
+
+    let result = {};
+
+    try {
+        result =
+            responseText
+                ? JSON.parse(responseText)
+                : {};
+    } catch {
+        result = {
+            success: false,
+            message:
+                responseText ||
+                `Invalid server response (${response.status}).`
+        };
+    }
+
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        clearTherapistSession();
+
+        window.location.replace(
+            "../patient/login.html"
+        );
+
+        throw new Error(
+            result.message ||
+            "Therapist session expired."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        throw new Error(
+            result.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return result;
+}
+
+function clearTherapistSession() {
+    [
+        "therapistToken",
+        "therapistRefreshToken",
+        "token",
+        "accessToken",
+        "refreshToken",
+        "role",
+        "therapistId",
+        "therapistName",
+        "therapistProfile",
+        "userId",
+        "userName",
+        "name",
+        "email",
+        "phoneNumber",
+        "profileCompleted",
+        "isLoggedIn"
+    ].forEach(
+        key => localStorage.removeItem(key)
+    );
+
+    sessionStorage.clear();
+}
+
+function therapistLogout() {
+    clearTherapistSession();
+
+    window.location.replace(
+        "../patient/login.html"
+    );
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+async function loadTherapistProfile() {
+    const storedName =
+        localStorage.getItem("therapistName") ||
+        localStorage.getItem("userName") ||
+        localStorage.getItem("name") ||
+        "Therapist";
+
+    updateTherapistHeader(
+        storedName,
+        "Therapist"
+    );
+
+    try {
+        const result =
+            await therapistApiRequest(
+                "/api/therapists/me"
+            );
+
+        const therapist =
+            result.data || {};
+
+        const name =
+            therapist.name ||
+            therapist.therapistName ||
+            storedName;
+
+        const specialization =
+            therapist.specialization ||
+            "Therapist";
+
+        updateTherapistHeader(
+            name,
+            specialization
+        );
+
+        if (
+            therapist.id !== null &&
+            therapist.id !== undefined
+        ) {
+            localStorage.setItem(
+                "therapistId",
+                String(therapist.id)
+            );
+        }
+
+        localStorage.setItem(
+            "therapistName",
+            name
+        );
+
+        localStorage.setItem(
+            "therapistProfile",
+            JSON.stringify(therapist)
+        );
+
+    } catch (error) {
+        console.error(
+            "Therapist profile loading failed:",
+            error
+        );
+
+        showAlert(
+            error.message ||
+            "Unable to load therapist profile.",
+            "error"
+        );
+    }
+}
+
+function updateTherapistHeader(
+    name,
+    specialization
+) {
+    const cleanName =
+        String(name || "Therapist").trim();
+
+    setText(
+        "therapistName",
+        cleanName
+    );
+
+    setText(
+        "therapistSpecialization",
+        specialization || "Therapist"
+    );
+
+    setText(
+        "therapistInitial",
+        cleanName.charAt(0).toUpperCase() || "T"
+    );
+}
+
+/* =========================
+   LOAD PATIENT HISTORY
+========================= */
+
+async function loadPatientHistory() {
+    showLoading();
+
+    const results =
+        await Promise.allSettled([
+            therapistApiRequest(
+                "/api/therapist-dashboard/patients"
+            ),
+
+            therapistApiRequest(
+                "/api/therapist-dashboard/treatment-progress"
+            ),
+
+            therapistApiRequest(
+                "/api/daily-treatments/therapist/my-sessions"
+            )
+        ]);
+
+    const patientsResult = results[0];
+    const progressResult = results[1];
+    const sessionsResult = results[2];
+
+    try {
+        if (
+            patientsResult.status !==
+            "fulfilled"
+        ) {
+            throw patientsResult.reason;
+        }
+
+        const patientData =
+            extractArray(
+                patientsResult.value.data
+            );
+
+        progressRecords =
+            progressResult.status ===
+            "fulfilled"
+                ? extractArray(
+                    progressResult.value.data
+                  ).map(
+                    normalizeProgress
+                  )
+                : [];
+
+        allSessions =
+            sessionsResult.status ===
+            "fulfilled"
+                ? extractArray(
+                    sessionsResult.value.data
+                  ).map(
+                    normalizeSession
+                  )
+                : [];
+
+        allPatients =
+            patientData
+                .map(normalizePatient)
+                .map(enrichPatient)
+                .sort(
+                    (first, second) =>
+                        String(
+                            first.patientName
+                        ).localeCompare(
+                            String(
+                                second.patientName
+                            )
+                        )
+                );
+
+        populateFilters();
+        updateSummary();
+        applyFilters();
+
+        const failures =
+            results.filter(
+                result =>
+                    result.status ===
+                    "rejected"
+            );
+
+        if (failures.length) {
+            console.warn(
+                "Some patient-history APIs failed:",
+                failures
+            );
+
+            showAlert(
+                "Patient records loaded, but some progress or session details could not be loaded.",
+                "info"
+            );
+        }
+
+    } catch (error) {
+        console.error(
+            "Patient history loading failed:",
+            error
+        );
+
+        allPatients = [];
+        progressRecords = [];
+        allSessions = [];
+        filteredPatients = [];
+
+        populateFilters();
+        updateSummary();
+        renderPatients();
+
+        showAlert(
+            error.message ||
+            "Unable to load patient history.",
+            "error"
+        );
+    }
+}
+
+function extractArray(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    if (Array.isArray(data?.patients)) {
+        return data.patients;
+    }
+
+    if (Array.isArray(data?.sessions)) {
+        return data.sessions;
+    }
+
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    return [];
+}
+
+function normalizePatient(item) {
+    const totalSessions =
+        Number(
+            item.totalSessions || 0
+        );
+
+    const completedSessions =
+        Number(
+            item.completedSessions || 0
+        );
+
+    const remainingSessions =
+        Number(
+            item.remainingSessions ??
+            Math.max(
+                totalSessions -
+                completedSessions,
+                0
+            )
+        );
+
+    return {
+        patientId:
+            item.patientId ??
+            item.id ??
+            null,
+
+        patientName:
+            item.patientName ||
+            item.name ||
+            "Patient",
+
+        phoneNumber:
+            item.phoneNumber ||
+            item.phone ||
+            "-",
+
+        email:
+            item.email || "-",
+
+        age:
+            item.age ?? "-",
+
+        gender:
+            String(
+                item.gender || "-"
+            ).toUpperCase(),
+
+        treatmentPlanId:
+            item.treatmentPlanId ??
+            item.planId ??
+            null,
+
+        treatmentName:
+            item.treatmentName ||
+            item.therapyName ||
+            "Therapy",
+
+        diagnosis:
+            item.diagnosis || "-",
+
+        doctorId:
+            item.doctorId ?? null,
+
+        doctorName:
+            item.doctorName ||
+            item.referredByDoctor ||
+            "-",
+
+        totalSessions,
+
+        completedSessions,
+
+        remainingSessions,
+
+        missedSessions:
+            Number(
+                item.missedSessions || 0
+            ),
+
+        pendingSessions:
+            Number(
+                item.pendingSessions || 0
+            ),
+
+        approvedSessions:
+            Number(
+                item.approvedSessions || 0
+            ),
+
+        completionPercentage:
+            Number(
+                item.completionPercentage ||
+                (
+                    totalSessions > 0
+                        ? Math.round(
+                            (
+                                completedSessions /
+                                totalSessions
+                            ) * 100
+                          )
+                        : 0
+                )
+            ),
+
+        planStatus:
+            normalizePlanStatus(
+                item.status ||
+                item.planStatus ||
+                "ONGOING"
+            ),
+
+        startDate:
+            item.startDate ||
+            item.createdAt ||
+            null,
+
+        endDate:
+            item.endDate || null,
+
+        latestProgressNote:
+            item.latestProgressNote ||
+            item.progressNotes ||
+            item.therapistNotes ||
+            "-",
+
+        createdAt:
+            item.createdAt || null,
+
+        updatedAt:
+            item.updatedAt || null
+    };
+}
+
+function normalizeProgress(item) {
+    return {
+        treatmentPlanId:
+            item.treatmentPlanId ??
+            item.planId ??
+            null,
+
+        patientId:
+            item.patientId ?? null,
+
+        patientName:
+            item.patientName ||
+            "Patient",
+
+        treatmentName:
+            item.treatmentName ||
+            item.therapyName ||
+            "Therapy",
+
+        totalSessions:
+            Number(
+                item.totalSessions || 0
+            ),
+
+        completedSessions:
+            Number(
+                item.completedSessions || 0
+            ),
+
+        remainingSessions:
+            Number(
+                item.remainingSessions || 0
+            ),
+
+        missedSessions:
+            Number(
+                item.missedSessions || 0
+            ),
+
+        pendingSessions:
+            Number(
+                item.pendingSessions || 0
+            ),
+
+        approvedSessions:
+            Number(
+                item.approvedSessions || 0
+            ),
+
+        completionPercentage:
+            Number(
+                item.completionPercentage || 0
+            ),
+
+        status:
+            normalizePlanStatus(
+                item.status ||
+                item.planStatus ||
+                "ONGOING"
+            )
+    };
+}
+
+function normalizeSession(item) {
+    const status =
+        String(
+            item.status ||
+            "PENDING_APPROVAL"
+        ).toUpperCase();
+
+    return {
+        id:
+            item.id ??
+            item.sessionId ??
+            null,
+
+        treatmentPlanId:
+            item.treatmentPlanId ?? null,
+
+        patientId:
+            item.patientId ?? null,
+
+        patientName:
+            item.patientName ||
+            "Patient",
+
+        treatmentName:
+            item.treatmentName ||
+            item.therapyName ||
+            "Therapy",
+
+        sessionDate:
+            item.sessionDate ||
+            item.date ||
+            "",
+
+        startTime:
+            item.startTime ||
+            item.sessionTime ||
+            item.time ||
+            "",
+
+        endTime:
+            item.endTime || "",
+
+        sessionNumber:
+            Number(
+                item.sessionNumber || 1
+            ),
+
+        totalSessions:
+            Number(
+                item.totalSessions || 1
+            ),
+
+        status,
+
+        patientNotes:
+            item.patientNotes || "",
+
+        therapistNotes:
+            item.therapistNotes || "",
+
+        rescheduleReason:
+            item.rescheduleReason || "",
+
+        completedAt:
+            item.completedAt || null,
+
+        missedAt:
+            item.missedAt || null,
+
+        createdAt:
+            item.createdAt || null,
+
+        updatedAt:
+            item.updatedAt || null
+    };
+}
+
+function enrichPatient(patient) {
+    const progress =
+        progressRecords.find(
+            item =>
+                (
+                    patient.treatmentPlanId &&
+                    String(
+                        item.treatmentPlanId
+                    ) ===
+                    String(
+                        patient.treatmentPlanId
+                    )
+                ) ||
+                (
+                    patient.patientId &&
+                    String(item.patientId) ===
+                    String(patient.patientId)
+                )
+        );
+
+    const sessions =
+        getPatientSessions(patient);
+
+    if (progress) {
+        patient.totalSessions =
+            progress.totalSessions ||
+            patient.totalSessions;
+
+        patient.completedSessions =
+            progress.completedSessions;
+
+        patient.remainingSessions =
+            progress.remainingSessions;
+
+        patient.missedSessions =
+            progress.missedSessions;
+
+        patient.pendingSessions =
+            progress.pendingSessions;
+
+        patient.approvedSessions =
+            progress.approvedSessions;
+
+        patient.completionPercentage =
+            progress.completionPercentage;
+
+        patient.planStatus =
+            progress.status;
+    }
+
+    if (sessions.length) {
+        const completedCount =
+            sessions.filter(
+                session =>
+                    session.status ===
+                    "COMPLETED"
+            ).length;
+
+        const missedCount =
+            sessions.filter(
+                session =>
+                    session.status ===
+                    "MISSED"
+            ).length;
+
+        if (!patient.totalSessions) {
+            patient.totalSessions =
+                Math.max(
+                    ...sessions.map(
+                        session =>
+                            Number(
+                                session.totalSessions || 1
+                            )
+                    ),
+                    sessions.length
+                );
+        }
+
+        if (!progress) {
+            patient.completedSessions =
+                completedCount;
+
+            patient.missedSessions =
+                missedCount;
+
+            patient.remainingSessions =
+                Math.max(
+                    patient.totalSessions -
+                    completedCount,
+                    0
+                );
+
+            patient.completionPercentage =
+                patient.totalSessions > 0
+                    ? Math.round(
+                        (
+                            completedCount /
+                            patient.totalSessions
+                        ) * 100
+                      )
+                    : 0;
+        }
+
+        const latestSession =
+            [...sessions]
+                .sort(
+                    (first, second) =>
+                        createSessionDate(second) -
+                        createSessionDate(first)
+                )[0];
+
+        patient.lastSessionDate =
+            latestSession.sessionDate ||
+            null;
+
+        patient.latestProgressNote =
+            latestSession.therapistNotes ||
+            latestSession.patientNotes ||
+            patient.latestProgressNote;
+    } else {
+        patient.lastSessionDate = null;
+    }
+
+    return patient;
+}
+
+function getPatientSessions(patient) {
+    return allSessions
+        .filter(
+            session =>
+                (
+                    patient.treatmentPlanId &&
+                    String(
+                        session.treatmentPlanId
+                    ) ===
+                    String(
+                        patient.treatmentPlanId
+                    )
+                ) ||
+                (
+                    patient.patientId &&
+                    String(
+                        session.patientId
+                    ) ===
+                    String(
+                        patient.patientId
+                    )
+                )
+        )
+        .sort(
+            (first, second) =>
+                createSessionDate(second) -
+                createSessionDate(first)
+        );
+}
+
+function normalizePlanStatus(value) {
+    const status =
+        String(value || "")
+            .toUpperCase();
+
+    if (
+        [
+            "ACTIVE",
+            "ONGOING",
+            "IN_PROGRESS"
+        ].includes(status)
+    ) {
+        return "ONGOING";
+    }
+
+    return status || "ONGOING";
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+function updateSummary() {
+    const totalPatients =
+        new Set(
+            allPatients.map(
+                patient =>
+                    String(
+                        patient.patientId
+                    )
+            )
+        ).size;
+
+    const ongoingPlans =
+        allPatients.filter(
+            patient =>
+                [
+                    "ONGOING",
+                    "ACTIVE",
+                    "IN_PROGRESS"
+                ].includes(
+                    patient.planStatus
+                )
+        ).length;
+
+    const completedPlans =
+        allPatients.filter(
+            patient =>
+                patient.planStatus ===
+                "COMPLETED"
+        ).length;
+
+    const completedSessions =
+        allSessions.filter(
+            session =>
+                session.status ===
+                "COMPLETED"
+        ).length ||
+        allPatients.reduce(
+            (
+                total,
+                patient
+            ) =>
+                total +
+                Number(
+                    patient.completedSessions || 0
+                ),
+            0
+        );
+
+    const cancelledPlans =
+        allPatients.filter(
+            patient =>
+                patient.planStatus ===
+                "CANCELLED"
+        ).length;
+
+    setText(
+        "totalPatients",
+        totalPatients
+    );
+
+    setText(
+        "ongoingPlans",
+        ongoingPlans
+    );
+
+    setText(
+        "completedPlans",
+        completedPlans
+    );
+
+    setText(
+        "completedSessions",
+        completedSessions
+    );
+
+    setText(
+        "cancelledPlans",
+        cancelledPlans
+    );
+}
+
+/* =========================
+   FILTERS
+========================= */
+
+function setStatusTab(button) {
+    document
+        .querySelectorAll(
+            ".tab-button"
+        )
+        .forEach(
+            item =>
+                item.classList.remove(
+                    "active"
+                )
+        );
+
+    button.classList.add(
+        "active"
+    );
+
+    selectedStatus =
+        normalizePlanStatus(
+            button.dataset.status || ""
+        );
+
+    if (
+        !button.dataset.status
+    ) {
+        selectedStatus = "";
+    }
+
+    currentPage = 1;
+    applyFilters();
+}
+
+function applyFilters() {
+    const search =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const therapy =
+        document
+            .getElementById("therapyFilter")
+            .value;
+
+    const doctor =
+        document
+            .getElementById("doctorFilter")
+            .value;
+
+    const progress =
+        document
+            .getElementById("progressFilter")
+            .value;
+
+    filteredPatients =
+        allPatients.filter(
+            patient => {
+                const matchesSearch =
+                    !search ||
+                    patient.patientName
+                        .toLowerCase()
+                        .includes(search) ||
+                    String(
+                        patient.phoneNumber || ""
+                    )
+                        .toLowerCase()
+                        .includes(search) ||
+                    String(
+                        patient.patientId || ""
+                    )
+                        .toLowerCase()
+                        .includes(search);
+
+                const matchesTherapy =
+                    !therapy ||
+                    patient.treatmentName ===
+                    therapy;
+
+                const matchesDoctor =
+                    !doctor ||
+                    patient.doctorName ===
+                    doctor;
+
+                const matchesStatus =
+                    !selectedStatus ||
+                    patient.planStatus ===
+                    selectedStatus;
+
+                const percentage =
+                    Number(
+                        patient.completionPercentage || 0
+                    );
+
+                const matchesProgress =
+                    !progress ||
+                    (
+                        progress === "LOW" &&
+                        percentage < 25
+                    ) ||
+                    (
+                        progress === "MEDIUM" &&
+                        percentage >= 25 &&
+                        percentage < 75
+                    ) ||
+                    (
+                        progress === "HIGH" &&
+                        percentage >= 75
+                    );
+
+                return (
+                    matchesSearch &&
+                    matchesTherapy &&
+                    matchesDoctor &&
+                    matchesStatus &&
+                    matchesProgress
+                );
             }
         );
 
-        /* =========================
-           AUTHENTICATION
-        ========================== */
+    currentPage = 1;
+    renderPatients();
+}
 
-        // function getTherapistToken() {
-        //     return (
-        //         localStorage.getItem("therapistToken") ||
-        //         localStorage.getItem("token")
-        //     );
-        // }
+function resetFilters() {
+    document.getElementById(
+        "searchInput"
+    ).value = "";
 
-        // function requireTherapistLogin() {
-        //     if (!getTherapistToken()) {
-        //         window.location.href =
-        //             "therapist-login.html";
-        //     }
-        // }
+    document.getElementById(
+        "therapyFilter"
+    ).value = "";
 
-        // async function therapistApiRequest(
-        //     endpoint,
-        //     options = {}
-        // ) {
-        //     const token =
-        //         getTherapistToken();
+    document.getElementById(
+        "doctorFilter"
+    ).value = "";
 
-        //     if (!token) {
-        //         window.location.href =
-        //             "therapist-login.html";
+    document.getElementById(
+        "progressFilter"
+    ).value = "";
 
-        //         throw new Error(
-        //             "Therapist login required."
-        //         );
-        //     }
+    selectedStatus = "";
 
-        //     const headers = {
-        //         ...(options.headers || {}),
-
-        //         "Authorization":
-        //             "Bearer " + token
-        //     };
-
-        //     if (
-        //         options.body &&
-        //         !(options.body instanceof FormData)
-        //     ) {
-        //         headers["Content-Type"] =
-        //             "application/json";
-        //     }
-
-        //     const response =
-        //         await fetch(
-        //             API_BASE_URL + endpoint,
-        //             {
-        //                 ...options,
-        //                 headers
-        //             }
-        //         );
-
-        //     let result;
-
-        //     try {
-        //         result =
-        //             await response.json();
-
-        //     } catch (error) {
-        //         result = {
-        //             success: false,
-        //             message:
-        //                 "Invalid server response."
-        //         };
-        //     }
-
-        //     if (
-        //         response.status === 401 ||
-        //         response.status === 403
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Therapist session expired."
-        //         );
-        //     }
-
-        //     if (
-        //         !response.ok ||
-        //         result.success === false
-        //     ) {
-        //         throw new Error(
-        //             result.message ||
-        //             "Request failed."
-        //         );
-        //     }
-
-        //     return result;
-        // }
-
-        // function therapistLogout() {
-        //     localStorage.removeItem(
-        //         "therapistToken"
-        //     );
-
-        //     localStorage.removeItem(
-        //         "therapistRefreshToken"
-        //     );
-
-        //     localStorage.removeItem("token");
-        //     localStorage.removeItem("refreshToken");
-        //     localStorage.removeItem("role");
-        //     localStorage.removeItem("therapistId");
-        //     localStorage.removeItem("userId");
-
-        //     window.location.href =
-        //         "therapist-login.html";
-        // }
-
-        /* =========================
-           PROFILE
-        ========================== */
-
-        async function loadTherapistProfile() {
-            try {
-                const result =
-                    await therapistApiRequest(
-                        "/api/users/getProfile"
-                    );
-
-                const name =
-                    result.data?.name ||
-                    "Therapist";
-
-                const specialization =
-                    result.data?.specialization ||
-                    result.data?.department ||
-                    "Therapy Staff";
-
-                setText(
-                    "therapistName",
-                    name
-                );
-
-                setText(
-                    "therapistSpecialization",
-                    specialization
-                );
-
-                setText(
-                    "therapistInitial",
-                    name
-                        .charAt(0)
-                        .toUpperCase()
-                );
-
-            } catch (error) {
-                console.error(
-                    "Profile loading failed:",
-                    error
-                );
-            }
-        }
-
-        /* =========================
-           LOAD PATIENT HISTORY
-        ========================== */
-
-        async function loadPatientHistory() {
-            document.getElementById(
-                "historyTableBody"
-            ).innerHTML = `
-                <tr>
-                    <td
-                        colspan="12"
-                        class="table-message"
-                    >
-                        <i class="fa-solid fa-spinner fa-spin"></i>
-                        Loading patient history...
-                    </td>
-                </tr>
-            `;
-
-            try {
-                const result =
-                    await therapistApiRequest(
-                        "/api/therapist/patients"
-                    );
-
-                const data =
-                    extractArray(
-                        result.data
-                    );
-
-                allPatients =
-                    data.map(
-                        normalizePatient
-                    );
-
-            } catch (error) {
-                console.error(
-                    "Patient history loading failed:",
-                    error
-                );
-
-                allPatients =
-                    getDemoPatients();
-
-                showAlert(
-                    "Patient history API is not connected. Demo data is displayed.",
-                    "info"
-                );
-            }
-
-            populateFilters();
-            updateSummary();
-            applyFilters();
-        }
-
-        function extractArray(data) {
-            if (Array.isArray(data)) {
-                return data;
-            }
-
-            if (
-                Array.isArray(
-                    data?.content
+    document
+        .querySelectorAll(
+            ".tab-button"
+        )
+        .forEach(
+            (button, index) =>
+                button.classList.toggle(
+                    "active",
+                    index === 0
                 )
-            ) {
-                return data.content;
-            }
-
-            return [];
-        }
-
-        function normalizePatient(item) {
-            const sessions =
-                Array.isArray(item.sessions)
-                    ? item.sessions.map(
-                        normalizeSession
-                    )
-                    : Array.isArray(
-                        item.sessionHistory
-                    )
-                        ? item.sessionHistory.map(
-                            normalizeSession
-                        )
-                        : [];
-
-            const completedSessions =
-                Number(
-                    item.completedSessions ??
-                    item.sessionsCompleted ??
-                    sessions.filter(
-                        session =>
-                            session.status ===
-                            "COMPLETED"
-                    ).length
-                );
-
-            const missedSessions =
-                Number(
-                    item.missedSessions ??
-                    sessions.filter(
-                        session =>
-                            session.status ===
-                                "MISSED" ||
-                            session.attendance ===
-                                "ABSENT"
-                    ).length
-                );
-
-            return {
-                id:
-                    item.id ||
-                    item.patientId,
-
-                patientCode:
-                    item.patientCode ||
-                    item.patientNumber ||
-                    `PAT-${item.id || item.patientId}`,
-
-                patientName:
-                    item.patientName ||
-                    item.name ||
-                    item.patient?.name ||
-                    "Patient",
-
-                patientPhone:
-                    item.patientPhone ||
-                    item.phoneNumber ||
-                    item.patient?.phoneNumber ||
-                    "-",
-
-                patientEmail:
-                    item.patientEmail ||
-                    item.email ||
-                    item.patient?.email ||
-                    "-",
-
-                age:
-                    item.age ||
-                    item.patientAge ||
-                    item.patient?.age ||
-                    "-",
-
-                gender:
-                    String(
-                        item.gender ||
-                        item.patientGender ||
-                        item.patient?.gender ||
-                        "-"
-                    ).toUpperCase(),
-
-                therapyName:
-                    item.therapyName ||
-                    item.activeTherapy ||
-                    item.therapy?.name ||
-                    "Therapy",
-
-                doctorName:
-                    item.doctorName ||
-                    item.doctor?.name ||
-                    "Not assigned",
-
-                symptoms:
-                    item.symptoms ||
-                    item.healthIssue ||
-                    "-",
-
-                medicalHistory:
-                    item.medicalHistory ||
-                    item.pastHistory ||
-                    "Not provided",
-
-                treatmentPlan:
-                    item.treatmentPlan ||
-                    item.planDescription ||
-                    "-",
-
-                totalSessions:
-                    Number(
-                        item.totalSessions ||
-                        item.planTotalSessions ||
-                        1
-                    ),
-
-                completedSessions:
-                    completedSessions,
-
-                missedSessions:
-                    missedSessions,
-
-                planStatus:
-                    normalizePlanStatus(
-                        item.planStatus ||
-                        item.status ||
-                        "ONGOING"
-                    ),
-
-                startDate:
-                    item.startDate ||
-                    item.planStartDate ||
-                    item.createdAt,
-
-                endDate:
-                    item.endDate ||
-                    item.planEndDate ||
-                    null,
-
-                lastSessionDate:
-                    item.lastSessionDate ||
-                    getLatestSessionDate(
-                        sessions
-                    ),
-
-                nextSessionDate:
-                    item.nextSessionDate ||
-                    getNextSessionDate(
-                        sessions
-                    ),
-
-                latestProgressNote:
-                    item.latestProgressNote ||
-                    item.progressNotes ||
-                    getLatestProgressNote(
-                        sessions
-                    ),
-
-                overallResponse:
-                    item.overallResponse ||
-                    item.patientResponse ||
-                    "-",
-
-                advice:
-                    item.advice ||
-                    "-",
-
-                sessions:
-                    sessions
-            };
-        }
-
-        function normalizeSession(item) {
-            return {
-                id:
-                    item.id ||
-                    item.sessionId,
-
-                sessionNumber:
-                    Number(
-                        item.sessionNumber ||
-                        item.currentSession ||
-                        1
-                    ),
-
-                sessionDate:
-                    item.sessionDate ||
-                    item.treatmentDate ||
-                    item.date,
-
-                sessionTime:
-                    item.sessionTime ||
-                    item.treatmentTime ||
-                    item.time,
-
-                attendance:
-                    String(
-                        item.attendance ||
-                        item.attendanceStatus ||
-                        "PENDING"
-                    ).toUpperCase(),
-
-                status:
-                    String(
-                        item.status ||
-                        "SCHEDULED"
-                    ).toUpperCase(),
-
-                treatmentPerformed:
-                    item.treatmentPerformed ||
-                    "-",
-
-                patientResponse:
-                    item.patientResponse ||
-                    "-",
-
-                progressNotes:
-                    item.progressNotes ||
-                    item.notes ||
-                    "-",
-
-                advice:
-                    item.advice ||
-                    "-",
-
-                nextSessionDate:
-                    item.nextSessionDate ||
-                    null
-            };
-        }
-
-        function normalizePlanStatus(value) {
-            const status =
-                String(
-                    value ||
-                    "ONGOING"
-                ).toUpperCase();
-
-            if (status === "ACTIVE") {
-                return "ONGOING";
-            }
-
-            return status;
-        }
-
-        function getLatestSessionDate(sessions) {
-            const validSessions =
-                sessions
-                    .filter(
-                        session =>
-                            session.sessionDate
-                    )
-                    .sort(
-                        (first, second) =>
-                            String(
-                                second.sessionDate
-                            ).localeCompare(
-                                String(
-                                    first.sessionDate
-                                )
-                            )
-                    );
-
-            return validSessions[0]?.sessionDate ||
-                null;
-        }
-
-        function getNextSessionDate(sessions) {
-            const today =
-                getTodayString();
-
-            const upcoming =
-                sessions
-                    .filter(
-                        session =>
-                            dateOnly(
-                                session.sessionDate
-                            ) >= today &&
-                            ![
-                                "COMPLETED",
-                                "MISSED",
-                                "CANCELLED"
-                            ].includes(
-                                session.status
-                            )
-                    )
-                    .sort(
-                        (first, second) =>
-                            String(
-                                first.sessionDate
-                            ).localeCompare(
-                                String(
-                                    second.sessionDate
-                                )
-                            )
-                    );
-
-            return upcoming[0]?.sessionDate ||
-                null;
-        }
-
-        function getLatestProgressNote(sessions) {
-            const latest =
-                [...sessions]
-                    .filter(
-                        session =>
-                            session.progressNotes &&
-                            session.progressNotes !==
-                            "-"
-                    )
-                    .sort(
-                        (first, second) =>
-                            String(
-                                second.sessionDate
-                            ).localeCompare(
-                                String(
-                                    first.sessionDate
-                                )
-                            )
-                    )[0];
-
-            return latest?.progressNotes ||
-                "-";
-        }
-
-        /* =========================
-           DEMO DATA
-        ========================== */
-
-        function getDemoPatients() {
-            return [
-                {
-                    id: 1,
-                    patientCode: "PAT-1001",
-                    patientName: "Nisha Rao",
-                    patientPhone: "9876543210",
-                    patientEmail: "nisha@example.com",
-                    age: 30,
-                    gender: "FEMALE",
-                    therapyName: "Panchakarma",
-                    doctorName: "Dr. N. G. Muraleedhara",
-                    symptoms: "Headache, stress and body stiffness",
-                    medicalHistory: "Migraine and acidity",
-                    treatmentPlan:
-                        "Seven-day Panchakarma plan including Abhyanga, steam therapy and Shirodhara.",
-                    totalSessions: 7,
-                    completedSessions: 3,
-                    missedSessions: 0,
-                    planStatus: "ONGOING",
-                    startDate: getOffsetDate(-7),
-                    endDate: getOffsetDate(7),
-                    lastSessionDate: getOffsetDate(-1),
-                    nextSessionDate: getOffsetDate(1),
-                    latestProgressNote:
-                        "Body stiffness reduced and sleep quality improved.",
-                    overallResponse:
-                        "Patient is responding positively to treatment.",
-                    advice:
-                        "Drink warm water and avoid heavy food.",
-                    sessions: [
-                        {
-                            id: 101,
-                            sessionNumber: 1,
-                            sessionDate: getOffsetDate(-6),
-                            sessionTime: "09:00",
-                            attendance: "PRESENT",
-                            status: "COMPLETED",
-                            treatmentPerformed:
-                                "Abhyanga full-body oil massage",
-                            patientResponse:
-                                "Patient felt relaxed",
-                            progressNotes:
-                                "Mild reduction in stiffness",
-                            advice:
-                                "Rest and drink warm water",
-                            nextSessionDate:
-                                getOffsetDate(-4)
-                        },
-                        {
-                            id: 102,
-                            sessionNumber: 2,
-                            sessionDate: getOffsetDate(-4),
-                            sessionTime: "09:00",
-                            attendance: "PRESENT",
-                            status: "COMPLETED",
-                            treatmentPerformed:
-                                "Steam therapy and Abhyanga",
-                            patientResponse:
-                                "Improved flexibility",
-                            progressNotes:
-                                "Headache frequency reduced",
-                            advice:
-                                "Avoid cold food",
-                            nextSessionDate:
-                                getOffsetDate(-1)
-                        },
-                        {
-                            id: 103,
-                            sessionNumber: 3,
-                            sessionDate: getOffsetDate(-1),
-                            sessionTime: "09:00",
-                            attendance: "PRESENT",
-                            status: "COMPLETED",
-                            treatmentPerformed:
-                                "Shirodhara",
-                            patientResponse:
-                                "Patient slept better",
-                            progressNotes:
-                                "Body stiffness reduced and sleep quality improved.",
-                            advice:
-                                "Maintain regular sleep timing",
-                            nextSessionDate:
-                                getOffsetDate(1)
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    patientCode: "PAT-1002",
-                    patientName: "Kiran Kumar",
-                    patientPhone: "9876543211",
-                    patientEmail: "kiran@example.com",
-                    age: 40,
-                    gender: "MALE",
-                    therapyName: "Acupuncture",
-                    doctorName: "Dr. N. G. Muraleedhara",
-                    symptoms: "Neck and shoulder pain",
-                    medicalHistory: "No major illness",
-                    treatmentPlan:
-                        "Ten-session acupuncture treatment plan for chronic neck pain.",
-                    totalSessions: 10,
-                    completedSessions: 6,
-                    missedSessions: 1,
-                    planStatus: "ONGOING",
-                    startDate: getOffsetDate(-20),
-                    endDate: getOffsetDate(15),
-                    lastSessionDate: getOffsetDate(-2),
-                    nextSessionDate: getOffsetDate(2),
-                    latestProgressNote:
-                        "Pain reduced from severe to moderate.",
-                    overallResponse:
-                        "Patient has shown steady improvement.",
-                    advice:
-                        "Avoid heavy lifting and continue stretching exercises.",
-                    sessions: [
-                        {
-                            id: 201,
-                            sessionNumber: 5,
-                            sessionDate: getOffsetDate(-5),
-                            sessionTime: "11:30",
-                            attendance: "ABSENT",
-                            status: "MISSED",
-                            treatmentPerformed: "-",
-                            patientResponse: "-",
-                            progressNotes:
-                                "Patient did not attend",
-                            advice: "-",
-                            nextSessionDate:
-                                getOffsetDate(-2)
-                        },
-                        {
-                            id: 202,
-                            sessionNumber: 6,
-                            sessionDate: getOffsetDate(-2),
-                            sessionTime: "11:30",
-                            attendance: "PRESENT",
-                            status: "COMPLETED",
-                            treatmentPerformed:
-                                "Acupuncture for neck and shoulder points",
-                            patientResponse:
-                                "Pain reduced after treatment",
-                            progressNotes:
-                                "Pain reduced from severe to moderate.",
-                            advice:
-                                "Avoid heavy lifting",
-                            nextSessionDate:
-                                getOffsetDate(2)
-                        }
-                    ]
-                },
-                {
-                    id: 3,
-                    patientCode: "PAT-1003",
-                    patientName: "Anitha Shetty",
-                    patientPhone: "9876543212",
-                    patientEmail: "anitha@example.com",
-                    age: 36,
-                    gender: "FEMALE",
-                    therapyName: "Yoga and Naturopathy",
-                    doctorName: "Dr. Aditi",
-                    symptoms: "Stress, anxiety and poor sleep",
-                    medicalHistory: "No major illness",
-                    treatmentPlan:
-                        "Fifteen-session yoga, breathing and relaxation program.",
-                    totalSessions: 15,
-                    completedSessions: 15,
-                    missedSessions: 0,
-                    planStatus: "COMPLETED",
-                    startDate: getOffsetDate(-40),
-                    endDate: getOffsetDate(-2),
-                    lastSessionDate: getOffsetDate(-2),
-                    nextSessionDate: null,
-                    latestProgressNote:
-                        "Treatment plan completed with good improvement.",
-                    overallResponse:
-                        "Sleep quality and concentration improved significantly.",
-                    advice:
-                        "Continue daily breathing exercises.",
-                    sessions: [
-                        {
-                            id: 301,
-                            sessionNumber: 15,
-                            sessionDate: getOffsetDate(-2),
-                            sessionTime: "15:00",
-                            attendance: "PRESENT",
-                            status: "COMPLETED",
-                            treatmentPerformed:
-                                "Yoga, Pranayama and guided relaxation",
-                            patientResponse:
-                                "Patient reported better sleep",
-                            progressNotes:
-                                "Treatment plan completed with good improvement.",
-                            advice:
-                                "Continue daily breathing exercises",
-                            nextSessionDate: null
-                        }
-                    ]
-                },
-                {
-                    id: 4,
-                    patientCode: "PAT-1004",
-                    patientName: "Ravi Bhat",
-                    patientPhone: "9876543213",
-                    patientEmail: "ravi@example.com",
-                    age: 34,
-                    gender: "MALE",
-                    therapyName: "Beauty Therapy",
-                    doctorName: "Dr. Aditi",
-                    symptoms: "Skin rejuvenation",
-                    medicalHistory: "Sensitive skin",
-                    treatmentPlan:
-                        "Six-session facial and skin rejuvenation plan.",
-                    totalSessions: 6,
-                    completedSessions: 2,
-                    missedSessions: 1,
-                    planStatus: "PAUSED",
-                    startDate: getOffsetDate(-15),
-                    endDate: null,
-                    lastSessionDate: getOffsetDate(-5),
-                    nextSessionDate: null,
-                    latestProgressNote:
-                        "Plan paused as requested by patient.",
-                    overallResponse:
-                        "Moderate improvement after two sessions.",
-                    advice:
-                        "Continue prescribed skin-care routine.",
-                    sessions: []
-                }
-            ].map(normalizePatient);
-        }
-
-        /* =========================
-           SUMMARY
-        ========================== */
-
-        function updateSummary() {
-            setText(
-                "totalPatients",
-                allPatients.length
-            );
-
-            setText(
-                "ongoingPlans",
-                allPatients.filter(
-                    patient =>
-                        patient.planStatus ===
-                        "ONGOING"
-                ).length
-            );
-
-            setText(
-                "completedPlans",
-                allPatients.filter(
-                    patient =>
-                        patient.planStatus ===
-                        "COMPLETED"
-                ).length
-            );
-
-            setText(
-                "completedSessions",
-                allPatients.reduce(
-                    (
-                        total,
-                        patient
-                    ) =>
-                        total +
-                        Number(
-                            patient.completedSessions
-                        ),
-                    0
-                )
-            );
-
-            setText(
-                "cancelledPlans",
-                allPatients.filter(
-                    patient =>
-                        patient.planStatus ===
-                        "CANCELLED"
-                ).length
-            );
-        }
-
-        /* =========================
-           FILTERS
-        ========================== */
-
-        function populateFilters() {
-            populateSelect(
-                "therapyFilter",
-                allPatients.map(
-                    patient =>
-                        patient.therapyName
-                ),
-                "All Therapies"
-            );
-
-            populateSelect(
-                "doctorFilter",
-                allPatients.map(
-                    patient =>
-                        patient.doctorName
-                ),
-                "All Doctors"
-            );
-        }
-
-        function populateSelect(
-            elementId,
-            values,
-            firstLabel
-        ) {
-            const select =
-                document.getElementById(
-                    elementId
-                );
-
-            const uniqueValues =
-                [
-                    ...new Set(
-                        values.filter(Boolean)
-                    )
-                ].sort();
-
-            select.innerHTML = `
-                <option value="">
-                    ${escapeHtml(firstLabel)}
-                </option>
-            `;
-
-            uniqueValues.forEach(
-                function (value) {
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value = value;
-                    option.textContent = value;
-
-                    select.appendChild(option);
-                }
-            );
-        }
-
-        function setStatusTab(button) {
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    tab =>
-                        tab.classList.remove(
-                            "active"
-                        )
-                );
-
-            button.classList.add("active");
-
-            selectedStatus =
-                button.dataset.status;
-
-            applyFilters();
-        }
-
-        function applyFilters() {
-            const search =
-                document.getElementById(
-                    "searchInput"
-                ).value
-                .trim()
-                .toLowerCase();
-
-            const therapy =
-                document.getElementById(
-                    "therapyFilter"
-                ).value;
-
-            const doctor =
-                document.getElementById(
-                    "doctorFilter"
-                ).value;
-
-            const progressFilter =
-                document.getElementById(
-                    "progressFilter"
-                ).value;
-
-            filteredPatients =
-                allPatients.filter(
-                    function (patient) {
-                        const progress =
-                            calculateProgress(
-                                patient.completedSessions,
-                                patient.totalSessions
-                            );
-
-                        const matchesSearch =
-                            !search ||
-                            patient.patientName
-                                .toLowerCase()
-                                .includes(search) ||
-                            patient.patientPhone
-                                .toLowerCase()
-                                .includes(search) ||
-                            patient.patientCode
-                                .toLowerCase()
-                                .includes(search);
-
-                        const matchesStatus =
-                            !selectedStatus ||
-                            patient.planStatus ===
-                                selectedStatus;
-
-                        const matchesTherapy =
-                            !therapy ||
-                            patient.therapyName ===
-                                therapy;
-
-                        const matchesDoctor =
-                            !doctor ||
-                            patient.doctorName ===
-                                doctor;
-
-                        let matchesProgress =
-                            true;
-
-                        if (
-                            progressFilter ===
-                            "LOW"
-                        ) {
-                            matchesProgress =
-                                progress < 25;
-
-                        } else if (
-                            progressFilter ===
-                            "MEDIUM"
-                        ) {
-                            matchesProgress =
-                                progress >= 25 &&
-                                progress < 75;
-
-                        } else if (
-                            progressFilter ===
-                            "HIGH"
-                        ) {
-                            matchesProgress =
-                                progress >= 75;
-                        }
-
-                        return (
-                            matchesSearch &&
-                            matchesStatus &&
-                            matchesTherapy &&
-                            matchesDoctor &&
-                            matchesProgress
-                        );
-                    }
-                );
-
-            currentPage = 1;
-            renderPatientHistory();
-        }
-
-        function resetFilters() {
-            document.getElementById(
-                "searchInput"
-            ).value = "";
-
-            document.getElementById(
-                "therapyFilter"
-            ).value = "";
-
-            document.getElementById(
-                "doctorFilter"
-            ).value = "";
-
-            document.getElementById(
-                "progressFilter"
-            ).value = "";
-
-            selectedStatus = "";
-
-            document
-                .querySelectorAll(
-                    ".tab-button"
-                )
-                .forEach(
-                    (tab, index) =>
-                        tab.classList.toggle(
-                            "active",
-                            index === 0
-                        )
-                );
-
-            applyFilters();
-        }
-
-        /* =========================
-           TABLE
-        ========================== */
-
-        function renderPatientHistory() {
-            const body =
-                document.getElementById(
-                    "historyTableBody"
-                );
-
-            const totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        filteredPatients.length /
-                        pageSize
-                    )
-                );
-
-            if (currentPage > totalPages) {
-                currentPage = totalPages;
-            }
-
-            const startIndex =
-                (currentPage - 1) *
-                pageSize;
-
-            const pageItems =
-                filteredPatients.slice(
-                    startIndex,
-                    startIndex + pageSize
-                );
-
-            setText(
-                "resultCount",
-                `${filteredPatients.length} Patient${
-                    filteredPatients.length === 1
-                        ? ""
-                        : "s"
-                }`
-            );
-
-            if (!pageItems.length) {
-                body.innerHTML = `
+        );
+
+    currentPage = 1;
+    applyFilters();
+}
+
+function populateFilters() {
+    populateSelect(
+        "therapyFilter",
+        "All Therapies",
+        allPatients
+            .map(
+                patient =>
+                    patient.treatmentName
+            )
+            .filter(Boolean)
+    );
+
+    populateSelect(
+        "doctorFilter",
+        "All Doctors",
+        allPatients
+            .map(
+                patient =>
+                    patient.doctorName
+            )
+            .filter(
+                value =>
+                    value &&
+                    value !== "-"
+            )
+    );
+}
+
+function populateSelect(
+    id,
+    defaultLabel,
+    values
+) {
+    const select =
+        document.getElementById(id);
+
+    const currentValue =
+        select.value;
+
+    const uniqueValues =
+        [...new Set(values)]
+            .sort();
+
+    select.innerHTML = `
+        <option value="">
+            ${escapeHtml(defaultLabel)}
+        </option>
+
+        ${uniqueValues
+            .map(
+                value => `
+                    <option value="${escapeHtml(value)}">
+                        ${escapeHtml(value)}
+                    </option>
+                `
+            )
+            .join("")}
+    `;
+
+    if (
+        uniqueValues.includes(
+            currentValue
+        )
+    ) {
+        select.value =
+            currentValue;
+    }
+}
+
+/* =========================
+   TABLE
+========================= */
+
+function showLoading() {
+    document.getElementById(
+        "historyTableBody"
+    ).innerHTML = `
+        <tr>
+            <td
+                colspan="12"
+                class="table-message"
+            >
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading patient history...
+            </td>
+        </tr>
+    `;
+}
+
+function renderPatients() {
+    const body =
+        document.getElementById(
+            "historyTableBody"
+        );
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredPatients.length /
+                pageSize
+            )
+        );
+
+    if (
+        currentPage >
+        totalPages
+    ) {
+        currentPage =
+            totalPages;
+    }
+
+    const start =
+        (currentPage - 1) *
+        pageSize;
+
+    const pagePatients =
+        filteredPatients.slice(
+            start,
+            start + pageSize
+        );
+
+    setText(
+        "resultCount",
+        `${filteredPatients.length} Patient${
+            filteredPatients.length === 1
+                ? ""
+                : "s"
+        }`
+    );
+
+    if (!pagePatients.length) {
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="12"
+                    class="table-message"
+                >
+                    <i class="fa-solid fa-user-xmark"></i>
+                    No patient treatment records found.
+                </td>
+            </tr>
+        `;
+
+        updatePagination(
+            0,
+            0,
+            0
+        );
+
+        renderPaginationButtons(1);
+        return;
+    }
+
+    body.innerHTML =
+        pagePatients
+            .map(
+                patient => `
                     <tr>
-                        <td
-                            colspan="12"
-                            class="table-message"
-                        >
-                            <i class="fa-solid fa-users-slash"></i>
-                            No patient history matched the selected filters.
+
+                        <td>
+                            <strong>
+                                PT-${escapeHtml(
+                                    patient.patientId ?? "-"
+                                )}
+                            </strong>
                         </td>
-                    </tr>
-                `;
 
-                updatePaginationInfo(
-                    0,
-                    0,
-                    0
-                );
+                        <td>
+                            <div class="patient-cell">
 
-                renderPaginationButtons(1);
-                return;
-            }
-
-            body.innerHTML = "";
-
-            pageItems.forEach(
-                function (patient) {
-                    const progress =
-                        calculateProgress(
-                            patient.completedSessions,
-                            patient.totalSessions
-                        );
-
-                    body.insertAdjacentHTML(
-                        "beforeend",
-                        `
-                        <tr>
-
-                            <td>
-                                <strong>
+                                <span class="patient-avatar">
                                     ${escapeHtml(
-                                        patient.patientCode
+                                        patient.patientName
+                                            .charAt(0)
+                                            .toUpperCase()
                                     )}
-                                </strong>
-                            </td>
-
-                            <td>
-
-                                <div class="patient-cell">
-
-                                    <span class="patient-avatar">
-                                        ${escapeHtml(
-                                            patient.patientName
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        )}
-                                    </span>
-
-                                    <div>
-
-                                        <strong>
-                                            ${escapeHtml(
-                                                patient.patientName
-                                            )}
-                                        </strong>
-
-                                        <small>
-                                            ${escapeHtml(
-                                                patient.patientPhone
-                                            )}
-                                        </small>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-                            <td>
-
-                                <span class="therapy-badge">
-
-                                    <i class="fa-solid fa-spa"></i>
-
-                                    ${escapeHtml(
-                                        patient.therapyName
-                                    )}
-
                                 </span>
 
-                            </td>
+                                <div>
+                                    <strong>
+                                        ${escapeHtml(
+                                            patient.patientName
+                                        )}
+                                    </strong>
 
-                            <td>
-                                ${escapeHtml(
-                                    patient.doctorName
-                                )}
-                            </td>
-
-                            <td>
-
-                                <div class="progress-wrapper">
-
-                                    <div class="progress-text">
-
-                                        <span>
-                                            ${escapeHtml(
-                                                patient.completedSessions
-                                            )}
-                                            /
-                                            ${escapeHtml(
-                                                patient.totalSessions
-                                            )}
-                                        </span>
-
-                                        <span>
-                                            ${progress}%
-                                        </span>
-
-                                    </div>
-
-                                    <div class="progress-bar">
-
-                                        <div
-                                            class="progress-fill"
-                                            style="width:${progress}%"
-                                        ></div>
-
-                                    </div>
-
+                                    <small>
+                                        ${escapeHtml(
+                                            patient.phoneNumber
+                                        )}
+                                    </small>
                                 </div>
 
-                            </td>
+                            </div>
+                        </td>
 
-                            <td>
+                        <td>
+                            <span class="therapy-badge">
+                                <i class="fa-solid fa-spa"></i>
                                 ${escapeHtml(
-                                    patient.completedSessions
+                                    patient.treatmentName
                                 )}
-                            </td>
+                            </span>
+                        </td>
 
-                            <td>
-                                ${escapeHtml(
-                                    patient.missedSessions
-                                )}
-                            </td>
+                        <td>
+                            ${escapeHtml(
+                                patient.doctorName
+                            )}
+                        </td>
 
-                            <td>
-                                ${createStatusBadge(
+                        <td>
+                            ${renderProgress(
+                                patient.completedSessions,
+                                patient.totalSessions,
+                                patient.completionPercentage
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                patient.completedSessions
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                patient.missedSessions
+                            )}
+                        </td>
+
+                        <td>
+                            <span
+                                class="status-badge ${statusClass(
                                     patient.planStatus
-                                )}
-                            </td>
-
-                            <td>
+                                )}"
+                            >
                                 ${escapeHtml(
-                                    formatDate(
-                                        patient.startDate
+                                    formatLabel(
+                                        patient.planStatus
                                     )
                                 )}
-                            </td>
+                            </span>
+                        </td>
 
-                            <td>
-                                ${escapeHtml(
-                                    formatDate(
-                                        patient.lastSessionDate
-                                    )
-                                )}
-                            </td>
+                        <td>
+                            ${escapeHtml(
+                                formatDate(
+                                    patient.startDate
+                                )
+                            )}
+                        </td>
 
-                            <td
+                        <td>
+                            ${escapeHtml(
+                                formatDate(
+                                    patient.lastSessionDate
+                                )
+                            )}
+                        </td>
+
+                        <td>
+                            <div
                                 class="notes-preview"
                                 title="${escapeHtml(
                                     patient.latestProgressNote
@@ -3450,1158 +3539,942 @@
                                 ${escapeHtml(
                                     patient.latestProgressNote
                                 )}
-                            </td>
+                            </div>
+                        </td>
 
-                            <td>
+                        <td>
+                            <div class="action-buttons">
 
-                                <div class="action-buttons">
+                                <button
+                                    type="button"
+                                    class="action-button view-button"
+                                    title="View patient history"
+                                    onclick="openPatientModal(${Number(
+                                        patient.patientId
+                                    )}, ${Number(
+                                        patient.treatmentPlanId || 0
+                                    )})"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
 
-                                    <button
-                                        type="button"
-                                        class="action-button view-button"
-                                        onclick="openPatientModal('${patient.id}')"
-                                        title="View patient history"
-                                    >
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
+                                <button
+                                    type="button"
+                                    class="action-button sessions-button"
+                                    title="View session history"
+                                    onclick="openPatientModal(${Number(
+                                        patient.patientId
+                                    )}, ${Number(
+                                        patient.treatmentPlanId || 0
+                                    )})"
+                                >
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                </button>
 
-                                    <button
-                                        type="button"
-                                        class="action-button sessions-button"
-                                        onclick="openPatientModal('${patient.id}')"
-                                        title="View session history"
-                                    >
-                                        <i class="fa-solid fa-list-check"></i>
-                                    </button>
+                            </div>
+                        </td>
 
-                                    <button
-                                        type="button"
-                                        class="action-button download-button"
-                                        onclick="downloadPatientReport('${patient.id}')"
-                                        title="Download report"
-                                    >
-                                        <i class="fa-solid fa-download"></i>
-                                    </button>
+                    </tr>
+                `
+            )
+            .join("");
 
-                                </div>
+    updatePagination(
+        start + 1,
+        Math.min(
+            start + pageSize,
+            filteredPatients.length
+        ),
+        filteredPatients.length
+    );
 
-                            </td>
+    renderPaginationButtons(
+        totalPages
+    );
+}
 
-                        </tr>
-                        `
-                    );
-                }
+function renderProgress(
+    completed,
+    total,
+    percentage
+) {
+    const safeTotal =
+        Math.max(
+            Number(total) || 0,
+            0
+        );
+
+    const safeCompleted =
+        Math.max(
+            Number(completed) || 0,
+            0
+        );
+
+    const safePercentage =
+        Math.min(
+            100,
+            Math.max(
+                0,
+                Number(percentage) ||
+                (
+                    safeTotal > 0
+                        ? Math.round(
+                            (
+                                safeCompleted /
+                                safeTotal
+                            ) * 100
+                          )
+                        : 0
+                )
+            )
+        );
+
+    return `
+        <div class="progress-wrapper">
+
+            <div class="progress-text">
+                <span>
+                    ${safeCompleted}/${safeTotal}
+                </span>
+
+                <span>
+                    ${safePercentage}%
+                </span>
+            </div>
+
+            <div class="progress-bar">
+                <div
+                    class="progress-fill"
+                    style="width:${safePercentage}%"
+                ></div>
+            </div>
+
+        </div>
+    `;
+}
+
+/* =========================
+   PAGINATION
+========================= */
+
+function updatePagination(
+    start,
+    end,
+    total
+) {
+    setText(
+        "paginationInfo",
+        total
+            ? `Showing ${start}-${end} of ${total} patients`
+            : "Showing 0 patients"
+    );
+}
+
+function renderPaginationButtons(
+    totalPages
+) {
+    const container =
+        document.getElementById(
+            "paginationButtons"
+        );
+
+    container.innerHTML = "";
+
+    container.appendChild(
+        createPaginationButton(
+            '<i class="fa-solid fa-chevron-left"></i>',
+            currentPage === 1,
+            () =>
+                changePage(
+                    currentPage - 1
+                )
+        )
+    );
+
+    for (
+        let page = 1;
+        page <= totalPages;
+        page++
+    ) {
+        if (
+            totalPages > 7 &&
+            page !== 1 &&
+            page !== totalPages &&
+            Math.abs(
+                page -
+                currentPage
+            ) > 1
+        ) {
+            continue;
+        }
+
+        const button =
+            createPaginationButton(
+                String(page),
+                false,
+                () =>
+                    changePage(page)
             );
 
-            updatePaginationInfo(
-                startIndex + 1,
-                Math.min(
-                    startIndex + pageSize,
-                    filteredPatients.length
-                ),
-                filteredPatients.length
-            );
-
-            renderPaginationButtons(
-                totalPages
+        if (
+            page === currentPage
+        ) {
+            button.classList.add(
+                "active"
             );
         }
 
-        function createStatusBadge(status) {
-            const normalized =
+        container.appendChild(
+            button
+        );
+    }
+
+    container.appendChild(
+        createPaginationButton(
+            '<i class="fa-solid fa-chevron-right"></i>',
+            currentPage ===
+                totalPages,
+            () =>
+                changePage(
+                    currentPage + 1
+                )
+        )
+    );
+}
+
+function createPaginationButton(
+    html,
+    disabled,
+    handler
+) {
+    const button =
+        document.createElement(
+            "button"
+        );
+
+    button.type = "button";
+    button.className =
+        "pagination-button";
+    button.innerHTML = html;
+    button.disabled = disabled;
+    button.onclick = handler;
+
+    return button;
+}
+
+function changePage(page) {
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredPatients.length /
+                pageSize
+            )
+        );
+
+    if (
+        page < 1 ||
+        page > totalPages
+    ) {
+        return;
+    }
+
+    currentPage = page;
+    renderPatients();
+
+    document
+        .querySelector(
+            ".history-panel"
+        )
+        ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+/* =========================
+   PATIENT MODAL
+========================= */
+
+function openPatientModal(
+    patientId,
+    treatmentPlanId
+) {
+    selectedPatient =
+        allPatients.find(
+            patient =>
+                (
+                    treatmentPlanId &&
+                    String(
+                        patient.treatmentPlanId
+                    ) ===
+                    String(
+                        treatmentPlanId
+                    )
+                ) ||
                 String(
-                    status ||
-                    "ONGOING"
-                ).toUpperCase();
+                    patient.patientId
+                ) ===
+                String(patientId)
+        ) || null;
 
-            const className = {
-                ONGOING:
-                    "status-ongoing",
+    if (!selectedPatient) {
+        showAlert(
+            "Patient history not found.",
+            "error"
+        );
+        return;
+    }
 
-                ACTIVE:
-                    "status-active",
+    const sessions =
+        getPatientSessions(
+            selectedPatient
+        );
 
-                COMPLETED:
-                    "status-completed",
+    document.getElementById(
+        "patientModalContent"
+    ).innerHTML = `
+        <div class="modal-patient-card">
 
-                CANCELLED:
-                    "status-cancelled",
+            <div class="modal-patient-left">
 
-                PAUSED:
-                    "status-paused"
-            }[normalized] ||
-                "status-ongoing";
-
-            return `
-                <span
-                    class="status-badge ${className}"
-                >
+                <span class="patient-avatar">
                     ${escapeHtml(
-                        formatStatus(
-                            normalized
-                        )
+                        selectedPatient.patientName
+                            .charAt(0)
+                            .toUpperCase()
                     )}
                 </span>
-            `;
-        }
 
-        /* =========================
-           PATIENT MODAL
-        ========================== */
+                <div>
+                    <h3>
+                        ${escapeHtml(
+                            selectedPatient.patientName
+                        )}
+                    </h3>
 
-        async function openPatientModal(id) {
-            selectedPatient =
-                findPatient(id);
-
-            if (!selectedPatient) {
-                return;
-            }
-
-            document.getElementById(
-                "patientModalContent"
-            ).innerHTML = `
-                <div class="table-message">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Loading complete patient history...
+                    <p>
+                        Patient ID:
+                        ${escapeHtml(
+                            selectedPatient.patientId ?? "-"
+                        )}
+                        ·
+                        ${escapeHtml(
+                            selectedPatient.phoneNumber
+                        )}
+                        ·
+                        ${escapeHtml(
+                            selectedPatient.treatmentName
+                        )}
+                    </p>
                 </div>
-            `;
 
-            openModal(
-                "patientModal"
-            );
+            </div>
 
-            try {
-                const result =
-                    await therapistApiRequest(
-                        `/api/therapist/patients/${encodeURIComponent(
-                            selectedPatient.id
-                        )}/history`
-                    );
+            <div class="modal-progress-number">
+                ${escapeHtml(
+                    selectedPatient.completionPercentage
+                )}%
+            </div>
 
-                if (result.data) {
-                    const fullPatient =
-                        normalizePatient({
-                            ...selectedPatient,
-                            ...result.data
-                        });
+        </div>
 
-                    selectedPatient =
-                        fullPatient;
-                }
+        <div class="details-grid">
 
-            } catch (error) {
-                console.error(
-                    "Detailed history API unavailable:",
-                    error
-                );
-            }
+            ${detailBox(
+                "Treatment Plan ID",
+                selectedPatient.treatmentPlanId ?? "-"
+            )}
 
-            renderPatientModal();
-        }
+            ${detailBox(
+                "Plan Status",
+                formatLabel(
+                    selectedPatient.planStatus
+                )
+            )}
 
-        function renderPatientModal() {
-            if (!selectedPatient) {
-                return;
-            }
+            ${detailBox(
+                "Therapy",
+                selectedPatient.treatmentName
+            )}
 
-            const progress =
-                calculateProgress(
-                    selectedPatient.completedSessions,
-                    selectedPatient.totalSessions
-                );
+            ${detailBox(
+                "Doctor",
+                selectedPatient.doctorName
+            )}
 
-            const sessionsHtml =
-                selectedPatient.sessions.length
-                    ? [...selectedPatient.sessions]
-                        .sort(
-                            (
-                                first,
-                                second
-                            ) =>
-                                Number(
-                                    first.sessionNumber
-                                ) -
-                                Number(
-                                    second.sessionNumber
-                                )
-                        )
+            ${detailBox(
+                "Diagnosis",
+                selectedPatient.diagnosis,
+                true
+            )}
+
+            ${detailBox(
+                "Total Sessions",
+                selectedPatient.totalSessions
+            )}
+
+            ${detailBox(
+                "Completed Sessions",
+                selectedPatient.completedSessions
+            )}
+
+            ${detailBox(
+                "Remaining Sessions",
+                selectedPatient.remainingSessions
+            )}
+
+            ${detailBox(
+                "Missed Sessions",
+                selectedPatient.missedSessions
+            )}
+
+            ${detailBox(
+                "Started On",
+                formatDate(
+                    selectedPatient.startDate
+                )
+            )}
+
+            ${detailBox(
+                "Latest Progress Note",
+                selectedPatient.latestProgressNote,
+                true
+            )}
+
+        </div>
+
+        <div class="section-heading">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Session History
+        </div>
+
+        <div class="session-history-list">
+            ${
+                sessions.length
+                    ? sessions
                         .map(
-                            session => `
-                            <article class="session-history-item">
-
-                                <div class="session-number-box">
-
-                                    <strong>
-                                        ${escapeHtml(
-                                            session.sessionNumber
-                                        )}
-                                    </strong>
-
-                                    <span>
-                                        Session
-                                    </span>
-
-                                </div>
-
-                                <div class="session-history-content">
-
-                                    <h4>
-                                        ${escapeHtml(
-                                            session.treatmentPerformed
-                                        )}
-                                    </h4>
-
-                                    <p>
-                                        <strong>Attendance:</strong>
-                                        ${escapeHtml(
-                                            formatStatus(
-                                                session.attendance
-                                            )
-                                        )}
-                                        ·
-                                        <strong>Status:</strong>
-                                        ${escapeHtml(
-                                            formatStatus(
-                                                session.status
-                                            )
-                                        )}
-                                    </p>
-
-                                    <p>
-                                        <strong>Patient response:</strong>
-                                        ${escapeHtml(
-                                            session.patientResponse
-                                        )}
-                                    </p>
-
-                                    <p>
-                                        <strong>Progress notes:</strong>
-                                        ${escapeHtml(
-                                            session.progressNotes
-                                        )}
-                                    </p>
-
-                                    <p>
-                                        <strong>Advice:</strong>
-                                        ${escapeHtml(
-                                            session.advice
-                                        )}
-                                    </p>
-
-                                </div>
-
-                                <div class="session-date-box">
-
-                                    ${escapeHtml(
-                                        formatDate(
-                                            session.sessionDate
-                                        )
-                                    )}
-
-                                    <br>
-
-                                    ${escapeHtml(
-                                        formatTime(
-                                            session.sessionTime
-                                        )
-                                    )}
-
-                                </div>
-
-                            </article>
-                            `
+                            session =>
+                                renderSessionHistoryItem(
+                                    session
+                                )
                         )
                         .join("")
                     : `
                         <div class="table-message">
-                            <i class="fa-solid fa-folder-open"></i>
-                            No session history is available.
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                            No sessions found for this treatment plan.
                         </div>
-                    `;
+                      `
+            }
+        </div>
+    `;
 
-            document.getElementById(
-                "patientModalContent"
-            ).innerHTML = `
-                <div class="modal-patient-card">
+    openModal(
+        "patientModal"
+    );
+}
 
-                    <div class="modal-patient-left">
+function detailBox(
+    label,
+    value,
+    fullWidth = false
+) {
+    return `
+        <div
+            class="detail-box ${
+                fullWidth
+                    ? "full-width"
+                    : ""
+            }"
+        >
+            <span>
+                ${escapeHtml(label)}
+            </span>
 
-                        <span class="patient-avatar">
+            ${
+                fullWidth
+                    ? `
+                        <p>
                             ${escapeHtml(
-                                selectedPatient.patientName
-                                    .charAt(0)
-                                    .toUpperCase()
+                                value ?? "-"
                             )}
-                        </span>
+                        </p>
+                      `
+                    : `
+                        <strong>
+                            ${escapeHtml(
+                                value ?? "-"
+                            )}
+                        </strong>
+                      `
+            }
+        </div>
+    `;
+}
 
-                        <div>
+function renderSessionHistoryItem(
+    session
+) {
+    return `
+        <article class="session-history-item">
 
-                            <h3>
-                                ${escapeHtml(
-                                    selectedPatient.patientName
-                                )}
-                            </h3>
+            <div class="session-number-box">
+                <strong>
+                    ${escapeHtml(
+                        session.sessionNumber
+                    )}
+                </strong>
 
+                <span>
+                    SESSION
+                </span>
+            </div>
+
+            <div class="session-history-content">
+
+                <h4>
+                    ${escapeHtml(
+                        session.treatmentName
+                    )}
+                </h4>
+
+                <p>
+                    <strong>Status:</strong>
+                    ${escapeHtml(
+                        formatLabel(
+                            session.status
+                        )
+                    )}
+                </p>
+
+                <p>
+                    <strong>Patient Notes:</strong>
+                    ${escapeHtml(
+                        session.patientNotes || "-"
+                    )}
+                </p>
+
+                <p>
+                    <strong>Therapist Notes:</strong>
+                    ${escapeHtml(
+                        session.therapistNotes || "-"
+                    )}
+                </p>
+
+                ${
+                    session.rescheduleReason
+                        ? `
                             <p>
+                                <strong>Reschedule Reason:</strong>
                                 ${escapeHtml(
-                                    selectedPatient.patientCode
-                                )}
-                                ·
-                                ${escapeHtml(
-                                    selectedPatient.patientPhone
-                                )}
-                                ·
-                                ${escapeHtml(
-                                    selectedPatient.patientEmail
+                                    session.rescheduleReason
                                 )}
                             </p>
-
-                        </div>
-
-                    </div>
-
-                    <div class="modal-progress-number">
-                        ${progress}%
-                    </div>
-
-                </div>
-
-                <div class="details-grid">
-
-                    <div class="detail-box">
-                        <span>Age / Gender</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedPatient.age
-                            )}
-                            /
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedPatient.gender
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Therapy</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedPatient.therapyName
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Doctor</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedPatient.doctorName
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Plan Status</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedPatient.planStatus
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Completed Sessions</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedPatient.completedSessions
-                            )}
-                            of
-                            ${escapeHtml(
-                                selectedPatient.totalSessions
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Missed Sessions</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                selectedPatient.missedSessions
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Plan Start Date</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedPatient.startDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Plan End Date</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedPatient.endDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Last Session</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedPatient.lastSessionDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Next Session</span>
-
-                        <strong>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedPatient.nextSessionDate
-                                )
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Symptoms / Health Concern</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedPatient.symptoms
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Medical History</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedPatient.medicalHistory
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Treatment Plan</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedPatient.treatmentPlan
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Latest Progress Note</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedPatient.latestProgressNote
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Overall Patient Response</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedPatient.overallResponse
-                            )}
-                        </p>
-                    </div>
-
-                    <div class="detail-box full-width">
-                        <span>Advice</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedPatient.advice
-                            )}
-                        </p>
-                    </div>
-
-                </div>
-
-                <div class="section-heading">
-
-                    <i class="fa-solid fa-list-check"></i>
-
-                    Session-by-Session History
-
-                </div>
-
-                <div class="session-history-list">
-                    ${sessionsHtml}
-                </div>
-            `;
-        }
-
-        /* =========================
-           DOWNLOAD / PRINT
-        ========================== */
-
-        async function downloadPatientReport(id) {
-            const patient =
-                findPatient(id);
-
-            if (!patient) {
-                return;
-            }
-
-            try {
-                const token =
-                    getTherapistToken();
-
-                const response =
-                    await fetch(
-                        `${API_BASE_URL}/api/therapist/patients/${encodeURIComponent(
-                            patient.id
-                        )}/report`,
-                        {
-                            headers: {
-                                "Authorization":
-                                    "Bearer " + token
-                            }
-                        }
-                    );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Report API not available."
-                    );
+                          `
+                        : ""
                 }
 
-                const blob =
-                    await response.blob();
+            </div>
 
-                const url =
-                    URL.createObjectURL(blob);
-
-                const link =
-                    document.createElement(
-                        "a"
-                    );
-
-                link.href = url;
-
-                link.download =
-                    `${patient.patientCode}-therapy-report.pdf`;
-
-                document.body.appendChild(
-                    link
-                );
-
-                link.click();
-                link.remove();
-
-                URL.revokeObjectURL(url);
-
-                showAlert(
-                    "Patient report downloaded successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                downloadPatientReportAsText(
-                    patient
-                );
-
-                showAlert(
-                    "PDF API is not connected. A text report was downloaded.",
-                    "info"
-                );
-            }
-        }
-
-        function downloadSelectedPatientReport() {
-            if (!selectedPatient) {
-                return;
-            }
-
-            downloadPatientReport(
-                selectedPatient.id
-            );
-        }
-
-        function downloadPatientReportAsText(
-            patient
-        ) {
-            const sessionText =
-                patient.sessions.length
-                    ? patient.sessions
-                        .map(
-                            session => `
-Session ${session.sessionNumber}
-Date: ${formatDate(session.sessionDate)}
-Time: ${formatTime(session.sessionTime)}
-Attendance: ${formatStatus(session.attendance)}
-Status: ${formatStatus(session.status)}
-Treatment: ${session.treatmentPerformed}
-Patient Response: ${session.patientResponse}
-Progress Notes: ${session.progressNotes}
-Advice: ${session.advice}
-`
-                        )
-                        .join("\n")
-                    : "No session history available.";
-
-            const report = `
-NEOLIFE WELLNESS CENTER
-THERAPY PATIENT HISTORY REPORT
-
-Patient ID: ${patient.patientCode}
-Patient Name: ${patient.patientName}
-Phone: ${patient.patientPhone}
-Email: ${patient.patientEmail}
-Age: ${patient.age}
-Gender: ${formatStatus(patient.gender)}
-
-Therapy: ${patient.therapyName}
-Doctor: ${patient.doctorName}
-Plan Status: ${formatStatus(patient.planStatus)}
-Plan Start Date: ${formatDate(patient.startDate)}
-Plan End Date: ${formatDate(patient.endDate)}
-
-Sessions Completed: ${patient.completedSessions}
-Total Sessions: ${patient.totalSessions}
-Missed Sessions: ${patient.missedSessions}
-Progress: ${calculateProgress(
-                patient.completedSessions,
-                patient.totalSessions
-            )}%
-
-Symptoms:
-${patient.symptoms}
-
-Medical History:
-${patient.medicalHistory}
-
-Treatment Plan:
-${patient.treatmentPlan}
-
-Latest Progress Note:
-${patient.latestProgressNote}
-
-Overall Response:
-${patient.overallResponse}
-
-Advice:
-${patient.advice}
-
-SESSION HISTORY
-${sessionText}
-            `.trim();
-
-            const blob =
-                new Blob(
-                    [report],
-                    {
-                        type:
-                            "text/plain;charset=utf-8"
-                    }
-                );
-
-            const url =
-                URL.createObjectURL(
-                    blob
-                );
-
-            const link =
-                document.createElement(
-                    "a"
-                );
-
-            link.href = url;
-
-            link.download =
-                `${patient.patientCode}-therapy-report.txt`;
-
-            document.body.appendChild(
-                link
-            );
-
-            link.click();
-            link.remove();
-
-            URL.revokeObjectURL(url);
-        }
-
-        function printPatientReport() {
-            if (!selectedPatient) {
-                return;
-            }
-
-            window.print();
-        }
-
-        /* =========================
-           PAGINATION
-        ========================== */
-
-        function updatePaginationInfo(
-            start,
-            end,
-            total
-        ) {
-            setText(
-                "paginationInfo",
-                total === 0
-                    ? "Showing 0 patients"
-                    : `Showing ${start}–${end} of ${total} patients`
-            );
-        }
-
-        function renderPaginationButtons(
-            totalPages
-        ) {
-            const container =
-                document.getElementById(
-                    "paginationButtons"
-                );
-
-            container.innerHTML = "";
-
-            const previous =
-                document.createElement(
-                    "button"
-                );
-
-            previous.type = "button";
-
-            previous.className =
-                "pagination-button";
-
-            previous.innerHTML =
-                '<i class="fa-solid fa-chevron-left"></i>';
-
-            previous.disabled =
-                currentPage === 1;
-
-            previous.onclick =
-                function () {
-                    changePage(
-                        currentPage - 1
-                    );
-                };
-
-            container.appendChild(
-                previous
-            );
-
-            for (
-                let page = 1;
-                page <= totalPages;
-                page++
-            ) {
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-                button.type = "button";
-
-                button.className =
-                    `pagination-button ${
-                        page === currentPage
-                            ? "active"
-                            : ""
-                    }`;
-
-                button.textContent =
-                    page;
-
-                button.onclick =
-                    function () {
-                        changePage(page);
-                    };
-
-                container.appendChild(
-                    button
-                );
-            }
-
-            const next =
-                document.createElement(
-                    "button"
-                );
-
-            next.type = "button";
-
-            next.className =
-                "pagination-button";
-
-            next.innerHTML =
-                '<i class="fa-solid fa-chevron-right"></i>';
-
-            next.disabled =
-                currentPage ===
-                totalPages;
-
-            next.onclick =
-                function () {
-                    changePage(
-                        currentPage + 1
-                    );
-                };
-
-            container.appendChild(
-                next
-            );
-        }
-
-        function changePage(page) {
-            const totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        filteredPatients.length /
-                        pageSize
+            <div class="session-date-box">
+                ${escapeHtml(
+                    formatDate(
+                        session.sessionDate
                     )
-                );
+                )}
+                <br>
+                ${escapeHtml(
+                    formatTimeRange(
+                        session.startTime,
+                        session.endTime
+                    )
+                )}
+            </div>
 
-            if (
-                page < 1 ||
-                page > totalPages
-            ) {
-                return;
+        </article>
+    `;
+}
+
+/* =========================
+   PRINT / DOWNLOAD
+========================= */
+
+function printPatientReport() {
+    if (!selectedPatient) {
+        showAlert(
+            "Select a patient first.",
+            "error"
+        );
+        return;
+    }
+
+    window.print();
+}
+
+function downloadSelectedPatientReport() {
+    if (!selectedPatient) {
+        showAlert(
+            "Select a patient first.",
+            "error"
+        );
+        return;
+    }
+
+    const sessions =
+        getPatientSessions(
+            selectedPatient
+        );
+
+    const report = [
+        "NEOLIFE PATIENT THERAPY HISTORY",
+        "",
+        `Patient: ${selectedPatient.patientName}`,
+        `Patient ID: ${selectedPatient.patientId ?? "-"}`,
+        `Phone: ${selectedPatient.phoneNumber}`,
+        `Therapy: ${selectedPatient.treatmentName}`,
+        `Doctor: ${selectedPatient.doctorName}`,
+        `Diagnosis: ${selectedPatient.diagnosis}`,
+        `Plan Status: ${formatLabel(selectedPatient.planStatus)}`,
+        `Progress: ${selectedPatient.completionPercentage}%`,
+        `Completed Sessions: ${selectedPatient.completedSessions}`,
+        `Remaining Sessions: ${selectedPatient.remainingSessions}`,
+        `Missed Sessions: ${selectedPatient.missedSessions}`,
+        "",
+        "SESSION HISTORY",
+        ...sessions.map(
+            session =>
+                [
+                    `Session ${session.sessionNumber}`,
+                    `Date: ${formatDate(session.sessionDate)}`,
+                    `Time: ${formatTimeRange(session.startTime, session.endTime)}`,
+                    `Status: ${formatLabel(session.status)}`,
+                    `Patient Notes: ${session.patientNotes || "-"}`,
+                    `Therapist Notes: ${session.therapistNotes || "-"}`,
+                    ""
+                ].join("\n")
+        )
+    ].join("\n");
+
+    const blob =
+        new Blob(
+            [report],
+            {
+                type:
+                    "text/plain;charset=utf-8"
             }
+        );
 
-            currentPage = page;
+    const url =
+        URL.createObjectURL(blob);
 
-            renderPatientHistory();
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+    link.download =
+        `patient-history-${selectedPatient.patientId || "report"}.txt`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+
+    showAlert(
+        "Patient history report downloaded.",
+        "success"
+    );
+}
+
+/* =========================
+   MODAL / SIDEBAR
+========================= */
+
+function openModal(id) {
+    const modal =
+        document.getElementById(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add("show");
+
+    document.body.style.overflow =
+        "hidden";
+}
+
+function closeModal(id) {
+    const modal =
+        document.getElementById(id);
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove("show");
+
+    document.body.style.overflow =
+        "";
+
+    if (id === "patientModal") {
+        selectedPatient = null;
+    }
+}
+
+function handleModalOutside(
+    event,
+    modalId
+) {
+    if (event.target.id === modalId) {
+        closeModal(modalId);
+    }
+}
+
+function toggleSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.toggle("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.toggle("show");
+}
+
+function closeSidebar() {
+    document
+        .getElementById(
+            "therapistSidebar"
+        )
+        .classList.remove("open");
+
+    document
+        .getElementById(
+            "sidebarOverlay"
+        )
+        .classList.remove("show");
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function statusClass(status) {
+    switch (
+        normalizePlanStatus(status)
+    ) {
+        case "COMPLETED":
+            return "status-completed";
+
+        case "CANCELLED":
+            return "status-cancelled";
+
+        case "PAUSED":
+            return "status-paused";
+
+        case "ONGOING":
+        default:
+            return "status-ongoing";
+    }
+}
+
+function formatLabel(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "-";
+    }
+
+    return String(value)
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            letter =>
+                letter.toUpperCase()
+        );
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(
+            String(value).includes("T")
+                ? value
+                : `${value}T00:00:00`
+        );
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
         }
+    );
+}
 
-        /* =========================
-           HELPERS
-        ========================== */
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
 
-        function findPatient(id) {
-            return allPatients.find(
-                patient =>
-                    String(patient.id) ===
-                    String(id)
+    const parts =
+        String(value).split(":");
+
+    if (parts.length < 2) {
+        return String(value);
+    }
+
+    const date = new Date();
+
+    date.setHours(
+        Number(parts[0]),
+        Number(parts[1]),
+        0,
+        0
+    );
+
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        }
+    );
+}
+
+function formatTimeRange(
+    start,
+    end
+) {
+    const startText =
+        formatTime(start);
+
+    const endText =
+        formatTime(end);
+
+    if (
+        end &&
+        endText !== "-"
+    ) {
+        return `${startText} - ${endText}`;
+    }
+
+    return startText;
+}
+
+function createSessionDate(
+    session
+) {
+    const date =
+        session.sessionDate ||
+        "1970-01-01";
+
+    const time =
+        session.startTime ||
+        "00:00:00";
+
+    return new Date(
+        `${date}T${time}`
+    );
+}
+
+function setText(id, value) {
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent =
+            String(value ?? "");
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const alertBox =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const alertMessage =
+        document.getElementById(
+            "alertMessage"
+        );
+
+    const alertIcon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    alertBox.className =
+        `page-alert show ${type}`;
+
+    alertMessage.textContent =
+        message;
+
+    alertIcon.className =
+        type === "success"
+            ? "fa-solid fa-circle-check"
+            : type === "error"
+                ? "fa-solid fa-circle-exclamation"
+                : "fa-solid fa-circle-info";
+
+    clearTimeout(
+        window.patientHistoryAlertTimer
+    );
+
+    window.patientHistoryAlertTimer =
+        setTimeout(
+            () => {
+                alertBox.classList
+                    .remove("show");
+            },
+            4000
+        );
+}
+
+document.addEventListener(
+    "keydown",
+    event => {
+        if (event.key === "Escape") {
+            closeModal(
+                "patientModal"
             );
         }
-
-        function calculateProgress(
-            completed,
-            total
-        ) {
-            if (
-                Number(total) <= 0
-            ) {
-                return 0;
-            }
-
-            return Math.min(
-                100,
-                Math.round(
-                    (
-                        Number(completed) /
-                        Number(total)
-                    ) * 100
-                )
-            );
-        }
-
-        function openModal(id) {
-            document.getElementById(
-                id
-            ).classList.add(
-                "show"
-            );
-        }
-
-        function closeModal(id) {
-            document.getElementById(
-                id
-            ).classList.remove(
-                "show"
-            );
-        }
-
-        function handleModalOutside(
-            event,
-            modalId
-        ) {
-            if (
-                event.target.id ===
-                modalId
-            ) {
-                closeModal(
-                    modalId
-                );
-            }
-        }
-
-        function getTodayString() {
-            const date =
-                new Date();
-
-            const year =
-                date.getFullYear();
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            return `${year}-${month}-${day}`;
-        }
-
-        function getOffsetDate(days) {
-            const date =
-                new Date();
-
-            date.setDate(
-                date.getDate() + days
-            );
-
-            const year =
-                date.getFullYear();
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(2, "0");
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(2, "0");
-
-            return `${year}-${month}-${day}`;
-        }
-
-        function dateOnly(value) {
-            return value
-                ? String(value)
-                    .substring(0, 10)
-                : "";
-        }
-
-        function formatDate(value) {
-            if (!value) {
-                return "-";
-            }
-
-            const date =
-                new Date(
-                    String(value).includes("T")
-                        ? value
-                        : `${value}T00:00:00`
-                );
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return String(value);
-            }
-
-            return date.toLocaleDateString(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                }
-            );
-        }
-
-        function formatTime(value) {
-            if (!value) {
-                return "-";
-            }
-
-            const clean =
-                String(value)
-                    .substring(0, 5);
-
-            const parts =
-                clean.split(":");
-
-            if (
-                parts.length < 2
-            ) {
-                return clean;
-            }
-
-            let hour =
-                Number(parts[0]);
-
-            const minute =
-                parts[1];
-
-            const period =
-                hour >= 12
-                    ? "PM"
-                    : "AM";
-
-            hour =
-                hour % 12 || 12;
-
-            return `${hour}:${minute} ${period}`;
-        }
-
-        function formatStatus(value) {
-            return String(value || "-")
-                .replaceAll("_", " ")
-                .toLowerCase()
-                .replace(
-                    /\b\w/g,
-                    character =>
-                        character.toUpperCase()
-                );
-        }
-
-        function toggleSidebar() {
-            document.getElementById(
-                "therapistSidebar"
-            ).classList.toggle(
-                "open"
-            );
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.toggle(
-                "show"
-            );
-        }
-
-        function closeSidebar() {
-            document.getElementById(
-                "therapistSidebar"
-            ).classList.remove(
-                "open"
-            );
-
-            document.getElementById(
-                "sidebarOverlay"
-            ).classList.remove(
-                "show"
-            );
-        }
-
-        function showAlert(
-            message,
-            type
-        ) {
-            const box =
-                document.getElementById(
-                    "pageAlert"
-                );
-
-            const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
-
-            setText(
-                "alertMessage",
-                message
-            );
-
-            box.className =
-                `page-alert show ${type}`;
-
-            if (
-                type === "success"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
-                icon.className =
-                    "fa-solid fa-circle-exclamation";
-
-            } else {
-                icon.className =
-                    "fa-solid fa-circle-info";
-            }
-
-            clearTimeout(
-                window.patientHistoryAlertTimer
-            );
-
-            window.patientHistoryAlertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
-        }
-
-        function setText(
-            id,
-            value
-        ) {
-            const element =
-                document.getElementById(
-                    id
-                );
-
-            if (element) {
-                element.textContent =
-                    value;
-            }
-        }
-
-        function escapeHtml(value) {
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return "";
-            }
-
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
-        }
-    </script>
+    }
+);
+</script>
 
 </body>
 </html>

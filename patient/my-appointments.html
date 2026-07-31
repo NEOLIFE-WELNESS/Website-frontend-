@@ -1068,6 +1068,9 @@ button{
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
+const CONSULTATION_ROOM_URL =
+  "http://127.0.0.1:5500/consultation-room.html";
+
 let allAppointments = [];
 let activeFilter = "ALL";
 
@@ -1171,6 +1174,8 @@ async function loadMyAppointments() {
         normalizeConsultation
       )
     ];
+
+    await loadPatientMeetingStates();
 
     renderAppointments();
 
@@ -1475,9 +1480,11 @@ function normalizeConsultation(item) {
       item.updatedAt,
 
     location:
-      item.meetingLink
-        ? "Online Video Consultation"
-        : "Meeting link will be provided after payment",
+      ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(
+        normalize(item.paymentStatus)
+      )
+        ? "Secure online consultation room"
+        : "Consultation room will be available after payment",
 
     meetingLink:
       item.meetingLink || null,
@@ -1485,12 +1492,112 @@ function normalizeConsultation(item) {
     meetingLinkExpiresAt:
       item.meetingLinkExpiresAt || null,
 
+    meetingCreated:
+      Boolean(
+        item.meetingCreated ||
+        item.videoMeetingId ||
+        item.roomId ||
+        item.meetingStatus ||
+        item.videoMeetingStatus
+      ),
+
+    meetingStatus:
+      String(
+        item.meetingStatus ||
+        item.videoMeetingStatus ||
+        ""
+      ).toUpperCase(),
+
+    roomId:
+      item.roomId || null,
+
     prescriptionId:
       item.prescriptionId || null,
 
     reviewAllowed:
       Boolean(item.reviewAllowed)
   };
+}
+
+async function loadPatientMeetingStates() {
+  const paidConsultations =
+    allAppointments.filter(
+      item =>
+        item.recordType === "CONSULTATION" &&
+        ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(
+          normalize(item.paymentStatus)
+        )
+    );
+
+  await Promise.allSettled(
+    paidConsultations.map(
+      async item => {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/video-meetings/${encodeURIComponent(
+              item.id
+            )}`,
+            {
+              method: "GET",
+              headers: authHeaders()
+            }
+          );
+
+          if (response.status === 404) {
+            item.meetingCreated = false;
+            item.meetingStatus = "";
+            return;
+          }
+
+          const result =
+            await safelyReadResponse(response);
+
+          if (
+            !response.ok ||
+            result?.success === false
+          ) {
+            const message =
+              String(
+                result?.message || ""
+              ).toLowerCase();
+
+            if (
+              message.includes("not found") ||
+              message.includes("does not exist")
+            ) {
+              item.meetingCreated = false;
+              item.meetingStatus = "";
+              return;
+            }
+
+            throw new Error(
+              result?.message ||
+              "Unable to check consultation room."
+            );
+          }
+
+          const meeting =
+            result?.data || {};
+
+          item.meetingCreated = true;
+          item.meetingStatus =
+            String(
+              meeting.status || "CREATED"
+            ).toUpperCase();
+          item.roomId =
+            meeting.roomId || null;
+
+        } catch (error) {
+          console.warn(
+            `Meeting check failed for consultation ${item.id}:`,
+            error
+          );
+
+          item.meetingCreated = false;
+        }
+      }
+    )
+  );
 }
 
 function filterAppointments(filter, button) {
@@ -1750,26 +1857,41 @@ function createStatusActions(item) {
       </button>
     `;
   }
+if (
+    isConsultation &&
+    ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(paymentStatus) &&
+    item.meetingCreated &&
+    !["ENDED", "EXPIRED", "CANCELLED"].includes(
+      item.meetingStatus
+    )
+) {
+    html += `
+        <button
+            type="button"
+            class="btn join-btn"
+            onclick="joinConsultation(${Number(item.id)})"
+        >
+            <i class="fa-solid fa-video"></i>
+            Join Consultation
+        </button>
+    `;
+}
+
 
   if (
     isConsultation &&
-    [
-      "SUCCESS",
-      "PAID"
-    ].includes(
-      paymentStatus
-    ) &&
-    item.meetingLink
+    ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(paymentStatus) &&
+    !item.meetingCreated
   ) {
     html += `
       <button
         type="button"
-        class="btn join-btn"
-        onclick="joinConsultation(
-          '${escapeJs(item.meetingLink)}'
-        )"
+        class="btn disabled-btn"
+        disabled
+        title="The doctor has not created the consultation room yet."
       >
-        Join Consultation
+        <i class="fa-solid fa-clock"></i>
+        Waiting for Doctor
       </button>
     `;
   }
@@ -1926,8 +2048,12 @@ function viewDetails(id) {
 
   setText(
     "modalLocation",
-    item.meetingLink
-      ? `Online Meeting: ${item.meetingLink}`
+    item.recordType === "CONSULTATION"
+      ? (
+          item.meetingCreated
+            ? `Secure consultation room (${item.meetingStatus || "CREATED"})`
+            : "Waiting for doctor to create the consultation room"
+        )
       : item.location
   );
 
@@ -1964,13 +2090,26 @@ function payConsultation(id) {
     `consultation-payment.html?consultationId=${encodeURIComponent(id)}`;
 }
 
-function joinConsultation(meetingLink) {
-  if (!meetingLink) {
-    alert("Meeting link is not available yet.");
+function joinConsultation(consultationId) {
+  if (!consultationId) {
+    alert("Consultation ID is missing.");
     return;
   }
 
-  window.location.href = meetingLink;
+  const token =
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken");
+
+  if (!token) {
+    alert("Please log in to join the consultation.");
+    window.location.href = "../login.html";
+    return;
+  }
+
+  window.location.href =
+    `${CONSULTATION_ROOM_URL}?consultationId=${encodeURIComponent(
+      consultationId
+    )}`;
 }
 
 async function requestReschedule(id) {

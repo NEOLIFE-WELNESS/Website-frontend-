@@ -697,6 +697,26 @@ a{
     font-size:28px;
 }
 
+
+/* =========================
+   THERAPIST AVAILABLE SLOTS
+========================== */
+
+.slot-section{grid-column:1/-1}
+.slot-heading-row{margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.slot-heading-row label{margin-bottom:0}
+.slot-status{color:var(--muted);font-size:10px;font-weight:700}
+.available-slot-grid{min-height:76px;padding:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;border:1px solid var(--border);border-radius:12px;background:#fbfcfa}
+.slot-message{min-height:50px;grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);text-align:center;font-size:11px;line-height:1.5}
+.slot-message i{color:var(--gold-dark)}
+.available-slot{min-height:42px;padding:8px 7px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #cfe0d4;border-radius:9px;color:var(--dark);background:#fff;font-size:11px;font-weight:800;transition:.2s}
+.available-slot:hover{border-color:var(--green);background:var(--soft)}
+.available-slot.selected{color:#fff;border-color:var(--dark);background:var(--dark)}
+.available-slot.disabled,.available-slot:disabled{color:#9b9f9c;border-color:#e4e7e5;background:#f1f2f1;cursor:not-allowed;text-decoration:line-through}
+.selected-slot-info{margin-top:9px;padding:9px 11px;display:none;border-radius:9px;color:var(--success);background:#eaf6ed;font-size:11px;font-weight:800}
+.selected-slot-info.show{display:block}
+@media(max-width:700px){.available-slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 /* =========================
    MODALS
 ========================== */
@@ -1351,18 +1371,29 @@ textarea.control{
 
             </div>
 
-            <div class="form-group">
+            <div class="form-group slot-section">
 
-                <label for="bookStartTime">
-                    Start Time
-                    <span style="color:var(--danger)">*</span>
-                </label>
+                <div class="slot-heading-row">
+                    <label>
+                        Available Time Slots
+                        <span style="color:var(--danger)">*</span>
+                    </label>
 
-                <input
-                    id="bookStartTime"
-                    type="time"
-                    class="control"
-                >
+                    <span class="slot-status" id="slotStatus">
+                        Select a date first
+                    </span>
+                </div>
+
+                <input id="bookStartTime" type="hidden">
+
+                <div class="available-slot-grid" id="availableSlotGrid">
+                    <div class="slot-message">
+                        <i class="fa-regular fa-calendar"></i>
+                        Select a session date to view the therapist's available slots.
+                    </div>
+                </div>
+
+                <div class="selected-slot-info" id="selectedSlotInfo"></div>
 
             </div>
 
@@ -1414,6 +1445,10 @@ const API_BASE_URL =
 let treatmentPlans = [];
 let dailySessions = [];
 let selectedPlan = null;
+let therapistAvailability = [];
+let generatedAvailableSlots = [];
+let selectedSlot = null;
+let availabilityRequestSequence = 0;
 
 const alertBox =
     document.getElementById(
@@ -1428,6 +1463,12 @@ document.addEventListener(
         }
 
         setMinimumSessionDate();
+
+        bookSessionDate.addEventListener(
+            "change",
+            loadAvailableSlotsForSelectedDate
+        );
+
         await loadPatientProfile();
 
         await Promise.allSettled([
@@ -2277,61 +2318,310 @@ function outsidePlanDetailsClose(event) {
    POST /api/daily-treatments/book-session
 ========================== */
 
-function openBookSessionModal(id) {
-    const plan =
-        treatmentPlans.find(
-            item =>
-                String(item.id) ===
-                String(id)
-        );
+async function openBookSessionModal(id) {
+    const plan = treatmentPlans.find(
+        item => String(item.id) === String(id)
+    );
 
     if (!plan) {
-        showAlert(
-            "Treatment plan details are unavailable.",
-            "error"
-        );
-
+        showAlert("Treatment plan details are unavailable.", "error");
         return;
     }
 
-    if (
-        String(
-            plan.status || ""
-        ).toUpperCase() !==
-        "ACTIVE"
-    ) {
-        showAlert(
-            "Only active treatment plans can be booked.",
-            "error"
-        );
-
+    if (String(plan.status || "").toUpperCase() !== "ACTIVE") {
+        showAlert("Only active treatment plans can be booked.", "error");
         return;
     }
 
-    selectedPlan =
-        plan;
+    if (!plan.therapistId) {
+        showAlert("A therapist is not assigned to this treatment plan.", "error");
+        return;
+    }
 
-    bookTreatmentPlanId.value =
-        plan.id;
+    selectedPlan = plan;
+    selectedSlot = null;
+    therapistAvailability = [];
+    generatedAvailableSlots = [];
 
+    bookTreatmentPlanId.value = plan.id;
     bookTreatmentName.value =
-        plan.treatmentName ||
-        "Treatment Plan";
+        `${plan.treatmentName || "Treatment Plan"} — ${plan.therapistName || "Therapist"}`;
 
-    bookSessionDate.value =
-        "";
+    bookSessionDate.value = "";
+    bookStartTime.value = "";
+    bookPatientNotes.value = "";
 
-    bookStartTime.value =
-        "";
-
-    bookPatientNotes.value =
-        "";
+    resetSlotDisplay(
+        "Select a session date to view the therapist's available slots."
+    );
 
     setMinimumSessionDate();
+    bookSessionModal.classList.add("show");
 
-    bookSessionModal.classList.add(
-        "show"
+    try {
+        await loadTherapistAvailability(plan.therapistId);
+    } catch (error) {
+        resetSlotDisplay(
+            error.message || "Unable to load therapist availability."
+        );
+        showAlert(
+            error.message || "Unable to load therapist availability.",
+            "error"
+        );
+    }
+}
+
+async function loadTherapistAvailability(therapistId) {
+    const result = await apiRequest(
+        `/api/therapist-availability/therapist/${encodeURIComponent(therapistId)}`,
+        { method: "GET" }
     );
+
+    therapistAvailability = Array.isArray(result.data)
+        ? result.data.map(normalizeAvailability).filter(item => item.active)
+        : [];
+
+    if (!therapistAvailability.length) {
+        throw new Error("The therapist has not added any active availability.");
+    }
+
+    slotStatus.textContent = "Select a date";
+}
+
+function normalizeAvailability(item) {
+    return {
+        id: item.id ?? item.availabilityId ?? null,
+        therapistId: item.therapistId ?? selectedPlan?.therapistId ?? null,
+        dayOfWeek: String(item.dayOfWeek || "").toUpperCase(),
+        startTime: item.startTime || "",
+        endTime: item.endTime || "",
+        slotDurationMinutes: Number(item.slotDurationMinutes || 30),
+        active: item.active !== false
+    };
+}
+
+async function loadAvailableSlotsForSelectedDate() {
+    const selectedDate = bookSessionDate.value;
+
+    selectedSlot = null;
+    bookStartTime.value = "";
+    selectedSlotInfo.classList.remove("show");
+
+    if (!selectedDate) {
+        resetSlotDisplay(
+            "Select a session date to view the therapist's available slots."
+        );
+        return;
+    }
+
+    if (!selectedPlan?.therapistId) {
+        resetSlotDisplay("Therapist information is missing.");
+        return;
+    }
+
+    const requestSequence = ++availabilityRequestSequence;
+
+    availableSlotGrid.innerHTML = `
+        <div class="slot-message">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Loading available slots...
+        </div>
+    `;
+    slotStatus.textContent = "Loading...";
+
+    try {
+        if (!therapistAvailability.length) {
+            await loadTherapistAvailability(selectedPlan.therapistId);
+        }
+
+        if (requestSequence !== availabilityRequestSequence) {
+            return;
+        }
+
+        const dayOfWeek = getDayOfWeek(selectedDate);
+        const availability = therapistAvailability.find(
+            item => item.dayOfWeek === dayOfWeek
+        );
+
+        if (!availability) {
+            generatedAvailableSlots = [];
+            resetSlotDisplay(
+                `${selectedPlan.therapistName || "The therapist"} is not available on ${formatLabel(dayOfWeek)}. Please choose another date.`
+            );
+            slotStatus.textContent = "Not available";
+            return;
+        }
+
+        generatedAvailableSlots = generateSlots(availability, selectedDate);
+        renderAvailableSlots(generatedAvailableSlots, selectedDate);
+
+    } catch (error) {
+        resetSlotDisplay(
+            error.message || "Unable to load available slots."
+        );
+        slotStatus.textContent = "Unable to load";
+    }
+}
+
+function generateSlots(availability, selectedDate) {
+    const startMinutes = timeToMinutes(availability.startTime);
+    const endMinutes = timeToMinutes(availability.endTime);
+    const duration = Math.max(
+        Number(availability.slotDurationMinutes) || 30,
+        1
+    );
+
+    if (
+        !Number.isFinite(startMinutes) ||
+        !Number.isFinite(endMinutes) ||
+        endMinutes <= startMinutes
+    ) {
+        return [];
+    }
+
+    const slots = [];
+
+    for (
+        let current = startMinutes;
+        current + duration <= endMinutes;
+        current += duration
+    ) {
+        const startTime = minutesToApiTime(current);
+        const endTime = minutesToApiTime(current + duration);
+
+        const alreadyBookedByPatient = dailySessions.some(
+            session =>
+                Number(session.therapistId) === Number(selectedPlan.therapistId) &&
+                String(session.sessionDate || "").substring(0, 10) === selectedDate &&
+                normalizeApiTime(
+                    String(session.startTime || "").substring(0, 5)
+                ) === startTime &&
+                !["CANCELLED", "REJECTED", "MISSED"].includes(
+                    String(session.status || "").toUpperCase()
+                )
+        );
+
+        const past = isPastSlot(selectedDate, startTime);
+
+        slots.push({
+            startTime,
+            endTime,
+            available: !alreadyBookedByPatient && !past,
+            unavailableReason: past
+                ? "Past time"
+                : alreadyBookedByPatient
+                    ? "Already booked"
+                    : ""
+        });
+    }
+
+    return slots;
+}
+
+function renderAvailableSlots(slots, selectedDate) {
+    if (!slots.length) {
+        resetSlotDisplay("No time slots are configured for this date.");
+        slotStatus.textContent = "No slots";
+        return;
+    }
+
+    const availableCount = slots.filter(slot => slot.available).length;
+    slotStatus.textContent = `${availableCount} available`;
+
+    availableSlotGrid.innerHTML = slots.map(
+        slot => `
+            <button
+                type="button"
+                class="available-slot ${slot.available ? "" : "disabled"}"
+                ${
+                    slot.available
+                        ? `onclick="selectAvailableSlot('${slot.startTime}','${slot.endTime}',this)"`
+                        : "disabled"
+                }
+                title="${escapeHtml(slot.unavailableReason || "Available")}"
+            >
+                <i class="fa-regular fa-clock"></i>
+                ${escapeHtml(formatTime(slot.startTime))}
+            </button>
+        `
+    ).join("");
+
+    if (!availableCount) {
+        availableSlotGrid.insertAdjacentHTML(
+            "beforeend",
+            `
+                <div class="slot-message">
+                    No selectable slots remain for
+                    ${escapeHtml(formatDate(selectedDate))}.
+                </div>
+            `
+        );
+    }
+}
+
+function selectAvailableSlot(startTime, endTime, button) {
+    document
+        .querySelectorAll(".available-slot.selected")
+        .forEach(element => element.classList.remove("selected"));
+
+    button.classList.add("selected");
+
+    selectedSlot = { startTime, endTime };
+    bookStartTime.value = startTime.substring(0, 5);
+
+    selectedSlotInfo.textContent =
+        `Selected: ${formatTime(startTime)} - ${formatTime(endTime)}`;
+    selectedSlotInfo.classList.add("show");
+}
+
+function resetSlotDisplay(message) {
+    availableSlotGrid.innerHTML = `
+        <div class="slot-message">
+            <i class="fa-regular fa-calendar"></i>
+            ${escapeHtml(message)}
+        </div>
+    `;
+
+    slotStatus.textContent = "Select a date";
+    selectedSlotInfo.textContent = "";
+    selectedSlotInfo.classList.remove("show");
+    bookStartTime.value = "";
+    selectedSlot = null;
+}
+
+function getDayOfWeek(dateValue) {
+    const date = new Date(`${dateValue}T00:00:00`);
+
+    return [
+        "SUNDAY",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY"
+    ][date.getDay()];
+}
+
+function timeToMinutes(value) {
+    const parts = String(value || "").split(":");
+
+    if (parts.length < 2) {
+        return NaN;
+    }
+
+    return Number(parts[0]) * 60 + Number(parts[1]);
+}
+
+function minutesToApiTime(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:00`;
+}
+
+function isPastSlot(dateValue, timeValue) {
+    return new Date(`${dateValue}T${timeValue}`).getTime() <= Date.now();
 }
 
 async function submitBookSession() {
@@ -2365,7 +2655,7 @@ async function submitBookSession() {
         !startTime
     ) {
         showAlert(
-            "Please select the session date and start time.",
+            "Please select the session date and one available time slot.",
             "error"
         );
 
@@ -2449,12 +2739,21 @@ async function submitBookSession() {
 }
 
 function closeBookSessionModal() {
-    bookSessionModal.classList.remove(
-        "show"
-    );
+    bookSessionModal.classList.remove("show");
 
-    selectedPlan =
-        null;
+    selectedPlan = null;
+    selectedSlot = null;
+    therapistAvailability = [];
+    generatedAvailableSlots = [];
+    availabilityRequestSequence++;
+
+    if (bookSessionDate) {
+        bookSessionDate.value = "";
+    }
+
+    resetSlotDisplay(
+        "Select a session date to view the therapist's available slots."
+    );
 }
 
 function outsideBookSessionClose(event) {

@@ -2457,7 +2457,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/users/getProfile"
+                        "/api/medical-staff/me"
                     );
 
                 const name =
@@ -2490,38 +2490,50 @@
         ========================== */
 
         async function loadTreatments() {
+            showTreatmentLoading();
+
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/daily-treatments/getAll"
+                        "/api/daily-treatments/admin/getAll"
                     );
 
                 const data =
-                    Array.isArray(result.data)
-                        ? result.data
-                        : Array.isArray(
-                            result.data?.content
-                        )
-                            ? result.data.content
-                            : [];
+                    extractArray(
+                        result.data
+                    );
 
                 allTreatments =
-                    data.map(
-                        normalizeTreatment
-                    );
+                    data
+                        .map(
+                            normalizeTreatment
+                        )
+                        .sort(
+                            (
+                                first,
+                                second
+                            ) =>
+                                createTreatmentDate(
+                                    second
+                                ) -
+                                createTreatmentDate(
+                                    first
+                                )
+                        );
 
             } catch (error) {
                 console.error(
-                    "Treatment loading failed:",
+                    "Daily treatment loading failed:",
                     error
                 );
 
-                allTreatments =
-                    getDemoTreatments();
+                allTreatments = [];
+                filteredTreatments = [];
 
                 showAlert(
-                    "Daily treatment API is not connected. Demo data is displayed.",
-                    "info"
+                    error.message ||
+                    "Unable to load daily treatments.",
+                    "error"
                 );
             }
 
@@ -2532,286 +2544,195 @@
             applyFilters();
         }
 
+        function showTreatmentLoading() {
+            const body =
+                document.getElementById(
+                    "treatmentTableBody"
+                );
+
+            if (!body) {
+                return;
+            }
+
+            body.innerHTML = `
+                <tr>
+                    <td
+                        colspan="13"
+                        class="table-message"
+                    >
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Loading daily treatments...
+                    </td>
+                </tr>
+            `;
+        }
+
+        function extractArray(data) {
+            if (Array.isArray(data)) {
+                return data;
+            }
+
+            if (
+                Array.isArray(
+                    data?.content
+                )
+            ) {
+                return data.content;
+            }
+
+            if (
+                Array.isArray(
+                    data?.sessions
+                )
+            ) {
+                return data.sessions;
+            }
+
+            return [];
+        }
+
         function normalizeTreatment(item) {
             const totalSessions =
                 Number(
-                    item.totalSessions ||
-                    item.planTotalSessions ||
-                    1
+                    item.totalSessions || 1
                 );
 
             const sessionNumber =
                 Number(
-                    item.sessionNumber ||
-                    item.currentSession ||
-                    1
+                    item.sessionNumber || 1
                 );
+
+            const status =
+                String(
+                    item.status ||
+                    "PENDING_APPROVAL"
+                ).toUpperCase();
 
             return {
                 id:
-                    item.id ||
-                    item.treatmentId,
+                    item.id ??
+                    item.sessionId ??
+                    null,
+
+                treatmentPlanId:
+                    item.treatmentPlanId ??
+                    null,
 
                 treatmentNumber:
-                    item.treatmentNumber ||
-                    item.treatmentCode ||
-                    `TRT-${item.id || item.treatmentId}`,
+                    `SES-${item.id ?? item.sessionId ?? "-"}`,
 
                 patientId:
-                    item.patientId ||
-                    item.patient?.id,
+                    item.patientId ??
+                    null,
 
                 patientName:
                     item.patientName ||
-                    item.patient?.name ||
                     "Patient",
 
                 patientPhone:
-                    item.patientPhone ||
-                    item.patient?.phoneNumber ||
+                    item.phoneNumber ||
+                    item.patientPhoneNumber ||
                     "-",
 
                 patientAge:
-                    item.patientAge ||
-                    item.patient?.age ||
-                    "-",
+                    item.age ?? "-",
 
                 patientGender:
                     String(
-                        item.patientGender ||
-                        item.patient?.gender ||
-                        "-"
+                        item.gender || "-"
                     ).toUpperCase(),
 
                 doctorId:
-                    item.doctorId ||
-                    item.doctor?.id,
+                    item.doctorId ??
+                    null,
 
                 doctorName:
                     item.doctorName ||
-                    item.doctor?.name ||
-                    "Doctor",
+                    "-",
+
+                therapistId:
+                    item.therapistId ??
+                    null,
+
+                therapistName:
+                    item.therapistName ||
+                    "Therapist",
 
                 therapyName:
-                    item.therapyName ||
                     item.treatmentName ||
-                    item.therapy?.name ||
                     "Therapy",
 
                 treatmentDate:
-                    item.treatmentDate ||
                     item.sessionDate ||
-                    item.date,
+                    "",
 
                 treatmentTime:
-                    item.treatmentTime ||
-                    item.sessionTime ||
-                    item.time,
+                    item.startTime ||
+                    "",
 
-                sessionNumber:
-                    sessionNumber,
+                endTime:
+                    item.endTime ||
+                    "",
 
-                totalSessions:
-                    totalSessions,
+                sessionNumber,
+                totalSessions,
 
                 attendance:
-                    String(
-                        item.attendance ||
-                        item.attendanceStatus ||
-                        "PENDING"
-                    ).toUpperCase(),
+                    status === "COMPLETED"
+                        ? "PRESENT"
+                        : status === "MISSED"
+                            ? "ABSENT"
+                            : "PENDING",
 
-                status:
-                    String(
-                        item.status ||
-                        "SCHEDULED"
-                    ).toUpperCase(),
+                status,
 
                 symptoms:
-                    item.symptoms ||
-                    item.healthIssue ||
+                    item.patientNotes ||
                     "-",
 
                 medicalHistory:
-                    item.medicalHistory ||
-                    item.pastHistory ||
-                    "Not provided",
+                    "Refer to patient medical record",
 
                 notes:
-                    item.notes ||
-                    item.treatmentNotes ||
+                    item.therapistNotes ||
                     "-",
 
                 attendanceNotes:
-                    item.attendanceNotes ||
+                    item.rescheduleReason ||
                     "-",
 
+                rescheduleReason:
+                    item.rescheduleReason ||
+                    null,
+
+                approvedAt:
+                    item.approvedAt ||
+                    null,
+
+                completedAt:
+                    item.completedAt ||
+                    null,
+
+                missedAt:
+                    item.missedAt ||
+                    null,
+
+                createdAt:
+                    item.createdAt ||
+                    null,
+
+                updatedAt:
+                    item.updatedAt ||
+                    null,
+
                 nextSessionDate:
-                    item.nextSessionDate ||
                     null
             };
         }
 
         function getDemoTreatments() {
-            return [
-                {
-                    id: 1,
-                    treatmentNumber:
-                        "TRT-1001",
-                    patientId: 1,
-                    patientName:
-                        "Nisha Rao",
-                    patientPhone:
-                        "9876543210",
-                    patientAge: 30,
-                    patientGender:
-                        "FEMALE",
-                    doctorId: 1,
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    therapyName:
-                        "Panchakarma",
-                    treatmentDate:
-                        getTodayString(),
-                    treatmentTime:
-                        "09:00",
-                    sessionNumber: 2,
-                    totalSessions: 7,
-                    attendance:
-                        "PRESENT",
-                    status:
-                        "IN_PROGRESS",
-                    symptoms:
-                        "Headache and stress",
-                    medicalHistory:
-                        "Migraine and acidity",
-                    notes:
-                        "Oil massage and steam completed.",
-                    attendanceNotes:
-                        "Patient arrived on time.",
-                    nextSessionDate:
-                        null
-                },
-                {
-                    id: 2,
-                    treatmentNumber:
-                        "TRT-1002",
-                    patientId: 2,
-                    patientName:
-                        "Kiran Kumar",
-                    patientPhone:
-                        "9876543211",
-                    patientAge: 40,
-                    patientGender:
-                        "MALE",
-                    doctorId: 1,
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    therapyName:
-                        "Acupuncture",
-                    treatmentDate:
-                        getTodayString(),
-                    treatmentTime:
-                        "10:30",
-                    sessionNumber: 5,
-                    totalSessions: 10,
-                    attendance:
-                        "PENDING",
-                    status:
-                        "SCHEDULED",
-                    symptoms:
-                        "Shoulder and neck pain",
-                    medicalHistory:
-                        "No major illness",
-                    notes:
-                        "-",
-                    attendanceNotes:
-                        "-",
-                    nextSessionDate:
-                        null
-                },
-                {
-                    id: 3,
-                    treatmentNumber:
-                        "TRT-1003",
-                    patientId: 3,
-                    patientName:
-                        "Anitha Shetty",
-                    patientPhone:
-                        "9876543212",
-                    patientAge: 36,
-                    patientGender:
-                        "FEMALE",
-                    doctorId: 2,
-                    doctorName:
-                        "Dr. Aditi",
-                    therapyName:
-                        "Yoga and Naturopathy",
-                    treatmentDate:
-                        getTodayString(),
-                    treatmentTime:
-                        "12:00",
-                    sessionNumber: 1,
-                    totalSessions: 15,
-                    attendance:
-                        "PRESENT",
-                    status:
-                        "COMPLETED",
-                    symptoms:
-                        "Stress and poor sleep",
-                    medicalHistory:
-                        "No major illness",
-                    notes:
-                        "Breathing exercises and relaxation therapy completed.",
-                    attendanceNotes:
-                        "Present",
-                    nextSessionDate:
-                        getOffsetDateString(1)
-                },
-                {
-                    id: 4,
-                    treatmentNumber:
-                        "TRT-1004",
-                    patientId: 4,
-                    patientName:
-                        "Ravi Bhat",
-                    patientPhone:
-                        "9876543213",
-                    patientAge: 34,
-                    patientGender:
-                        "MALE",
-                    doctorId: 2,
-                    doctorName:
-                        "Dr. Aditi",
-                    therapyName:
-                        "Beauty Therapy",
-                    treatmentDate:
-                        getOffsetDateString(-1),
-                    treatmentTime:
-                        "15:00",
-                    sessionNumber: 3,
-                    totalSessions: 6,
-                    attendance:
-                        "ABSENT",
-                    status:
-                        "MISSED",
-                    symptoms:
-                        "Skin rejuvenation",
-                    medicalHistory:
-                        "Sensitive skin",
-                    notes:
-                        "Patient did not attend.",
-                    attendanceNotes:
-                        "No prior notification.",
-                    nextSessionDate:
-                        null
-                }
-            ];
+            return [];
         }
-
-        /* =========================
-           SUMMARY
-        ========================== */
 
         function updateSummary() {
             const today =
@@ -3843,15 +3764,21 @@
                     "attendanceStatus"
                 ).value;
 
-            const notes =
-                document.getElementById(
-                    "attendanceNotes"
-                ).value.trim();
-
             if (!attendance) {
                 showAlert(
                     "Please select attendance status.",
                     "error"
+                );
+
+                return;
+            }
+
+            if (
+                attendance === "CANCELLED"
+            ) {
+                showAlert(
+                    "The API document does not provide a cancel-session endpoint.",
+                    "info"
                 );
 
                 return;
@@ -3873,60 +3800,36 @@
             `;
 
             try {
-                await staffApiRequest(
-                    `/api/daily-treatments/attendance/${encodeURIComponent(
-                        selectedTreatment.id
-                    )}`,
-                    {
-                        method: "PUT",
+                const endpoint =
+                    attendance === "PRESENT"
+                        ? `/api/daily-treatments/${encodeURIComponent(
+                            selectedTreatment.id
+                          )}/complete`
+                        : `/api/daily-treatments/${encodeURIComponent(
+                            selectedTreatment.id
+                          )}/mark-missed`;
 
-                        body:
-                            JSON.stringify({
-                                attendance:
-                                    attendance,
+                const result =
+                    await staffApiRequest(
+                        endpoint,
+                        {
+                            method: "PUT"
+                        }
+                    );
 
-                                notes:
-                                    notes
-                            })
-                    }
+                showAlert(
+                    result.message ||
+                    (
+                        attendance === "PRESENT"
+                            ? "Treatment session completed successfully."
+                            : "Treatment session marked as missed."
+                    ),
+                    "success"
                 );
-
-                selectedTreatment.attendance =
-                    attendance;
-
-                selectedTreatment.attendanceNotes =
-                    notes || "-";
-
-                if (
-                    attendance === "ABSENT"
-                ) {
-                    selectedTreatment.status =
-                        "MISSED";
-
-                } else if (
-                    attendance === "CANCELLED"
-                ) {
-                    selectedTreatment.status =
-                        "CANCELLED";
-
-                } else if (
-                    attendance === "PRESENT" &&
-                    selectedTreatment.status ===
-                        "SCHEDULED"
-                ) {
-                    selectedTreatment.status =
-                        "IN_PROGRESS";
-                }
 
                 closeAttendanceModal();
 
-                updateSummary();
-                applyFilters();
-
-                showAlert(
-                    "Attendance updated successfully.",
-                    "success"
-                );
+                await loadTreatments();
 
             } catch (error) {
                 showAlert(
@@ -4002,25 +3905,6 @@
                 return;
             }
 
-            const notes =
-                document.getElementById(
-                    "completionNotes"
-                ).value.trim();
-
-            const nextSessionDate =
-                document.getElementById(
-                    "nextSessionDate"
-                ).value;
-
-            if (!notes) {
-                showAlert(
-                    "Please enter treatment notes.",
-                    "error"
-                );
-
-                return;
-            }
-
             const button =
                 document.getElementById(
                     "completeSubmitButton"
@@ -4037,47 +3921,25 @@
             `;
 
             try {
-                await staffApiRequest(
-                    `/api/daily-treatments/complete/${encodeURIComponent(
-                        selectedTreatment.id
-                    )}`,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify({
-                                notes:
-                                    notes,
-
-                                nextSessionDate:
-                                    nextSessionDate ||
-                                    null
-                            })
-                    }
-                );
-
-                selectedTreatment.status =
-                    "COMPLETED";
-
-                selectedTreatment.attendance =
-                    "PRESENT";
-
-                selectedTreatment.notes =
-                    notes;
-
-                selectedTreatment.nextSessionDate =
-                    nextSessionDate ||
-                    null;
-
-                closeCompleteModal();
-
-                updateSummary();
-                applyFilters();
+                const result =
+                    await staffApiRequest(
+                        `/api/daily-treatments/${encodeURIComponent(
+                            selectedTreatment.id
+                        )}/complete`,
+                        {
+                            method: "PUT"
+                        }
+                    );
 
                 showAlert(
+                    result.message ||
                     "Treatment session completed successfully.",
                     "success"
                 );
+
+                closeCompleteModal();
+
+                await loadTreatments();
 
             } catch (error) {
                 showAlert(
@@ -4097,7 +3959,7 @@
            HISTORY
         ========================== */
 
-        async function openHistoryModal(
+        function openHistoryModal(
             patientId,
             treatmentId
         ) {
@@ -4110,59 +3972,44 @@
                 return;
             }
 
-            const content =
-                document.getElementById(
-                    "historyModalContent"
-                );
-
-            content.innerHTML = `
-                ${createPatientCard(
-                    selectedTreatment
-                )}
-
-                <div class="table-message">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Loading treatment history...
-                </div>
-            `;
+            const history =
+                allTreatments
+                    .filter(
+                        item =>
+                            String(
+                                item.patientId
+                            ) ===
+                                String(patientId) &&
+                            (
+                                !selectedTreatment.treatmentPlanId ||
+                                String(
+                                    item.treatmentPlanId
+                                ) ===
+                                    String(
+                                        selectedTreatment.treatmentPlanId
+                                    )
+                            )
+                    )
+                    .sort(
+                        (
+                            first,
+                            second
+                        ) =>
+                            createTreatmentDate(
+                                second
+                            ) -
+                            createTreatmentDate(
+                                first
+                            )
+                    );
 
             document.getElementById(
                 "historyModal"
             ).classList.add("show");
 
-            try {
-                const result =
-                    await staffApiRequest(
-                        `/api/daily-treatments/patient/${encodeURIComponent(
-                            patientId
-                        )}`
-                    );
-
-                const history =
-                    Array.isArray(result.data)
-                        ? result.data.map(
-                            normalizeTreatment
-                        )
-                        : [];
-
-                renderTreatmentHistory(
-                    history
-                );
-
-            } catch (error) {
-                const localHistory =
-                    allTreatments.filter(
-                        item =>
-                            String(
-                                item.patientId
-                            ) ===
-                            String(patientId)
-                    );
-
-                renderTreatmentHistory(
-                    localHistory
-                );
-            }
+            renderTreatmentHistory(
+                history
+            );
         }
 
         function renderTreatmentHistory(
@@ -4479,6 +4326,25 @@
 
                 </div>
             `;
+        }
+
+        function createTreatmentDate(
+            treatment
+        ) {
+            const date =
+                treatment.treatmentDate ||
+                "1970-01-01";
+
+            const time =
+                treatment.treatmentTime ||
+                "00:00:00";
+
+            return new Date(
+                `${String(date).substring(
+                    0,
+                    10
+                )}T${time}`
+            );
         }
 
         function getTodayString() {

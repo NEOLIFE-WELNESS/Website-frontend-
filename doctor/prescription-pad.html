@@ -74,32 +74,103 @@ textarea.control{min-height:100px;resize:vertical;line-height:1.5}
 <body>
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 <div class="layout">
-<aside class="sidebar" id="sidebar">
-  <div class="brand"><img src="../assets/main_logo.jpeg"><div><h2>Neolife</h2><span>Doctor Portal</span></div></div>
-  <nav class="menu">
-    <span class="menu-label">Main</span>
-    <a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
-    <a href="patients.html"><i class="fa-solid fa-users"></i>Patient Dashboard</a>
-    <a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
-    <a href="doctor-availability.html">
-                    <i class="fa-solid fa-clock"></i>
+<aside
+            class="doctor-sidebar"
+            id="doctorSidebar"
+        >
+
+            <div class="doctor-brand">
+
+                <img
+                    src="../assets/main_logo.jpeg"
+                    alt="Neolife Logo"
+                >
+
+                <div>
+                    <h2>Neolife</h2>
+                    <span>Doctor Portal</span>
+                </div>
+
+            </div>
+
+            <nav class="doctor-menu">
+
+                <span class="menu-label">
+                    Main
+                </span>
+
+                <a
+                    href="doctor-dashboard.html"
+                    class="active"
+                >
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <a href="patients.html">
+                    <i class="fa-solid fa-users"></i>
+                    Patient Dashboard
+                </a>
+
+                <a href="appointment-calendar.html">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Appointment Calendar
+                </a>
+                <a href="doctor-availability.html">
+                    <i class="fa-solid fa-users"></i>
                     Manage Availability
                 </a>
-    <span class="menu-label">Clinical</span>
-    
-    <a href="doctor-appointments.html"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
-    <a href="video-recordings.html"><i class="fa-solid fa-video"></i>Video Recordings</a>
 
-    <span class="menu-label">Finance</span>
+                <span class="menu-label">
+                    Clinical
+                </span>
 
-    <a href="transactions.html"><i class="fa-solid fa-indian-rupee-sign"></i>Transactions</a>
+                
 
-    <span class="menu-label">Account</span>
+                <a href="doctor-appointments.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Appointment Details
+                </a>
+                <a href="online-consultation.html">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Consultation Details
+                </a>
 
-    <a href="doctor-profile.html"><i class="fa-solid fa-user-doctor"></i>My Profile</a>
-  </nav>
-  <div class="sidebar-footer"><button class="logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
-</aside>
+                <a href="video-recordings.html">
+                    <i class="fa-solid fa-video"></i>
+                    Video Recordings
+                </a>
+
+                <span class="menu-label">
+                    Finance
+                </span>
+
+                <a href="transactions.html">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Transactions
+                </a>
+
+                <a href="doctor-profile.html">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    My Profile
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <button
+                    type="button"
+                    class="sidebar-logout"
+                    onclick="doctorLogout()"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+
+            </div>
+
+        </aside>
 
 <main class="main">
 <header class="topbar">
