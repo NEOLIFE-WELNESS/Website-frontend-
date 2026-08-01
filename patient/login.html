@@ -607,7 +607,7 @@
 
             <div class="login-options">
               <label>
-                <input type="checkbox">
+                <input type="checkbox" id="rememberMe">
                 Remember me
               </label>
 
@@ -671,146 +671,418 @@
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
-function showEmailLogin(){
-  document.getElementById("emailLoginForm").classList.remove("hide");
-  document.getElementById("phoneLoginForm").classList.add("hide");
-  document.getElementById("emailTab").classList.add("active");
-  document.getElementById("phoneTab").classList.remove("active");
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    restoreRememberedEmail();
+
+    const token =
+      localStorage.getItem("token");
+
+    const role =
+      localStorage.getItem("role");
+
+    const profileCompleted =
+      localStorage.getItem(
+        "profileCompleted"
+      ) === "true";
+
+    if (token && role) {
+      redirectByRole(
+        role,
+        profileCompleted
+      );
+    }
+  }
+);
+
+function showEmailLogin() {
+  document
+    .getElementById("emailLoginForm")
+    .classList.remove("hide");
+
+  document
+    .getElementById("phoneLoginForm")
+    .classList.add("hide");
+
+  document
+    .getElementById("emailTab")
+    .classList.add("active");
+
+  document
+    .getElementById("phoneTab")
+    .classList.remove("active");
+
+  clearLoginMessage();
 }
 
-function showPhoneLogin(){
-  document.getElementById("phoneLoginForm").classList.remove("hide");
-  document.getElementById("emailLoginForm").classList.add("hide");
-  document.getElementById("phoneTab").classList.add("active");
-  document.getElementById("emailTab").classList.remove("active");
+function showPhoneLogin() {
+  document
+    .getElementById("phoneLoginForm")
+    .classList.remove("hide");
+
+  document
+    .getElementById("emailLoginForm")
+    .classList.add("hide");
+
+  document
+    .getElementById("phoneTab")
+    .classList.add("active");
+
+  document
+    .getElementById("emailTab")
+    .classList.remove("active");
+
+  clearLoginMessage();
 }
 
-function showLoginMessage(message,type="error"){
-  const box=document.getElementById("loginMessage");
+function showLoginMessage(
+  message,
+  type = "error"
+) {
+  const box =
+    document.getElementById(
+      "loginMessage"
+    );
 
-  if(!box){
+  if (!box) {
     alert(message);
     return;
   }
 
-  box.textContent=message;
-  box.className=`form-message show ${type}`;
+  box.textContent = message;
+  box.className =
+    `form-message show ${type}`;
 }
 
-function clearLoginMessage(){
-  const box=document.getElementById("loginMessage");
+function clearLoginMessage() {
+  const box =
+    document.getElementById(
+      "loginMessage"
+    );
 
-  if(!box){
+  if (!box) {
     return;
   }
 
-  box.textContent="";
-  box.className="form-message";
+  box.textContent = "";
+  box.className = "form-message";
 }
 
-function saveLoginSession(data){
-  localStorage.setItem("token",data.token||"");
-  localStorage.setItem("refreshToken",data.refreshToken||"");
-  localStorage.setItem("userId",String(data.id||""));
-  localStorage.setItem("email",data.email||"");
-  localStorage.setItem("role",data.role||"USER");
-  localStorage.setItem("profileCompleted",String(Boolean(data.profileCompleted)));
-  localStorage.setItem("isLoggedIn","true");
+function saveLoginSession(data) {
+  localStorage.setItem(
+    "token",
+    data.token || ""
+  );
+
+  localStorage.setItem(
+    "refreshToken",
+    data.refreshToken || ""
+  );
+
+  localStorage.setItem(
+    "userId",
+    String(data.id || "")
+  );
+
+  localStorage.setItem(
+    "email",
+    data.email || ""
+  );
+
+  localStorage.setItem(
+    "role",
+    String(
+      data.role || "USER"
+    ).toUpperCase()
+  );
+
+  localStorage.setItem(
+    "profileCompleted",
+    String(
+      Boolean(
+        data.profileCompleted
+      )
+    )
+  );
+
+  localStorage.setItem(
+    "isLoggedIn",
+    "true"
+  );
 }
 
-function redirectByRole(role,profileCompleted){
-  if(role==="ADMIN"){
-    window.location.href="../admin/admin-dashboard.html";
-  }else if(role==="DOCTOR"){
-    window.location.href=profileCompleted
-      ? "../doctor/doctor-dashboard.html"
-      : "../doctor/doctor-profile.html";
-  }else if(role==="MEDICAL_STAFF"){
-    window.location.href=profileCompleted
-      ? "../medical/staff-dashboard.html"
-      : "../medical/profile.html";
-  }else if(role==="THERAPIST"){
-    window.location.href=profileCompleted
-      ? "../therapist/therapist-dashboard.html"
-      : "../therapist/therapist-profile.html";
-  }else{
-    window.location.href="profile.html";
+function saveRememberedEmail(email) {
+  const remember =
+    document.getElementById(
+      "rememberMe"
+    )?.checked;
+
+  if (remember) {
+    localStorage.setItem(
+      "rememberedLoginEmail",
+      email
+    );
+  } else {
+    localStorage.removeItem(
+      "rememberedLoginEmail"
+    );
   }
 }
 
-async function emailLogin(event){
+function restoreRememberedEmail() {
+  const rememberedEmail =
+    localStorage.getItem(
+      "rememberedLoginEmail"
+    );
+
+  const emailInput =
+    document.getElementById(
+      "email"
+    );
+
+  const rememberCheckbox =
+    document.getElementById(
+      "rememberMe"
+    );
+
+  if (
+    rememberedEmail &&
+    emailInput
+  ) {
+    emailInput.value =
+      rememberedEmail;
+
+    if (rememberCheckbox) {
+      rememberCheckbox.checked =
+        true;
+    }
+  }
+}
+
+function redirectByRole(
+  role,
+  profileCompleted
+) {
+  const normalizedRole =
+    String(role || "USER")
+      .toUpperCase();
+
+  switch (normalizedRole) {
+    case "ADMIN":
+      window.location.replace(
+        "../admin/admin-dashboard.html"
+      );
+      break;
+
+    case "DOCTOR":
+      window.location.replace(
+        profileCompleted
+          ? "../doctor/doctor-dashboard.html"
+          : "../doctor/doctor-profile.html"
+      );
+      break;
+
+    case "MEDICAL_STAFF":
+      window.location.replace(
+        profileCompleted
+          ? "../medical/staff-dashboard.html"
+          : "../medical/profile.html"
+      );
+      break;
+
+    case "THERAPIST":
+      window.location.replace(
+        profileCompleted
+          ? "../therapist/therapist-dashboard.html"
+          : "../therapist/therapist-profile.html"
+      );
+      break;
+
+    case "USER":
+    default:
+      window.location.replace(
+        "profile.html"
+      );
+      break;
+  }
+}
+
+async function safelyReadResponse(
+  response
+) {
+  const responseText =
+    await response.text();
+
+  if (!responseText) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(
+      responseText
+    );
+  } catch {
+    return {
+      success: false,
+      message:
+        responseText ||
+        `Invalid server response (${response.status}).`
+    };
+  }
+}
+
+async function emailLogin(event) {
   event.preventDefault();
   clearLoginMessage();
 
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  const button =
-    document.getElementById("loginButton") ||
-    event.submitter ||
-    document.querySelector("#emailLoginForm button[type='submit']");
+  const email =
+    document
+      .getElementById("email")
+      .value
+      .trim();
 
-  if(!email||!password){
-    showLoginMessage("Please enter email and password.");
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
+  const button =
+    document.getElementById(
+      "loginButton"
+    ) ||
+    event.submitter;
+
+  if (!email || !password) {
+    showLoginMessage(
+      "Please enter your email and password."
+    );
     return false;
   }
 
-  if(button){
-    button.disabled=true;
-    button.textContent="Logging in...";
+  const originalButtonHtml =
+    button
+      ? button.innerHTML
+      : "Login";
+
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Logging in...
+    `;
   }
 
-  try{
-    const response=await fetch(`${API_BASE_URL}/api/auth/login`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password})
-    });
+  try {
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Accept:
+              "application/json"
+          },
+          body: JSON.stringify({
+            email,
+            password
+          })
+        }
+      );
 
-    const result=await response.json();
+    const result =
+      await safelyReadResponse(
+        response
+      );
 
-    if(!response.ok||!result.success){
-      showLoginMessage(result.message||"Invalid email or password.");
-      return false;
+    if (
+      !response.ok ||
+      result.success === false
+    ) {
+      throw new Error(
+        result.message ||
+        "Invalid email or password."
+      );
     }
 
-    const data=result.data||{};
+    const data =
+      result.data || {};
 
-    if(!data.token){
-      showLoginMessage("Login token was not returned by backend.");
-      return false;
+    if (!data.token) {
+      throw new Error(
+        "Login token was not returned by the backend."
+      );
     }
 
     saveLoginSession(data);
-    showLoginMessage("Login successful. Redirecting...","success");
+    saveRememberedEmail(email);
 
-    setTimeout(()=>{
-      redirectByRole(data.role||"USER",Boolean(data.profileCompleted));
-    },500);
+    showLoginMessage(
+      result.message ||
+      "Login successful. Redirecting...",
+      "success"
+    );
 
-  }catch(error){
-    console.error(error);
-    showLoginMessage("Unable to connect to backend. Make sure Spring Boot is running on port 8085.");
-  }finally{
-    if(button){
-      button.disabled=false;
-      button.textContent="Login";
+    setTimeout(
+      function () {
+        redirectByRole(
+          data.role || "USER",
+          Boolean(
+            data.profileCompleted
+          )
+        );
+      },
+      900
+    );
+
+  } catch (error) {
+    console.error(
+      "Login failed:",
+      error
+    );
+
+    showLoginMessage(
+      error.message ||
+      "Unable to connect to the server. Make sure Spring Boot is running on port 8085."
+    );
+
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML =
+        originalButtonHtml;
     }
   }
 
   return false;
 }
 
-function sendOTP(){
-  alert("Phone OTP login API is not available yet. Please use Email Login.");
+function sendOTP() {
+  showLoginMessage(
+    "Phone OTP login is not available yet. Please use Email Login.",
+    "error"
+  );
+
+  showEmailLogin();
 }
 
-function verifyOTP(){
-  alert("Phone OTP login API is not available yet. Please use Email Login.");
+function verifyOTP() {
+  showLoginMessage(
+    "Phone OTP login is not available yet. Please use Email Login.",
+    "error"
+  );
+
+  showEmailLogin();
   return false;
 }
 
-function startGoogleLogin(){
-  alert("Google login API is not available yet. Please use Email Login.");
+function startGoogleLogin() {
+  showLoginMessage(
+    "Google login is not available yet. Please use Email Login.",
+    "error"
+  );
 }
 </script>
 </body>

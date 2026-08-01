@@ -1460,7 +1460,51 @@
                 width: 100%;
             }
         }
-    </style>
+    
+        .status-given {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .status-pending-give {
+            color: #946300;
+            background: var(--warning-light);
+        }
+
+        .give-button {
+            min-width: auto;
+            padding: 0 12px;
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .give-button:hover {
+            color: var(--white);
+            background: var(--success);
+        }
+
+        .give-button:disabled {
+            opacity: 0.58;
+            cursor: not-allowed;
+        }
+
+        .medicine-quantity {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .dispense-note {
+            margin-top: 15px;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--muted);
+            background: #fbfcfa;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+</style>
 </head>
 
 <body>
@@ -1689,7 +1733,7 @@
                         </div>
 
                         <div>
-                            <p>Offline Prescriptions</p>
+                            <p>Pending Medicine</p>
                             <h3 id="offlinePrescriptions">0</h3>
                         </div>
 
@@ -1702,7 +1746,7 @@
                         </div>
 
                         <div>
-                            <p>Online Prescriptions</p>
+                            <p>Medicines Given</p>
                             <h3 id="onlinePrescriptions">0</h3>
                         </div>
 
@@ -1749,25 +1793,25 @@
 
                     <div class="form-group">
 
-                        <label for="typeFilter">
-                            Consultation Type
+                        <label for="dispenseFilter">
+                            Medicine Status
                         </label>
 
                         <select
-                            id="typeFilter"
+                            id="dispenseFilter"
                             class="form-control"
                             onchange="applyFilters()"
                         >
                             <option value="">
-                                All Types
+                                All Medicine Statuses
                             </option>
 
-                            <option value="OFFLINE">
-                                Offline
+                            <option value="PENDING">
+                                Pending
                             </option>
 
-                            <option value="ONLINE">
-                                Online
+                            <option value="GIVEN">
+                                Given
                             </option>
                         </select>
 
@@ -1803,15 +1847,11 @@
                             onchange="applyFilters()"
                         >
                             <option value="">
-                                All Statuses
+                                All Prescription Statuses
                             </option>
 
-                            <option value="ISSUED">
-                                Issued
-                            </option>
-
-                            <option value="DRAFT">
-                                Draft
+                            <option value="FINALIZED">
+                                Finalized
                             </option>
                         </select>
 
@@ -1852,7 +1892,7 @@
                             <h2>Prescription List</h2>
 
                             <p>
-                                Open a prescription to view medicine details.
+                                Only finalized prescriptions linked to offline appointments are displayed.
                             </p>
 
                         </div>
@@ -1875,11 +1915,12 @@
                                     <th>Prescription ID</th>
                                     <th>Patient</th>
                                     <th>Doctor</th>
-                                    <th>Consultation</th>
-                                    <th>Issued Date</th>
+                                    <th>Appointment</th>
+                                    <th>Finalized Date</th>
                                     <th>Diagnosis</th>
                                     <th>Medicines</th>
-                                    <th>Status</th>
+                                    <th>Prescription</th>
+                                    <th>Medicine Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -1888,7 +1929,7 @@
 
                                 <tr>
                                     <td
-                                        colspan="9"
+                                        colspan="10"
                                         class="table-message"
                                     >
                                         <i class="fa-solid fa-spinner fa-spin"></i>
@@ -2101,7 +2142,7 @@
             localStorage.removeItem("userId");
 
             window.location.href =
-                "staff-login.html";
+                "../patient/login.html";
         }
 
         /* PROFILE */
@@ -2140,7 +2181,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/prescriptions/getAll"
+                        "/api/medical-staff/prescriptions"
                     );
 
                 const data =
@@ -2153,9 +2194,36 @@
                             : [];
 
                 allPrescriptions =
-                    data.map(
-                        normalizePrescription
-                    );
+                    data
+                        .map(
+                            normalizePrescription
+                        )
+                        .filter(
+                            prescription =>
+                                prescription.consultationType ===
+                                    "OFFLINE" &&
+                                prescription.appointmentId &&
+                                prescription.status ===
+                                    "FINALIZED" &&
+                                prescription.medicines.length > 0
+                        );
+
+                /*
+                 * The medical-staff prescription response does not always contain
+                 * patient phone, age and gender. Load the linked appointment and
+                 * merge those patient details before rendering the page.
+                 */
+                allPrescriptions = await Promise.all(
+                    allPrescriptions.map(
+                        enrichPrescriptionFromAppointment
+                    )
+                );
+
+                allPrescriptions.sort(
+                    (first, second) =>
+                        new Date(second.issuedDate || 0) -
+                        new Date(first.issuedDate || 0)
+                );
 
             } catch (error) {
                 console.error(
@@ -2163,12 +2231,12 @@
                     error
                 );
 
-                allPrescriptions =
-                    getDemoPrescriptions();
+                allPrescriptions = [];
 
                 showAlert(
-                    "Prescription API is not connected. Demo data is displayed.",
-                    "info"
+                    error.message ||
+                    "Unable to load medical staff prescriptions.",
+                    "error"
                 );
             }
 
@@ -2178,13 +2246,74 @@
             applyFilters();
         }
 
+        async function enrichPrescriptionFromAppointment(prescription) {
+            if (!prescription.appointmentId) {
+                return prescription;
+            }
+
+            try {
+                const result = await staffApiRequest(
+                    `/api/appointments/${encodeURIComponent(
+                        prescription.appointmentId
+                    )}/get`
+                );
+
+                const appointment = result.data || {};
+
+                return {
+                    ...prescription,
+                    patientName:
+                        appointment.patientName ||
+                        prescription.patientName,
+                    patientPhone:
+                        appointment.phoneNumber ||
+                        appointment.patientPhone ||
+                        appointment.patient?.phoneNumber ||
+                        prescription.patientPhone,
+                    patientAge:
+                        appointment.age ??
+                        appointment.patientAge ??
+                        appointment.patient?.age ??
+                        prescription.patientAge,
+                    patientGender:
+                        String(
+                            appointment.gender ||
+                            appointment.patientGender ||
+                            appointment.patient?.gender ||
+                            prescription.patientGender ||
+                            "-"
+                        ).toUpperCase()
+                };
+
+            } catch (error) {
+                console.warn(
+                    `Unable to load appointment ${prescription.appointmentId}:`,
+                    error
+                );
+
+                /*
+                 * Keep the prescription visible even when the appointment
+                 * endpoint is not permitted for the medical-staff role.
+                 */
+                return prescription;
+            }
+        }
+
         function normalizePrescription(item) {
             const medicines =
-                Array.isArray(item.medicines)
-                    ? item.medicines
-                    : Array.isArray(item.items)
-                        ? item.items
+                Array.isArray(item.items)
+                    ? item.items
+                    : Array.isArray(item.medicines)
+                        ? item.medicines
                         : [];
+
+            const appointmentId =
+                item.appointmentId ??
+                null;
+
+            const consultationId =
+                item.consultationId ??
+                null;
 
             return {
                 id:
@@ -2203,7 +2332,6 @@
                 patientName:
                     item.patientName ||
                     item.patient?.name ||
-                    item.userName ||
                     "Patient",
 
                 patientPhone:
@@ -2235,38 +2363,53 @@
                     "-",
 
                 consultationType:
-                    String(
-                        item.consultationType ||
-                        item.appointmentType ||
-                        item.type ||
-                        "OFFLINE"
-                    ).toUpperCase(),
+                    appointmentId &&
+                    !consultationId
+                        ? "OFFLINE"
+                        : consultationId
+                            ? "ONLINE"
+                            : "UNKNOWN",
 
-                appointmentId:
-                    item.appointmentId ||
-                    item.consultationId ||
-                    null,
+                appointmentId,
+                consultationId,
 
                 issuedDate:
+                    item.finalizedAt ||
                     item.issuedDate ||
                     item.createdAt ||
                     item.prescriptionDate,
 
                 diagnosis:
                     item.diagnosis ||
-                    item.symptoms ||
                     "Not specified",
 
                 notes:
                     item.notes ||
                     item.advice ||
-                    "Follow the prescribed dosage and consult the doctor if symptoms persist.",
+                    "-",
 
                 status:
                     String(
                         item.status ||
-                        "ISSUED"
+                        "DRAFT"
                     ).toUpperCase(),
+
+                dispenseStatus:
+                    String(
+                        item.dispenseStatus ||
+                        item.dispensingStatus ||
+                        item.medicineStatus ||
+                        (
+                            item.medicinesGiven === true
+                                ? "GIVEN"
+                                : "PENDING"
+                        )
+                    ).toUpperCase(),
+
+                medicinesGivenAt:
+                    item.medicinesGivenAt ||
+                    item.dispensedAt ||
+                    null,
 
                 medicines:
                     medicines.map(
@@ -2282,6 +2425,15 @@
 
         function normalizeMedicine(item) {
             return {
+                id:
+                    item.id ||
+                    item.prescriptionItemId ||
+                    null,
+
+                productId:
+                    item.productId ||
+                    null,
+
                 medicineName:
                     item.medicineName ||
                     item.productName ||
@@ -2294,150 +2446,34 @@
 
                 frequency:
                     item.frequency ||
-                    "-",
+                    item.doseFrequency ||
+                    item.frequencyText ||
+                    item.schedule ||
+                    item.timing ||
+                    "Not specified",
 
                 duration:
                     item.duration ||
-                    "-",
+                    (
+                        item.durationDays
+                            ? `${item.durationDays} days`
+                            : "-"
+                    ),
+
+                durationDays:
+                    item.durationDays ||
+                    null,
+
+                quantity:
+                    item.quantity ||
+                    1,
 
                 instruction:
+                    item.instructions ||
                     item.instruction ||
                     item.notes ||
                     "-"
             };
-        }
-
-        function getDemoPrescriptions() {
-            return [
-                {
-                    id: 101,
-                    prescriptionNumber:
-                        "RX-2026-0101",
-                    patientId: 1,
-                    patientName:
-                        "Nisha Rao",
-                    patientPhone:
-                        "9876543210",
-                    patientAge: 30,
-                    patientGender:
-                        "FEMALE",
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    doctorQualification:
-                        "BAMS",
-                    consultationType:
-                        "ONLINE",
-                    appointmentId: 1001,
-                    issuedDate:
-                        "2026-07-14T10:45:00",
-                    diagnosis:
-                        "Headache, stress and poor concentration",
-                    notes:
-                        "Take adequate rest, drink sufficient water and follow a light diet.",
-                    status:
-                        "ISSUED",
-                    medicines: [
-                        {
-                            medicineName:
-                                "NeoPainil Capsule",
-                            dosage:
-                                "1 capsule",
-                            frequency:
-                                "Twice daily",
-                            duration:
-                                "7 days",
-                            instruction:
-                                "After food"
-                        },
-                        {
-                            medicineName:
-                                "Neoliv Liver Syrup",
-                            dosage:
-                                "10 ml",
-                            frequency:
-                                "Twice daily",
-                            duration:
-                                "14 days",
-                            instruction:
-                                "Before food"
-                        }
-                    ],
-                    pdfUrl: null
-                },
-                {
-                    id: 102,
-                    prescriptionNumber:
-                        "RX-2026-0102",
-                    patientId: 2,
-                    patientName:
-                        "Raghavendra Bhat",
-                    patientPhone:
-                        "9876543211",
-                    patientAge: 42,
-                    patientGender:
-                        "MALE",
-                    doctorName:
-                        "Dr. N. G. Muraleedhara",
-                    doctorQualification:
-                        "BAMS",
-                    consultationType:
-                        "OFFLINE",
-                    appointmentId: 1002,
-                    issuedDate:
-                        "2026-07-13T09:30:00",
-                    diagnosis:
-                        "Joint stiffness and body pain",
-                    notes:
-                        "Avoid heavy lifting and attend the advised therapy session.",
-                    status:
-                        "ISSUED",
-                    medicines: [
-                        {
-                            medicineName:
-                                "NeoPainil Capsule",
-                            dosage:
-                                "1 capsule",
-                            frequency:
-                                "Twice daily",
-                            duration:
-                                "15 days",
-                            instruction:
-                                "After food"
-                        }
-                    ],
-                    pdfUrl: null
-                },
-                {
-                    id: 103,
-                    prescriptionNumber:
-                        "RX-2026-0103",
-                    patientId: 3,
-                    patientName:
-                        "Anitha Shetty",
-                    patientPhone:
-                        "9876543212",
-                    patientAge: 36,
-                    patientGender:
-                        "FEMALE",
-                    doctorName:
-                        "Dr. Aditi",
-                    doctorQualification:
-                        "BNYS",
-                    consultationType:
-                        "OFFLINE",
-                    appointmentId: 1003,
-                    issuedDate:
-                        "2026-07-12T12:00:00",
-                    diagnosis:
-                        "Digestive discomfort",
-                    notes:
-                        "Draft prescription awaiting doctor confirmation.",
-                    status:
-                        "DRAFT",
-                    medicines: [],
-                    pdfUrl: null
-                }
-            ];
         }
 
         /* URL FILTER */
@@ -2508,8 +2544,8 @@
                 "offlinePrescriptions",
                 allPrescriptions.filter(
                     item =>
-                        item.consultationType ===
-                        "OFFLINE"
+                        item.dispenseStatus !==
+                        "GIVEN"
                 ).length
             );
 
@@ -2517,8 +2553,8 @@
                 "onlinePrescriptions",
                 allPrescriptions.filter(
                     item =>
-                        item.consultationType ===
-                        "ONLINE"
+                        item.dispenseStatus ===
+                        "GIVEN"
                 ).length
             );
 
@@ -2527,7 +2563,7 @@
                 allPrescriptions.filter(
                     item =>
                         String(
-                            item.issuedDate
+                            item.issuedDate || ""
                         ).substring(0, 10) ===
                         today
                 ).length
@@ -2583,9 +2619,9 @@
                 .trim()
                 .toLowerCase();
 
-            const type =
+            const dispense =
                 document.getElementById(
-                    "typeFilter"
+                    "dispenseFilter"
                 ).value;
 
             const doctor =
@@ -2618,10 +2654,10 @@
                                 .toLowerCase()
                                 .includes(search);
 
-                        const matchesType =
-                            !type ||
-                            item.consultationType ===
-                                type;
+                        const matchesDispense =
+                            !dispense ||
+                            item.dispenseStatus ===
+                                dispense;
 
                         const matchesDoctor =
                             !doctor ||
@@ -2642,7 +2678,7 @@
 
                         return (
                             matchesSearch &&
-                            matchesType &&
+                            matchesDispense &&
                             matchesDoctor &&
                             matchesStatus &&
                             matchesDate
@@ -2660,7 +2696,11 @@
             ).value = "";
 
             document.getElementById(
-                "typeFilter"
+                "dispenseFilter"
+            ).value = "";
+
+            document.getElementById(
+                "doctorFilter"
             ).value = "";
 
             document.getElementById(
@@ -2722,7 +2762,7 @@
                 body.innerHTML = `
                     <tr>
                         <td
-                            colspan="9"
+                            colspan="10"
                             class="table-message"
                         >
                             <i class="fa-solid fa-file-circle-xmark"></i>
@@ -2805,9 +2845,12 @@
                             </td>
 
                             <td>
-                                ${createTypeBadge(
-                                    item.consultationType
-                                )}
+                                <span class="type-badge type-offline">
+                                    <i class="fa-solid fa-hospital-user"></i>
+                                    Offline #${escapeHtml(
+                                        item.appointmentId
+                                    )}
+                                </span>
                             </td>
 
                             <td>
@@ -2846,6 +2889,12 @@
                             </td>
 
                             <td>
+                                ${createDispenseStatusBadge(
+                                    item.dispenseStatus
+                                )}
+                            </td>
+
+                            <td>
 
                                 <div class="action-buttons">
 
@@ -2857,6 +2906,22 @@
                                     >
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
+
+                                    ${
+                                        item.dispenseStatus !== "GIVEN"
+                                            ? `
+                                                <button
+                                                    type="button"
+                                                    class="action-button give-button"
+                                                    onclick="markPrescriptionGiven('${item.id}')"
+                                                    title="Mark medicines as given"
+                                                >
+                                                    <i class="fa-solid fa-box-open"></i>
+                                                    Given
+                                                </button>
+                                              `
+                                            : ""
+                                    }
 
                                     <button
                                         type="button"
@@ -2980,6 +3045,12 @@
 
                                 <td>
                                     ${escapeHtml(
+                                        medicine.quantity
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${escapeHtml(
                                         medicine.instruction
                                     )}
                                 </td>
@@ -2989,7 +3060,7 @@
                         .join("")
                     : `
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 No medicines added to this prescription.
                             </td>
                         </tr>
@@ -3120,6 +3191,7 @@
                                 <th>Dosage</th>
                                 <th>Frequency</th>
                                 <th>Duration</th>
+                                <th>Quantity</th>
                                 <th>Instruction</th>
                             </tr>
                         </thead>
@@ -3160,6 +3232,18 @@
 
                 </div>
             `;
+
+            const markButton =
+                document.getElementById(
+                    "markGivenModalButton"
+                );
+
+            if (markButton) {
+                markButton.hidden =
+                    selectedPrescription
+                        .dispenseStatus ===
+                    "GIVEN";
+            }
 
             document.getElementById(
                 "prescriptionModal"
@@ -3605,6 +3689,104 @@
                 .replaceAll(">", "&gt;")
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
+        }
+         function createDispenseStatusBadge(status) {
+            const normalized =
+                String(status || "PENDING")
+                    .toUpperCase();
+
+            if (normalized === "GIVEN") {
+                return `
+                    <span class="status-badge status-given">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Given
+                    </span>
+                `;
+            }
+
+            return `
+                <span class="status-badge status-pending-give">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    Pending
+                </span>
+            `;
+        }
+
+        async function markPrescriptionGiven(id) {
+            const prescription =
+                allPrescriptions.find(
+                    item =>
+                        String(item.id) ===
+                        String(id)
+                );
+
+            if (!prescription) {
+                showAlert(
+                    "Prescription was not found.",
+                    "error"
+                );
+                return;
+            }
+
+            if (!prescription.medicines.length) {
+                showAlert(
+                    "This prescription has no medicines.",
+                    "error"
+                );
+                return;
+            }
+
+            const confirmed =
+                window.confirm(
+                    `Confirm that all prescribed medicines for ${prescription.patientName} have been given?`
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                /*
+                 * This action requires a backend endpoint.
+                 * Expected endpoint:
+                 * PUT /api/medical-staff/prescriptions/{id}/mark-given
+                 */
+                const result =
+                    await staffApiRequest(
+                        `/api/medical-staff/prescriptions/${encodeURIComponent(
+                            id
+                        )}/mark-given`,
+                        {
+                            method: "PUT"
+                        }
+                    );
+
+                showAlert(
+                    result.message ||
+                    "Medicines marked as given successfully.",
+                    "success"
+                );
+
+                closePrescriptionModal();
+                await loadPrescriptions();
+
+            } catch (error) {
+                showAlert(
+                    error.message ||
+                    "Unable to mark medicines as given.",
+                    "error"
+                );
+            }
+        }
+
+        function markSelectedPrescriptionGiven() {
+            if (!selectedPrescription) {
+                return;
+            }
+
+            markPrescriptionGiven(
+                selectedPrescription.id
+            );
         }
     </script>
 

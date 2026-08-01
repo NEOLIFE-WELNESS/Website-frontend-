@@ -455,6 +455,9 @@
             <input type="text"
                    id="name"
                    placeholder="Full Name"
+                   autocomplete="name"
+                   minlength="2"
+                   maxlength="100"
                    required>
           </div>
 
@@ -464,6 +467,8 @@
               <input type="tel"
                      id="phoneNumber"
                      placeholder="Phone Number"
+                     autocomplete="tel"
+                     inputmode="numeric"
                      maxlength="10"
                      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                      required>
@@ -473,6 +478,8 @@
               <input type="email"
                      id="email"
                      placeholder="Email Address"
+                     autocomplete="email"
+                     maxlength="150"
                      required>
             </div>
 
@@ -504,6 +511,9 @@
             <input type="password"
                    id="password"
                    placeholder="Create Password"
+                   autocomplete="new-password"
+                   minlength="8"
+                   maxlength="72"
                    required>
           </div>
 
@@ -511,6 +521,9 @@
             <input type="password"
                    id="confirmPassword"
                    placeholder="Confirm Password"
+                   autocomplete="new-password"
+                   minlength="8"
+                   maxlength="72"
                    required>
           </div>
 
@@ -519,7 +532,7 @@
             Your account information is used only for Neolife services.
           </div>
 
-          <button type="submit" class="register-btn">
+          <button type="submit" class="register-btn" id="registerButton">
             Create Account
           </button>
 
@@ -541,100 +554,445 @@
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
-function showRegisterMessage(message,type="error"){
-  const box=document.getElementById("registerMessage");
-  box.textContent=message;
-  box.className=`form-message show ${type}`;
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    /*
+     * A logged-in user should not remain on
+     * the registration page.
+     */
+    const token =
+      localStorage.getItem("token");
+
+    const role =
+      localStorage.getItem("role");
+
+    if (token && role) {
+      redirectLoggedInUser(
+        role,
+        localStorage.getItem(
+          "profileCompleted"
+        ) === "true"
+      );
+    }
+  }
+);
+
+function showRegisterMessage(
+  message,
+  type = "error"
+) {
+  const box =
+    document.getElementById(
+      "registerMessage"
+    );
+
+  if (!box) {
+    alert(message);
+    return;
+  }
+
+  box.textContent = message;
+  box.className =
+    `form-message show ${type}`;
 }
 
-function clearRegisterMessage(){
-  const box=document.getElementById("registerMessage");
-  box.textContent="";
-  box.className="form-message";
+function clearRegisterMessage() {
+  const box =
+    document.getElementById(
+      "registerMessage"
+    );
+
+  if (!box) {
+    return;
+  }
+
+  box.textContent = "";
+  box.className = "form-message";
 }
 
-async function registerUser(event){
+function redirectLoggedInUser(
+  role,
+  profileCompleted
+) {
+  const normalizedRole =
+    String(role || "USER")
+      .toUpperCase();
+
+  switch (normalizedRole) {
+    case "ADMIN":
+      window.location.replace(
+        "../admin/admin-dashboard.html"
+      );
+      break;
+
+    case "DOCTOR":
+      window.location.replace(
+        profileCompleted
+          ? "../doctor/doctor-dashboard.html"
+          : "../doctor/doctor-profile.html"
+      );
+      break;
+
+    case "MEDICAL_STAFF":
+      window.location.replace(
+        profileCompleted
+          ? "../medical/staff-dashboard.html"
+          : "../medical/profile.html"
+      );
+      break;
+
+    case "THERAPIST":
+      window.location.replace(
+        profileCompleted
+          ? "../therapist/therapist-dashboard.html"
+          : "../therapist/therapist-profile.html"
+      );
+      break;
+
+    case "USER":
+    default:
+      window.location.replace(
+        "profile.html"
+      );
+      break;
+  }
+}
+
+async function safelyReadResponse(
+  response
+) {
+  const responseText =
+    await response.text();
+
+  if (!responseText) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(
+      responseText
+    );
+  } catch {
+    return {
+      success: false,
+      message:
+        responseText ||
+        `Invalid server response (${response.status}).`
+    };
+  }
+}
+
+function getRegistrationPayload() {
+  return {
+    name:
+      document
+        .getElementById("name")
+        .value
+        .trim(),
+
+    phoneNumber:
+      document
+        .getElementById(
+          "phoneNumber"
+        )
+        .value
+        .trim(),
+
+    email:
+      document
+        .getElementById("email")
+        .value
+        .trim()
+        .toLowerCase(),
+
+    age:
+      Number(
+        document
+          .getElementById("age")
+          .value
+      ),
+
+    gender:
+      document
+        .getElementById("gender")
+        .value,
+
+    password:
+      document
+        .getElementById("password")
+        .value,
+
+    confirmPassword:
+      document
+        .getElementById(
+          "confirmPassword"
+        )
+        .value
+  };
+}
+
+function validateRegistration(
+  payload
+) {
+  if (
+    !payload.name ||
+    !payload.phoneNumber ||
+    !payload.email ||
+    !payload.age ||
+    !payload.gender ||
+    !payload.password ||
+    !payload.confirmPassword
+  ) {
+    showRegisterMessage(
+      "Please fill in all fields."
+    );
+    return false;
+  }
+
+  if (
+    payload.name.length < 2
+  ) {
+    showRegisterMessage(
+      "Full name must contain at least 2 characters."
+    );
+
+    document
+      .getElementById("name")
+      .focus();
+
+    return false;
+  }
+
+  if (
+    !/^[A-Za-zÀ-ž.'\-\s]+$/.test(
+      payload.name
+    )
+  ) {
+    showRegisterMessage(
+      "Please enter a valid full name."
+    );
+
+    document
+      .getElementById("name")
+      .focus();
+
+    return false;
+  }
+
+  if (
+    !/^[6-9][0-9]{9}$/.test(
+      payload.phoneNumber
+    )
+  ) {
+    showRegisterMessage(
+      "Enter a valid 10-digit Indian mobile number."
+    );
+
+    document
+      .getElementById(
+        "phoneNumber"
+      )
+      .focus();
+
+    return false;
+  }
+
+  const emailPattern =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (
+    !emailPattern.test(
+      payload.email
+    )
+  ) {
+    showRegisterMessage(
+      "Please enter a valid email address."
+    );
+
+    document
+      .getElementById("email")
+      .focus();
+
+    return false;
+  }
+
+  if (
+    !Number.isInteger(
+      payload.age
+    ) ||
+    payload.age < 1 ||
+    payload.age > 120
+  ) {
+    showRegisterMessage(
+      "Please enter a valid age between 1 and 120."
+    );
+
+    document
+      .getElementById("age")
+      .focus();
+
+    return false;
+  }
+
+  /*
+   * Backend example uses passwords such as Yogesh@123.
+   * Require at least 8 characters, one uppercase,
+   * one lowercase, one number and one special character.
+   */
+  const passwordPattern =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,72}$/;
+
+  if (
+    !passwordPattern.test(
+      payload.password
+    )
+  ) {
+    showRegisterMessage(
+      "Password must contain at least 8 characters, including uppercase, lowercase, number and special character."
+    );
+
+    document
+      .getElementById("password")
+      .focus();
+
+    return false;
+  }
+
+  if (
+    payload.password !==
+    payload.confirmPassword
+  ) {
+    showRegisterMessage(
+      "Password and confirm password do not match."
+    );
+
+    document
+      .getElementById(
+        "confirmPassword"
+      )
+      .focus();
+
+    return false;
+  }
+
+  return true;
+}
+
+async function registerUser(event) {
   event.preventDefault();
   clearRegisterMessage();
 
-  const name=document.getElementById("name").value.trim();
-  const phoneNumber=document.getElementById("phoneNumber").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const age=Number(document.getElementById("age").value);
-  const gender=document.getElementById("gender").value;
-  const password=document.getElementById("password").value;
-  const confirmPassword=document.getElementById("confirmPassword").value;
+  const payload =
+    getRegistrationPayload();
+
+  if (
+    !validateRegistration(
+      payload
+    )
+  ) {
+    return false;
+  }
+
   const button =
-    document.getElementById("registerButton") ||
-    event.submitter ||
-    document.querySelector("#registerForm button[type='submit']");
+    document.getElementById(
+      "registerButton"
+    ) ||
+    event.submitter;
 
-  if(!name||!phoneNumber||!email||!age||!gender||!password||!confirmPassword){
-    showRegisterMessage("Please fill in all fields.");
-    return false;
+  const originalButtonHtml =
+    button
+      ? button.innerHTML
+      : "Create Account";
+
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Creating Account...
+    `;
   }
 
-  if(!/^[0-9]{10}$/.test(phoneNumber)){
-    showRegisterMessage("Phone number must contain exactly 10 digits.");
-    return false;
-  }
+  try {
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Accept:
+              "application/json"
+          },
+          body:
+            JSON.stringify(
+              payload
+            )
+        }
+      );
 
-  if(age<1||age>120){
-    showRegisterMessage("Please enter a valid age.");
-    return false;
-  }
+    const result =
+      await safelyReadResponse(
+        response
+      );
 
-  if(password.length<8){
-    showRegisterMessage("Password must contain at least 8 characters.");
-    return false;
-  }
-
-  if(password!==confirmPassword){
-    showRegisterMessage("Password and confirm password do not match.");
-    return false;
-  }
-
-  if(button){
-    button.disabled=true;
-    button.textContent="Creating Account...";
-  }
-
-  try{
-    const response=await fetch(`${API_BASE_URL}/api/auth/register`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        name,
-        phoneNumber,
-        email,
-        age,
-        gender,
-        password,
-        confirmPassword
-      })
-    });
-
-    const result=await response.json();
-
-    if(!response.ok||!result.success){
-      showRegisterMessage(result.message||"Registration failed.");
-      return false;
+    if (
+      !response.ok ||
+      result.success === false
+    ) {
+      throw new Error(
+        result.message ||
+        "Registration failed."
+      );
     }
 
-    showRegisterMessage(result.message||"Registration successful. Redirecting to login...","success");
-    document.getElementById("registerForm").reset();
+    /*
+     * The registration response does not return a login token,
+     * so redirect the new patient to the login page.
+     */
+    localStorage.setItem(
+      "registeredEmail",
+      payload.email
+    );
 
-    setTimeout(()=>{
-      window.location.href="login.html";
-    },900);
+    showRegisterMessage(
+      result.message ||
+      "Registration successful. Redirecting to login...",
+      "success"
+    );
 
-  }catch(error){
-    console.error(error);
-    showRegisterMessage("Unable to connect to backend. Make sure Spring Boot is running on port 8085.");
-  }finally{
-    if(button){
-      button.disabled=false;
-      button.textContent="Create Account";
+    document
+      .getElementById(
+        "registerForm"
+      )
+      .reset();
+
+    setTimeout(
+      function () {
+        window.location.replace(
+          "login.html"
+        );
+      },
+      1000
+    );
+
+  } catch (error) {
+    console.error(
+      "Registration failed:",
+      error
+    );
+
+    showRegisterMessage(
+      error.message ||
+      "Unable to connect to the server. Make sure Spring Boot is running on port 8085."
+    );
+
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML =
+        originalButtonHtml;
     }
   }
 

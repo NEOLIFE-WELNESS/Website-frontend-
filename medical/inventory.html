@@ -1687,7 +1687,7 @@
                                 id="searchInput"
                                 class="form-control"
                                 placeholder="Product name, code or batch"
-                                oninput="applyFilters()"
+                                oninput="scheduleInventorySearch()"
                             >
 
                         </div>
@@ -2236,7 +2236,7 @@
             localStorage.removeItem("userId");
 
             window.location.href =
-                "staff-login.html";
+                "../patient/login.html";
         }
 
         /* =========================
@@ -2276,13 +2276,48 @@
            LOAD INVENTORY
         ========================== */
 
+        async function loadInventoryByEndpoint(endpoint) {
+            const result = await staffApiRequest(endpoint);
+            const data = Array.isArray(result.data)
+                ? result.data
+                : Array.isArray(result.data?.content)
+                    ? result.data.content
+                    : [];
+            return data.map(normalizeInventory);
+        }
+
+        async function loadLowStockProducts() {
+            return loadInventoryByEndpoint("/api/inventory/low-stock");
+        }
+
+        async function loadOutOfStockProducts() {
+            return loadInventoryByEndpoint("/api/inventory/out-of-stock");
+        }
+
+        async function searchInventoryFromApi(keyword) {
+            if (!keyword.trim()) {
+                await loadInventory();
+                return;
+            }
+
+            try {
+                allInventory = await loadInventoryByEndpoint(
+                    `/api/inventory/search?keyword=${encodeURIComponent(keyword.trim())}`
+                );
+                updateSummary();
+                applyFilters();
+            } catch (error) {
+                showAlert(error.message || "Inventory search failed.", "error");
+            }
+        }
+
         async function loadInventory() {
             showLoading();
 
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/inventory"
+                        "/api/inventory/getAll"
                     );
 
                 const data =
@@ -2305,12 +2340,11 @@
                     error
                 );
 
-                allInventory =
-                    getDemoInventory();
+                allInventory = [];
 
                 showAlert(
-                    "Inventory API is not connected. Demo data is displayed.",
-                    "info"
+                    error.message || "Unable to load inventory.",
+                    "error"
                 );
             }
 
@@ -2331,6 +2365,7 @@
 
             const minimumStock =
                 Number(
+                    item.lowStockLimit ??
                     item.minimumStock ??
                     item.lowStockThreshold ??
                     10
@@ -2390,6 +2425,17 @@
 
                 expiryDate:
                     item.expiryDate ||
+                    null,
+
+                manufacturer:
+                    item.manufacturer ||
+                    "-",
+
+                status:
+                    String(item.status || "").toUpperCase(),
+
+                lastUpdated:
+                    item.lastUpdated ||
                     null
             };
         }
@@ -2586,6 +2632,16 @@
                     select.appendChild(option);
                 }
             );
+        }
+
+        let inventorySearchTimer = null;
+
+        function scheduleInventorySearch() {
+            clearTimeout(inventorySearchTimer);
+            inventorySearchTimer = setTimeout(() => {
+                const keyword = document.getElementById("searchInput").value;
+                searchInventoryFromApi(keyword);
+            }, 350);
         }
 
         function applyFilters() {
@@ -2916,6 +2972,15 @@
                                         <i class="fa-solid fa-clock-rotate-left"></i>
                                     </button>
 
+                                    <button
+                                        type="button"
+                                        class="action-button history-button"
+                                        onclick="updateLowStockLimit('${item.id}')"
+                                        title="Update low stock limit"
+                                    >
+                                        <i class="fa-solid fa-sliders"></i>
+                                    </button>
+
                                 </div>
 
                             </td>
@@ -2941,6 +3006,10 @@
         }
 
         function getStockStatus(item) {
+            if (item.status) {
+                return item.status;
+            }
+
             if (
                 Number(item.currentStock) <=
                 0
@@ -3217,10 +3286,7 @@
         function setStockFieldsVisibility(
             operation
         ) {
-            const display =
-                operation === "ADD"
-                    ? "block"
-                    : "none";
+            const display = "none";
 
             document.getElementById(
                 "batchNumberGroup"
@@ -3404,14 +3470,6 @@
                 return;
             }
 
-            if (!reason) {
-                showAlert(
-                    "Enter a reason for the stock movement.",
-                    "error"
-                );
-
-                return;
-            }
 
             const submitButton =
                 document.getElementById(
@@ -3433,70 +3491,16 @@
                     stockOperation ===
                     "ADD"
                 ) {
-                    const batchNumber =
-                        document.getElementById(
-                            "batchNumber"
-                        ).value.trim();
-
-                    const manufacturingDate =
-                        document.getElementById(
-                            "manufacturingDate"
-                        ).value;
-
-                    const expiryDate =
-                        document.getElementById(
-                            "stockExpiryDate"
-                        ).value;
-
-                    if (
-                        !batchNumber ||
-                        !manufacturingDate ||
-                        !expiryDate
-                    ) {
-                        throw new Error(
-                            "Batch number, manufacturing date and expiry date are required."
-                        );
-                    }
-
                     await staffApiRequest(
                         "/api/inventory/add-stock",
                         {
                             method: "POST",
-
-                            body:
-                                JSON.stringify({
-                                    productId:
-                                        selectedInventory.productId,
-
-                                    quantity:
-                                        quantity,
-
-                                    batchNumber:
-                                        batchNumber,
-
-                                    manufacturingDate:
-                                        manufacturingDate,
-
-                                    expiryDate:
-                                        expiryDate,
-
-                                    reason:
-                                        reason
-                                })
+                            body: JSON.stringify({
+                                productId: selectedInventory.productId,
+                                quantity: quantity
+                            })
                         }
                     );
-
-                    selectedInventory.currentStock +=
-                        quantity;
-
-                    selectedInventory.batchNumber =
-                        batchNumber;
-
-                    selectedInventory.manufacturingDate =
-                        manufacturingDate;
-
-                    selectedInventory.expiryDate =
-                        expiryDate;
 
                 } else {
                     await staffApiRequest(
@@ -3510,10 +3514,7 @@
                                         selectedInventory.productId,
 
                                     quantity:
-                                        quantity,
-
-                                    reason:
-                                        reason
+                                        quantity
                                 })
                         }
                     );
@@ -3524,8 +3525,7 @@
 
                 closeStockModal();
 
-                updateSummary();
-                applyFilters();
+                await loadInventory();
 
                 showAlert(
                     stockOperation === "ADD"
@@ -3552,6 +3552,42 @@
 
                 submitButton.textContent =
                     originalText;
+            }
+        }
+
+        async function updateLowStockLimit(id) {
+            const item = allInventory.find(entry => String(entry.id) === String(id));
+            if (!item) return;
+
+            const entered = window.prompt(
+                `Enter low stock limit for ${item.productName}:`,
+                String(item.minimumStock)
+            );
+
+            if (entered === null) return;
+
+            const lowStockLimit = Number(entered);
+            if (!Number.isInteger(lowStockLimit) || lowStockLimit < 0) {
+                showAlert("Enter a valid whole-number low stock limit.", "error");
+                return;
+            }
+
+            try {
+                const result = await staffApiRequest(
+                    "/api/inventory/update-limit",
+                    {
+                        method: "PUT",
+                        body: JSON.stringify({
+                            productId: item.productId,
+                            lowStockLimit: lowStockLimit
+                        })
+                    }
+                );
+
+                showAlert(result.message || "Low stock limit updated successfully.", "success");
+                await loadInventory();
+            } catch (error) {
+                showAlert(error.message || "Unable to update low stock limit.", "error");
             }
         }
 
@@ -3612,15 +3648,16 @@
             try {
                 const result =
                     await staffApiRequest(
-                        `/api/inventory/history/${encodeURIComponent(
-                            item.productId
-                        )}`
+                        "/api/inventory/history"
                     );
 
                 const history =
-                    Array.isArray(result.data)
+                    (Array.isArray(result.data)
                         ? result.data
-                        : [];
+                        : []
+                    ).filter(record =>
+                        String(record.productId) === String(item.productId)
+                    );
 
                 renderHistory(
                     item,
@@ -3628,33 +3665,8 @@
                 );
 
             } catch (error) {
-                renderHistory(
-                    item,
-                    [
-                        {
-                            id: 1,
-                            type: "ADD",
-                            quantity: 20,
-                            reason:
-                                "New batch received",
-                            createdAt:
-                                "2026-07-10T10:30:00",
-                            batchNumber:
-                                item.batchNumber
-                        },
-                        {
-                            id: 2,
-                            type: "REMOVE",
-                            quantity: 3,
-                            reason:
-                                "Order fulfillment",
-                            createdAt:
-                                "2026-07-12T15:10:00",
-                            batchNumber:
-                                item.batchNumber
-                        }
-                    ]
-                );
+                renderHistory(item, []);
+                showAlert(error.message || "Unable to load stock history.", "error");
             }
         }
 

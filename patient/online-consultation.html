@@ -1427,18 +1427,7 @@ textarea.form-control {
                 >
             </div>
 
-            <div class="form-group full-width">
-                <label for="email">
-                    Email Address
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    class="form-control"
-                    placeholder="Enter email address"
-                >
-            </div>
+            
 
             <div class="form-group full-width">
                 <label for="symptoms">
@@ -1465,17 +1454,6 @@ textarea.form-control {
                 ></textarea>
             </div>
 
-            <div class="form-group full-width">
-                <label for="currentMedication">
-                    Current Medication
-                </label>
-
-                <textarea
-                    id="currentMedication"
-                    class="form-control"
-                    placeholder="Mention medicines currently being taken"
-                ></textarea>
-            </div>
 
             <div class="form-group full-width">
                 <label>
@@ -2452,9 +2430,6 @@ function validatePatientForm() {
     const phoneNumber =
         getInputValue("phoneNumber");
 
-    const email =
-        getInputValue("email");
-
     const symptoms =
         getInputValue("symptoms");
 
@@ -2507,19 +2482,19 @@ function validatePatientForm() {
      * but it is not included in the consultation API body
      * because the provided backend request does not accept it.
      */
-    if (
-        email &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-            email
-        )
-    ) {
-        showAlert(
-            "Please enter a valid email address.",
-            "error"
-        );
+    // if (
+    //     email &&
+    //     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    //         email
+    //     )
+    // ) {
+    //     showAlert(
+    //         "Please enter a valid email address.",
+    //         "error"
+    //     );
 
-        return false;
-    }
+    //     return false;
+    // }
 
     if (!symptoms) {
         showAlert(

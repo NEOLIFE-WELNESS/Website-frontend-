@@ -2249,10 +2249,9 @@
 
             try{
                 const url =
-                    `${API_BASE_URL}/api/appointment-slots/available` +
-                    `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
-                    `&date=${encodeURIComponent(date)}` +
-                    `&type=OFFLINE`;
+    `${API_BASE_URL}/api/appointment-slots/appointments/available` +
+    `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
+    `&date=${encodeURIComponent(date)}`;
 
                 const response = await fetch(
                     url,
@@ -2263,6 +2262,20 @@
                 );
 
                 const result = await readJsonResponse(response);
+
+                if(response.status === 401){
+                    localStorage.removeItem("token");
+                    throw new Error(
+                        "Your login session has expired. Please log in again."
+                    );
+                }
+
+                if(response.status === 403){
+                    throw new Error(
+                        result.message ||
+                        "You are not authorized to view appointment slots."
+                    );
+                }
 
                 if(!response.ok || result.success === false){
                     throw new Error(
@@ -2336,6 +2349,8 @@
                         slot.available !== false;
 
                     const slotKey =
+                        slot.id ||
+                        slot.appointmentSlotId ||
                         `${bookingData.doctorId}-${bookingData.appointmentDate}-${startTime}`;
 
                     const clickHandler = isAvailable
@@ -2414,10 +2429,9 @@
 
             try{
                 const url =
-                    `${API_BASE_URL}/api/appointment-slots/available` +
+                    `${API_BASE_URL}/api/appointment-slots/appointments/available` +
                     `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
-                    `&date=${encodeURIComponent(bookingData.appointmentDate)}` +
-                    `&type=OFFLINE`;
+                    `&date=${encodeURIComponent(bookingData.appointmentDate)}`;
 
                 const response = await fetch(
                     url,

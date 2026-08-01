@@ -1816,7 +1816,7 @@
                             Review incoming medicine orders from product
                             purchases and doctor prescriptions. Pack medicines,
                             create Shiprocket shipments, generate labels and
-                            update order status for patient tracking.
+                            view order details and shipping information returned by the backend.
                         </p>
 
                     </div>
@@ -2673,7 +2673,7 @@
             localStorage.removeItem("userId");
 
             window.location.href =
-                "staff-login.html";
+                "../patient/login.html";
         }
 
         /* =========================
@@ -2684,7 +2684,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/users/getProfile"
+                        "/api/medical-staff/me"
                     );
 
                 const name =
@@ -2734,6 +2734,7 @@
             try {
                 const result =
                     await staffApiRequest(
+                        // Documented medical-staff order list API
                         "/api/orders/getAll"
                     );
 
@@ -2746,10 +2747,16 @@
                             ? result.data.content
                             : [];
 
-                allOrders =
-                    data.map(
-                        normalizeOrder
+                allOrders = data
+                    .map(normalizeOrder)
+                    .sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+
+                if (!allOrders.length) {
+                    showAlert(
+                        "The server returned an empty order list. Medical staff access must be corrected in the backend /api/orders/getAll service.",
+                        "info"
                     );
+                }
 
             } catch (error) {
                 console.error(
@@ -2757,12 +2764,12 @@
                     error
                 );
 
-                allOrders =
-                    getDemoOrders();
+                allOrders = [];
 
                 showAlert(
-                    "Order API is not connected. Demo data is displayed.",
-                    "info"
+                    error.message ||
+                    "Unable to load orders from the server.",
+                    "error"
                 );
             }
 
@@ -2861,7 +2868,7 @@
                     item.patientName ||
                     item.userName ||
                     item.user?.name ||
-                    "Customer",
+                    (item.userId ? `User ${item.userId}` : "Customer"),
 
                 customerPhone:
                     item.customerPhone ||
@@ -3512,29 +3519,9 @@
                             )
                             .join(", ");
 
-                    const canProcess =
-                        ![
-                            "SHIPPED",
-                            "OUT_FOR_DELIVERY",
-                            "DELIVERED",
-                            "CANCELLED",
-                            "RETURNED",
-                            "REFUNDED"
-                        ].includes(
-                            order.status
-                        );
+                    const canProcess = false;
 
-                    const canCreateShipment =
-                        order.paymentStatus ===
-                            "PAID" &&
-                        [
-                            "PROCESSING",
-                            "PACKED"
-                        ].includes(
-                            order.status
-                        ) &&
-                        order.shippingStatus !==
-                            "CREATED";
+                    const canCreateShipment = false;
 
                     const canTrack =
                         Boolean(
@@ -3883,9 +3870,34 @@
            ORDER DETAILS
         ========================== */
 
-        function openDetailsModal(id) {
-            selectedOrder =
-                findOrder(id);
+        async function openDetailsModal(id) {
+            selectedOrder = findOrder(id);
+
+            try {
+                const result = await staffApiRequest(
+                    `/api/orders/${encodeURIComponent(id)}`
+                );
+
+                if (result.data) {
+                    selectedOrder = normalizeOrder(result.data);
+
+                    const index = allOrders.findIndex(
+                        order => String(order.id) === String(id)
+                    );
+
+                    if (index >= 0) {
+                        allOrders[index] = selectedOrder;
+                    }
+                }
+            } catch (error) {
+                if (!selectedOrder) {
+                    showAlert(
+                        error.message || "Unable to load order details.",
+                        "error"
+                    );
+                    return;
+                }
+            }
 
             if (!selectedOrder) {
                 return;
@@ -4159,18 +4171,7 @@
                 `;
             }
 
-            if (
-                ![
-                    "SHIPPED",
-                    "OUT_FOR_DELIVERY",
-                    "DELIVERED",
-                    "CANCELLED",
-                    "RETURNED",
-                    "REFUNDED"
-                ].includes(
-                    selectedOrder.status
-                )
-            ) {
+            if (false) {
                 actions += `
                     <button
                         type="button"
@@ -4183,18 +4184,7 @@
                 `;
             }
 
-            if (
-                selectedOrder.paymentStatus ===
-                    "PAID" &&
-                [
-                    "PROCESSING",
-                    "PACKED"
-                ].includes(
-                    selectedOrder.status
-                ) &&
-                selectedOrder.shippingStatus !==
-                    "CREATED"
-            ) {
+            if (false) {
                 actions += `
                     <button
                         type="button"
@@ -4686,69 +4676,24 @@
         ========================== */
 
         async function openTrackingModal(id) {
-            selectedOrder =
-                findOrder(id);
+            selectedOrder = findOrder(id);
 
             if (!selectedOrder) {
                 return;
             }
 
             document.getElementById(
-                "trackingModalContent"
-            ).innerHTML = `
-                ${createCustomerCard(
-                    selectedOrder
-                )}
-
-                <div class="table-message">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Loading tracking information...
-                </div>
-            `;
-
-            document.getElementById(
                 "trackingModal"
             ).classList.add("show");
 
-            try {
-                const trackingIdentifier =
-                    selectedOrder.awbCode ||
-                    selectedOrder.shipmentId ||
-                    selectedOrder.id;
-
-                const result =
-                    await staffApiRequest(
-                        `/api/shipping/track/${encodeURIComponent(
-                            trackingIdentifier
-                        )}`
-                    );
-
-                renderTracking(
-                    result.data ||
-                    {}
-                );
-
-            } catch (error) {
-                renderTracking({
-                    awbCode:
-                        selectedOrder.awbCode,
-
-                    courierName:
-                        selectedOrder.courierName,
-
-                    currentStatus:
-                        selectedOrder.status,
-
-                    expectedDeliveryDate:
-                        selectedOrder.expectedDeliveryDate,
-
-                    trackingUrl:
-                        selectedOrder.trackingUrl,
-
-                    activities:
-                        selectedOrder.timeline
-                });
-            }
+            renderTracking({
+                awbCode: selectedOrder.awbCode,
+                courierName: selectedOrder.courierName,
+                currentStatus: selectedOrder.status,
+                expectedDeliveryDate: selectedOrder.expectedDeliveryDate,
+                trackingUrl: selectedOrder.trackingUrl,
+                activities: selectedOrder.timeline
+            });
         }
 
         function renderTracking(data) {

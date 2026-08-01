@@ -29,174 +29,403 @@ button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}
 .message{padding:55px 20px;text-align:center;color:var(--muted)}.message i{display:block;margin-bottom:12px;color:var(--gold);font-size:30px}
 .alert{width:min(390px,calc(100% - 35px));padding:14px 16px;position:fixed;top:102px;right:22px;z-index:5000;display:none;border-radius:12px;color:#fff}.alert.show{display:block}.alert.error{background:var(--danger)}.alert.success{background:var(--success)}.mobile-overlay{position:fixed;inset:0;z-index:950;display:none;background:rgba(13,36,24,.58)}.mobile-overlay.show{display:block}
 @media(max-width:980px){.grid{grid-template-columns:1fr}}@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.3s}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.toggle{display:block}}@media(max-width:650px){.content{padding:18px 13px}.hero{grid-template-columns:1fr;text-align:center}.patient-avatar{margin:auto}.hero-meta{text-align:center}.details-grid{grid-template-columns:1fr}.detail.full{grid-column:auto}}
-/* =========================
+       /* ===========================
+
    SIDEBAR
-========================= */
+
+=========================== */
+
+
 
 .doctor-sidebar{
+
     width:var(--sidebar-width);
+
     height:100vh;
 
     position:fixed;
+
     top:0;
+
     left:0;
+
     z-index:1000;
 
+
+
     display:flex;
+
     flex-direction:column;
+
+
 
     overflow:hidden;
 
+
+
     color:var(--white);
 
-    background:linear-gradient(
-        180deg,
-        #123824,
-        #1e5134
-    );
+
+
+    background:linear-gradient(180deg,#123824,#1e5134);
+
+
 
     box-shadow:8px 0 30px rgba(18,56,36,.14);
-    transition:.3s;
+
+
+
+    transition:transform .3s ease;
+
 }
+
+
 
 .doctor-brand{
+
     min-height:104px;
+
     padding:20px 18px;
 
+
+
     display:flex;
+
     align-items:center;
+
     gap:13px;
 
+
+
     border-bottom:1px solid rgba(255,255,255,.12);
+
 }
+
+
 
 .doctor-brand img{
+
     width:58px;
+
     height:58px;
+
     object-fit:cover;
+
+
+
     border-radius:50%;
+
     border:2px solid var(--gold);
+
+
+
     background:#fff;
+
 }
+
+
 
 .doctor-brand h2{
+
     margin-bottom:5px;
+
     font-size:18px;
+
     font-weight:800;
+
 }
+
+
 
 .doctor-brand span{
+
     color:#f2cf69;
+
     font-size:11px;
+
     font-weight:700;
+
     letter-spacing:1.3px;
+
     text-transform:uppercase;
+
 }
+
+
 
 .doctor-menu{
+
     flex:1;
+
     padding:20px 13px;
 
+
+
     overflow-y:auto;
+
     overflow-x:hidden;
 
+
+
     scrollbar-width:thin;
-    scrollbar-color:#c99a16 transparent;
+
+    scrollbar-color:#f5f5f5 transparent;
+
 }
+
+
 
 .doctor-menu::-webkit-scrollbar{
+
     width:6px;
+
 }
+
+
 
 .doctor-menu::-webkit-scrollbar-thumb{
+
     background:#c99a16;
+
     border-radius:10px;
+
 }
+
+
 
 .doctor-menu::-webkit-scrollbar-track{
+
     background:transparent;
+
 }
 
+
+
 .menu-label{
+
     display:block;
+
+
+
     margin:8px 12px 10px;
+
+
 
     color:rgba(255,255,255,.48);
 
+
+
     font-size:10px;
+
     font-weight:800;
+
     letter-spacing:1.4px;
+
     text-transform:uppercase;
+
 }
+
+
 
 .doctor-menu a{
+
     min-height:49px;
+
     margin-bottom:7px;
+
     padding:12px 14px;
 
+
+
     display:flex;
+
     align-items:center;
+
     gap:13px;
 
+
+
     border-radius:12px;
+
+
 
     color:rgba(255,255,255,.82);
+
     text-decoration:none;
 
+
+
     font-size:14px;
+
     font-weight:700;
 
+
+
     transition:.25s;
+
 }
+
+
 
 .doctor-menu a i{
+
     width:21px;
+
     text-align:center;
+
     font-size:17px;
+
 }
+
+
 
 .doctor-menu a:hover,
+
 .doctor-menu a.active{
-    background:#fff;
+
     color:var(--dark-green);
+
+    background:#fff;
+
     transform:translateX(3px);
+
 }
+
+
 
 .doctor-menu a.active i{
+
     color:var(--gold);
+
 }
+
+
 
 .sidebar-footer{
+
     padding:17px 13px;
+
     border-top:1px solid rgba(255,255,255,.12);
+
 }
+
+
 
 .sidebar-logout{
+
     width:100%;
+
     min-height:46px;
+
     padding:11px 14px;
 
+
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     gap:10px;
 
+
+
     border:1px solid rgba(255,255,255,.20);
+
     border-radius:12px;
 
-    background:rgba(255,255,255,.08);
+
+
     color:#fff;
 
+    background:rgba(255,255,255,.08);
+
+
+
     font-size:14px;
+
     font-weight:800;
 
+
+
     transition:.25s;
+
 }
 
+
+
 .sidebar-logout:hover{
-    background:#fff;
+
     color:var(--dark-green);
+
+    background:#fff;
+
 }
+
+.sidebar-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:950;
+
+    display:none;
+
+    background:rgba(13,36,24,.58);
+
+}
+
+
+
+.sidebar-overlay.show{
+
+    display:block;
+
+}
+
+
+
+@media(max-width:900px){
+
+
+
+    .doctor-sidebar{
+
+        transform:translateX(-100%);
+
+    }
+
+
+
+    .doctor-sidebar.open{
+
+        transform:translateX(0);
+
+    }
+
+
+
+    .doctor-main{
+
+        width:100%;
+
+        margin-left:0;
+
+    }
+
+
+
+    .sidebar-toggle{
+
+        display:flex;
+
+    }
+
+}
+      
+      
 </style>
 </head>
 <body>
@@ -208,6 +437,15 @@ button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}
     <span class="menu-label">Main</span>
     <a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
     <a href="patients.html"><i class="fa-solid fa-users"></i>Patient Dashboard</a>
+    <a href="walk-in-patients.html">
+    <i class="fa-solid fa-person-walking-luggage"></i>
+    Walk-in Patients
+</a>
+
+<a href="add-patient.html">
+    <i class="fa-solid fa-user-plus"></i>
+    Add Walk-in Patient
+</a>
     <a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
     <a href="doctor-availability.html"><i class="fa-solid fa-clock"></i>Manage Availability</a>
     <span class="menu-label">Clinical</span>

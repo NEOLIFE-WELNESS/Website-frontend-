@@ -18,179 +18,497 @@
 .modal-form select.control{padding:0 12px}
 .modal-note{margin-top:8px;color:var(--muted);font-size:10px;line-height:1.5}
 .modal-btn:disabled{opacity:.65;cursor:not-allowed}
-/* =========================
+    /* ===========================
+
    SIDEBAR
-========================= */
+
+=========================== */
+
+
 
 .doctor-sidebar{
+
     width:var(--sidebar-width);
+
     height:100vh;
 
     position:fixed;
+
     top:0;
+
     left:0;
+
     z-index:1000;
 
+
+
     display:flex;
+
     flex-direction:column;
+
+
 
     overflow:hidden;
 
+
+
     color:var(--white);
 
-    background:linear-gradient(
-        180deg,
-        #123824,
-        #1e5134
-    );
+
+
+    background:linear-gradient(180deg,#123824,#1e5134);
+
+
 
     box-shadow:8px 0 30px rgba(18,56,36,.14);
-    transition:.3s;
+
+
+
+    transition:transform .3s ease;
+
 }
+
+
 
 .doctor-brand{
+
     min-height:104px;
+
     padding:20px 18px;
 
+
+
     display:flex;
+
     align-items:center;
+
     gap:13px;
 
+
+
     border-bottom:1px solid rgba(255,255,255,.12);
+
 }
+
+
 
 .doctor-brand img{
+
     width:58px;
+
     height:58px;
+
     object-fit:cover;
+
+
+
     border-radius:50%;
+
     border:2px solid var(--gold);
+
+
+
     background:#fff;
+
 }
+
+
 
 .doctor-brand h2{
+
     margin-bottom:5px;
+
     font-size:18px;
+
     font-weight:800;
+
 }
+
+
 
 .doctor-brand span{
+
     color:#f2cf69;
+
     font-size:11px;
+
     font-weight:700;
+
     letter-spacing:1.3px;
+
     text-transform:uppercase;
+
 }
+
+
 
 .doctor-menu{
+
     flex:1;
+
     padding:20px 13px;
 
+
+
     overflow-y:auto;
+
     overflow-x:hidden;
 
+
+
     scrollbar-width:thin;
-    scrollbar-color:#c99a16 transparent;
+
+    scrollbar-color:#f5f5f5 transparent;
+
 }
+
+
 
 .doctor-menu::-webkit-scrollbar{
+
     width:6px;
+
 }
+
+
 
 .doctor-menu::-webkit-scrollbar-thumb{
+
     background:#c99a16;
+
     border-radius:10px;
+
 }
+
+
 
 .doctor-menu::-webkit-scrollbar-track{
+
     background:transparent;
+
 }
 
+
+
 .menu-label{
+
     display:block;
+
+
+
     margin:8px 12px 10px;
+
+
 
     color:rgba(255,255,255,.48);
 
+
+
     font-size:10px;
+
     font-weight:800;
+
     letter-spacing:1.4px;
+
     text-transform:uppercase;
+
 }
+
+
 
 .doctor-menu a{
+
     min-height:49px;
+
     margin-bottom:7px;
+
     padding:12px 14px;
 
+
+
     display:flex;
+
     align-items:center;
+
     gap:13px;
 
+
+
     border-radius:12px;
+
+
 
     color:rgba(255,255,255,.82);
+
     text-decoration:none;
 
+
+
     font-size:14px;
+
     font-weight:700;
 
+
+
     transition:.25s;
+
 }
+
+
 
 .doctor-menu a i{
+
     width:21px;
+
     text-align:center;
+
     font-size:17px;
+
 }
+
+
 
 .doctor-menu a:hover,
+
 .doctor-menu a.active{
-    background:#fff;
+
     color:var(--dark-green);
+
+    background:#fff;
+
     transform:translateX(3px);
+
 }
+
+
 
 .doctor-menu a.active i{
+
     color:var(--gold);
+
 }
+
+
 
 .sidebar-footer{
+
     padding:17px 13px;
+
     border-top:1px solid rgba(255,255,255,.12);
+
 }
 
+
+
 .sidebar-logout{
+
     width:100%;
+
     min-height:46px;
+
     padding:11px 14px;
 
+
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     gap:10px;
 
+
+
     border:1px solid rgba(255,255,255,.20);
+
     border-radius:12px;
 
-    background:rgba(255,255,255,.08);
+
+
     color:#fff;
 
+    background:rgba(255,255,255,.08);
+
+
+
     font-size:14px;
+
     font-weight:800;
 
+
+
+    transition:.25s;
+
+}
+
+
+
+.sidebar-logout:hover{
+
+    color:var(--dark-green);
+
+    background:#fff;
+
+}
+
+.sidebar-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:950;
+
+    display:none;
+
+    background:rgba(13,36,24,.58);
+
+}
+
+
+
+.sidebar-overlay.show{
+
+    display:block;
+
+}
+
+
+
+@media(max-width:900px){
+
+
+
+    .doctor-sidebar{
+
+        transform:translateX(-100%);
+
+    }
+
+
+
+    .doctor-sidebar.open{
+
+        transform:translateX(0);
+
+    }
+
+
+
+    .doctor-main{
+
+        width:100%;
+
+        margin-left:0;
+
+    }
+
+
+
+    .sidebar-toggle{
+
+        display:flex;
+
+    }
+
+}
+      
+
+
+/* APPOINTMENT COMPLETION WORKFLOW */
+
+.complete{
+    color:#287146;
+    background:#ebf7ef;
+}
+
+.complete:hover{
+    color:#fff;
+    background:#287146;
+}
+
+.action:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+.workflow-options{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+}
+
+.workflow-option{
+    width:100%;
+    padding:18px;
+    display:flex;
+    align-items:flex-start;
+    gap:13px;
+    text-align:left;
+    border:1px solid var(--border);
+    border-radius:15px;
+    color:var(--text);
+    background:#fff;
     transition:.25s;
 }
 
-.sidebar-logout:hover{
-    background:#fff;
-    color:var(--dark-green);
+.workflow-option:hover{
+    border-color:var(--gold);
+    transform:translateY(-2px);
+    box-shadow:0 10px 25px rgba(21,61,41,.09);
 }
-@media(max-width:650px){.modal-form{grid-template-columns:1fr}.modal-form .group.full{grid-column:auto}}
 
-@media(max-width:1200px){.summary{grid-template-columns:repeat(3,1fr)}.filters{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:900px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.toggle{display:block}}
-@media(max-width:650px){.content{padding:18px 13px}.topbar{padding:12px 14px}.title p,.profile div{display:none}.banner{align-items:flex-start}.banner-icon{display:none}.summary,.filters{grid-template-columns:1fr}.panel-head,.pagination{align-items:flex-start;flex-direction:column;gap:10px}.details{grid-template-columns:1fr}.detail.full{grid-column:auto}.modal-actions{flex-direction:column}.modal-btn{width:100%}}
+.workflow-option-icon{
+    width:48px;
+    height:48px;
+    display:grid;
+    place-items:center;
+    flex-shrink:0;
+    border-radius:14px;
+    font-size:19px;
+}
+
+.workflow-option-icon.prescription{
+    color:#31708f;
+    background:#edf6fb;
+}
+
+.workflow-option-icon.plan{
+    color:#9b7200;
+    background:#fff7df;
+}
+
+.workflow-option strong{
+    display:block;
+    margin-bottom:6px;
+    color:var(--dark);
+    font-size:13px;
+}
+
+.workflow-option small{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.55;
+}
+
+.completion-message{
+    padding:15px;
+    border:1px solid #c8e4d1;
+    border-radius:13px;
+    color:#24653f;
+    background:#ebf7ef;
+    font-size:12px;
+    line-height:1.65;
+}
+
+@media(max-width:650px){
+    .workflow-options{
+        grid-template-columns:1fr;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -223,7 +541,6 @@
 
                 <a
                     href="doctor-dashboard.html"
-                    class="active"
                 >
                     <i class="fa-solid fa-chart-line"></i>
                     Dashboard
@@ -233,6 +550,16 @@
                     <i class="fa-solid fa-users"></i>
                     Patient Dashboard
                 </a>
+
+                <a href="walk-in-patients.html">
+    <i class="fa-solid fa-person-walking-luggage"></i>
+    Walk-in Patients
+</a>
+
+<a href="add-patient.html">
+    <i class="fa-solid fa-user-plus"></i>
+    Add Walk-in Patient
+</a>
 
                 <a href="appointment-calendar.html">
                     <i class="fa-solid fa-calendar-days"></i>
@@ -249,7 +576,7 @@
 
                 
 
-                <a href="doctor-appointments.html">
+                <a href="doctor-appointments.html" class="active">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
@@ -461,12 +788,142 @@ Create Plan
 </div>
 </div>
 </div>
+
+<!-- COMPLETE APPOINTMENT CONFIRMATION -->
+
+<div class="overlay" id="completeAppointmentModal"
+     onclick="outsideCompleteAppointmentClose(event)">
+    <div class="modal" style="max-width:560px">
+
+        <div class="modal-head">
+            <div>
+                <h2>Mark Appointment as Done</h2>
+                <p style="margin-top:5px;color:var(--muted);font-size:11px">
+                    Confirm that the consultation has been completed.
+                </p>
+            </div>
+
+            <button class="close" type="button"
+                    onclick="closeCompleteAppointmentModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="patient-card">
+                <span class="patient-icon" id="completePatientInitial">P</span>
+
+                <div>
+                    <h3 id="completePatientName">Patient</h3>
+                    <p id="completeAppointmentInfo">Appointment details</p>
+                </div>
+            </div>
+
+            <div class="completion-message">
+                The appointment will be marked as <strong>COMPLETED</strong>.
+                After that, create the prescription and create a treatment
+                plan only when therapy is clinically required.
+            </div>
+
+        </div>
+
+        <div class="modal-actions">
+            <button class="modal-btn secondary" type="button"
+                    onclick="closeCompleteAppointmentModal()">
+                Cancel
+            </button>
+
+            <button class="modal-btn primary" type="button"
+                    id="confirmCompleteAppointmentButton"
+                    onclick="completeSelectedAppointment()">
+                <i class="fa-solid fa-circle-check"></i>
+                Mark as Done
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- NEXT CLINICAL ACTION -->
+
+<div class="overlay" id="postCompletionModal">
+    <div class="modal" style="max-width:700px">
+
+        <div class="modal-head">
+            <div>
+                <h2>Appointment Completed</h2>
+                <p style="margin-top:5px;color:var(--muted);font-size:11px">
+                    Select the next clinical action.
+                </p>
+            </div>
+
+            <button class="close" type="button"
+                    onclick="closePostCompletionModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="workflow-options">
+
+                <button type="button"
+                        class="workflow-option"
+                        onclick="continueToPrescription()">
+
+                    <span class="workflow-option-icon prescription">
+                        <i class="fa-solid fa-file-prescription"></i>
+                    </span>
+
+                    <span>
+                        <strong>Create Prescription</strong>
+                        <small>
+                            Enter diagnosis, advice and prescribed medicines,
+                            then finalize the prescription.
+                        </small>
+                    </span>
+                </button>
+
+                <button type="button"
+                        class="workflow-option"
+                        onclick="continueToTreatmentPlan()">
+
+                    <span class="workflow-option-icon plan">
+                        <i class="fa-solid fa-notes-medical"></i>
+                    </span>
+
+                    <span>
+                        <strong>Create Treatment Plan</strong>
+                        <small>
+                            Assign a therapist and create planned therapy
+                            sessions only when treatment is required.
+                        </small>
+                    </span>
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="modal-actions">
+            <button class="modal-btn secondary" type="button"
+                    onclick="closePostCompletionModal()">
+                Do Later
+            </button>
+        </div>
+
+    </div>
+</div>
+
 <script>
 const API_BASE_URL="http://localhost:8085";
 let appointments=[];
 let filtered=[];
 let page=1;
 let selectedAppointmentForTreatment=null;
+let selectedAppointmentForCompletion=null;
+let completedAppointmentForWorkflow=null;
 let therapists=[];
 const pageSize=8;
 const alertBox=document.getElementById("alert");
@@ -580,15 +1037,367 @@ function normalize(a){return{id:a.id,patientId:a.patientId,patientName:a.patient
 function bindFilters(){[searchInput,dateFilter,statusFilter,modeFilter].forEach(el=>el.addEventListener(el.tagName==="INPUT"?"input":"change",()=>{page=1;applyFilters()}))}
 function applyFilters(){const q=searchInput.value.trim().toLowerCase(),d=dateFilter.value,s=statusFilter.value,m=modeFilter.value;filtered=appointments.filter(a=>(!q||[a.patientName,a.phoneNumber,a.symptoms].some(v=>String(v).toLowerCase().includes(q)))&&(!d||a.date===d)&&(!s||a.status===s)&&(!m||a.mode===m));updateSummary();render()}
 function updateSummary(){const today=new Date().toISOString().slice(0,10);totalCount.textContent=appointments.length;todayCount.textContent=appointments.filter(a=>a.date===today).length;pendingCount.textContent=appointments.filter(a=>["PENDING","PAYMENT_PENDING","RESCHEDULED"].includes(a.status)).length;completedCount.textContent=appointments.filter(a=>a.status==="COMPLETED").length;paidCount.textContent=appointments.filter(a=>["SUCCESS","PAID"].includes(a.paymentStatus)).length;resultCount.textContent=`${filtered.length} result${filtered.length===1?"":"s"}`}
-function render(){const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));if(page>totalPages)page=totalPages;const start=(page-1)*pageSize,items=filtered.slice(start,start+pageSize);if(!items.length){tableBody.innerHTML='<tr><td colspan="7" class="message"><i class="fa-regular fa-calendar-xmark"></i>No appointments found.</td></tr>'}else{tableBody.innerHTML=items.map(a=>`<tr><td><div class="patient"><span class="patient-icon">${esc(a.patientName.charAt(0).toUpperCase())}</span><div><strong>${esc(a.patientName)}</strong><small>${esc(a.phoneNumber)}</small></div></div></td><td><strong>${formatDate(a.date)}</strong><br><small>${formatTime(a.startTime)}${a.endTime?` - ${formatTime(a.endTime)}`:""}</small></td><td><span class="badge ${a.mode==='ONLINE'?'online':'offline'}">${esc(a.mode)}</span></td><td title="${esc(a.symptoms)}">${esc(short(a.symptoms,45))}</td><td><span class="badge ${statusClass(a.status)}">${esc(a.status.replaceAll('_',' '))}</span></td><td><span class="badge ${statusClass(a.paymentStatus)}">${esc(a.paymentStatus)}</span></td><td><div class="actions"><button class="action view" title="View" onclick="viewDetails(${a.id})"><i class="fa-regular fa-eye"></i></button><button class="action treatment" title="Create Treatment Plan" onclick="openTreatmentPlanModalById(${a.id})"><i class="fa-solid fa-notes-medical"></i></button><button class="action prescribe" title="Prescription" onclick="openPrescription(${a.id})"><i class="fa-solid fa-prescription"></i></button></div></td></tr>`).join("")}
-pageInfo.textContent=filtered.length?`Showing ${start+1}-${Math.min(start+pageSize,filtered.length)} of ${filtered.length}`:"Showing 0 appointments";renderPages(totalPages)}
+function render(){
+const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
+if(page>totalPages)page=totalPages;
+
+const start=(page-1)*pageSize;
+const items=filtered.slice(start,start+pageSize);
+
+if(!items.length){
+tableBody.innerHTML=
+'<tr><td colspan="7" class="message"><i class="fa-regular fa-calendar-xmark"></i>No appointments found.</td></tr>';
+}else{
+tableBody.innerHTML=items.map(a=>`
+<tr>
+<td>
+<div class="patient">
+<span class="patient-icon">${esc(a.patientName.charAt(0).toUpperCase())}</span>
+<div>
+<strong>${esc(a.patientName)}</strong>
+<small>${esc(a.phoneNumber)}</small>
+</div>
+</div>
+</td>
+
+<td>
+<strong>${formatDate(a.date)}</strong><br>
+<small>
+${formatTime(a.startTime)}
+${a.endTime?` - ${formatTime(a.endTime)}`:""}
+</small>
+</td>
+
+<td>
+<span class="badge ${a.mode==="ONLINE"?"online":"offline"}">
+${esc(a.mode)}
+</span>
+</td>
+
+<td title="${esc(a.symptoms)}">
+${esc(short(a.symptoms,45))}
+</td>
+
+<td>
+<span class="badge ${statusClass(a.status)}">
+${esc(a.status.replaceAll("_"," "))}
+</span>
+</td>
+
+<td>
+<span class="badge ${statusClass(a.paymentStatus)}">
+${esc(a.paymentStatus)}
+</span>
+</td>
+
+<td>
+${renderAppointmentActions(a)}
+</td>
+</tr>
+`).join("");
+}
+
+pageInfo.textContent=filtered.length
+?`Showing ${start+1}-${Math.min(start+pageSize,filtered.length)} of ${filtered.length}`
+:"Showing 0 appointments";
+
+renderPages(totalPages);
+}
+
+function renderAppointmentActions(a){
+const status=String(a.status||"").toUpperCase();
+const payment=String(a.paymentStatus||"").toUpperCase();
+
+const paid=["SUCCESS","PAID"].includes(payment);
+const completed=status==="COMPLETED";
+const blocked=["CANCELLED","REJECTED"].includes(status);
+
+let html=`
+<div class="actions">
+
+<button class="action view"
+        type="button"
+        title="View appointment"
+        onclick="viewDetails(${a.id})">
+<i class="fa-regular fa-eye"></i>
+</button>
+`;
+
+if(paid&&!completed&&!blocked){
+html+=`
+<button class="action complete"
+        type="button"
+        title="Mark appointment as done"
+        onclick="openCompleteAppointmentModal(${a.id})">
+<i class="fa-solid fa-circle-check"></i>
+</button>
+`;
+}
+
+if(completed){
+html+=`
+<button class="action prescribe"
+        type="button"
+        title="Create prescription"
+        onclick="openPrescription(${a.id})">
+<i class="fa-solid fa-file-prescription"></i>
+</button>
+
+<button class="action treatment"
+        type="button"
+        title="Create treatment plan"
+        onclick="openTreatmentPlanModalById(${a.id})">
+<i class="fa-solid fa-notes-medical"></i>
+</button>
+`;
+}
+
+html+="</div>";
+return html;
+}
+
 function renderPages(total){pages.innerHTML=`<button class="page-btn" ${page===1?'disabled':''} onclick="goPage(${page-1})"><i class="fa-solid fa-angle-left"></i></button>`+Array.from({length:total},(_,i)=>i+1).map(n=>`<button class="page-btn ${n===page?'active':''}" onclick="goPage(${n})">${n}</button>`).join("")+`<button class="page-btn" ${page===total?'disabled':''} onclick="goPage(${page+1})"><i class="fa-solid fa-angle-right"></i></button>`}
 function goPage(n){page=n;render();window.scrollTo({top:0,behavior:"smooth"})}
-async function viewDetails(id){try{const r=await api(`/api/appointments/${encodeURIComponent(id)}`);openModal(normalize(r.data||{}))}catch(e){const a=appointments.find(x=>String(x.id)===String(id));if(a)openModal(a);showAlert(e.message||"Could not fetch appointment details","error")}}
-function openModal(a){modalBody.innerHTML=`<div class="patient-card"><span class="patient-icon">${esc(a.patientName.charAt(0).toUpperCase())}</span><div><h3>${esc(a.patientName)}</h3><p>${esc(a.phoneNumber)} · ${esc(a.age)} years · ${esc(a.gender)}</p></div></div><div class="details"><div class="detail"><span>Appointment ID</span><strong>#${esc(a.id)}</strong></div><div class="detail"><span>Date & Time</span><strong>${formatDate(a.date)} · ${formatTime(a.startTime)}</strong></div><div class="detail"><span>Mode</span><strong>${esc(a.mode)}</strong></div><div class="detail"><span>Status</span><strong>${esc(a.status.replaceAll('_',' '))}</strong></div><div class="detail"><span>Booking Fee</span><strong>₹${Number(a.bookingFee||0).toLocaleString('en-IN')}</strong></div><div class="detail"><span>Payment</span><strong>${esc(a.paymentStatus)}</strong></div><div class="detail full"><span>Symptoms</span><p>${esc(a.symptoms)}</p></div><div class="detail full"><span>Past Medical History</span><p>${esc(a.history)}</p></div>${a.rescheduleReason?`<div class="detail full"><span>Reschedule Reason</span><p>${esc(a.rescheduleReason)}</p></div>`:""}${a.cancellationReason?`<div class="detail full"><span>Cancellation Reason</span><p>${esc(a.cancellationReason)}</p></div>`:""}</div>`;prescriptionButton.onclick=()=>openPrescription(a.id);
+async function viewDetails(id){
+const localAppointment=
+appointments.find(x=>String(x.id)===String(id));
+
+if(localAppointment){
+openModal(localAppointment);
+return;
+}
+
+showAlert("Appointment details are unavailable.","error");
+}
+function openModal(a){
+modalBody.innerHTML=`
+<div class="patient-card">
+<span class="patient-icon">${esc(a.patientName.charAt(0).toUpperCase())}</span>
+<div>
+<h3>${esc(a.patientName)}</h3>
+<p>${esc(a.phoneNumber)} · ${esc(a.age)} years · ${esc(a.gender)}</p>
+</div>
+</div>
+
+<div class="details">
+<div class="detail"><span>Appointment ID</span><strong>#${esc(a.id)}</strong></div>
+<div class="detail"><span>Date & Time</span><strong>${formatDate(a.date)} · ${formatTime(a.startTime)}</strong></div>
+<div class="detail"><span>Mode</span><strong>${esc(a.mode)}</strong></div>
+<div class="detail"><span>Status</span><strong>${esc(a.status.replaceAll("_"," "))}</strong></div>
+<div class="detail"><span>Booking Fee</span><strong>₹${Number(a.bookingFee||0).toLocaleString("en-IN")}</strong></div>
+<div class="detail"><span>Payment</span><strong>${esc(a.paymentStatus)}</strong></div>
+<div class="detail full"><span>Symptoms</span><p>${esc(a.symptoms)}</p></div>
+<div class="detail full"><span>Past Medical History</span><p>${esc(a.history)}</p></div>
+${a.rescheduleReason?`<div class="detail full"><span>Reschedule Reason</span><p>${esc(a.rescheduleReason)}</p></div>`:""}
+${a.cancellationReason?`<div class="detail full"><span>Cancellation Reason</span><p>${esc(a.cancellationReason)}</p></div>`:""}
+</div>
+`;
+
+const completed=String(a.status||"").toUpperCase()==="COMPLETED";
+
+prescriptionButton.hidden=!completed;
+treatmentPlanButton.hidden=!completed;
+
+prescriptionButton.onclick=()=>openPrescription(a.id);
 treatmentPlanButton.onclick=()=>openTreatmentPlanModal(a);
-detailsModal.classList.add("show")}
-function openPrescription(id){const a=appointments.find(x=>String(x.id)===String(id));if(!a)return;location.href=`prescription-pad.html?appointmentId=${encodeURIComponent(a.id)}&patientId=${encodeURIComponent(a.patientId||"")}`}
+
+detailsModal.classList.add("show");
+}
+
+function openPrescription(id){
+const a=
+appointments.find(x=>String(x.id)===String(id))||
+(
+completedAppointmentForWorkflow&&
+String(completedAppointmentForWorkflow.id)===String(id)
+?completedAppointmentForWorkflow
+:null
+);
+
+if(!a){
+showAlert("Appointment details are unavailable.","error");
+return;
+}
+
+if(String(a.status||"").toUpperCase()!=="COMPLETED"){
+showAlert(
+"Complete the appointment before creating the prescription.",
+"error"
+);
+return;
+}
+
+location.href=
+`prescription-pad.html?appointmentId=${encodeURIComponent(a.id)}&patientId=${encodeURIComponent(a.patientId||"")}`;
+}
+
+
+function openCompleteAppointmentModal(id){
+const appointment=appointments.find(
+a=>String(a.id)===String(id)
+);
+
+if(!appointment){
+showAlert("Appointment details are unavailable.","error");
+return;
+}
+
+const payment=String(appointment.paymentStatus||"").toUpperCase();
+const status=String(appointment.status||"").toUpperCase();
+
+if(!["SUCCESS","PAID"].includes(payment)){
+showAlert(
+"The appointment can be completed only after successful payment.",
+"error"
+);
+return;
+}
+
+if(status==="COMPLETED"){
+showAlert("This appointment is already completed.","info");
+return;
+}
+
+if(["CANCELLED","REJECTED"].includes(status)){
+showAlert(
+"A cancelled or rejected appointment cannot be completed.",
+"error"
+);
+return;
+}
+
+selectedAppointmentForCompletion=appointment;
+
+completePatientInitial.textContent=
+(appointment.patientName||"P").charAt(0).toUpperCase();
+
+completePatientName.textContent=
+appointment.patientName||"Patient";
+
+completeAppointmentInfo.textContent=
+`${formatDate(appointment.date)} · ${formatTime(appointment.startTime)} · ${appointment.mode}`;
+
+completeAppointmentModal.classList.add("show");
+}
+
+function closeCompleteAppointmentModal(){
+completeAppointmentModal.classList.remove("show");
+selectedAppointmentForCompletion=null;
+}
+
+function outsideCompleteAppointmentClose(event){
+if(event.target===completeAppointmentModal){
+closeCompleteAppointmentModal();
+}
+}
+
+async function completeSelectedAppointment(){
+if(!selectedAppointmentForCompletion){
+return;
+}
+
+const button=
+document.getElementById("confirmCompleteAppointmentButton");
+
+const originalContent=button.innerHTML;
+button.disabled=true;
+button.innerHTML=
+'<i class="fa-solid fa-spinner fa-spin"></i> Completing...';
+
+const appointmentSnapshot={
+...selectedAppointmentForCompletion
+};
+
+try{
+let result;
+
+try{
+/*
+ * The API document heading identifies this as a PUT action.
+ * Use PUT first.
+ */
+result=await api(
+`/api/appointments/${encodeURIComponent(appointmentSnapshot.id)}/complete`,
+{method:"PUT"}
+);
+}catch(error){
+/*
+ * The same API document prints GET beside the URL.
+ * Fall back to GET only when the backend rejects PUT with 404/405.
+ */
+const message=String(error.message||"");
+
+if(
+message.includes("405")||
+message.includes("404")||
+message.toLowerCase().includes("method not allowed")
+){
+result=await api(
+`/api/appointments/${encodeURIComponent(appointmentSnapshot.id)}/complete`
+);
+}else{
+throw error;
+}
+}
+
+completedAppointmentForWorkflow={
+...appointmentSnapshot,
+...(result.data||{}),
+status:"COMPLETED"
+};
+
+closeCompleteAppointmentModal();
+
+showAlert(
+result.message||
+"Appointment completed successfully.",
+"success"
+);
+
+await loadAppointments();
+
+postCompletionModal.classList.add("show");
+
+}catch(error){
+console.error("Appointment completion failed:",error);
+
+showAlert(
+error.message||
+"Unable to complete the appointment.",
+"error"
+);
+
+}finally{
+button.disabled=false;
+button.innerHTML=originalContent;
+}
+}
+
+function closePostCompletionModal(){
+postCompletionModal.classList.remove("show");
+completedAppointmentForWorkflow=null;
+}
+
+function continueToPrescription(){
+if(!completedAppointmentForWorkflow){
+return;
+}
+
+openPrescription(completedAppointmentForWorkflow.id);
+}
+
+function continueToTreatmentPlan(){
+if(!completedAppointmentForWorkflow){
+return;
+}
+
+const appointment={
+...completedAppointmentForWorkflow
+};
+
+closePostCompletionModal();
+openTreatmentPlanModal(appointment);
+}
 
 async function loadTherapists(){
 try{
@@ -652,6 +1461,14 @@ openTreatmentPlanModal(appointment);
 }
 
 function openTreatmentPlanModal(appointment){
+if(String(appointment.status||"").toUpperCase()!=="COMPLETED"){
+showAlert(
+"Complete the appointment before creating a treatment plan.",
+"error"
+);
+return;
+}
+
 if(!appointment.patientId){
 showAlert("Patient ID is missing for this appointment.","error");
 return;
@@ -823,7 +1640,15 @@ function showAlert(msg,type="info"){alertBox.textContent=msg;alertBox.className=
 function statusClass(s){s=String(s).toLowerCase();return["completed","confirmed","paid","success"].includes(s)?"status-completed":["pending","payment_pending","rescheduled"].includes(s)?`status-${s}`:["cancelled","rejected","failed"].includes(s)?"status-cancelled":"status-default"}
 function formatDate(v){if(!v)return"—";const d=new Date(v+"T00:00:00");return Number.isNaN(d.getTime())?v:d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}function formatTime(v){if(!v)return"—";const [h,m]=String(v).split(":");const d=new Date();d.setHours(+h,+m||0,0,0);return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}
 function short(v,n){v=String(v||"");return v.length>n?v.slice(0,n)+"…":v}function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
-function toggleSidebar(){sidebar.classList.toggle("open");mobileOverlay.classList.toggle("show")}function closeSidebar(){sidebar.classList.remove("open");mobileOverlay.classList.remove("show")}
+function toggleSidebar(){
+doctorSidebar.classList.toggle("open");
+mobileOverlay.classList.toggle("show");
+}
+
+function closeSidebar(){
+doctorSidebar.classList.remove("open");
+mobileOverlay.classList.remove("show");
+}
 function clearSession(){
 [
 "token",
@@ -841,7 +1666,10 @@ function clearSession(){
 ].forEach(
 k=>localStorage.removeItem(k)
 )
-}function logout(){clearSession();location.href="../patient/login.html"}
+}function doctorLogout(){
+clearSession();
+location.href="../patient/login.html";
+}
 </script>
 </body>
 </html>
