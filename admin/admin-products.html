@@ -988,10 +988,7 @@ tbody tr:hover{
                 Offers & Banners
             </a>
 
-            <a href="admin-images.html">
-                <i class="fa-solid fa-photo-film"></i>
-                Image Management
-            </a>
+           
 
             <a href="admin-clinic-reviews.html">
                 <i class="fa-solid fa-star"></i>
@@ -1685,21 +1682,22 @@ function renderProducts(){
 
                             <div class="product-name">
 
-                                <strong>
-                                    ${escapeHtml(
-                                        product.name ||
-                                        "-"
-                                    )}
-                                </strong>
+    <strong>
+        ${escapeHtml(
+            product.productName ||
+            product.name ||
+            "-"
+        )}
+    </strong>
 
-                                <small>
-                                    ${escapeHtml(
-                                        product.category ||
-                                        "Ayurvedic Product"
-                                    )}
-                                </small>
+    <small>
+        ${escapeHtml(
+            product.category ||
+            "Ayurvedic Product"
+        )}
+    </small>
 
-                            </div>
+</div>
 
                         </div>
 
@@ -1723,11 +1721,11 @@ function renderProducts(){
                     </td>
 
                     <td>
-                        ${escapeHtml(
-                            product.manufacturer ||
-                            "-"
-                        )}
-                    </td>
+    ${escapeHtml(
+        product.manufacturerName  ||
+        "-"
+    )}
+</td>
 
                     <td>
                         ${escapeHtml(

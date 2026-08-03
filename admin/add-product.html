@@ -125,7 +125,7 @@ a{
     overflow-y:auto;
     overflow-x:hidden;
     scrollbar-width:thin;
-    scrollbar-color: #eeedeb transparent;
+    scrollbar-color:#ffffff transparent;
 }
 
 .admin-menu::-webkit-scrollbar{
@@ -133,7 +133,7 @@ a{
 }
 
 .admin-menu::-webkit-scrollbar-thumb{
-    background:var(--gold);
+    background:#ffffff;
     border-radius:10px;
 }
 
@@ -482,75 +482,164 @@ textarea.form-control{
 
 /* IMAGES */
 
-.image-help{
-    margin-bottom:12px;
+.upload-zone{
+    padding:25px;
+    position:relative;
+    border:2px dashed #cbd8cf;
+    border-radius:16px;
+    text-align:center;
+    background:#fbfcfa;
+    transition:.25s;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover{
+    border-color:var(--gold);
+    background:#fffdf5;
+}
+
+.upload-zone input[type="file"]{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+}
+
+.upload-icon{
+    width:58px;
+    height:58px;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    color:var(--gold-dark);
+    background:#fff7dc;
+    font-size:23px;
+}
+
+.upload-zone h3{
+    margin-bottom:6px;
+    color:var(--dark-green);
+    font-size:14px;
+}
+
+.upload-zone p{
     color:var(--muted);
     font-size:10px;
     line-height:1.6;
 }
 
-#uploadedImagesBox{
+.image-help{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.6;
+}
+
+.image-summary{
+    margin:16px 0 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    color:var(--dark-green);
+    font-size:11px;
+    font-weight:800;
+}
+
+.image-count{
+    padding:6px 10px;
+    border-radius:20px;
+    color:var(--dark-green);
+    background:var(--green-light);
+    font-size:10px;
+}
+
+#imagePreviewBox{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
     gap:14px;
 }
 
-.image-select-card{
+.preview-card{
     position:relative;
-    padding:9px;
-    display:block;
+    overflow:hidden;
     border:1px solid var(--border);
-    border-radius:13px;
+    border-radius:14px;
     background:#fbfcfa;
-    cursor:pointer;
-    transition:.25s;
 }
 
-.image-select-card:hover{
-    border-color:var(--gold);
-    transform:translateY(-3px);
-    box-shadow:0 8px 20px rgba(21,61,41,.08);
-}
-
-.image-select-card img{
+.preview-card img{
     width:100%;
-    height:110px;
-    object-fit:cover;
+    height:145px;
     display:block;
-    border-radius:9px;
+    object-fit:cover;
     background:var(--green-light);
 }
 
-.image-select-card input{
-    width:18px;
-    height:18px;
-    margin-top:9px;
-    accent-color:var(--dark-green);
+.preview-info{
+    padding:9px 10px;
 }
 
-.image-message{
+.preview-name{
+    display:block;
+    overflow:hidden;
+    color:var(--dark-green);
+    font-size:10px;
+    font-weight:800;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.preview-size{
+    display:block;
+    margin-top:4px;
+    color:var(--muted);
+    font-size:9px;
+}
+
+.remove-image-btn{
+    width:31px;
+    height:31px;
+    position:absolute;
+    top:8px;
+    right:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:50%;
+    color:var(--white);
+    background:rgba(199,71,71,.92);
+}
+
+.no-selected-images{
     grid-column:1/-1;
-    padding:22px;
+    padding:24px;
     text-align:center;
     border:1px dashed var(--border);
-    border-radius:12px;
+    border-radius:13px;
     color:var(--muted);
     background:#fbfcfa;
     font-size:11px;
 }
 
-#imagePreviewBox{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
+.upload-progress{
+    display:none;
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:11px;
+    color:var(--info);
+    background:var(--info-light);
+    font-size:10px;
+    font-weight:800;
 }
 
-.preview-img{
-    width:120px;
-    height:120px;
-    object-fit:cover;
-    border-radius:12px;
-    border:1px solid var(--border);
+.upload-progress.show{
+    display:block;
 }
 
 /* ACTIONS */
@@ -832,10 +921,7 @@ textarea.form-control{
                 Offers & Banners
             </a>
 
-            <a href="admin-images.html">
-                <i class="fa-solid fa-photo-film"></i>
-                Image Management
-            </a>
+            
 
             <a href="admin-clinic-reviews.html">
                 <i class="fa-solid fa-star"></i>
@@ -964,8 +1050,8 @@ textarea.form-control{
 
                     <p>
                         Add product information, pricing, inventory,
-                        manufacturer, expiry date and select uploaded product
-                        images for the online store.
+                        manufacturer, expiry date and upload multiple product
+                        images directly from your device.
                     </p>
 
                 </div>
@@ -1200,37 +1286,54 @@ textarea.form-control{
                         </div>
 
                     </div>
-
                     <div class="section-title">
                         <i class="fa-solid fa-images"></i>
                         Product Images
                     </div>
 
                     <div class="form-group full-width">
-
-                        <label>
-                            Select Uploaded Product Images
+                        <label for="productImages">
+                            Upload Product Images
                             <span class="required">*</span>
                         </label>
 
-                        <p class="image-help">
-                            Select one or more images already uploaded under the
-                            PRODUCT module.
-                        </p>
+                        <div class="upload-zone" id="uploadZone">
+                            <input
+                                type="file"
+                                id="productImages"
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                multiple
+                                onchange="handleImageSelection(event)"
+                            >
 
-                        <div id="uploadedImagesBox">
-
-                            <div class="image-message">
-                                <i class="fa-solid fa-spinner fa-spin"></i>
-                                Loading product images...
+                            <div class="upload-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
                             </div>
 
+                            <h3>Choose or drag product images here</h3>
+                            <p>Upload JPG, JPEG, PNG or WEBP files. You can select multiple images.</p>
                         </div>
 
-                    </div>
+                        <p class="image-help">
+                            Maximum 10 images. Maximum size: 5 MB per image.
+                            The first selected image will be used as the primary product image.
+                        </p>
 
-                    <div class="form-group full-width">
-                        <div id="imagePreviewBox"></div>
+                        <div class="image-summary">
+                            <span>Selected Images</span>
+                            <span class="image-count" id="selectedImageCount">0 Images</span>
+                        </div>
+
+                        <div id="imagePreviewBox">
+                            <div class="no-selected-images">
+                                No product images selected.
+                            </div>
+                        </div>
+
+                        <div class="upload-progress" id="uploadProgress">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <span id="uploadProgressText">Uploading images...</span>
+                        </div>
                     </div>
 
                     <p class="message" id="message"></p>
@@ -1268,148 +1371,369 @@ textarea.form-control{
 
 <script>
 const API_BASE_URL = "http://localhost:8085";
+const MAX_IMAGES = 10;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+let selectedImageFiles = [];
 let selectedImageUrls = [];
 
-window.onload = function(){
-  loadManufacturers();
-  loadProductImages();
-};
+window.addEventListener("DOMContentLoaded", function(){
+    loadManufacturers();
+    setupDragAndDrop();
+    renderImagePreviews();
+});
 
-async function loadProductImages(){
-  const token = localStorage.getItem("token");
-  const box = document.getElementById("uploadedImagesBox");
-
-  try{
-    const response = await fetch(`${API_BASE_URL}/api/images/module/PRODUCT`, {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    });
-
-    const text = await response.text();
-
-    if(!response.ok){
-      box.innerHTML = `<p style="color:red;">Unable to load product images. Status: ${response.status}</p>`;
-      console.log(text);
-      return;
-    }
-
-    const result = JSON.parse(text);
-
-    box.innerHTML = "";
-
-    if(!result.success || !result.data || result.data.length === 0){
-      box.innerHTML = "<p>No product images uploaded.</p>";
-      return;
-    }
-
-    result.data.forEach(img => {
-      const fullUrl = API_BASE_URL + img.fileUrl;
-
-      box.innerHTML += `
-        <label class="image-select-card">
-          <img src="${fullUrl}">
-          <input type="checkbox" value="${img.fileUrl}" onchange="toggleImageSelection(this)">
-        </label>
-      `;
-    });
-
-  }catch(error){
-    console.log(error);
-    box.innerHTML = `<p style="color:red;">Error loading images</p>`;
-  }
+function getToken(){
+    return localStorage.getItem("token") ||
+           localStorage.getItem("accessToken") || "";
 }
 
-function toggleImageSelection(checkbox){
-  if(checkbox.checked){
-    selectedImageUrls.push(checkbox.value);
-  }else{
-    selectedImageUrls = selectedImageUrls.filter(url => url !== checkbox.value);
-  }
+function handleImageSelection(event){
+    addSelectedFiles(Array.from(event.target.files || []));
+    event.target.value = "";
 }
 
-document.getElementById("productForm").addEventListener("submit", async function(e){
-  e.preventDefault();
+function addSelectedFiles(files){
+    const acceptedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp"
+    ];
 
-  const token = localStorage.getItem("token");
+    const validFiles = [];
 
-  if(!token){
-    showAlert("Please login as admin first.", "error");
-    window.location.href = "../pages/login.html";
-    return;
-  }
+    for(const file of files){
+        if(!acceptedTypes.includes(file.type)){
+            showAlert(`${file.name} is not a supported image type.`, "error");
+            continue;
+        }
 
-  if(selectedImageUrls.length === 0){
-    showAlert("Please select at least one product image.", "error");
-    return;
-  }
+        if(file.size > MAX_IMAGE_SIZE){
+            showAlert(`${file.name} is larger than 5 MB.`, "error");
+            continue;
+        }
 
-  const product = {
-    productName: document.getElementById("productName").value.trim(),
-    category: document.getElementById("category").value,
-    productCode: document.getElementById("productNo").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    price: Number(document.getElementById("price").value),
-    stock: Number(document.getElementById("stock").value),
-    netQty: document.getElementById("netQty").value.trim(),
-    indication: document.getElementById("indication").value.trim(),
-    manufacturerName: document.getElementById("manufacturer").value,
-    manufacturingDate: new Date().toISOString().split("T")[0],
-    expiryDate: document.getElementById("expiryDate").value + "-01",
-    imageUrls: selectedImageUrls
-  };
+        const duplicate = selectedImageFiles.some(existing =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified
+        );
 
-  try{
-    const response = await fetch(`${API_BASE_URL}/api/products/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify(product)
-    });
-
-    const result = await response.json();
-
-    if(result.success){
-      showAlert("Product created successfully.", "success");
-      window.location.href = "admin-products.html";
-    }else{
-      showAlert(result.message || "Failed to add product.", "error");
+        if(!duplicate){
+            validFiles.push(file);
+        }
     }
 
-  }catch(error){
-    console.log(error);
-    showAlert("Backend not connected or admin token invalid.", "error");
-  }
+    const remainingSlots = MAX_IMAGES - selectedImageFiles.length;
+
+    if(remainingSlots <= 0){
+        showAlert(`You can upload a maximum of ${MAX_IMAGES} images.`, "error");
+        return;
+    }
+
+    if(validFiles.length > remainingSlots){
+        showAlert(
+            `Only ${remainingSlots} more image${remainingSlots === 1 ? "" : "s"} can be added.`,
+            "info"
+        );
+    }
+
+    selectedImageFiles.push(...validFiles.slice(0, remainingSlots));
+    renderImagePreviews();
+}
+
+function renderImagePreviews(){
+    const previewBox = document.getElementById("imagePreviewBox");
+    const count = document.getElementById("selectedImageCount");
+
+    count.textContent =
+        `${selectedImageFiles.length} Image${selectedImageFiles.length === 1 ? "" : "s"}`;
+
+    if(!selectedImageFiles.length){
+        previewBox.innerHTML = `
+            <div class="no-selected-images">
+                No product images selected.
+            </div>
+        `;
+        return;
+    }
+
+    previewBox.innerHTML = "";
+
+    selectedImageFiles.forEach((file, index) => {
+        const card = document.createElement("div");
+        card.className = "preview-card";
+
+        const objectUrl = URL.createObjectURL(file);
+
+        card.innerHTML = `
+            <img src="${objectUrl}" alt="${escapeHtml(file.name)}">
+
+            <button
+                type="button"
+                class="remove-image-btn"
+                onclick="removeSelectedImage(${index})"
+                title="Remove image"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="preview-info">
+                <span class="preview-name">
+                    ${index === 0 ? "Primary: " : ""}${escapeHtml(file.name)}
+                </span>
+                <span class="preview-size">${formatFileSize(file.size)}</span>
+            </div>
+        `;
+
+        const image = card.querySelector("img");
+        image.addEventListener("load", () => URL.revokeObjectURL(objectUrl), {once:true});
+
+        previewBox.appendChild(card);
+    });
+}
+
+function removeSelectedImage(index){
+    selectedImageFiles.splice(index, 1);
+    renderImagePreviews();
+}
+
+function setupDragAndDrop(){
+    const zone = document.getElementById("uploadZone");
+
+    ["dragenter", "dragover"].forEach(eventName => {
+        zone.addEventListener(eventName, event => {
+            event.preventDefault();
+            event.stopPropagation();
+            zone.classList.add("dragover");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+        zone.addEventListener(eventName, event => {
+            event.preventDefault();
+            event.stopPropagation();
+            zone.classList.remove("dragover");
+        });
+    });
+
+    zone.addEventListener("drop", event => {
+        addSelectedFiles(Array.from(event.dataTransfer.files || []));
+    });
+}
+
+async function uploadSingleImage(file, token){
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("module", "PRODUCT");
+
+    const response = await fetch(`${API_BASE_URL}/api/images/upload`, {
+        method:"POST",
+        headers:{
+            "Authorization":"Bearer " + token
+        },
+        body:formData
+    });
+
+    const responseText = await response.text();
+    let result = {};
+
+    if(responseText){
+        try{
+            result = JSON.parse(responseText);
+        }catch(error){
+            throw new Error(`Invalid upload response for ${file.name}.`);
+        }
+    }
+
+    if(!response.ok || result.success !== true){
+        throw new Error(result.message || `Failed to upload ${file.name}.`);
+    }
+
+    const fileUrl = result.data?.fileUrl;
+
+    if(!fileUrl){
+        throw new Error(`The server did not return a URL for ${file.name}.`);
+    }
+
+    return fileUrl;
+}
+
+async function uploadSelectedImages(token){
+    const progress = document.getElementById("uploadProgress");
+    const progressText = document.getElementById("uploadProgressText");
+
+    progress.classList.add("show");
+    selectedImageUrls = [];
+
+    try{
+        for(let index = 0; index < selectedImageFiles.length; index++){
+            const file = selectedImageFiles[index];
+
+            progressText.textContent =
+                `Uploading image ${index + 1} of ${selectedImageFiles.length}: ${file.name}`;
+
+            const uploadedUrl = await uploadSingleImage(file, token);
+            selectedImageUrls.push(uploadedUrl);
+        }
+
+        return selectedImageUrls;
+
+    }finally{
+        progress.classList.remove("show");
+    }
+}
+
+document.getElementById("productForm").addEventListener("submit", async function(event){
+    event.preventDefault();
+
+    const token = getToken();
+    const saveButton = event.submitter || this.querySelector('.save-button');
+
+    if(!token){
+        showAlert("Please login as admin first.", "error");
+        window.location.href = "../patient/login.html";
+        return;
+    }
+
+    if(!selectedImageFiles.length){
+        showAlert("Please upload at least one product image.", "error");
+        return;
+    }
+
+    const expiryMonth = document.getElementById("expiryDate").value;
+
+    if(!expiryMonth){
+        showAlert("Please select the expiry month.", "error");
+        return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Saving Product...
+    `;
+
+    try{
+        const uploadedImageUrls = await uploadSelectedImages(token);
+
+        const product = {
+            productName: document.getElementById("productName").value.trim(),
+            category: document.getElementById("category").value,
+            productCode: document.getElementById("productNo").value.trim(),
+            description: document.getElementById("description").value.trim(),
+            price: Number(document.getElementById("price").value),
+            stock: Number(document.getElementById("stock").value),
+            netQty: document.getElementById("netQty").value.trim(),
+            indication: document.getElementById("indication").value.trim(),
+            manufacturerName: document.getElementById("manufacturer").value,
+            manufacturingDate: new Date().toISOString().split("T")[0],
+            expiryDate: expiryMonth + "-01",
+            imageUrls: uploadedImageUrls,
+            imageUrl: uploadedImageUrls[0]
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/products/add`, {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":"Bearer " + token
+            },
+            body:JSON.stringify(product)
+        });
+
+        const responseText = await response.text();
+        let result = {};
+
+        if(responseText){
+            try{
+                result = JSON.parse(responseText);
+            }catch(error){
+                throw new Error("Invalid product API response.");
+            }
+        }
+
+        if(!response.ok || result.success !== true){
+            throw new Error(result.message || "Failed to create product.");
+        }
+
+        showAlert(result.message || "Product created successfully.", "success");
+
+        setTimeout(() => {
+            window.location.href = "admin-products.html";
+        }, 900);
+
+    }catch(error){
+        console.error("ADD PRODUCT ERROR:", error);
+        showAlert(error.message || "Unable to create product.", "error");
+
+    }finally{
+        saveButton.disabled = false;
+        saveButton.innerHTML = `
+            <i class="fa-solid fa-floppy-disk"></i>
+            Save Product
+        `;
+    }
 });
 
 async function loadManufacturers(){
-  const token = localStorage.getItem("token");
+    const token = getToken();
+    const select = document.getElementById("manufacturer");
 
-  try{
-    const response = await fetch(`${API_BASE_URL}/api/manufacturers/getAll`, {
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    });
+    try{
+        const response = await fetch(`${API_BASE_URL}/api/manufacturers/getAll`, {
+            method:"GET",
+            headers:{
+                "Authorization":"Bearer " + token
+            }
+        });
 
-    const result = await response.json();
+        const result = await response.json();
 
-    if(result.success){
-      const manufacturerSelect = document.getElementById("manufacturer");
-      manufacturerSelect.innerHTML = `<option value="">Select Manufacturer</option>`;
+        if(!response.ok || result.success !== true){
+            throw new Error(result.message || "Unable to load manufacturers.");
+        }
 
-      result.data.forEach(item => {
-        manufacturerSelect.innerHTML += `
-          <option value="${item.name}">${item.name}</option>
+        select.innerHTML = `<option value="">Select Manufacturer</option>`;
+
+        const manufacturers = Array.isArray(result.data) ? result.data : [];
+
+        manufacturers.forEach(item => {
+            const name = item.name || item.manufacturerName || "";
+
+            if(name){
+                const option = document.createElement("option");
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            }
+        });
+
+        if(!manufacturers.length){
+            select.innerHTML += `<option value="Neolife">Neolife</option>`;
+        }
+
+    }catch(error){
+        console.error("MANUFACTURER ERROR:", error);
+        select.innerHTML = `
+            <option value="">Select Manufacturer</option>
+            <option value="Neolife">Neolife</option>
         `;
-      });
+        showAlert("Manufacturers could not be loaded. Default option added.", "info");
     }
-  }catch(error){
-    console.log(error);
-  }
+}
+
+function formatFileSize(bytes){
+    if(bytes < 1024){
+        return bytes + " B";
+    }
+
+    if(bytes < 1024 * 1024){
+        return (bytes / 1024).toFixed(1) + " KB";
+    }
+
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
 function toggleSidebar(){
@@ -1424,23 +1748,19 @@ function closeSidebar(){
 
 function logoutAdmin(){
     localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
-
     window.location.href = "../patient/login.html";
 }
 
-function showAlert(message, type){
+function showAlert(message, type = "info"){
     const box = document.getElementById("pageAlert");
     const icon = document.getElementById("alertIcon");
     const text = document.getElementById("alertMessage");
 
-    if(!box || !icon || !text){
-        return;
-    }
-
-    text.textContent = message;
+    text.textContent = message || "Something went wrong.";
     box.className = `page-alert show ${type}`;
 
     icon.className =
@@ -1452,9 +1772,22 @@ function showAlert(message, type){
 
     clearTimeout(window.addProductAlertTimer);
 
-    window.addProductAlertTimer = setTimeout(function(){
+    window.addProductAlertTimer = setTimeout(() => {
         box.classList.remove("show");
-    }, 4000);
+    }, 4500);
+}
+
+function escapeHtml(value){
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 </script>
 

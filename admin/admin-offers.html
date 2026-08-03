@@ -938,6 +938,21 @@ textarea.form-control{
     grid-column:auto;
   }
 }
+
+.image-upload-box{min-height:170px;padding:18px;display:flex;align-items:center;justify-content:center;border:2px dashed #cfd9d1;border-radius:15px;background:#f9fbf8}
+.image-upload-box.has-image{border-style:solid;background:#fff}
+.image-file-input{display:none}
+.image-upload-label{width:100%;min-height:130px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.image-upload-placeholder{text-align:center;color:var(--muted)}
+.image-upload-placeholder i{display:block;margin-bottom:10px;color:var(--gold);font-size:34px}
+.image-upload-placeholder strong{display:block;margin-bottom:6px;color:var(--dark-green);font-size:13px}
+.image-upload-placeholder span{font-size:10px}
+.banner-preview-wrapper{width:100%;display:none;position:relative}
+.banner-preview-wrapper.show{display:block}
+.banner-preview-image{width:100%;max-height:260px;display:block;object-fit:contain;border-radius:12px;background:#edf5ef}
+.remove-image-btn{width:36px;height:36px;position:absolute;top:9px;right:9px;display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;color:#fff;background:rgba(199,71,71,.94)}
+.upload-progress{display:none;margin-top:9px;color:var(--info);font-size:10px;font-weight:700}
+.upload-progress.show{display:block}
 </style>
 </head>
 
@@ -1054,10 +1069,7 @@ textarea.form-control{
       Offers & Banners
     </a>
 
-    <a href="admin-images.html">
-      <i class="fa-solid fa-photo-film"></i>
-      Image Management
-    </a>
+    
 
     <a href="admin-clinic-reviews.html">
       <i class="fa-solid fa-star"></i>
@@ -1478,13 +1490,42 @@ textarea.form-control{
         </div>
 
         <div class="form-group full-width">
-          <label for="bannerImageUrl">Banner Image URL</label>
-          <input
-            type="text"
-            id="bannerImageUrl"
-            class="form-control"
-            placeholder="Image URL or backend image path"
-          >
+          <label for="bannerImageFile">Banner Image</label>
+          <input type="hidden" id="bannerImageUrl">
+
+          <div class="image-upload-box" id="bannerUploadBox">
+            <input
+              type="file"
+              id="bannerImageFile"
+              class="image-file-input"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              onchange="previewBannerImage(event)"
+            >
+
+            <label for="bannerImageFile" class="image-upload-label">
+              <div class="image-upload-placeholder" id="bannerUploadPlaceholder">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <strong>Click to choose banner image</strong>
+                <span>PNG, JPG, JPEG or WEBP</span>
+              </div>
+
+              <div class="banner-preview-wrapper" id="bannerPreviewWrapper">
+                <img id="bannerPreviewImage" class="banner-preview-image" alt="Banner preview">
+                <button
+                  type="button"
+                  class="remove-image-btn"
+                  onclick="removeSelectedBannerImage(event)"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </label>
+          </div>
+
+          <div class="upload-progress" id="bannerUploadProgress">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Uploading banner image...
+          </div>
         </div>
 
       </div>
@@ -1522,6 +1563,8 @@ const API_BASE_URL = "http://localhost:8085";
 
 let offers = [];
 let editId = null;
+let selectedBannerFile = null;
+let existingBannerImageUrl = "";
 
 window.onload = function(){
   loadOffers();
@@ -1703,67 +1746,171 @@ function viewAllOffers(){
   document.getElementById("searchInput").value = "";
   displayOffers(offers);
 }
+
+function previewBannerImage(event){
+  const file = event.target.files?.[0];
+  if(!file) return;
+
+  const allowedTypes = ["image/png","image/jpeg","image/jpg","image/webp"];
+  if(!allowedTypes.includes(file.type)){
+    showAlert("Please select a PNG, JPG, JPEG or WEBP image.","error");
+    event.target.value = "";
+    return;
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    showAlert("Banner image size must be less than 5 MB.","error");
+    event.target.value = "";
+    return;
+  }
+
+  selectedBannerFile = file;
+  showBannerPreview(URL.createObjectURL(file));
+}
+
+function showBannerPreview(imageUrl){
+  document.getElementById("bannerPreviewImage").src = getOfferImageUrl(imageUrl);
+  document.getElementById("bannerPreviewWrapper").classList.add("show");
+  document.getElementById("bannerUploadPlaceholder").style.display = "none";
+  document.getElementById("bannerUploadBox").classList.add("has-image");
+}
+
+function removeSelectedBannerImage(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  selectedBannerFile = null;
+  existingBannerImageUrl = "";
+  document.getElementById("bannerImageUrl").value = "";
+  document.getElementById("bannerImageFile").value = "";
+  document.getElementById("bannerPreviewImage").removeAttribute("src");
+  document.getElementById("bannerPreviewWrapper").classList.remove("show");
+  document.getElementById("bannerUploadPlaceholder").style.display = "block";
+  document.getElementById("bannerUploadBox").classList.remove("has-image");
+}
+
+async function uploadBannerImage(){
+  if(!selectedBannerFile){
+    return document.getElementById("bannerImageUrl").value.trim() || existingBannerImageUrl;
+  }
+
+  const token = getToken();
+  if(!token) throw new Error("Please login as admin first.");
+
+  const formData = new FormData();
+  formData.append("file", selectedBannerFile);
+  formData.append("module", "BANNER");
+
+  const progress = document.getElementById("bannerUploadProgress");
+  progress.classList.add("show");
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/images/upload`,{
+      method:"POST",
+      headers:{Authorization:"Bearer " + token},
+      body:formData
+    });
+
+    const result = await response.json();
+
+    if(!response.ok || result.success === false){
+      throw new Error(result.message || "Banner image upload failed.");
+    }
+
+    const fileUrl = result.data?.fileUrl;
+    if(!fileUrl) throw new Error("Uploaded image URL was not returned.");
+
+    document.getElementById("bannerImageUrl").value = fileUrl;
+    existingBannerImageUrl = fileUrl;
+    selectedBannerFile = null;
+    return fileUrl;
+  }finally{
+    progress.classList.remove("show");
+  }
+}
+
 async function saveOffer(){
   const token = getToken();
 
   if(!token){
-    showAlert("Please login as admin first.", "error");
-    window.location.href = "../frontend/login.html";
+    showAlert("Please login as admin first.","error");
+    window.location.href = "../patient/login.html";
     return;
   }
 
-  const offer = {
-    offerLabel: document.getElementById("offerLabel").value.trim(),
-    offerTitle: document.getElementById("offerTitle").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    discountText: document.getElementById("discountText").value.trim(),
-    couponCode: document.getElementById("couponCode").value.trim(),
-    buttonText: document.getElementById("buttonText").value.trim(),
-    buttonLink: document.getElementById("buttonLink").value.trim(),
-    startDate: document.getElementById("startDate").value,
-    endDate: document.getElementById("endDate").value,
-    priority: Number(document.getElementById("priority").value),
-    active: document.getElementById("active").value === "true",
-    bannerImageUrl: document.getElementById("bannerImageUrl").value.trim()
-  };
+  const saveButton = document.querySelector(".save-btn");
+  const originalHtml = saveButton.innerHTML;
+  saveButton.disabled = true;
+  saveButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
   try{
+    const bannerImageUrl = await uploadBannerImage();
+
+    if(!bannerImageUrl){
+      throw new Error("Please select a banner image.");
+    }
+
+    const priorityValue = document.getElementById("priority").value;
+
+    const offer = {
+      offerLabel: document.getElementById("offerLabel").value.trim(),
+      offerTitle: document.getElementById("offerTitle").value.trim(),
+      description: document.getElementById("description").value.trim(),
+      discountText: document.getElementById("discountText").value.trim(),
+      couponCode: document.getElementById("couponCode").value.trim(),
+      buttonText: document.getElementById("buttonText").value.trim(),
+      buttonLink: document.getElementById("buttonLink").value.trim(),
+      startDate: document.getElementById("startDate").value,
+      endDate: document.getElementById("endDate").value,
+      priority: priorityValue ? Number(priorityValue) : 0,
+      active: document.getElementById("active").value === "true",
+      bannerImageUrl
+    };
+
+    if(!offer.offerTitle){
+      throw new Error("Please enter the offer title.");
+    }
+
+    if(offer.startDate && offer.endDate && offer.endDate < offer.startDate){
+      throw new Error("End date cannot be before start date.");
+    }
+
     let url = `${API_BASE_URL}/api/offers/create`;
     let method = "POST";
 
     if(editId !== null){
-      url = `${API_BASE_URL}/api/offers/update/${editId}`;
+      url = `${API_BASE_URL}/api/offers/update/${encodeURIComponent(editId)}`;
       method = "PUT";
     }
 
-    const response = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
+    const response = await fetch(url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + token,
+        "Accept":"application/json"
       },
-      body: JSON.stringify(offer)
+      body:JSON.stringify(offer)
     });
-
-    if(!response.ok){
-      const text = await response.text();
-      showAlert(text || "Failed to save offer.", "error");
-      return;
-    }
 
     const result = await response.json();
 
-    if(result.success){
-      showAlert(result.message || "Operation completed.", "success");
-      closeOfferModal();
-      loadOffers();
-    }else{
-      showAlert(result.message || "Failed to save offer.", "error");
+    if(!response.ok || result.success === false){
+      throw new Error(result.message || "Failed to save offer.");
     }
+
+    showAlert(result.message || "Offer saved successfully.","success");
+    closeOfferModal();
+    await loadOffers();
 
   }catch(error){
     console.error(error);
-    showAlert(error.message || "Something went wrong.", "error");
+    showAlert(error.message || "Something went wrong.","error");
+  }finally{
+    saveButton.disabled = false;
+    saveButton.innerHTML = originalHtml;
   }
 }
 
@@ -1806,7 +1953,16 @@ async function editOffer(id){
       document.getElementById("endDate").value = offer.endDate || "";
       document.getElementById("priority").value = offer.priority ?? "";
       document.getElementById("active").value = String(offer.active);
-      document.getElementById("bannerImageUrl").value = offer.bannerImageUrl || "";
+      existingBannerImageUrl = offer.bannerImageUrl || "";
+      selectedBannerFile = null;
+      document.getElementById("bannerImageUrl").value = existingBannerImageUrl;
+      document.getElementById("bannerImageFile").value = "";
+
+      if(existingBannerImageUrl){
+        showBannerPreview(existingBannerImageUrl);
+      }else{
+        removeSelectedBannerImage();
+      }
 
       document.getElementById("modalTitle").innerText = "Edit Offer Banner";
       document.getElementById("offerModal").style.display = "flex";
@@ -1873,7 +2029,15 @@ function clearForm(){
   document.getElementById("endDate").value = "";
   document.getElementById("priority").value = "";
   document.getElementById("active").value = "true";
+  selectedBannerFile = null;
+  existingBannerImageUrl = "";
   document.getElementById("bannerImageUrl").value = "";
+  document.getElementById("bannerImageFile").value = "";
+  document.getElementById("bannerPreviewImage").removeAttribute("src");
+  document.getElementById("bannerPreviewWrapper").classList.remove("show");
+  document.getElementById("bannerUploadPlaceholder").style.display = "block";
+  document.getElementById("bannerUploadBox").classList.remove("has-image");
+  document.getElementById("bannerUploadProgress").classList.remove("show");
 }
 
 

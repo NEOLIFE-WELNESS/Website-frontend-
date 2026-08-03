@@ -134,7 +134,7 @@ a{
 }
 
 .admin-menu::-webkit-scrollbar-thumb{
-    background:var(--gold);
+    background:#ffffff;
     border-radius:10px;
 }
 
@@ -480,7 +480,7 @@ textarea.form-control{
     color:var(--gold-dark);
 }
 
-/* IMAGE GRID */
+/* BLOG IMAGE UPLOAD */
 
 .image-help{
     margin-bottom:12px;
@@ -489,59 +489,172 @@ textarea.form-control{
     line-height:1.6;
 }
 
-#uploadedBlogImagesBox{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-    gap:14px;
-}
-
-.image-select-card{
+.blog-upload-zone{
+    min-height:185px;
+    padding:24px;
     position:relative;
-    padding:9px;
-    display:block;
-    border:1px solid var(--border);
-    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px dashed #cfdcd2;
+    border-radius:16px;
     background:#fbfcfa;
-    cursor:pointer;
     transition:.25s;
 }
 
-.image-select-card:hover{
+.blog-upload-zone:hover,
+.blog-upload-zone.drag-over{
     border-color:var(--gold);
-    transform:translateY(-3px);
-    box-shadow:0 8px 20px rgba(21,61,41,.08);
+    background:#fffdf6;
 }
 
-.image-select-card.selected{
-    border:2px solid var(--dark-green);
-    background:var(--green-light);
-}
-
-.image-select-card img{
-    width:100%;
-    height:120px;
-    object-fit:cover;
-    display:block;
-    border-radius:9px;
-    background:var(--green-light);
-}
-
-.image-select-card input{
-    width:18px;
-    height:18px;
-    margin-top:9px;
-    accent-color:var(--dark-green);
-}
-
-.image-message{
-    grid-column:1/-1;
-    padding:24px;
+.blog-upload-content{
     text-align:center;
-    border:1px dashed var(--border);
-    border-radius:12px;
+}
+
+.blog-upload-icon{
+    width:58px;
+    height:58px;
+    margin:0 auto 13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    color:var(--gold-dark);
+    background:#fff7df;
+    font-size:24px;
+}
+
+.blog-upload-content h3{
+    margin-bottom:6px;
+    color:var(--dark-green);
+    font-size:15px;
+}
+
+.blog-upload-content p{
+    margin-bottom:14px;
     color:var(--muted);
-    background:#fbfcfa;
+    font-size:10px;
+    line-height:1.6;
+}
+
+.choose-image-btn{
+    min-height:42px;
+    padding:10px 16px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border:none;
+    border-radius:10px;
+    color:var(--white);
+    background:var(--dark-green);
     font-size:11px;
+    font-weight:800;
+}
+
+.choose-image-btn:hover{
+    background:var(--gold-dark);
+}
+
+#blogImageInput{
+    display:none;
+}
+
+.blog-image-preview-wrap{
+    margin-top:16px;
+    display:none;
+}
+
+.blog-image-preview-wrap.show{
+    display:block;
+}
+
+.blog-image-preview-card{
+    padding:12px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fbfcfa;
+}
+
+.blog-image-preview{
+    width:145px;
+    height:105px;
+    flex-shrink:0;
+    object-fit:cover;
+    border-radius:11px;
+    border:1px solid var(--border);
+    background:var(--green-light);
+}
+
+.blog-image-info{
+    min-width:0;
+    flex:1;
+}
+
+.blog-image-info strong{
+    display:block;
+    margin-bottom:6px;
+    color:var(--dark-green);
+    font-size:12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.blog-image-info span{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.remove-image-btn{
+    width:38px;
+    height:38px;
+    flex-shrink:0;
+    border:none;
+    border-radius:10px;
+    color:var(--danger);
+    background:var(--danger-light);
+}
+
+.remove-image-btn:hover{
+    color:var(--white);
+    background:var(--danger);
+}
+
+.upload-progress{
+    margin-top:10px;
+    display:none;
+}
+
+.upload-progress.show{
+    display:block;
+}
+
+.upload-progress-bar{
+    height:8px;
+    overflow:hidden;
+    border-radius:10px;
+    background:#e8eee9;
+}
+
+.upload-progress-fill{
+    width:0%;
+    height:100%;
+    border-radius:10px;
+    background:var(--dark-green);
+    transition:width .25s ease;
+}
+
+.upload-progress-text{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:10px;
+    text-align:center;
 }
 
 /* ACTIONS */
@@ -696,6 +809,20 @@ textarea.form-control{
     .form-button{
         width:100%;
     }
+
+    .blog-image-preview-card{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .blog-image-preview{
+        width:100%;
+        height:190px;
+    }
+
+    .remove-image-btn{
+        width:100%;
+    }
 }
 </style>
 </head>
@@ -815,10 +942,7 @@ textarea.form-control{
             Offers & Banners
         </a>
 
-        <a href="admin-images.html">
-            <i class="fa-solid fa-photo-film"></i>
-            Image Management
-        </a>
+        
 
         <a href="admin-clinic-reviews.html">
             <i class="fa-solid fa-star"></i>
@@ -1020,22 +1144,99 @@ textarea.form-control{
 
                 <div class="section-title">
                     <i class="fa-solid fa-image"></i>
-                    Select Blog Image
+                    Upload Blog Image
                 </div>
 
                 <div class="form-group full-width">
 
+                    <label for="blogImageInput">
+                        Blog Image
+                        <span class="required">*</span>
+                    </label>
+
                     <p class="image-help">
-                        Select one image that was uploaded under the BLOG image module.
+                        Upload one JPG, JPEG, PNG or WEBP image. Maximum file size: 5 MB.
                     </p>
 
-                    <div id="uploadedBlogImagesBox">
+                    <div
+                        class="blog-upload-zone"
+                        id="blogUploadZone"
+                        onclick="document.getElementById('blogImageInput').click()"
+                    >
+                        <div class="blog-upload-content">
 
-                        <div class="image-message">
-                            <i class="fa-solid fa-spinner fa-spin"></i>
-                            Loading blog images...
+                            <div class="blog-upload-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+
+                            <h3>Upload Blog Image</h3>
+
+                            <p>
+                                Click to choose an image or drag and drop it here.
+                            </p>
+
+                            <button
+                                type="button"
+                                class="choose-image-btn"
+                                onclick="event.stopPropagation(); document.getElementById('blogImageInput').click()"
+                            >
+                                <i class="fa-solid fa-image"></i>
+                                Choose Image
+                            </button>
+
                         </div>
+                    </div>
 
+                    <input
+                        type="file"
+                        id="blogImageInput"
+                        accept="image/jpeg,image/png,image/webp"
+                        onchange="handleBlogImageSelection(this.files)"
+                    >
+
+                    <div
+                        class="blog-image-preview-wrap"
+                        id="blogImagePreviewWrap"
+                    >
+                        <div class="blog-image-preview-card">
+
+                            <img
+                                id="blogImagePreview"
+                                class="blog-image-preview"
+                                src=""
+                                alt="Selected blog image"
+                            >
+
+                            <div class="blog-image-info">
+                                <strong id="blogImageName">Selected image</strong>
+                                <span id="blogImageSize">0 KB</span>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="remove-image-btn"
+                                onclick="removeSelectedBlogImage()"
+                                title="Remove selected image"
+                            >
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="upload-progress-bar">
+                            <div
+                                class="upload-progress-fill"
+                                id="uploadProgressFill"
+                            ></div>
+                        </div>
+                        <div
+                            class="upload-progress-text"
+                            id="uploadProgressText"
+                        >
+                            Uploading image...
+                        </div>
                     </div>
 
                 </div>
@@ -1077,6 +1278,7 @@ textarea.form-control{
                 <button
                     type="button"
                     class="form-button draft-button"
+                    id="saveDraftButton"
                     onclick="saveDraft()"
                 >
                     <i class="fa-solid fa-file-pen"></i>
@@ -1107,204 +1309,362 @@ const API_BASE_URL =
     "http://localhost:8085";
 
 let selectedBlogImageUrl = "";
+let selectedBlogImageFile = null;
+let selectedBlogImagePreviewUrl = "";
 
-window.onload =
-    function(){
-        loadBlogImages();
-    };
+window.onload = function(){
+    setupBlogImageDragAndDrop();
+};
 
-async function loadBlogImages(){
-    const token =
-        localStorage.getItem(
-            "token"
-        );
+function setupBlogImageDragAndDrop(){
+    const uploadZone =
+        document.getElementById("blogUploadZone");
 
-    const box =
-        document.getElementById(
-            "uploadedBlogImagesBox"
-        );
-
-    if(!token){
-        showAlert(
-            "Please login as admin first.",
-            "error"
-        );
-
+    if(!uploadZone){
         return;
     }
 
-    try{
-        const response =
-            await fetch(
-                `${API_BASE_URL}/api/images/module/BLOG`,
-                {
-                    method:"GET",
+    ["dragenter","dragover"].forEach(eventName => {
+        uploadZone.addEventListener(eventName, function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            uploadZone.classList.add("drag-over");
+        });
+    });
 
-                    headers:{
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
+    ["dragleave","drop"].forEach(eventName => {
+        uploadZone.addEventListener(eventName, function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            uploadZone.classList.remove("drag-over");
+        });
+    });
 
-        const text =
-            await response.text();
+    uploadZone.addEventListener("drop", function(event){
+        const files = event.dataTransfer.files;
 
-        if(!response.ok){
-            box.innerHTML = `
-                <div class="image-message">
-                    Unable to load blog images.
-                    Status: ${response.status}
-                </div>
-            `;
-
-            return;
+        if(files && files.length){
+            handleBlogImageSelection(files);
         }
+    });
+}
 
-        const result =
-            JSON.parse(text);
+function handleBlogImageSelection(files){
+    const file =
+        files && files.length
+            ? files[0]
+            : null;
 
-        box.innerHTML = "";
+    if(!file){
+        return;
+    }
 
-        if(
-            !result.success ||
-            !Array.isArray(result.data) ||
-            result.data.length === 0
-        ){
-            box.innerHTML = `
-                <div class="image-message">
-                    No blog images uploaded.
-                </div>
-            `;
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
 
-            return;
-        }
+    if(!allowedTypes.includes(file.type)){
+        showAlert(
+            "Please choose a JPG, JPEG, PNG or WEBP image.",
+            "error"
+        );
 
-        result.data.forEach(
-            function(img){
-                const fullUrl =
-                    getImageUrl(
-                        img.fileUrl
-                    );
+        resetBlogImageInput();
+        return;
+    }
 
-                box.insertAdjacentHTML(
-                    "beforeend",
-                    `
-                    <label class="image-select-card">
+    const maximumSize =
+        5 * 1024 * 1024;
 
-                        <img
-                            src="${escapeHtml(fullUrl)}"
-                            alt="Blog image"
-                            onerror="this.src='../assets/main_logo.jpeg'"
-                        >
+    if(file.size > maximumSize){
+        showAlert(
+            "The blog image must be 5 MB or smaller.",
+            "error"
+        );
 
-                        <input
-                            type="radio"
-                            name="blogImage"
-                            value="${escapeHtml(
-                                img.fileUrl
-                            )}"
-                            onchange="selectBlogImage(this)"
-                        >
+        resetBlogImageInput();
+        return;
+    }
 
-                    </label>
-                    `
-                );
+    selectedBlogImageFile = file;
+    selectedBlogImageUrl = "";
+
+    if(selectedBlogImagePreviewUrl){
+        URL.revokeObjectURL(
+            selectedBlogImagePreviewUrl
+        );
+    }
+
+    selectedBlogImagePreviewUrl =
+        URL.createObjectURL(file);
+
+    document.getElementById(
+        "blogImagePreview"
+    ).src =
+        selectedBlogImagePreviewUrl;
+
+    document.getElementById(
+        "blogImageName"
+    ).textContent =
+        file.name;
+
+    document.getElementById(
+        "blogImageSize"
+    ).textContent =
+        formatFileSize(file.size);
+
+    document.getElementById(
+        "blogImagePreviewWrap"
+    ).classList.add("show");
+
+    showAlert(
+        "Blog image selected successfully.",
+        "info"
+    );
+}
+
+function removeSelectedBlogImage(){
+    selectedBlogImageFile = null;
+    selectedBlogImageUrl = "";
+
+    if(selectedBlogImagePreviewUrl){
+        URL.revokeObjectURL(
+            selectedBlogImagePreviewUrl
+        );
+
+        selectedBlogImagePreviewUrl = "";
+    }
+
+    resetBlogImageInput();
+
+    const preview =
+        document.getElementById(
+            "blogImagePreview"
+        );
+
+    if(preview){
+        preview.src = "";
+    }
+
+    document.getElementById(
+        "blogImagePreviewWrap"
+    ).classList.remove("show");
+
+    hideUploadProgress();
+}
+
+function resetBlogImageInput(){
+    const input =
+        document.getElementById(
+            "blogImageInput"
+        );
+
+    if(input){
+        input.value = "";
+    }
+}
+
+function formatFileSize(bytes){
+    if(!Number.isFinite(bytes) || bytes <= 0){
+        return "0 KB";
+    }
+
+    if(bytes < 1024 * 1024){
+        return (
+            bytes / 1024
+        ).toFixed(1) + " KB";
+    }
+
+    return (
+        bytes / (1024 * 1024)
+    ).toFixed(2) + " MB";
+}
+
+async function uploadBlogImage(){
+    if(selectedBlogImageUrl){
+        return selectedBlogImageUrl;
+    }
+
+    if(!selectedBlogImageFile){
+        throw new Error(
+            "Please upload one blog image."
+        );
+    }
+
+    const token =
+        localStorage.getItem("token");
+
+    if(!token){
+        throw new Error(
+            "Please login as admin first."
+        );
+    }
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        selectedBlogImageFile
+    );
+
+    formData.append(
+        "module",
+        "BLOG"
+    );
+
+    showUploadProgress(
+        35,
+        "Uploading blog image..."
+    );
+
+    const response =
+        await fetch(
+            `${API_BASE_URL}/api/images/upload`,
+            {
+                method:"POST",
+                headers:{
+                    "Authorization":
+                        "Bearer " + token
+                },
+                body:formData
             }
         );
 
+    const responseText =
+        await response.text();
+
+    let result = null;
+
+    try{
+        result =
+            responseText
+                ? JSON.parse(responseText)
+                : null;
     }catch(error){
-        console.error(error);
-
-        box.innerHTML = `
-            <div class="image-message">
-                Error loading blog images.
-            </div>
-        `;
+        throw new Error(
+            responseText ||
+            "Invalid image-upload response."
+        );
     }
-}
 
-function selectBlogImage(
-    radio
-){
+    if(!response.ok || result?.success === false){
+        throw new Error(
+            result?.message ||
+            `Image upload failed (${response.status}).`
+        );
+    }
+
+    const uploadedUrl =
+        result?.data?.fileUrl;
+
+    if(!uploadedUrl){
+        throw new Error(
+            "The image was uploaded, but no file URL was returned."
+        );
+    }
+
     selectedBlogImageUrl =
-        radio.value;
+        uploadedUrl;
 
-    document
-        .querySelectorAll(
-            ".image-select-card"
-        )
-        .forEach(
-            card =>
-                card.classList.remove(
-                    "selected"
-                )
-        );
+    showUploadProgress(
+        100,
+        "Blog image uploaded successfully."
+    );
 
-    radio
-        .closest(
-            ".image-select-card"
-        )
-        .classList.add(
-            "selected"
-        );
+    return uploadedUrl;
 }
 
-async function saveDraft(){
-    const token =
-        localStorage.getItem(
-            "token"
-        );
+function showUploadProgress(percent, message){
+    document.getElementById(
+        "uploadProgress"
+    ).classList.add("show");
 
-    if(!token){
+    document.getElementById(
+        "uploadProgressFill"
+    ).style.width =
+        `${Math.max(0, Math.min(100, percent))}%`;
+
+    document.getElementById(
+        "uploadProgressText"
+    ).textContent =
+        message;
+}
+
+function hideUploadProgress(){
+    document.getElementById(
+        "uploadProgress"
+    ).classList.remove("show");
+
+    document.getElementById(
+        "uploadProgressFill"
+    ).style.width =
+        "0%";
+}
+
+async function saveDraft() {
+    const saveButton =
+        document.getElementById("saveDraftButton");
+
+    const token =
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken");
+
+    if (!token) {
         showAlert(
             "Please login as admin first.",
             "error"
         );
 
-        setTimeout(
-            function(){
-                window.location.href =
-                    "../frontend/login.html";
-            },
-            1000
-        );
-
         return;
     }
 
-    if(!validateBlogForm()){
+    if (!validateBlogForm()) {
         return;
     }
 
-    const blog = {
-        title:
-            document.getElementById(
-                "title"
-            ).value.trim(),
+    try {
+        if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        }
 
-        content:
-            document.getElementById(
-                "content"
-            ).value.trim(),
+        const uploadedImageUrl =
+            await uploadBlogImage();
 
-        authorName:
-            document.getElementById(
-                "author"
-            ).value.trim(),
+        const blog = {
+            title:
+                document
+                    .getElementById("title")
+                    .value
+                    .trim(),
 
-        imageUrl:
-            selectedBlogImageUrl
-    };
+            content:
+                document
+                    .getElementById("content")
+                    .value
+                    .trim(),
 
-    try{
+            authorName:
+                document
+                    .getElementById("author")
+                    .value
+                    .trim(),
+
+            imageUrl:
+                uploadedImageUrl
+        };
+
         const response =
             await fetch(
                 `${API_BASE_URL}/api/blogs/add`,
                 {
-                    method:"POST",
+                    method: "POST",
 
-                    headers:{
+                    headers: {
                         "Content-Type":
                             "application/json",
 
@@ -1313,51 +1673,88 @@ async function saveDraft(){
                     },
 
                     body:
-                        JSON.stringify(
-                            blog
-                        )
+                        JSON.stringify(blog)
                 }
             );
 
-        const result =
-            await response.json();
+        const responseText =
+            await response.text();
 
-        if(result.success){
-            localStorage.setItem(
-                "blogId",
-                result.data.id
-            );
+        let result = null;
 
-            showAlert(
-                result.message ||
-                "Blog saved as draft.",
-                "success"
-            );
+        try {
+            result =
+                responseText
+                    ? JSON.parse(responseText)
+                    : null;
 
-        }else{
-            showAlert(
-                result.message ||
-                "Failed to save blog.",
-                "error"
+        } catch (error) {
+            throw new Error(
+                responseText ||
+                "Invalid response from the blog API."
             );
         }
 
-    }catch(error){
-        console.error(error);
+        if (
+            !response.ok ||
+            result?.success === false
+        ) {
+            throw new Error(
+                result?.message ||
+                `Failed to save blog (${response.status}).`
+            );
+        }
+
+        const blogId =
+            result?.data?.id;
+
+        if (!blogId) {
+            throw new Error(
+                "Blog was saved, but no blog ID was returned."
+            );
+        }
+
+        localStorage.setItem(
+            "blogId",
+            String(blogId)
+        );
+
+        showAlert(
+            result.message ||
+            "Blog saved as draft successfully.",
+            "success"
+        );
+
+        hideUploadProgress();
+
+    } catch (error) {
+        console.error(
+            "Save blog draft error:",
+            error
+        );
 
         showAlert(
             error.message ||
-            "Unable to save blog.",
+            "Unable to save the blog.",
             "error"
         );
+
+        hideUploadProgress();
+
+    } finally {
+        if (saveButton) {
+            saveButton.disabled = false;
+
+            saveButton.innerHTML =
+                '<i class="fa-solid fa-file-pen"></i> Save as Draft';
+        }
     }
 }
 
 async function publishBlog(){
     const token =
-        localStorage.getItem(
-            "token"
-        );
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken");
 
     const blogId =
         localStorage.getItem(
@@ -1478,9 +1875,9 @@ function validateBlogForm(){
         return false;
     }
 
-    if(!selectedBlogImageUrl){
+    if(!selectedBlogImageFile && !selectedBlogImageUrl){
         showAlert(
-            "Please select one blog image.",
+            "Please upload one blog image.",
             "error"
         );
 
