@@ -1087,7 +1087,8 @@
                     <button
                         type="button"
                         class="topbar-button"
-                        onclick="showAlert('Dashboard data refreshed.', 'success')"
+                        id="refreshButton"
+                        onclick="refreshDashboard()"
                         title="Refresh"
                     >
                         <i class="fa-solid fa-rotate"></i>
@@ -1101,8 +1102,11 @@
                     >
                         <i class="fa-solid fa-bell"></i>
 
-                        <span class="notification-badge">
-                            6
+                        <span
+                            class="notification-badge"
+                            id="notificationCount"
+                        >
+                            0
                         </span>
                     </button>
 
@@ -1161,7 +1165,7 @@
                         </div>
                         <div>
                             <p>Total Patients</p>
-                            <h3 id="totalPatients">1,248</h3>
+                            <h3 id="totalPatients">0</h3>
                         </div>
                     </article>
 
@@ -1171,7 +1175,7 @@
                         </div>
                         <div>
                             <p>Doctors</p>
-                            <h3 id="totalDoctors">6</h3>
+                            <h3 id="totalDoctors">0</h3>
                         </div>
                     </article>
 
@@ -1181,7 +1185,7 @@
                         </div>
                         <div>
                             <p>Staff & Therapists</p>
-                            <h3 id="totalStaff">18</h3>
+                            <h3 id="totalStaff">0</h3>
                         </div>
                     </article>
 
@@ -1191,7 +1195,7 @@
                         </div>
                         <div>
                             <p>Today's Appointments</p>
-                            <h3 id="todayAppointments">34</h3>
+                            <h3 id="todayAppointments">0</h3>
                         </div>
                     </article>
 
@@ -1201,7 +1205,7 @@
                         </div>
                         <div>
                             <p>Pending Orders</p>
-                            <h3 id="pendingOrders">21</h3>
+                            <h3 id="pendingOrders">0</h3>
                         </div>
                     </article>
 
@@ -1211,7 +1215,7 @@
                         </div>
                         <div>
                             <p>Monthly Revenue</p>
-                            <h3 id="monthlyRevenue">₹4.8L</h3>
+                            <h3 id="monthlyRevenue">₹0</h3>
                         </div>
                     </article>
 
@@ -1221,7 +1225,7 @@
                         </div>
                         <div>
                             <p>Low Stock Items</p>
-                            <h3 id="lowStockCount">9</h3>
+                            <h3 id="lowStockCount">0</h3>
                         </div>
                     </article>
 
@@ -1231,7 +1235,7 @@
                         </div>
                         <div>
                             <p>Pending Reviews</p>
-                            <h3 id="pendingReviews">14</h3>
+                            <h3 id="pendingReviews">0</h3>
                         </div>
                     </article>
 
@@ -1683,37 +1687,487 @@
     </div>
 
     <script>
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-                /*
-                Backend/login mode can be enabled later.
+        const API_BASE_URL = "http://localhost:8085";
+        const DASHBOARD_SUMMARY_ENDPOINT =
+            `${API_BASE_URL}/api/admin/dashboard/summary`;
 
-                requireAdminLogin();
-                loadAdminProfile();
-                loadDashboardSummary();
-                */
+        document.addEventListener("DOMContentLoaded", function () {
+            const allowed = requireAdminLogin();
 
-                loadDemoDashboard();
+            if (!allowed) {
+                return;
             }
-        );
 
-        function loadDemoDashboard() {
+            loadAdminProfile();
+            loadDashboardSummary();
+        });
+
+        /*
+         * Supports the most common token names.
+         * Your login page can store token, accessToken or jwtToken.
+         */
+        function getAuthToken() {
+            return (
+                localStorage.getItem("token") ||
+                localStorage.getItem("accessToken") ||
+                localStorage.getItem("jwtToken") ||
+                sessionStorage.getItem("token") ||
+                sessionStorage.getItem("accessToken") ||
+                sessionStorage.getItem("jwtToken") ||
+                ""
+            ).trim();
+        }
+
+        /*
+         * Supports ADMIN and ROLE_ADMIN.
+         * It also checks user data saved as a JSON object.
+         */
+        function getLoggedInRole() {
+            let role =
+                localStorage.getItem("role") ||
+                sessionStorage.getItem("role") ||
+                "";
+
+            if (!role) {
+                const savedUser =
+                    localStorage.getItem("user") ||
+                    localStorage.getItem("loggedInUser") ||
+                    localStorage.getItem("userData") ||
+                    sessionStorage.getItem("user");
+
+                if (savedUser) {
+                    try {
+                        const user = JSON.parse(savedUser);
+
+                        role =
+                            user.role ||
+                            user.userRole ||
+                            user.authority ||
+                            user.roles?.[0] ||
+                            user.authorities?.[0]?.authority ||
+                            "";
+                    } catch (error) {
+                        console.warn("Saved user data is not valid JSON.");
+                    }
+                }
+            }
+
+            return String(role)
+                .replace(/^ROLE_/i, "")
+                .trim()
+                .toUpperCase();
+        }
+
+        function requireAdminLogin() {
+            const token = getAuthToken();
+            const role = getLoggedInRole();
+
+            console.log("Admin authentication check:", {
+                tokenAvailable: Boolean(token),
+                role: role
+            });
+
+            if (!token) {
+                window.location.replace("../patient/login.html");
+                return false;
+            }
+
+            /*
+             * Redirect only when a definite non-admin role exists.
+             * Do not reject the user merely because the login page
+             * did not save a role value.
+             */
+            if (role && role !== "ADMIN") {
+                alert("Admin access only.");
+                window.location.replace("../patient/homepage.html");
+                return false;
+            }
+
+            return true;
+        }
+
+        function loadAdminProfile() {
             const adminName =
                 localStorage.getItem("adminName") ||
+                localStorage.getItem("userName") ||
+                localStorage.getItem("name") ||
+                sessionStorage.getItem("adminName") ||
+                sessionStorage.getItem("userName") ||
                 "Admin";
 
-            setText(
-                "adminName",
-                adminName
-            );
-
+            setText("adminName", adminName);
             setText(
                 "adminInitial",
-                adminName
-                    .charAt(0)
-                    .toUpperCase()
+                adminName.charAt(0).toUpperCase()
             );
+        }
+
+        async function loadDashboardSummary() {
+    const token = getAuthToken();
+
+    setDashboardLoading();
+
+    const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json"
+    };
+
+    try {
+        const today = new Date().toISOString().split("T")[0];
+
+        const [
+            usersResult,
+            doctorsResult,
+            medicalStaffResult,
+            therapistsResult,
+            appointmentsResult,
+            ordersResult,
+            productsResult,
+            clinicReviewsResult,
+            productReviewsResult
+        ] = await Promise.allSettled([
+            fetchJson(
+                `${API_BASE_URL}/api/users/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/doctors/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/medical-staff/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/therapists/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/appointments/admin/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/orders/admin/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/products/getAll`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/clinic-reviews/getAllAdmin`,
+                headers
+            ),
+
+            fetchJson(
+                `${API_BASE_URL}/api/product-reviews/getAllAdmin`,
+                headers
+            )
+        ]);
+
+        const users = getSettledData(usersResult);
+        const doctors = getSettledData(doctorsResult);
+        const medicalStaff = getSettledData(medicalStaffResult);
+        const therapists = getSettledData(therapistsResult);
+        const appointments = getSettledData(appointmentsResult);
+        const orders = getSettledData(ordersResult);
+        const products = getSettledData(productsResult);
+        const clinicReviews = getSettledData(clinicReviewsResult);
+        const productReviews = getSettledData(productReviewsResult);
+
+        const todayAppointments = appointments.filter(
+            appointment =>
+                appointment.appointmentDate === today
+        ).length;
+
+        const pendingOrders = orders.filter(order => {
+            const status = String(
+                order.status ||
+                order.orderStatus ||
+                ""
+            ).toUpperCase();
+
+            return [
+                "PENDING",
+                "PLACED",
+                "PROCESSING",
+                "CONFIRMED",
+                "PAYMENT_PENDING"
+            ].includes(status);
+        }).length;
+
+        const lowStockItems = products.filter(product => {
+            const stock = Number(product.stock || 0);
+
+            const lowStockLimit = Number(
+                product.lowStockLimit ?? 10
+            );
+
+            return stock <= lowStockLimit;
+        }).length;
+
+        const pendingClinicReviews =
+            clinicReviews.filter(review =>
+                String(review.status)
+                    .toUpperCase() === "PENDING"
+            ).length;
+
+        const pendingProductReviews =
+            productReviews.filter(review =>
+                String(review.status)
+                    .toUpperCase() === "PENDING"
+            ).length;
+
+        const pendingReviews =
+            pendingClinicReviews +
+            pendingProductReviews;
+
+        const monthlyRevenue = calculateMonthlyRevenue(
+            orders
+        );
+
+        setText(
+            "totalPatients",
+            formatNumber(users.length)
+        );
+
+        setText(
+            "totalDoctors",
+            formatNumber(doctors.length)
+        );
+
+        setText(
+            "totalStaff",
+            formatNumber(
+                medicalStaff.length +
+                therapists.length
+            )
+        );
+
+        setText(
+            "todayAppointments",
+            formatNumber(todayAppointments)
+        );
+
+        setText(
+            "pendingOrders",
+            formatNumber(pendingOrders)
+        );
+
+        setText(
+            "monthlyRevenue",
+            formatCurrency(monthlyRevenue)
+        );
+
+        setText(
+            "lowStockCount",
+            formatNumber(lowStockItems)
+        );
+
+        setText(
+            "pendingReviews",
+            formatNumber(pendingReviews)
+        );
+
+        setText(
+            "notificationCount",
+            formatNumber(
+                pendingOrders +
+                lowStockItems +
+                pendingReviews
+            )
+        );
+
+    } catch (error) {
+        console.error(
+            "Dashboard loading failed:",
+            error
+        );
+
+        setDashboardError();
+
+        showAlert(
+            "Some dashboard information could not be loaded.",
+            "error"
+        );
+    }
+}
+async function fetchJson(url, headers) {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: headers
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            `${url} failed with status ${response.status}`
+        );
+    }
+
+    const result = await response.json();
+
+    if (result.success === false) {
+        throw new Error(
+            result.message || "API request failed"
+        );
+    }
+
+    return Array.isArray(result.data)
+        ? result.data
+        : [];
+}
+
+function getSettledData(result) {
+    if (
+        result.status === "fulfilled" &&
+        Array.isArray(result.value)
+    ) {
+        return result.value;
+    }
+
+    if (result.status === "rejected") {
+        console.error(
+            "Dashboard API error:",
+            result.reason
+        );
+    }
+
+    return [];
+}
+
+function calculateMonthlyRevenue(orders) {
+    const now = new Date();
+
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return orders.reduce((total, order) => {
+        const status = String(
+            order.paymentStatus ||
+            order.status ||
+            ""
+        ).toUpperCase();
+
+        const createdAt =
+            order.createdAt ||
+            order.orderDate ||
+            order.createdDate;
+
+        if (!createdAt) {
+            return total;
+        }
+
+        const orderDate = new Date(createdAt);
+
+        const isCurrentMonth =
+            orderDate.getMonth() === currentMonth &&
+            orderDate.getFullYear() === currentYear;
+
+        const isPaid = [
+            "SUCCESS",
+            "PAID",
+            "COMPLETED",
+            "DELIVERED"
+        ].includes(status);
+
+        if (!isCurrentMonth || !isPaid) {
+            return total;
+        }
+
+        return total + Number(
+            order.totalAmount ||
+            order.finalAmount ||
+            order.grandTotal ||
+            order.amount ||
+            0
+        );
+    }, 0);
+}
+
+        async function refreshDashboard() {
+            const button =
+                document.getElementById("refreshButton");
+            const icon = button?.querySelector("i");
+
+            if (button) {
+                button.disabled = true;
+            }
+
+            if (icon) {
+                icon.classList.add("fa-spin");
+            }
+
+            await loadDashboardSummary();
+
+            if (button) {
+                button.disabled = false;
+            }
+
+            if (icon) {
+                icon.classList.remove("fa-spin");
+            }
+        }
+
+        function setDashboardLoading() {
+            setText("totalPatients", "...");
+            setText("totalDoctors", "...");
+            setText("totalStaff", "...");
+            setText("todayAppointments", "...");
+            setText("pendingOrders", "...");
+            setText("monthlyRevenue", "...");
+            setText("lowStockCount", "...");
+            setText("pendingReviews", "...");
+            setText("notificationCount", "...");
+        }
+
+        function setDashboardError() {
+            setText("totalPatients", "0");
+            setText("totalDoctors", "0");
+            setText("totalStaff", "0");
+            setText("todayAppointments", "0");
+            setText("pendingOrders", "0");
+            setText("monthlyRevenue", "₹0");
+            setText("lowStockCount", "0");
+            setText("pendingReviews", "0");
+            setText("notificationCount", "0");
+        }
+
+        function firstNumber(...values) {
+            for (const value of values) {
+                if (
+                    value !== null &&
+                    value !== undefined &&
+                    value !== "" &&
+                    !Number.isNaN(Number(value))
+                ) {
+                    return Number(value);
+                }
+            }
+
+            return 0;
+        }
+
+        function formatNumber(value) {
+            return Number(value || 0)
+                .toLocaleString("en-IN");
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat(
+                "en-IN",
+                {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0
+                }
+            ).format(Number(value || 0));
         }
 
         function toggleSidebar() {
@@ -1740,81 +2194,72 @@
                 .remove("show");
         }
 
-        function logoutAdmin() {
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("role");
-            localStorage.removeItem("adminName");
-            localStorage.removeItem("userId");
+        function clearLoginData() {
+            const keys = [
+                "token",
+                "accessToken",
+                "jwtToken",
+                "refreshToken",
+                "role",
+                "adminName",
+                "userName",
+                "name",
+                "userId",
+                "user",
+                "loggedInUser",
+                "userData"
+            ];
 
-            window.location.href =
-                "../patient/login.html";
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
         }
 
-        function showAlert(
-            message,
-            type
-        ) {
+        function logoutAdmin() {
+            clearLoginData();
+            window.location.replace("../patient/login.html");
+        }
+
+        function showAlert(message, type) {
             const box =
-                document.getElementById(
-                    "pageAlert"
-                );
-
+                document.getElementById("pageAlert");
             const icon =
-                document.getElementById(
-                    "alertIcon"
-                );
+                document.getElementById("alertIcon");
 
-            setText(
-                "alertMessage",
-                message
-            );
+            if (!box || !icon) {
+                return;
+            }
 
+            setText("alertMessage", message);
             box.className =
                 `page-alert show ${type}`;
 
-            if (
-                type === "success"
-            ) {
+            if (type === "success") {
                 icon.className =
                     "fa-solid fa-circle-check";
-
-            } else if (
-                type === "error"
-            ) {
+            } else if (type === "error") {
                 icon.className =
                     "fa-solid fa-circle-exclamation";
-
             } else {
                 icon.className =
                     "fa-solid fa-circle-info";
             }
 
-            clearTimeout(
-                window.adminAlertTimer
-            );
+            clearTimeout(window.adminAlertTimer);
 
             window.adminAlertTimer =
-                setTimeout(
-                    function () {
-                        box.classList.remove(
-                            "show"
-                        );
-                    },
-                    4000
-                );
+                setTimeout(function () {
+                    box.classList.remove("show");
+                }, 4000);
         }
 
-        function setText(
-            id,
-            value
-        ) {
+        function setText(id, value) {
             const element =
                 document.getElementById(id);
 
             if (element) {
-                element.textContent =
-                    value;
+                element.textContent = value ?? 0;
             }
         }
     </script>

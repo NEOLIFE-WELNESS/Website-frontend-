@@ -1,1129 +1,3166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Consultation | NeoLife Wellness</title>
+<link rel="icon" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-    <title>Online Consultation | NeoLife Wellness</title>
+<style>
+:root{
+  --dark:#123c32;
+  --green:#216c55;
+  --light:#eaf5ef;
+  --cream:#f5f3eb;
+  --white:#fff;
+  --text:#1f302a;
+  --muted:#68756f;
+  --border:#dce7e1;
+  --danger:#c33945;
+  --gold:#c99a16;
+  --shadow:0 15px 42px rgba(18,60,50,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{
+  min-height:100vh;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);
+  background:var(--cream)
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
 
-    <link
-        rel="icon"
-        type="image/jpeg"
-        href="./assets/main_logo.jpeg"
-    >
+.header{
+  min-height:76px;
+  padding:12px 22px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 4px 18px rgba(18,60,50,.07)
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{
+  width:52px;height:52px;object-fit:cover;border-radius:50%;
+  border:2px solid var(--gold)
+}
+.brand h1{font-size:19px;color:var(--dark)}
+.brand p{margin-top:3px;font-size:11px;color:#987100;font-weight:700}
+.header-right{display:flex;align-items:center;gap:9px}
+.pill{
+  padding:9px 13px;display:inline-flex;align-items:center;gap:7px;
+  border-radius:25px;font-size:12px;font-weight:800
+}
+.role-pill{color:#765700;background:#fff3cf}
+.status-pill{color:var(--dark);background:#e8f4ee}
 
-    <style>
-        :root {
-            --green-dark: #123c32;
-            --green: #216c55;
-            --cream: #f7f4eb;
-            --white: #ffffff;
-            --danger: #c33945;
-            --text: #1f302a;
-            --muted: #68756f;
-            --border: #dce7e1;
-        }
+.alert{
+  width:min(1200px,calc(100% - 28px));
+  margin:14px auto 0;padding:13px 16px;display:none;
+  border-radius:12px;font-size:13px;line-height:1.5
+}
+.alert.show{display:block}
+.alert.error{color:#842f36;background:#fde8ea;border:1px solid #edbdc1}
+.alert.success{color:#17623a;background:#e7f7ed;border:1px solid #b8dfc8}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+.shell{
+  width:min(1550px,calc(100% - 28px));
+  margin:18px auto 30px;
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(390px,.75fr);
+  gap:18px
+}
+.left,.right{min-width:0;display:grid;gap:18px;align-content:start}
+.panel{
+  border:1px solid var(--border);
+  border-radius:22px;
+  background:var(--white);
+  box-shadow:var(--shadow)
+}
 
-        body {
-            min-height: 100vh;
-            background: var(--cream);
-            color: var(--text);
-            font-family: Arial, Helvetica, sans-serif;
-        }
+/* VIDEO */
+.video-panel{overflow:hidden;background:#10251f}
+.video-title{
+  min-height:56px;padding:12px 17px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  color:#fff;border-bottom:1px solid rgba(255,255,255,.1)
+}
+.video-title h2{font-size:16px}
+.video-time{font-size:12px;color:#f3d773;font-weight:700}
+.video-grid{
+  min-height:475px;padding:13px;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px
+}
+.participant-card{
+  min-height:440px;position:relative;overflow:hidden;
+  border-radius:17px;background:#20352e;border:1px solid rgba(255,255,255,.1)
+}
+.participant-video{
+  width:100%;height:100%;min-height:440px;
+  display:grid;place-items:center;color:rgba(255,255,255,.65)
+}
+.participant-video video{width:100%;height:100%;min-height:440px;object-fit:cover}
+.participant-audio{display:none}
+.participant-name{
+  position:absolute;left:12px;bottom:12px;
+  padding:7px 11px;border-radius:9px;color:#fff;
+  background:rgba(0,0,0,.58);font-size:12px;font-weight:700
+}
+.waiting{
+  grid-column:1/-1;min-height:475px;
+  display:grid;place-items:center;text-align:center;color:rgba(255,255,255,.78)
+}
+.waiting i{font-size:34px;color:#f3d773;margin-bottom:14px}
+.waiting h2{margin-bottom:7px}
+.waiting p{font-size:13px}
+.controls{
+  min-height:76px;padding:13px;
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
+  border-top:1px solid rgba(255,255,255,.1)
+}
+.control-btn{
+  min-height:43px;padding:10px 15px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:12px;color:#fff;
+  background:rgba(255,255,255,.13);font-size:12px;font-weight:800
+}
+.control-btn:hover{background:rgba(255,255,255,.22)}
+.control-btn.danger{background:var(--danger)}
 
-        button {
-            font: inherit;
-            cursor: pointer;
-        }
+/* PATIENT INFO */
+.info-panel{padding:20px}
+.panel-heading{
+  margin-bottom:16px;display:flex;align-items:center;justify-content:space-between
+}
+.panel-heading h2{font-size:19px;color:var(--dark)}
+.panel-heading i{color:#987100}
+.patient-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.detail{
+  padding:12px;border-radius:12px;background:#f7faf8;border:1px solid var(--border)
+}
+.detail.full{grid-column:1/-1}
+.detail span{
+  display:block;margin-bottom:5px;color:var(--muted);
+  font-size:10px;font-weight:800;text-transform:uppercase
+}
+.detail strong,.detail p{font-size:13px;line-height:1.55;word-break:break-word}
 
-        button:disabled {
-            opacity: .55;
-            cursor: not-allowed;
-        }
+/* PRESCRIPTION */
+.prescription-panel{overflow:hidden}
+.prescription-head{
+  padding:18px 20px;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;border-bottom:1px solid var(--border)
+}
+.prescription-head h2{font-size:20px;color:var(--dark)}
+.prescription-state{
+  padding:6px 10px;border-radius:20px;
+  color:#765700;background:#fff3cf;font-size:10px;font-weight:800
+}
+.prescription-state.finalized{color:#17623a;background:#e5f5eb}
+.prescription-body{padding:20px}
+.doctor-view,.patient-view{display:none}
+.role-hidden{display:none!important}
+.doctor-view.show,.patient-view.show{display:block}
+.form-group{margin-bottom:13px}
+.form-group label{
+  display:block;margin-bottom:7px;color:var(--dark);font-size:11px;font-weight:800
+}
+.form-control{
+  width:100%;min-height:43px;padding:10px 12px;
+  border:1px solid var(--border);border-radius:10px;outline:none
+}
+.form-control:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,154,22,.12)}
+textarea.form-control{min-height:74px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.search-wrap{position:relative}
+.suggestions{
+  width:100%;max-height:210px;position:absolute;top:calc(100% + 5px);left:0;
+  z-index:20;display:none;overflow-y:auto;
+  border:1px solid var(--border);border-radius:10px;background:#fff;
+  box-shadow:0 12px 30px rgba(18,60,50,.16)
+}
+.suggestions.show{display:block}
+.suggestion{
+  width:100%;padding:10px 12px;border:none;border-bottom:1px solid var(--border);
+  text-align:left;background:#fff
+}
+.suggestion:hover{background:var(--light)}
+.suggestion strong{display:block;color:var(--dark);font-size:12px;margin-bottom:3px}
+.suggestion span{font-size:10px;color:var(--muted)}
+.action{
+  min-height:43px;padding:10px 14px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:10px;color:#fff;background:var(--dark);
+  font-size:11px;font-weight:800
+}
+.action:hover{background:#987100}
+.action.secondary{color:var(--dark);background:#eef5f0}
+.action.full{width:100%}
+.actions{margin-top:14px;display:flex;flex-wrap:wrap;gap:9px}
+.message{
+  margin-top:12px;padding:11px;display:none;border-radius:10px;
+  font-size:11px;line-height:1.5
+}
+.message.show{display:block}
+.message.success{color:#17623a;background:#e5f5eb}
+.message.error{color:#a33b3b;background:#fde9e9}
+.readonly-note{
+  margin-bottom:14px;padding:11px;border-radius:10px;
+  color:#5b6861;background:#edf5ef;font-size:11px;line-height:1.5
+}
+.summary{
+  margin-bottom:14px;padding:14px;border-radius:12px;
+  background:#f3f8f5;border:1px solid var(--border)
+}
+.summary p{margin-bottom:8px;font-size:12px;line-height:1.5}
+.summary p:last-child{margin-bottom:0}
+.summary strong{color:var(--dark)}
+.medicine-list{margin:16px 0;display:grid;gap:10px}
+.medicine-card{
+  padding:13px;display:grid;grid-template-columns:1fr auto;gap:10px;
+  border:1px solid var(--border);border-radius:12px;background:#fafcfb
+}
+.medicine-card h4{margin-bottom:6px;color:var(--dark);font-size:13px}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.meta span{
+  padding:5px 8px;border-radius:17px;color:#59665f;
+  background:#edf3ef;font-size:9px;font-weight:700
+}
+.instruction{margin-top:7px;color:var(--muted);font-size:11px;line-height:1.5}
+.remove{
+  width:34px;height:34px;border:none;border-radius:9px;
+  color:#a33b3b;background:#fde9e9
+}
+.empty{
+  padding:28px 15px;text-align:center;border:1px dashed var(--border);
+  border-radius:13px;color:var(--muted);background:#fafcfb;
+  font-size:12px;line-height:1.6
+}
+.empty i{display:block;margin-bottom:10px;color:var(--gold);font-size:29px}
+.download{
+  width:100%;min-height:46px;margin-top:14px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  border:none;border-radius:11px;color:#fff;background:var(--dark);
+  font-size:12px;font-weight:800
+}
+.download:hover{background:#987100}
 
-        .consultation-header {
-            min-height: 74px;
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-        }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+/* REPORTS */
+.report-panel{
+  padding:20px;
+}
 
-        .brand img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
+.report-header{
+  margin-bottom:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
 
-        .brand h1 {
-            color: var(--green-dark);
-            font-size: 20px;
-        }
+.report-header h2{
+  color:var(--dark);
+  font-size:19px;
+}
 
-        .brand p {
-            margin-top: 3px;
-            color: var(--muted);
-            font-size: 12px;
-        }
+.report-header i{
+  color:#987100;
+}
 
-        .meeting-status {
-            padding: 9px 14px;
-            border-radius: 30px;
-            color: var(--green-dark);
-            background: #e8f4ee;
-            font-size: 13px;
-            font-weight: 700;
-        }
+.report-upload-box{
+  margin-bottom:14px;
+  padding:16px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:8px;
+  border:2px dashed var(--border);
+  border-radius:13px;
+  color:var(--muted);
+  background:#fafcfb;
+  text-align:center;
+  transition:.2s ease;
+}
 
-        .consultation-room {
-            width: min(1500px, calc(100% - 30px));
-            margin: 20px auto;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 360px;
-            gap: 18px;
-        }
+.report-upload-box:hover,
+.report-upload-box.dragging{
+  border-color:var(--gold);
+  background:#fffaf0;
+}
 
-        .video-section {
-            min-height: 690px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            border-radius: 22px;
-            background: #10251f;
-        }
+.report-upload-box i{
+  color:#987100;
+  font-size:28px;
+}
 
-        .video-grid {
-            flex: 1;
-            min-height: 580px;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
+.report-upload-box strong{
+  color:var(--dark);
+  font-size:12px;
+}
 
-        .participant-card {
-            min-height: 260px;
-            position: relative;
-            overflow: hidden;
-            border-radius: 18px;
-            background: #20352e;
-            border: 1px solid rgba(255,255,255,.1);
-        }
+.report-upload-box span{
+  font-size:10px;
+}
 
-        .participant-video {
-            width: 100%;
-            height: 100%;
-            min-height: 260px;
-            display: grid;
-            place-items: center;
-        }
+.report-upload-box input{
+  width:100%;
+  height:100%;
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
 
-        .participant-video video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+.report-list{
+  display:grid;
+  gap:10px;
+}
 
-        .participant-audio {
-            display: none;
-        }
+.report-card{
+  padding:12px;
+  display:grid;
+  grid-template-columns:42px 1fr auto;
+  align-items:center;
+  gap:11px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fafcfb;
+}
 
-        .participant-name {
-            position: absolute;
-            left: 12px;
-            bottom: 12px;
-            padding: 6px 10px;
-            border-radius: 9px;
-            color: white;
-            background: rgba(0,0,0,.55);
-            font-size: 12px;
-        }
+.report-icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:11px;
+  color:#fff;
+  background:var(--dark);
+  font-size:17px;
+}
 
-        .waiting-message {
-            height: 100%;
-            min-height: 580px;
-            display: grid;
-            place-items: center;
-            color: rgba(255,255,255,.75);
-            text-align: center;
-        }
+.report-info{
+  min-width:0;
+}
 
-        .video-controls {
-            min-height: 78px;
-            padding-top: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+.report-info strong{
+  display:block;
+  margin-bottom:4px;
+  overflow:hidden;
+  color:var(--dark);
+  font-size:12px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
-        .control-button {
-            min-width: 130px;
-            padding: 13px 18px;
-            border: none;
-            border-radius: 14px;
-            color: white;
-            background: rgba(255,255,255,.13);
-            font-weight: 700;
-        }
+.report-info span{
+  color:var(--muted);
+  font-size:10px;
+}
 
-        .leave-button,
-        .end-button {
-            background: var(--danger);
-        }
+.report-actions{
+  display:flex;
+  gap:7px;
+}
 
-        .prescription-section {
-            padding: 22px;
-            border-radius: 22px;
-            background: var(--white);
-            border: 1px solid var(--border);
-        }
+.report-button{
+  min-height:35px;
+  padding:8px 10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border:none;
+  border-radius:8px;
+  color:var(--dark);
+  background:#eaf3ed;
+  font-size:10px;
+  font-weight:800;
+}
 
-        .prescription-section h2 {
-            margin-bottom: 16px;
-            color: var(--green-dark);
-        }
+.report-button:hover{
+  color:#fff;
+  background:var(--dark);
+}
 
-        #prescriptionPad {
-            min-height: 560px;
-            padding: 18px;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            color: var(--muted);
-            background: #fbfcfa;
-        }
+.report-button.download-report{
+  color:#765700;
+  background:#fff3cf;
+}
 
-        .error-box {
-            width: min(700px, calc(100% - 30px));
-            margin: 20px auto;
-            padding: 15px 18px;
-            display: none;
-            border-radius: 13px;
-            color: #842f36;
-            background: #fde8ea;
-            border: 1px solid #edbdc1;
-        }
+.report-selected{
+  min-height:18px;
+  margin-top:8px;
+  color:#17623a;
+  font-size:10px;
+  font-weight:700;
+}
 
-        .error-box.show {
-            display: block;
-        }
+.report-note{
+  margin-bottom:12px;
+  padding:10px;
+  border-radius:10px;
+  color:var(--muted);
+  background:#f3f8f5;
+  font-size:10px;
+  line-height:1.5;
+}
 
-        @media (max-width: 1000px) {
-            .consultation-room {
-                grid-template-columns: 1fr;
-            }
-
-            .prescription-section {
-                min-height: auto;
-            }
-
-            #prescriptionPad {
-                min-height: 300px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .consultation-header {
-                padding: 10px 14px;
-            }
-
-            .brand h1 {
-                font-size: 16px;
-            }
-
-            .video-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .video-section {
-                min-height: calc(100vh - 115px);
-            }
-
-            .control-button {
-                min-width: 90px;
-                padding: 12px 10px;
-            }
-        }
-    </style>
+@media(max-width:1150px){
+  .shell{grid-template-columns:1fr}
+}
+@media(max-width:800px){
+  .video-grid{grid-template-columns:1fr}
+  .participant-card,.participant-video,.participant-video video{min-height:300px}
+  .patient-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .header{padding:10px 12px}
+  .brand h1{font-size:15px}
+  .brand p,.role-pill{display:none}
+  .brand img{width:44px;height:44px}
+  .shell{width:calc(100% - 16px);margin-top:10px}
+  .controls{justify-content:flex-start}
+  .control-btn{flex:1;min-width:90px}
+  .patient-grid,.form-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 
 <body>
 
-<header class="consultation-header">
-
-    <div class="brand">
-        <img
-            src="./assets/main_logo.jpeg"
-            alt="NeoLife Logo"
-        >
-
-        <div>
-            <h1>NeoLife Wellness Center</h1>
-            <p>Secure Online Consultation</p>
-        </div>
+<header class="header">
+  <div class="brand">
+    <img src="../assets/main_logo.jpeg" alt="NeoLife Logo">
+    <div>
+      <h1>NeoLife Doctor Console</h1>
+      <p>Secure Online Consultation</p>
     </div>
+  </div>
 
-    <div
-        id="meetingStatus"
-        class="meeting-status"
-    >
-        Connecting...
-    </div>
+  <div class="header-right">
+    <span class="pill role-pill" id="rolePill">
+      <i class="fa-solid fa-user"></i>
+      Loading role...
+    </span>
 
+    <span class="pill status-pill" id="meetingStatus">
+      Connecting...
+    </span>
+  </div>
 </header>
 
-<div
-    id="errorBox"
-    class="error-box"
-></div>
+<div class="alert error" id="errorBox"></div>
+<div class="alert success" id="successBox"></div>
 
-<main class="consultation-room">
+<main class="shell">
 
-    <section class="video-section">
+  <section class="left">
+
+    <section class="panel video-panel">
+      <div class="video-title">
+        <h2>
+          <i class="fa-solid fa-video"></i>
+          Live Consultation
+        </h2>
+
+        <span class="video-time" id="consultationTime">
+          Consultation
+        </span>
+      </div>
+
+      <div class="video-grid" id="videoGrid">
+        <div class="waiting" id="waitingMessage">
+          <div>
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <h2>Preparing consultation room</h2>
+            <p>Please allow camera and microphone access.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="control-btn" id="microphoneButton" type="button" disabled>
+          <i class="fa-solid fa-microphone"></i>
+          Mute
+        </button>
+
+        <button class="control-btn" id="cameraButton" type="button" disabled>
+          <i class="fa-solid fa-video"></i>
+          Camera Off
+        </button>
+
+        <button class="control-btn danger" id="leaveButton" type="button" disabled>
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Leave
+        </button>
+
+        <button
+          class="control-btn danger"
+          id="endConsultationButton"
+          type="button"
+          hidden
+          disabled
+        >
+          <i class="fa-solid fa-phone-slash"></i>
+          End Consultation
+        </button>
+      </div>
+    </section>
+
+    <section class="panel info-panel" id="patientDetailsPanel">
+      <div class="panel-heading">
+        <h2>Patient Details</h2>
+        <i class="fa-solid fa-notes-medical"></i>
+      </div>
+
+      <div class="patient-grid">
+        <div class="detail">
+          <span>Name</span>
+          <strong id="patientName">Loading...</strong>
+        </div>
+
+        <div class="detail">
+          <span>Age / Gender</span>
+          <strong id="patientAgeGender">—</strong>
+        </div>
+
+        <div class="detail">
+          <span>Phone</span>
+          <strong id="patientPhone">—</strong>
+        </div>
+
+        <div class="detail full">
+          <span>Symptoms</span>
+          <p id="patientSymptoms">Loading consultation details...</p>
+        </div>
+
+        <div class="detail full">
+          <span>Past Medical History</span>
+          <p id="patientHistory">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="panel report-panel"
+      id="reportsPanel"
+    >
+      <div class="report-header">
+        <h2>
+          <i class="fa-solid fa-file-medical"></i>
+          Patient Reports
+        </h2>
+
+        <button
+          type="button"
+          class="report-button"
+          onclick="loadConsultationReports()"
+        >
+          <i class="fa-solid fa-rotate"></i>
+          Refresh
+        </button>
+      </div>
+
+      <div
+        id="patientReportUploadArea"
+        hidden
+      >
+        <div class="report-note">
+          Upload blood reports, X-rays, scans or previous prescriptions for
+          the doctor to review during this consultation.
+        </div>
 
         <div
-            id="videoGrid"
-            class="video-grid"
+          class="report-upload-box"
+          id="reportUploadBox"
         >
-            <div
-                id="waitingMessage"
-                class="waiting-message"
-            >
-                <div>
-                    <h2>Preparing consultation room</h2>
-                    <p>Please allow camera and microphone access.</p>
-                </div>
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <strong>Click or drag reports here</strong>
+          <span>PDF, JPG, JPEG or PNG — maximum 10 MB each</span>
+
+          <input
+            type="file"
+            id="reportFiles"
+            accept=".pdf,image/png,image/jpeg"
+            multiple
+            onchange="handleReportSelection(event)"
+          >
+        </div>
+
+        <div
+          class="report-selected"
+          id="reportSelectedMessage"
+        ></div>
+
+        <button
+          type="button"
+          class="action full"
+          id="uploadReportsButton"
+          onclick="uploadPatientReports()"
+          disabled
+        >
+          <i class="fa-solid fa-upload"></i>
+          Upload Reports
+        </button>
+      </div>
+
+      <div
+        class="report-list"
+        id="consultationReportList"
+      >
+        <div class="empty">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Loading uploaded reports...
+        </div>
+      </div>
+    </section>
+
+  </section>
+
+  <aside class="right">
+
+    <section class="panel prescription-panel">
+
+      <div class="prescription-head">
+        <h2>
+          <i class="fa-solid fa-prescription"></i>
+          Prescription Pad
+        </h2>
+
+        <span class="prescription-state" id="prescriptionStatus">
+          Waiting
+        </span>
+      </div>
+
+      <div class="prescription-body">
+
+        <!-- DOCTOR VIEW -->
+        <div class="doctor-view" id="doctorView">
+
+          <div class="form-group">
+            <label for="diagnosis">Diagnosis</label>
+            <textarea
+              id="diagnosis"
+              class="form-control"
+              placeholder="Enter diagnosis"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="advice">Advice</label>
+            <textarea
+              id="advice"
+              class="form-control"
+              placeholder="Enter treatment advice"
+            ></textarea>
+          </div>
+
+          <div class="readonly-note">
+            Enter the diagnosis and advice, then add medicines below.
+            The prescription will be created automatically when the first
+            medicine is added.
+          </div>
+
+          <div id="medicineForm">
+
+            <div class="form-group search-wrap">
+              <label for="medicineSearch">Medicine Search</label>
+
+              <input
+                type="text"
+                id="medicineSearch"
+                class="form-control"
+                placeholder="Search product or enter medicine name"
+                autocomplete="off"
+              >
+
+              <div class="suggestions" id="productSuggestions"></div>
             </div>
+
+            <input type="hidden" id="selectedProductId">
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="medicineName">Medicine Name</label>
+                <input
+                  type="text"
+                  id="medicineName"
+                  class="form-control"
+                  placeholder="Medicine name"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="dosage">Dosage</label>
+                <input
+                  type="text"
+                  id="dosage"
+                  class="form-control"
+                  placeholder="Example: 10 ml"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="frequency">Frequency / Timing</label>
+                <input
+                  type="text"
+                  id="frequency"
+                  class="form-control"
+                  placeholder="Morning and evening"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="durationDays">Duration (Days)</label>
+                <input
+                  type="number"
+                  id="durationDays"
+                  class="form-control"
+                  min="1"
+                  value="1"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="quantity">Quantity</label>
+                <input
+                  type="number"
+                  id="quantity"
+                  class="form-control"
+                  min="1"
+                  value="1"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="instructions">Instructions</label>
+                <input
+                  type="text"
+                  id="instructions"
+                  class="form-control"
+                  placeholder="After food, with warm water..."
+                >
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="action full"
+              id="addMedicineButton"
+              onclick="addMedicine()"
+            >
+              <i class="fa-solid fa-plus"></i>
+              Add Medicine
+            </button>
+          </div>
+
+          <div class="medicine-list" id="doctorMedicineList"></div>
+
+          <div class="actions" id="doctorPrescriptionActions">
+            <button
+              type="button"
+              class="action secondary"
+              onclick="refreshPrescription()"
+            >
+              <i class="fa-solid fa-rotate"></i>
+              Refresh
+            </button>
+
+            <button
+              type="button"
+              class="action"
+              id="finalizePrescriptionButton"
+              onclick="finalizePrescription()"
+              disabled
+            >
+              <i class="fa-solid fa-check-double"></i>
+              Finalize Prescription
+            </button>
+          </div>
         </div>
 
-        <div class="video-controls">
+        <!-- PATIENT VIEW -->
+        <div class="patient-view" id="patientView">
+          <div class="readonly-note">
+            Medicines prescribed by the doctor will appear here automatically.
+          </div>
 
-            <button
-                id="microphoneButton"
-                class="control-button"
-                type="button"
-                disabled
-            >
-                Mute
-            </button>
+          <div id="patientPrescriptionContent">
+            <div class="empty">
+              <i class="fa-solid fa-prescription-bottle-medical"></i>
+              The doctor has not created a prescription yet.
+            </div>
+          </div>
 
-            <button
-                id="cameraButton"
-                class="control-button"
-                type="button"
-                disabled
-            >
-                Camera Off
-            </button>
-
-            <button
-                id="leaveButton"
-                class="control-button leave-button"
-                type="button"
-                disabled
-            >
-                Leave
-            </button>
-
-            <button
-                id="endConsultationButton"
-                class="control-button end-button"
-                type="button"
-                hidden
-                disabled
-            >
-                End Consultation
-            </button>
-
+          <button
+            type="button"
+            class="download"
+            id="downloadPrescriptionButton"
+            onclick="downloadPrescription()"
+            hidden
+          >
+            <i class="fa-solid fa-file-arrow-down"></i>
+            Download Prescription
+          </button>
         </div>
 
+        <div class="message" id="prescriptionMessage"></div>
+
+      </div>
     </section>
 
-    <section class="prescription-section">
-
-        <h2>Live Prescription</h2>
-
-        <div id="prescriptionPad">
-            The prescription will appear here during the consultation.
-        </div>
-
-    </section>
+  </aside>
 
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
 <script>
-// const API_BASE_URL =
-//     "https://neolifeayush.com/api";
-
-
-// For local backend testing, use:
-
-const API_BASE_URL =
-    "http://localhost:8085/api";
-
+const API_BASE_URL = "http://localhost:8085/api";
 
 const consultationId =
-    new URLSearchParams(
-        window.location.search
-    ).get("consultationId");
+  new URLSearchParams(window.location.search)
+    .get("consultationId");
 
 const authToken =
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken");
+  localStorage.getItem("token") ||
+  localStorage.getItem("accessToken") ||
+  localStorage.getItem("jwtToken") ||
+  sessionStorage.getItem("token") ||
+  "";
 
 let room = null;
-let participantRole = null;
+let participantRole = "";
 let meetingEndedByUser = false;
+let currentConsultation = null;
+let currentPrescription = null;
+let allProducts = [];
+let prescriptionTimer = null;
+let consultationReports = [];
+let selectedReportFiles = [];
 
-const videoGrid =
-    document.getElementById(
-        "videoGrid"
-    );
-
-const waitingMessage =
-    document.getElementById(
-        "waitingMessage"
-    );
-
-const microphoneButton =
-    document.getElementById(
-        "microphoneButton"
-    );
-
-const cameraButton =
-    document.getElementById(
-        "cameraButton"
-    );
-
-const leaveButton =
-    document.getElementById(
-        "leaveButton"
-    );
-
+const videoGrid = document.getElementById("videoGrid");
+const waitingMessage = document.getElementById("waitingMessage");
+const microphoneButton = document.getElementById("microphoneButton");
+const cameraButton = document.getElementById("cameraButton");
+const leaveButton = document.getElementById("leaveButton");
 const endConsultationButton =
-    document.getElementById(
-        "endConsultationButton"
-    );
+  document.getElementById("endConsultationButton");
+const meetingStatus = document.getElementById("meetingStatus");
+const errorBox = document.getElementById("errorBox");
+const successBox = document.getElementById("successBox");
 
-const meetingStatus =
-    document.getElementById(
-        "meetingStatus"
-    );
+document.addEventListener("DOMContentLoaded", async function(){
+  if(!consultationId){
+    showError("Consultation ID is missing from the URL.");
+    return;
+  }
 
-const errorBox =
-    document.getElementById(
-        "errorBox"
-    );
+  if(!authToken){
+    window.location.href = "../patient/login.html";
+    return;
+  }
 
-async function joinConsultation() {
+  setupMedicineSearch();
+  setupReportDragAndDrop();
+  initializeDoctorPrescriptionControls();
 
-    if (!consultationId) {
-        showError(
-            "Consultation ID is missing from the page URL."
-        );
+  const savedRole = normalizeRole(
+    localStorage.getItem("role") ||
+    sessionStorage.getItem("role") ||
+    ""
+  );
 
-        return;
+  if(savedRole){
+    participantRole = savedRole;
+    configureRoleInterface();
+  }
+
+  await Promise.allSettled([
+    joinConsultation(),
+    loadConsultationDetails(),
+    loadProducts(),
+    loadConsultationReports()
+  ]);
+
+  await refreshPrescription();
+
+  if(participantRole !== "DOCTOR"){
+    startPatientPrescriptionRefresh();
+  }
+});
+
+/* =========================
+   VIDEO MEETING
+========================= */
+
+async function joinConsultation(){
+  setMeetingStatus("Requesting access...");
+
+  const response = await fetch(
+    `${API_BASE_URL}/video-meetings/${encodeURIComponent(consultationId)}/join`,
+    {
+      method:"POST",
+      headers:getAuthHeaders(false)
     }
+  );
 
-    if (!authToken) {
-        window.location.href =
-            "/login.html";
+  const result = await readResponse(response);
 
-        return;
+  if(!response.ok || result?.success === false){
+    throw new Error(
+      result?.message || "Unable to join consultation."
+    );
+  }
+
+  const meeting = result?.data || {};
+
+  participantRole = normalizeRole(
+    meeting.participantRole ||
+    participantRole ||
+    localStorage.getItem("role")
+  );
+
+  configureRoleInterface();
+
+  const serverUrl = meeting.serverUrl;
+  const liveKitToken = meeting.accessToken || meeting.token;
+
+  if(!serverUrl || !liveKitToken){
+    throw new Error(
+      "LiveKit server URL or access token is missing."
+    );
+  }
+
+  room = new LivekitClient.Room({
+    adaptiveStream:true,
+    dynacast:true
+  });
+
+  registerRoomEvents();
+
+  setMeetingStatus("Connecting...");
+
+  await room.connect(serverUrl, liveKitToken);
+
+  try{
+    await room.localParticipant.setMicrophoneEnabled(true);
+    await room.localParticipant.setCameraEnabled(true);
+  }catch(error){
+    console.warn("Media permission error:", error);
+    showError(
+      "Camera or microphone permission was not granted. Prescription features are still available."
+    );
+  }
+
+  removeWaitingMessage();
+  renderLocalParticipant();
+  renderExistingParticipants();
+  enableControls();
+
+  if(participantRole === "DOCTOR"){
+    endConsultationButton.hidden = false;
+  }
+
+  setMeetingStatus(
+    participantRole === "DOCTOR"
+      ? "Doctor connected"
+      : "Waiting for doctor..."
+  );
+}
+
+function registerRoomEvents(){
+  room.on(
+    LivekitClient.RoomEvent.TrackSubscribed,
+    (track, publication, participant) => {
+      removeWaitingMessage();
+      attachTrack(track, participant.identity);
     }
+  );
 
-    setMeetingStatus(
-        "Requesting secure access..."
-    );
-
-    const response = await fetch(
-        `${API_BASE_URL}/video-meetings/${encodeURIComponent(
-            consultationId
-        )}/join`,
-        {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Authorization":
-                    `Bearer ${authToken}`
-            }
-        }
-    );
-
-    const result =
-        await safelyReadResponse(
-            response
-        );
-
-    if (
-        !response.ok ||
-        result?.success === false
-    ) {
-        throw new Error(
-            result?.message ||
-            "Unable to join consultation."
-        );
+  room.on(
+    LivekitClient.RoomEvent.TrackUnsubscribed,
+    track => {
+      track.detach().forEach(element => element.remove());
     }
+  );
 
-    const meeting =
-        result?.data || {};
+  room.on(
+    LivekitClient.RoomEvent.ParticipantConnected,
+    participant => {
+      removeWaitingMessage();
 
-    participantRole =
-        String(
-            meeting.participantRole || ""
-        ).toUpperCase();
-
-    const serverUrl =
-        meeting.serverUrl;
-
-    const liveKitToken =
-        meeting.accessToken ||
-        meeting.token;
-
-    if (
-        !serverUrl ||
-        !liveKitToken
-    ) {
-        throw new Error(
-            "LiveKit access details are missing from the server response."
-        );
-    }
-
-    room = new LivekitClient.Room({
-        adaptiveStream: true,
-        dynacast: true
-    });
-
-    registerRoomListeners();
-
-    setMeetingStatus(
-        "Connecting..."
-    );
-
-    await room.connect(
-        serverUrl,
-        liveKitToken
-    );
-
-    await room.localParticipant
-        .setMicrophoneEnabled(true);
-
-    await room.localParticipant
-        .setCameraEnabled(true);
-
-    removeWaitingMessage();
-
-    renderLocalParticipant();
-
-    renderExistingRemoteParticipants();
-
-    enableMeetingControls();
-
-    if (
+      setMeetingStatus(
         participantRole === "DOCTOR"
-    ) {
-        endConsultationButton.hidden =
-            false;
+          ? "Patient connected"
+          : "Doctor connected"
+      );
     }
+  );
 
-    setMeetingStatus(
+  room.on(
+    LivekitClient.RoomEvent.ParticipantDisconnected,
+    participant => {
+      removeParticipant(participant.identity);
+
+      setMeetingStatus(
         participantRole === "DOCTOR"
-            ? "Doctor connected"
-            : "Waiting for doctor..."
-    );
-}
-
-function registerRoomListeners() {
-
-    room.on(
-        LivekitClient.RoomEvent.TrackSubscribed,
-        (
-            track,
-            publication,
-            participant
-        ) => {
-            removeWaitingMessage();
-
-            attachTrack(
-                track,
-                participant.identity
-            );
-        }
-    );
-
-    room.on(
-        LivekitClient.RoomEvent.TrackUnsubscribed,
-        track => {
-            track.detach().forEach(
-                element => element.remove()
-            );
-        }
-    );
-
-    room.on(
-        LivekitClient.RoomEvent.ParticipantConnected,
-        participant => {
-            removeWaitingMessage();
-
-            setMeetingStatus(
-                participantRole === "DOCTOR"
-                    ? "Patient connected"
-                    : "Doctor connected"
-            );
-        }
-    );
-
-    room.on(
-        LivekitClient.RoomEvent.ParticipantDisconnected,
-        participant => {
-            removeParticipantContainer(
-                participant.identity
-            );
-
-            setMeetingStatus(
-                participantRole === "DOCTOR"
-                    ? "Patient disconnected"
-                    : "Doctor disconnected"
-            );
-        }
-    );
-
-    room.on(
-        LivekitClient.RoomEvent.LocalTrackPublished,
-        publication => {
-            if (publication.track) {
-                attachTrack(
-                    publication.track,
-                    room.localParticipant.identity
-                );
-            }
-        }
-    );
-
-    room.on(
-        LivekitClient.RoomEvent.LocalTrackUnpublished,
-        publication => {
-            if (publication.track) {
-                publication.track
-                    .detach()
-                    .forEach(
-                        element =>
-                            element.remove()
-                    );
-            }
-        }
-    );
-
-    room.on(
-        LivekitClient.RoomEvent.Disconnected,
-        () => {
-            if (!meetingEndedByUser) {
-                setMeetingStatus(
-                    "Disconnected"
-                );
-            }
-
-            disableMeetingControls();
-        }
-    );
-}
-
-function renderExistingRemoteParticipants() {
-
-    room.remoteParticipants.forEach(
-        participant => {
-            participant.trackPublications
-                .forEach(publication => {
-                    if (
-                        publication.track &&
-                        publication.isSubscribed
-                    ) {
-                        attachTrack(
-                            publication.track,
-                            participant.identity
-                        );
-                    }
-                });
-        }
-    );
-}
-
-function renderLocalParticipant() {
-
-    const localParticipant =
-        room.localParticipant;
-
-    localParticipant.trackPublications
-        .forEach(publication => {
-            if (publication.track) {
-                attachTrack(
-                    publication.track,
-                    localParticipant.identity
-                );
-            }
-        });
-}
-
-function attachTrack(
-    track,
-    participantIdentity
-) {
-
-    const container =
-        getOrCreateParticipantContainer(
-            participantIdentity
-        );
-
-    const attachedElements =
-        track.attach();
-
-    const elements =
-        Array.isArray(attachedElements)
-            ? attachedElements
-            : [attachedElements];
-
-    elements.forEach(element => {
-
-        element.autoplay = true;
-        element.playsInline = true;
-
-        if (
-            track.kind ===
-            LivekitClient.Track.Kind.Video
-        ) {
-            const videoContainer =
-                container.querySelector(
-                    ".participant-video"
-                );
-
-            videoContainer.innerHTML = "";
-            videoContainer.appendChild(
-                element
-            );
-
-        } else {
-            container
-                .querySelector(
-                    ".participant-audio"
-                )
-                .appendChild(
-                    element
-                );
-        }
-    });
-}
-
-function getOrCreateParticipantContainer(
-    participantIdentity
-) {
-
-    const safeIdentity =
-        createSafeElementId(
-            participantIdentity
-        );
-
-    let container =
-        document.getElementById(
-            `participant-${safeIdentity}`
-        );
-
-    if (container) {
-        return container;
+          ? "Patient disconnected"
+          : "Doctor disconnected"
+      );
     }
+  );
 
-    container =
-        document.createElement(
-            "article"
+  room.on(
+    LivekitClient.RoomEvent.LocalTrackPublished,
+    publication => {
+      if(publication.track){
+        attachTrack(
+          publication.track,
+          room.localParticipant.identity
         );
+      }
+    }
+  );
 
-    container.id =
-        `participant-${safeIdentity}`;
+  room.on(
+    LivekitClient.RoomEvent.Disconnected,
+    () => {
+      if(!meetingEndedByUser){
+        setMeetingStatus("Disconnected");
+      }
 
-    container.className =
-        "participant-card";
+      disableControls();
+    }
+  );
+}
 
-    container.dataset.identity =
-        participantIdentity;
+function renderExistingParticipants(){
+  room.remoteParticipants.forEach(participant => {
+    participant.trackPublications.forEach(publication => {
+      if(publication.track && publication.isSubscribed){
+        attachTrack(publication.track, participant.identity);
+      }
+    });
+  });
+}
 
-    container.innerHTML = `
-        <div class="participant-video"></div>
-        <div class="participant-audio"></div>
+function renderLocalParticipant(){
+  room.localParticipant.trackPublications.forEach(publication => {
+    if(publication.track){
+      attachTrack(
+        publication.track,
+        room.localParticipant.identity
+      );
+    }
+  });
+}
 
-        <span class="participant-name">
-            ${escapeHtml(
-                getParticipantDisplayName(
-                    participantIdentity
-                )
-            )}
-        </span>
-    `;
+function attachTrack(track, identity){
+  const container = getParticipantContainer(identity);
+  const attached = track.attach();
+  const elements = Array.isArray(attached) ? attached : [attached];
 
-    videoGrid.appendChild(
-        container
-    );
+  elements.forEach(element => {
+    element.autoplay = true;
+    element.playsInline = true;
 
+    if(track.kind === LivekitClient.Track.Kind.Video){
+      const videoContainer =
+        container.querySelector(".participant-video");
+
+      videoContainer.innerHTML = "";
+      videoContainer.appendChild(element);
+    }else{
+      container
+        .querySelector(".participant-audio")
+        .appendChild(element);
+    }
+  });
+}
+
+function getParticipantContainer(identity){
+  const safeId = safeElementId(identity);
+
+  let container =
+    document.getElementById(`participant-${safeId}`);
+
+  if(container){
     return container;
+  }
+
+  container = document.createElement("article");
+  container.id = `participant-${safeId}`;
+  container.className = "participant-card";
+
+  container.innerHTML = `
+    <div class="participant-video">
+      <i class="fa-solid fa-user"></i>
+    </div>
+
+    <div class="participant-audio"></div>
+
+    <span class="participant-name">
+      ${escapeHtml(participantDisplayName(identity))}
+    </span>
+  `;
+
+  videoGrid.appendChild(container);
+  return container;
 }
 
-function removeParticipantContainer(
-    participantIdentity
-) {
-
-    const safeIdentity =
-        createSafeElementId(
-            participantIdentity
-        );
-
-    document
-        .getElementById(
-            `participant-${safeIdentity}`
-        )
-        ?.remove();
+function removeParticipant(identity){
+  document
+    .getElementById(`participant-${safeElementId(identity)}`)
+    ?.remove();
 }
 
-async function toggleMicrophone() {
+async function toggleMicrophone(){
+  if(!room) return;
 
-    if (!room) {
-        return;
-    }
+  const enabled =
+    room.localParticipant.isMicrophoneEnabled;
 
-    try {
-        const enabled =
-            room.localParticipant
-                .isMicrophoneEnabled;
+  await room.localParticipant
+    .setMicrophoneEnabled(!enabled);
 
-        await room.localParticipant
-            .setMicrophoneEnabled(
-                !enabled
-            );
-
-        microphoneButton.textContent =
-            enabled
-                ? "Unmute"
-                : "Mute";
-
-    } catch (error) {
-        showError(
-            error.message ||
-            "Unable to change microphone."
-        );
-    }
+  microphoneButton.innerHTML =
+    enabled
+      ? `<i class="fa-solid fa-microphone-slash"></i> Unmute`
+      : `<i class="fa-solid fa-microphone"></i> Mute`;
 }
 
-async function toggleCamera() {
+async function toggleCamera(){
+  if(!room) return;
 
-    if (!room) {
-        return;
-    }
+  const enabled =
+    room.localParticipant.isCameraEnabled;
 
-    try {
-        const enabled =
-            room.localParticipant
-                .isCameraEnabled;
+  await room.localParticipant
+    .setCameraEnabled(!enabled);
 
-        await room.localParticipant
-            .setCameraEnabled(
-                !enabled
-            );
-
-        cameraButton.textContent =
-            enabled
-                ? "Camera On"
-                : "Camera Off";
-
-    } catch (error) {
-        showError(
-            error.message ||
-            "Unable to change camera."
-        );
-    }
+  cameraButton.innerHTML =
+    enabled
+      ? `<i class="fa-solid fa-video-slash"></i> Camera On`
+      : `<i class="fa-solid fa-video"></i> Camera Off`;
 }
 
-function leaveConsultation() {
+function leaveConsultation(){
+  meetingEndedByUser = true;
+  stopPatientPrescriptionRefresh();
+
+  if(room){
+    room.disconnect();
+  }
+
+  redirectToDashboard();
+}
+
+async function endConsultation(){
+  if(participantRole !== "DOCTOR") return;
+
+  if(!confirm(
+    "End this consultation? Finalize the prescription first when medicines have been prescribed."
+  )){
+    return;
+  }
+
+  setButtonLoading(
+    endConsultationButton,
+    true,
+    "Ending..."
+  );
+
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/video-meetings/${encodeURIComponent(consultationId)}/end`,
+      {
+        method:"PUT",
+        headers:getAuthHeaders(false)
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok || result?.success === false){
+      throw new Error(
+        result?.message || "Unable to end consultation."
+      );
+    }
+
+    await fetch(
+      `${API_BASE_URL}/consultations/${encodeURIComponent(consultationId)}/complete`,
+      {
+        method:"PUT",
+        headers:getAuthHeaders(false)
+      }
+    ).catch(() => {});
 
     meetingEndedByUser = true;
 
-    if (room) {
-        room.disconnect();
+    if(room){
+      room.disconnect();
     }
 
-    redirectToDashboard();
-}
-
-async function endConsultation() {
-
-    if (
-        participantRole !== "DOCTOR"
-    ) {
-        return;
-    }
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to end this consultation?"
-        );
-
-    if (!confirmed) {
-        return;
-    }
-
-    endConsultationButton.disabled =
-        true;
-
-    endConsultationButton.textContent =
-        "Ending...";
-
-    try {
-        const response = await fetch(
-            `${API_BASE_URL}/video-meetings/${encodeURIComponent(
-                consultationId
-            )}/end`,
-            {
-                method: "PUT",
-                headers: {
-                    "Accept":
-                        "application/json",
-                    "Authorization":
-                        `Bearer ${authToken}`
-                }
-            }
-        );
-
-        const result =
-            await safelyReadResponse(
-                response
-            );
-
-        if (
-            !response.ok ||
-            result?.success === false
-        ) {
-            throw new Error(
-                result?.message ||
-                "Unable to end consultation."
-            );
-        }
-
-        meetingEndedByUser = true;
-
-        if (room) {
-            room.disconnect();
-        }
-
-        alert(
-            result?.message ||
-            "Consultation ended successfully."
-        );
-
-        redirectToDashboard();
-
-    } catch (error) {
-        endConsultationButton.disabled =
-            false;
-
-        endConsultationButton.textContent =
-            "End Consultation";
-
-        showError(
-            error.message ||
-            "Unable to end consultation."
-        );
-    }
-}
-
-function redirectToDashboard() {
-
-    if (
-        participantRole === "DOCTOR"
-    ) {
-        window.location.href =
-            "/doctor/doctor-dashboard.html";
-
-        return;
-    }
-
-    window.location.href =
-        "/patient/my-appointments.html";
-}
-
-function enableMeetingControls() {
-
-    microphoneButton.disabled =
-        false;
-
-    cameraButton.disabled =
-        false;
-
-    leaveButton.disabled =
-        false;
-
-    if (
-        participantRole === "DOCTOR"
-    ) {
-        endConsultationButton.disabled =
-            false;
-    }
-}
-
-function disableMeetingControls() {
-
-    microphoneButton.disabled =
-        true;
-
-    cameraButton.disabled =
-        true;
-
-    leaveButton.disabled =
-        true;
-
-    endConsultationButton.disabled =
-        true;
-}
-
-function removeWaitingMessage() {
-    waitingMessage?.remove();
-}
-
-function setMeetingStatus(message) {
-    meetingStatus.textContent =
-        message;
-}
-
-function showError(message) {
-
-    errorBox.textContent =
-        message;
-
-    errorBox.classList.add(
-        "show"
+    showSuccess(
+      result?.message || "Consultation ended successfully."
     );
 
-    setMeetingStatus(
-        "Unable to connect"
+    setTimeout(redirectToDashboard, 1000);
+
+  }catch(error){
+    showError(error.message);
+
+    setButtonLoading(
+      endConsultationButton,
+      false,
+      "End Consultation",
+      "fa-phone-slash"
     );
+  }
 }
 
-function createSafeElementId(value) {
-    return String(value || "participant")
-        .replace(
-            /[^a-zA-Z0-9_-]/g,
-            "-"
-        );
+/* =========================
+   ROLE UI
+========================= */
+
+function initializeDoctorPrescriptionControls(){
+  const finalizeButton =
+    document.getElementById("finalizePrescriptionButton");
+
+  if(finalizeButton){
+    finalizeButton.disabled = true;
+  }
 }
 
-function getParticipantDisplayName(
-    identity
-) {
-    const value =
-        String(identity || "");
+function configureRoleInterface(){
+  const doctorView = document.getElementById("doctorView");
+  const patientView = document.getElementById("patientView");
+  const rolePill = document.getElementById("rolePill");
+  const patientDetailsPanel =
+    document.getElementById("patientDetailsPanel");
 
-    if (
-        value.toUpperCase()
-            .startsWith("DOCTOR")
-    ) {
-        return "Doctor";
+  const reportUploadArea =
+    document.getElementById("patientReportUploadArea");
+
+  if(participantRole === "DOCTOR"){
+    doctorView.classList.add("show");
+    patientView.classList.remove("show");
+
+    patientDetailsPanel?.classList.remove("role-hidden");
+
+    if(reportUploadArea){
+      reportUploadArea.hidden = true;
     }
 
-    if (
-        value.toUpperCase()
-            .startsWith("PATIENT")
-    ) {
-        return "Patient";
+    rolePill.innerHTML = `
+      <i class="fa-solid fa-user-doctor"></i>
+      Doctor View
+    `;
+  }else{
+    patientView.classList.add("show");
+    doctorView.classList.remove("show");
+
+    /*
+     * Patient side displays only the video consultation
+     * and prescription details. Personal/patient details
+     * are hidden from the patient interface.
+     */
+    patientDetailsPanel?.classList.add("role-hidden");
+
+    if(reportUploadArea){
+      reportUploadArea.hidden = false;
     }
 
-    return value || "Participant";
+    rolePill.innerHTML = `
+      <i class="fa-solid fa-user"></i>
+      Patient View
+    `;
+  }
 }
 
-function escapeHtml(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
+/* =========================
+   CONSULTATION DETAILS
+========================= */
 
-async function safelyReadResponse(
-    response
-) {
-    const text =
-        await response.text();
+async function loadConsultationDetails(){
+  let consultation = null;
 
-    if (!text) {
-        return null;
+  const directEndpoints = [
+    `${API_BASE_URL}/consultations/${encodeURIComponent(consultationId)}`,
+    `${API_BASE_URL}/consultations/${encodeURIComponent(consultationId)}/get`
+  ];
+
+  for(const endpoint of directEndpoints){
+    try{
+      const response = await fetch(endpoint, {
+        method:"GET",
+        headers:getAuthHeaders(false)
+      });
+
+      const result = await readResponse(response);
+
+      if(response.ok && result?.success !== false && result?.data){
+        consultation = result.data;
+        break;
+      }
+    }catch(error){
+      console.warn("Consultation endpoint failed:", endpoint);
     }
+  }
 
-    try {
-        return JSON.parse(text);
+  if(!consultation){
+    const listEndpoints = [
+      `${API_BASE_URL}/consultations/my-consultations`,
+      `${API_BASE_URL}/consultations/doctor/upcoming`,
+      `${API_BASE_URL}/consultations/doctor/requests`
+    ];
 
-    } catch {
-        return {
-            success: false,
-            message: text
-        };
-    }
-}
+    for(const endpoint of listEndpoints){
+      try{
+        const response = await fetch(endpoint, {
+          method:"GET",
+          headers:getAuthHeaders(false)
+        });
 
-microphoneButton.addEventListener(
-    "click",
-    toggleMicrophone
-);
+        const result = await readResponse(response);
 
-cameraButton.addEventListener(
-    "click",
-    toggleCamera
-);
+        const list = extractArray(result);
 
-leaveButton.addEventListener(
-    "click",
-    leaveConsultation
-);
+        consultation =
+          list.find(item =>
+            String(item.id) === String(consultationId)
+          ) || null;
 
-endConsultationButton.addEventListener(
-    "click",
-    endConsultation
-);
-
-window.addEventListener(
-    "beforeunload",
-    () => {
-        if (room) {
-            room.disconnect();
+        if(consultation){
+          break;
         }
+      }catch(error){
+        console.warn("Consultation list failed:", endpoint);
+      }
     }
-);
+  }
 
-joinConsultation().catch(error => {
-    console.error(
-        "Consultation connection error:",
-        error
+  if(!consultation){
+    return;
+  }
+
+  currentConsultation = consultation;
+  renderConsultationDetails(consultation);
+
+  const embeddedReports =
+    extractReportsFromConsultation(consultation);
+
+  if(embeddedReports.length > 0){
+    consultationReports = mergeReports(
+      consultationReports,
+      embeddedReports
     );
 
+    renderConsultationReports(
+      consultationReports
+    );
+  }
+}
+
+function renderConsultationDetails(consultation){
+  setText(
+    "patientName",
+    consultation.patientName || "Patient"
+  );
+
+  setText(
+    "patientAgeGender",
+    [
+      consultation.age
+        ? `${consultation.age} years`
+        : "",
+      consultation.gender || ""
+    ].filter(Boolean).join(" / ") || "—"
+  );
+
+  setText(
+    "patientPhone",
+    consultation.phoneNumber || "—"
+  );
+
+  setText(
+    "patientSymptoms",
+    consultation.symptoms || "No symptoms recorded."
+  );
+
+  setText(
+    "patientHistory",
+    consultation.pastMedicalHistory ||
+    "No past medical history recorded."
+  );
+
+  setText(
+    "consultationTime",
+    [
+      consultation.consultationDate
+        ? formatDate(consultation.consultationDate)
+        : "",
+      consultation.startTime
+        ? formatTime(consultation.startTime)
+        : ""
+    ].filter(Boolean).join(" • ") ||
+    `Consultation #${consultationId}`
+  );
+}
+
+/* =========================
+   PATIENT REPORTS
+========================= */
+
+function setupReportDragAndDrop(){
+  const box =
+    document.getElementById("reportUploadBox");
+
+  if(!box){
+    return;
+  }
+
+  ["dragenter","dragover"].forEach(eventName => {
+    box.addEventListener(eventName, event => {
+      event.preventDefault();
+      box.classList.add("dragging");
+    });
+  });
+
+  ["dragleave","drop"].forEach(eventName => {
+    box.addEventListener(eventName, event => {
+      event.preventDefault();
+      box.classList.remove("dragging");
+    });
+  });
+
+  box.addEventListener("drop", event => {
+    const files =
+      Array.from(event.dataTransfer?.files || []);
+
+    selectReportFiles(files);
+  });
+}
+
+function handleReportSelection(event){
+  const files =
+    Array.from(event.target.files || []);
+
+  selectReportFiles(files);
+
+  event.target.value = "";
+}
+
+function selectReportFiles(files){
+  const maximumSize =
+    10 * 1024 * 1024;
+
+  const allowedTypes = [
+    "application/pdf",
+    "image/png",
+    "image/jpeg"
+  ];
+
+  const validFiles = [];
+
+  files.forEach(file => {
+    if(!allowedTypes.includes(file.type)){
+      showError(
+        `${file.name} is not a supported report format.`
+      );
+      return;
+    }
+
+    if(file.size > maximumSize){
+      showError(
+        `${file.name} is larger than 10 MB.`
+      );
+      return;
+    }
+
+    const duplicate =
+      selectedReportFiles.some(existing =>
+        existing.name === file.name &&
+        existing.size === file.size &&
+        existing.lastModified === file.lastModified
+      );
+
+    if(!duplicate){
+      validFiles.push(file);
+    }
+  });
+
+  selectedReportFiles.push(...validFiles);
+
+  const message =
+    document.getElementById("reportSelectedMessage");
+
+  const button =
+    document.getElementById("uploadReportsButton");
+
+  if(message){
+    message.textContent =
+      selectedReportFiles.length
+        ? `${selectedReportFiles.length} report(s) selected`
+        : "";
+  }
+
+  if(button){
+    button.disabled =
+      selectedReportFiles.length === 0;
+  }
+}
+
+async function uploadPatientReports(){
+  if(
+    participantRole === "DOCTOR" ||
+    selectedReportFiles.length === 0
+  ){
+    return;
+  }
+
+  const button =
+    document.getElementById("uploadReportsButton");
+
+  setButtonLoading(
+    button,
+    true,
+    "Uploading..."
+  );
+
+  try{
+    for(const file of selectedReportFiles){
+      const uploadedFile =
+        await uploadSingleReportFile(file);
+
+      await attachReportToConsultation(
+        uploadedFile,
+        file
+      );
+    }
+
+    selectedReportFiles = [];
+
+    document.getElementById(
+      "reportSelectedMessage"
+    ).textContent = "";
+
+    showSuccess(
+      "Patient reports uploaded successfully."
+    );
+
+    await loadConsultationReports();
+
+  }catch(error){
     showError(
-        error.message ||
-        "Unable to join consultation."
+      error.message ||
+      "Unable to upload patient reports."
     );
+
+  }finally{
+    setButtonLoading(
+      button,
+      false,
+      "Upload Reports",
+      "fa-upload"
+    );
+
+    button.disabled =
+      selectedReportFiles.length === 0;
+  }
+}
+
+async function uploadSingleReportFile(file){
+  const formData =
+    new FormData();
+
+  formData.append("file", file);
+  formData.append("module", "CONSULTATION_REPORT");
+
+  const response = await fetch(
+    `${API_BASE_URL}/images/upload`,
+    {
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${authToken}`
+      },
+      body:formData
+    }
+  );
+
+  const result =
+    await readResponse(response);
+
+  if(
+    !response.ok ||
+    result?.success === false ||
+    !result?.data?.fileUrl
+  ){
+    throw new Error(
+      result?.message ||
+      `Unable to upload ${file.name}.`
+    );
+  }
+
+  return result.data;
+}
+
+async function attachReportToConsultation(
+  uploadedFile,
+  originalFile
+){
+  const requestBody = {
+    fileId:uploadedFile.id || null,
+    fileName:
+      originalFile.name ||
+      uploadedFile.fileName,
+    fileUrl:uploadedFile.fileUrl,
+    contentType:
+      originalFile.type ||
+      uploadedFile.contentType,
+    reportType:
+      getReportType(
+        originalFile.type ||
+        uploadedFile.contentType
+      )
+  };
+
+  const endpoints = [
+    `${API_BASE_URL}/consultations/${encodeURIComponent(
+      consultationId
+    )}/reports`,
+    `${API_BASE_URL}/consultation-reports/consultation/${encodeURIComponent(
+      consultationId
+    )}`
+  ];
+
+  let lastError = null;
+
+  for(const endpoint of endpoints){
+    try{
+      const response = await fetch(
+        endpoint,
+        {
+          method:"POST",
+          headers:getAuthHeaders(true),
+          body:JSON.stringify(requestBody)
+        }
+      );
+
+      const result =
+        await readResponse(response);
+
+      if(
+        response.ok &&
+        result?.success !== false
+      ){
+        return result?.data || requestBody;
+      }
+
+      lastError = new Error(
+        result?.message ||
+        `Report attachment API failed with HTTP ${response.status}.`
+      );
+
+    }catch(error){
+      lastError = error;
+    }
+  }
+
+  /*
+   * The uploaded file cannot be linked to the consultation unless
+   * the backend exposes a consultation-report association endpoint.
+   */
+  throw lastError || new Error(
+    "The file uploaded, but the backend could not link it to this consultation."
+  );
+}
+
+async function loadConsultationReports(){
+  const list =
+    document.getElementById("consultationReportList");
+
+  if(!list){
+    return;
+  }
+
+  list.innerHTML = `
+    <div class="empty">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Loading uploaded reports...
+    </div>
+  `;
+
+  let loadedReports = [];
+
+  const endpoints = [
+    `${API_BASE_URL}/consultations/${encodeURIComponent(
+      consultationId
+    )}/reports`,
+    `${API_BASE_URL}/consultation-reports/consultation/${encodeURIComponent(
+      consultationId
+    )}`
+  ];
+
+  for(const endpoint of endpoints){
+    try{
+      const response = await fetch(
+        endpoint,
+        {
+          method:"GET",
+          headers:getAuthHeaders(false)
+        }
+      );
+
+      const result =
+        await readResponse(response);
+
+      if(
+        response.ok &&
+        result?.success !== false
+      ){
+        loadedReports =
+          extractReportArray(result);
+
+        if(loadedReports.length > 0){
+          break;
+        }
+      }
+    }catch(error){
+      console.warn(
+        "Report endpoint failed:",
+        endpoint,
+        error
+      );
+    }
+  }
+
+  const embeddedReports =
+    extractReportsFromConsultation(
+      currentConsultation
+    );
+
+  consultationReports =
+    mergeReports(
+      loadedReports,
+      embeddedReports
+    );
+
+  renderConsultationReports(
+    consultationReports
+  );
+}
+
+function extractReportArray(result){
+  if(Array.isArray(result)){
+    return result;
+  }
+
+  if(Array.isArray(result?.data)){
+    return result.data;
+  }
+
+  if(Array.isArray(result?.data?.reports)){
+    return result.data.reports;
+  }
+
+  if(Array.isArray(result?.data?.attachments)){
+    return result.data.attachments;
+  }
+
+  return [];
+}
+
+function extractReportsFromConsultation(
+  consultation
+){
+  if(!consultation){
+    return [];
+  }
+
+  const candidates = [
+    consultation.reports,
+    consultation.reportFiles,
+    consultation.attachments,
+    consultation.medicalReports,
+    consultation.uploadedReports
+  ];
+
+  for(const candidate of candidates){
+    if(Array.isArray(candidate)){
+      return candidate;
+    }
+  }
+
+  const urlCandidates = [
+    consultation.reportUrls,
+    consultation.attachmentUrls,
+    consultation.medicalReportUrls
+  ];
+
+  for(const candidate of urlCandidates){
+    if(Array.isArray(candidate)){
+      return candidate.map((url,index) => ({
+        id:`embedded-${index}`,
+        fileName:getFileNameFromUrl(url),
+        fileUrl:url,
+        contentType:getContentTypeFromUrl(url)
+      }));
+    }
+  }
+
+  return [];
+}
+
+function mergeReports(...groups){
+  const map =
+    new Map();
+
+  groups
+    .flat()
+    .filter(Boolean)
+    .forEach((report,index) => {
+      const normalized =
+        normalizeReport(report,index);
+
+      const key =
+        normalized.id ||
+        normalized.fileUrl ||
+        `${normalized.fileName}-${index}`;
+
+      map.set(String(key),normalized);
+    });
+
+  return [...map.values()];
+}
+
+function normalizeReport(report,index){
+  if(typeof report === "string"){
+    return {
+      id:`url-${index}`,
+      fileName:getFileNameFromUrl(report),
+      fileUrl:report,
+      contentType:getContentTypeFromUrl(report),
+      createdAt:null
+    };
+  }
+
+  const fileUrl =
+    report.fileUrl ||
+    report.reportUrl ||
+    report.url ||
+    report.downloadUrl ||
+    report.path ||
+    "";
+
+  return {
+    id:
+      report.id ||
+      report.reportId ||
+      report.fileId ||
+      `report-${index}`,
+    fileName:
+      report.fileName ||
+      report.originalFileName ||
+      report.reportName ||
+      report.name ||
+      getFileNameFromUrl(fileUrl) ||
+      `Report ${index + 1}`,
+    fileUrl:fileUrl,
+    contentType:
+      report.contentType ||
+      report.fileType ||
+      report.mimeType ||
+      getContentTypeFromUrl(fileUrl),
+    createdAt:
+      report.createdAt ||
+      report.uploadedAt ||
+      null
+  };
+}
+
+function renderConsultationReports(reports){
+  const list =
+    document.getElementById("consultationReportList");
+
+  if(!list){
+    return;
+  }
+
+  if(!reports.length){
+    list.innerHTML = `
+      <div class="empty">
+        <i class="fa-solid fa-file-circle-xmark"></i>
+        No reports have been uploaded for this consultation.
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML =
+    reports.map(report => {
+      const url =
+        getReportUrl(report.fileUrl);
+
+      const isPdf =
+        String(report.contentType || "")
+          .toLowerCase()
+          .includes("pdf") ||
+        String(report.fileName || "")
+          .toLowerCase()
+          .endsWith(".pdf");
+
+      return `
+        <article class="report-card">
+
+          <div class="report-icon">
+            <i class="fa-solid ${
+              isPdf
+                ? "fa-file-pdf"
+                : "fa-file-image"
+            }"></i>
+          </div>
+
+          <div class="report-info">
+            <strong>
+              ${escapeHtml(
+                report.fileName ||
+                "Medical Report"
+              )}
+            </strong>
+
+            <span>
+              ${
+                isPdf
+                  ? "PDF Report"
+                  : "Image Report"
+              }
+              ${
+                report.createdAt
+                  ? ` • ${escapeHtml(
+                      formatReportDate(
+                        report.createdAt
+                      )
+                    )}`
+                  : ""
+              }
+            </span>
+          </div>
+
+          <div class="report-actions">
+            <button
+              type="button"
+              class="report-button"
+              onclick="viewReport(
+                '${escapeJs(url)}',
+                '${escapeJs(
+                  report.contentType || ""
+                )}'
+              )"
+            >
+              <i class="fa-solid fa-eye"></i>
+              View
+            </button>
+
+            <button
+              type="button"
+              class="report-button download-report"
+              onclick="downloadReport(
+                '${escapeJs(url)}',
+                '${escapeJs(
+                  report.fileName ||
+                  "medical-report"
+                )}'
+              )"
+            >
+              <i class="fa-solid fa-download"></i>
+            </button>
+          </div>
+
+        </article>
+      `;
+    }).join("");
+}
+
+function viewReport(url,contentType){
+  if(!url){
+    showError(
+      "This report does not contain a valid file URL."
+    );
+    return;
+  }
+
+  window.open(
+    url,
+    "_blank",
+    "noopener,noreferrer"
+  );
+}
+
+async function downloadReport(
+  url,
+  fileName
+){
+  if(!url){
+    showError(
+      "This report does not contain a valid file URL."
+    );
+    return;
+  }
+
+  try{
+    const response = await fetch(
+      url,
+      {
+        method:"GET",
+        headers:url.startsWith(
+          "http://localhost:8085"
+        )
+          ? {
+              Authorization:
+                `Bearer ${authToken}`
+            }
+          : {}
+      }
+    );
+
+    if(!response.ok){
+      throw new Error(
+        "Unable to download report."
+      );
+    }
+
+    const blob =
+      await response.blob();
+
+    const objectUrl =
+      URL.createObjectURL(blob);
+
+    const anchor =
+      document.createElement("a");
+
+    anchor.href = objectUrl;
+    anchor.download =
+      fileName || "medical-report";
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    URL.revokeObjectURL(objectUrl);
+
+  }catch(error){
+    showError(
+      error.message ||
+      "Unable to download report."
+    );
+  }
+}
+
+function getReportUrl(value){
+  if(!value){
+    return "";
+  }
+
+  const url =
+    String(value).trim();
+
+  if(
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("data:") ||
+    url.startsWith("blob:")
+  ){
+    return url;
+  }
+
+  if(url.startsWith("/")){
+    return `http://localhost:8085${url}`;
+  }
+
+  return `http://localhost:8085/${url}`;
+}
+
+function getReportType(contentType){
+  const value =
+    String(contentType || "")
+      .toLowerCase();
+
+  if(value.includes("pdf")){
+    return "PDF";
+  }
+
+  if(value.includes("image")){
+    return "IMAGE";
+  }
+
+  return "DOCUMENT";
+}
+
+function getContentTypeFromUrl(url){
+  const value =
+    String(url || "")
+      .toLowerCase();
+
+  if(value.endsWith(".pdf")){
+    return "application/pdf";
+  }
+
+  if(
+    value.endsWith(".jpg") ||
+    value.endsWith(".jpeg")
+  ){
+    return "image/jpeg";
+  }
+
+  if(value.endsWith(".png")){
+    return "image/png";
+  }
+
+  return "application/octet-stream";
+}
+
+function getFileNameFromUrl(url){
+  const value =
+    String(url || "");
+
+  const clean =
+    value.split("?")[0];
+
+  return decodeURIComponent(
+    clean.substring(
+      clean.lastIndexOf("/") + 1
+    )
+  );
+}
+
+function formatReportDate(value){
+  const date =
+    new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "";
+  }
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric"
+    }
+  );
+}
+
+/* =========================
+   PRODUCTS AND SEARCH
+========================= */
+
+async function loadProducts(){
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/products/getAll`,
+      {
+        method:"GET",
+        headers:{Accept:"application/json"}
+      }
+    );
+
+    const result = await readResponse(response);
+
+    allProducts =
+      extractArray(result).filter(product =>
+        Number(product.stock || 0) > 0
+      );
+  }catch(error){
+    console.error("Products loading failed:", error);
+  }
+}
+
+function setupMedicineSearch(){
+  const input = document.getElementById("medicineSearch");
+  const suggestions =
+    document.getElementById("productSuggestions");
+
+  input.addEventListener("input", function(){
+    const query = input.value.trim().toLowerCase();
+
+    document.getElementById("selectedProductId").value = "";
+
+    if(!query){
+      suggestions.innerHTML = "";
+      suggestions.classList.remove("show");
+      return;
+    }
+
+    const matches =
+      allProducts.filter(product => {
+        const name = String(
+          product.productName ||
+          product.name ||
+          ""
+        ).toLowerCase();
+
+        const code = String(
+          product.productCode || ""
+        ).toLowerCase();
+
+        return name.includes(query) || code.includes(query);
+      }).slice(0,8);
+
+    if(matches.length === 0){
+      suggestions.innerHTML = `
+        <button
+          type="button"
+          class="suggestion"
+          onclick="useTypedMedicine()"
+        >
+          <strong>Use “${escapeHtml(input.value)}”</strong>
+          <span>Add as a manually entered medicine</span>
+        </button>
+      `;
+    }else{
+      suggestions.innerHTML =
+        matches.map(product => `
+          <button
+            type="button"
+            class="suggestion"
+            onclick="selectProduct(
+              '${escapeJs(String(product.id))}',
+              '${escapeJs(product.productName || product.name || "")}'
+            )"
+          >
+            <strong>
+              ${escapeHtml(product.productName || product.name || "Product")}
+            </strong>
+
+            <span>
+              ${escapeHtml(product.productCode || "")}
+              ${product.netQty ? ` • ${escapeHtml(product.netQty)}` : ""}
+              • Stock ${escapeHtml(String(product.stock || 0))}
+            </span>
+          </button>
+        `).join("");
+    }
+
+    suggestions.classList.add("show");
+  });
+
+  document.addEventListener("click", function(event){
+    if(!event.target.closest(".search-wrap")){
+      suggestions.classList.remove("show");
+    }
+  });
+}
+
+function selectProduct(id, name){
+  document.getElementById("selectedProductId").value = id;
+  document.getElementById("medicineName").value = name;
+  document.getElementById("medicineSearch").value = name;
+  document.getElementById("productSuggestions").classList.remove("show");
+}
+
+function useTypedMedicine(){
+  const name =
+    document.getElementById("medicineSearch").value.trim();
+
+  document.getElementById("medicineName").value = name;
+  document.getElementById("selectedProductId").value = "";
+  document.getElementById("productSuggestions").classList.remove("show");
+}
+
+/* =========================
+   DOCTOR PRESCRIPTION
+========================= */
+
+async function createPrescription(){
+  if(participantRole !== "DOCTOR"){
+    throw new Error("Only the doctor can create a prescription.");
+  }
+
+  if(currentPrescription?.id){
+    return currentPrescription;
+  }
+
+  const diagnosis =
+    document.getElementById("diagnosis").value.trim();
+
+  const advice =
+    document.getElementById("advice").value.trim();
+
+  if(!diagnosis){
+    throw new Error(
+      "Please enter the diagnosis before adding medicine."
+    );
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/prescriptions/create`,
+    {
+      method:"POST",
+      headers:getAuthHeaders(true),
+      body:JSON.stringify({
+        consultationId:Number(consultationId),
+        diagnosis:diagnosis,
+        advice:advice
+      })
+    }
+  );
+
+  const result = await readResponse(response);
+
+  if(!response.ok || result?.success === false){
+    throw new Error(
+      result?.message || "Unable to create prescription."
+    );
+  }
+
+  currentPrescription = result.data;
+
+  renderDoctorPrescription(currentPrescription);
+
+  return currentPrescription;
+}
+
+async function addMedicine(){
+  if(participantRole !== "DOCTOR"){
+    return;
+  }
+
+  const productId =
+    document.getElementById("selectedProductId").value;
+
+  const medicineName =
+    document.getElementById("medicineName").value.trim();
+
+  const dosage =
+    document.getElementById("dosage").value.trim();
+
+  const frequency =
+    document.getElementById("frequency").value.trim();
+
+  const durationDays =
+    Number(document.getElementById("durationDays").value);
+
+  const quantity =
+    Number(document.getElementById("quantity").value);
+
+  const instructions =
+    document.getElementById("instructions").value.trim();
+
+  if(!medicineName || !dosage){
+    showPrescriptionMessage(
+      "Medicine name and dosage are required.",
+      "error"
+    );
+    return;
+  }
+
+  if(durationDays < 1 || quantity < 1){
+    showPrescriptionMessage(
+      "Duration and quantity must be at least 1.",
+      "error"
+    );
+    return;
+  }
+
+  const button =
+    document.getElementById("addMedicineButton");
+
+  setButtonLoading(button, true, "Adding...");
+
+  try{
+    if(!currentPrescription?.id){
+      showPrescriptionMessage(
+        "Creating prescription...",
+        "success"
+      );
+
+      await createPrescription();
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/prescriptions/${encodeURIComponent(currentPrescription.id)}/items`,
+      {
+        method:"POST",
+        headers:getAuthHeaders(true),
+        body:JSON.stringify({
+          productId:productId ? Number(productId) : null,
+          medicineName:medicineName,
+          dosage:dosage,
+          frequency:frequency || null,
+          durationDays:durationDays,
+          quantity:quantity,
+          instructions:instructions || null
+        })
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok || result?.success === false){
+      throw new Error(
+        result?.message || "Unable to add medicine."
+      );
+    }
+
+    currentPrescription = result.data;
+
+    resetMedicineForm();
+    renderDoctorPrescription(currentPrescription);
+
+    showPrescriptionMessage(
+      result?.message || "Medicine added successfully.",
+      "success"
+    );
+
+  }catch(error){
+    showPrescriptionMessage(error.message, "error");
+
+  }finally{
+    setButtonLoading(
+      button,
+      false,
+      "Add Medicine",
+      "fa-plus"
+    );
+  }
+}
+
+async function removeMedicine(itemId){
+  if(!currentPrescription?.id || !itemId) return;
+
+  if(!confirm("Remove this medicine?")){
+    return;
+  }
+
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/prescriptions/${encodeURIComponent(currentPrescription.id)}/items/${encodeURIComponent(itemId)}`,
+      {
+        method:"DELETE",
+        headers:getAuthHeaders(false)
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok || result?.success === false){
+      throw new Error(
+        result?.message || "Unable to remove medicine."
+      );
+    }
+
+    currentPrescription = result.data;
+    renderDoctorPrescription(currentPrescription);
+
+    showPrescriptionMessage(
+      result?.message || "Medicine removed successfully.",
+      "success"
+    );
+
+  }catch(error){
+    showPrescriptionMessage(error.message, "error");
+  }
+}
+
+async function finalizePrescription(){
+  if(!currentPrescription?.id) return;
+
+  if(!currentPrescription.items?.length){
+    showPrescriptionMessage(
+      "Add at least one medicine before finalizing.",
+      "error"
+    );
+    return;
+  }
+
+  if(!confirm(
+    "Finalize this prescription? It cannot be edited afterward."
+  )){
+    return;
+  }
+
+  const button =
+    document.getElementById("finalizePrescriptionButton");
+
+  setButtonLoading(button, true, "Finalizing...");
+
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/prescriptions/${encodeURIComponent(currentPrescription.id)}/finalize`,
+      {
+        method:"PUT",
+        headers:getAuthHeaders(false)
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok || result?.success === false){
+      throw new Error(
+        result?.message || "Unable to finalize prescription."
+      );
+    }
+
+    currentPrescription = result.data;
+    renderDoctorPrescription(currentPrescription);
+
+    showPrescriptionMessage(
+      result?.message ||
+      "Prescription finalized successfully.",
+      "success"
+    );
+
+  }catch(error){
+    showPrescriptionMessage(error.message, "error");
+
+  }finally{
+    setButtonLoading(
+      button,
+      false,
+      "Finalize Prescription",
+      "fa-check-double"
+    );
+  }
+}
+
+function renderDoctorPrescription(prescription){
+  if(!prescription) return;
+
+  document.getElementById("diagnosis").value =
+    prescription.diagnosis || "";
+
+  document.getElementById("advice").value =
+    prescription.advice || "";
+
+  const finalized =
+    String(prescription.status || "").toUpperCase() ===
+    "FINALIZED";
+
+  updatePrescriptionStatus(prescription.status || "DRAFT");
+
+  document.getElementById("medicineForm").hidden = finalized;
+  document.getElementById("doctorPrescriptionActions").hidden = false;
+
+  document.getElementById("diagnosis").disabled = true;
+  document.getElementById("advice").disabled = true;
+
+  const finalizeButton =
+    document.getElementById("finalizePrescriptionButton");
+
+  finalizeButton.disabled =
+    finalized ||
+    !Array.isArray(prescription.items) ||
+    prescription.items.length === 0;
+
+  finalizeButton.hidden = finalized;
+
+  const list =
+    document.getElementById("doctorMedicineList");
+
+  if(!prescription.items?.length){
+    list.innerHTML = `
+      <div class="empty">
+        <i class="fa-solid fa-capsules"></i>
+        No medicines have been added.
+      </div>
+    `;
+  }else{
+    list.innerHTML =
+      renderMedicineCards(prescription.items, !finalized);
+  }
+}
+
+/* =========================
+   PATIENT PRESCRIPTION
+========================= */
+
+function startPatientPrescriptionRefresh(){
+  stopPatientPrescriptionRefresh();
+
+  prescriptionTimer =
+    setInterval(refreshPrescription, 5000);
+}
+
+function stopPatientPrescriptionRefresh(){
+  if(prescriptionTimer){
+    clearInterval(prescriptionTimer);
+    prescriptionTimer = null;
+  }
+}
+
+async function refreshPrescription(){
+  const prescription =
+    await fetchPrescriptionForConsultation();
+
+  if(!prescription){
+    if(participantRole !== "DOCTOR"){
+      renderPatientEmptyPrescription();
+    }
+
+    return;
+  }
+
+  currentPrescription = prescription;
+
+  if(participantRole === "DOCTOR"){
+    renderDoctorPrescription(prescription);
+  }else{
+    renderPatientPrescription(prescription);
+  }
+}
+
+async function fetchPrescriptionForConsultation(){
+  const directEndpoints = [
+    `${API_BASE_URL}/prescriptions/consultation/${encodeURIComponent(consultationId)}`,
+    `${API_BASE_URL}/prescriptions/by-consultation/${encodeURIComponent(consultationId)}`
+  ];
+
+  for(const endpoint of directEndpoints){
+    try{
+      const response = await fetch(endpoint, {
+        method:"GET",
+        headers:getAuthHeaders(false)
+      });
+
+      const result = await readResponse(response);
+
+      if(response.ok && result?.success !== false && result?.data){
+        return result.data;
+      }
+    }catch(error){
+      console.warn("Prescription endpoint failed:", endpoint);
+    }
+  }
+
+  const listEndpoints = [
+    `${API_BASE_URL}/prescriptions/my-prescriptions`,
+    `${API_BASE_URL}/medical-staff/prescriptions`
+  ];
+
+  for(const endpoint of listEndpoints){
+    try{
+      const response = await fetch(endpoint, {
+        method:"GET",
+        headers:getAuthHeaders(false)
+      });
+
+      const result = await readResponse(response);
+
+      if(!response.ok){
+        continue;
+      }
+
+      const match =
+        extractArray(result).find(item =>
+          String(item.consultationId) ===
+          String(consultationId)
+        );
+
+      if(match){
+        return match;
+      }
+    }catch(error){
+      console.warn("Prescription list failed:", endpoint);
+    }
+  }
+
+  return null;
+}
+
+function renderPatientPrescription(prescription){
+  updatePrescriptionStatus(prescription.status || "DRAFT");
+
+  const content =
+    document.getElementById("patientPrescriptionContent");
+
+  content.innerHTML = `
+    <div class="summary">
+      <p>
+        <strong>Doctor:</strong>
+        ${escapeHtml(
+          prescription.doctorName ||
+          currentConsultation?.doctorName ||
+          "Doctor"
+        )}
+      </p>
+
+      <p>
+        <strong>Diagnosis:</strong>
+        ${escapeHtml(prescription.diagnosis || "Not entered")}
+      </p>
+
+      <p>
+        <strong>Advice:</strong>
+        ${escapeHtml(prescription.advice || "Not entered")}
+      </p>
+
+      ${
+        prescription.notes
+          ? `
+            <p>
+              <strong>Notes:</strong>
+              ${escapeHtml(prescription.notes)}
+            </p>
+          `
+          : ""
+      }
+    </div>
+
+    <div class="medicine-list">
+      ${
+        prescription.items?.length
+          ? renderMedicineCards(prescription.items, false)
+          : `
+              <div class="empty">
+                <i class="fa-solid fa-capsules"></i>
+                No medicines have been added yet.
+              </div>
+            `
+      }
+    </div>
+  `;
+
+  const finalized =
+    String(prescription.status || "").toUpperCase() ===
+    "FINALIZED";
+
+  document.getElementById(
+    "downloadPrescriptionButton"
+  ).hidden = !finalized;
+}
+
+function renderPatientEmptyPrescription(){
+  updatePrescriptionStatus("WAITING");
+
+  document.getElementById(
+    "patientPrescriptionContent"
+  ).innerHTML = `
+    <div class="empty">
+      <i class="fa-solid fa-prescription-bottle-medical"></i>
+      The doctor has not created a prescription yet.
+    </div>
+  `;
+
+  document.getElementById(
+    "downloadPrescriptionButton"
+  ).hidden = true;
+}
+
+async function downloadPrescription(){
+  if(!currentPrescription?.id){
+    showPrescriptionMessage(
+      "A finalized prescription is not available yet.",
+      "error"
+    );
+    return;
+  }
+
+  try{
+    const response = await fetch(
+      `${API_BASE_URL}/prescriptions/${encodeURIComponent(currentPrescription.id)}/download`,
+      {
+        method:"GET",
+        headers:getAuthHeaders(false)
+      }
+    );
+
+    if(!response.ok){
+      const result = await readResponse(response);
+
+      throw new Error(
+        result?.message || "Unable to download prescription."
+      );
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `NeoLife-Prescription-${currentPrescription.id}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    showPrescriptionMessage(
+      "Prescription downloaded successfully.",
+      "success"
+    );
+
+  }catch(error){
+    showPrescriptionMessage(error.message, "error");
+  }
+}
+
+/* =========================
+   DISPLAY HELPERS
+========================= */
+
+function renderMedicineCards(items, removable){
+  return items.map(item => `
+    <article class="medicine-card">
+      <div>
+        <h4>
+          <i class="fa-solid fa-capsules"></i>
+          ${escapeHtml(
+            item.medicineName ||
+            item.productName ||
+            "Medicine"
+          )}
+        </h4>
+
+        <div class="meta">
+          ${
+            item.dosage
+              ? `<span>Dosage: ${escapeHtml(item.dosage)}</span>`
+              : ""
+          }
+
+          ${
+            item.frequency
+              ? `<span>${escapeHtml(item.frequency)}</span>`
+              : ""
+          }
+
+          ${
+            item.durationDays
+              ? `<span>${escapeHtml(String(item.durationDays))} day(s)</span>`
+              : ""
+          }
+
+          ${
+            item.quantity
+              ? `<span>Qty ${escapeHtml(String(item.quantity))}</span>`
+              : ""
+          }
+        </div>
+
+        ${
+          item.instructions
+            ? `
+              <div class="instruction">
+                <i class="fa-solid fa-circle-info"></i>
+                ${escapeHtml(item.instructions)}
+              </div>
+            `
+            : ""
+        }
+      </div>
+
+      ${
+        removable
+          ? `
+            <button
+              type="button"
+              class="remove"
+              onclick="removeMedicine('${escapeJs(String(item.id))}')"
+              title="Remove medicine"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          `
+          : ""
+      }
+    </article>
+  `).join("");
+}
+
+function updatePrescriptionStatus(status){
+  const element =
+    document.getElementById("prescriptionStatus");
+
+  const normalized =
+    String(status || "WAITING").toUpperCase();
+
+  element.textContent =
+    normalized.replaceAll("_", " ");
+
+  element.classList.toggle(
+    "finalized",
+    normalized === "FINALIZED"
+  );
+}
+
+function resetMedicineForm(){
+  [
+    "medicineSearch",
+    "selectedProductId",
+    "medicineName",
+    "dosage",
+    "frequency",
+    "instructions"
+  ].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  document.getElementById("durationDays").value = "1";
+  document.getElementById("quantity").value = "1";
+}
+
+/* =========================
+   COMMON HELPERS
+========================= */
+
+function getAuthHeaders(includeJson = true){
+  const headers = {
+    Accept:"application/json",
+    Authorization:`Bearer ${authToken}`
+  };
+
+  if(includeJson){
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+function normalizeRole(value){
+  return String(value || "")
+    .replace(/^ROLE_/i, "")
+    .trim()
+    .toUpperCase();
+}
+
+function extractArray(result){
+  if(Array.isArray(result)) return result;
+  if(Array.isArray(result?.data)) return result.data;
+  if(Array.isArray(result?.data?.content)) return result.data.content;
+  return [];
+}
+
+async function readResponse(response){
+  const text = await response.text();
+
+  if(!text){
+    return null;
+  }
+
+  try{
+    return JSON.parse(text);
+  }catch(error){
+    return {
+      success:false,
+      message:text
+    };
+  }
+}
+
+function enableControls(){
+  microphoneButton.disabled = false;
+  cameraButton.disabled = false;
+  leaveButton.disabled = false;
+
+  if(participantRole === "DOCTOR"){
+    endConsultationButton.disabled = false;
+  }
+}
+
+function disableControls(){
+  microphoneButton.disabled = true;
+  cameraButton.disabled = true;
+  leaveButton.disabled = true;
+  endConsultationButton.disabled = true;
+}
+
+function redirectToDashboard(){
+  if(participantRole === "DOCTOR"){
+    window.location.href =
+      "../doctor/doctor-dashboard.html";
+  }else{
+    window.location.href =
+      "../patient/my-appointments.html";
+  }
+}
+
+function removeWaitingMessage(){
+  waitingMessage?.remove();
+}
+
+function setMeetingStatus(message){
+  meetingStatus.textContent = message;
+}
+
+function setText(id, value){
+  const element = document.getElementById(id);
+
+  if(element){
+    element.textContent = value ?? "";
+  }
+}
+
+function setButtonLoading(
+  button,
+  loading,
+  text,
+  icon = "fa-spinner fa-spin"
+){
+  if(!button) return;
+
+  button.disabled = loading;
+
+  button.innerHTML = `
+    <i class="fa-solid ${icon}"></i>
+    ${escapeHtml(text)}
+  `;
+}
+
+function showError(message){
+  errorBox.textContent = message;
+  errorBox.classList.add("show");
+
+  clearTimeout(window.errorTimer);
+
+  window.errorTimer =
+    setTimeout(
+      () => errorBox.classList.remove("show"),
+      6500
+    );
+}
+
+function showSuccess(message){
+  successBox.textContent = message;
+  successBox.classList.add("show");
+
+  clearTimeout(window.successTimer);
+
+  window.successTimer =
+    setTimeout(
+      () => successBox.classList.remove("show"),
+      4500
+    );
+}
+
+function showPrescriptionMessage(message, type){
+  const box =
+    document.getElementById("prescriptionMessage");
+
+  box.textContent = message;
+  box.className = `message show ${type}`;
+
+  clearTimeout(window.prescriptionMessageTimer);
+
+  window.prescriptionMessageTimer =
+    setTimeout(
+      () => box.classList.remove("show"),
+      4500
+    );
+}
+
+function safeElementId(value){
+  return String(value || "participant")
+    .replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function participantDisplayName(identity){
+  const value = String(identity || "");
+
+  if(value.toUpperCase().startsWith("DOCTOR")){
+    return "Doctor";
+  }
+
+  if(value.toUpperCase().startsWith("PATIENT")){
+    return "Patient";
+  }
+
+  return value || "Participant";
+}
+
+function formatDate(value){
+  const parts = String(value || "").split("-");
+
+  if(parts.length !== 3){
+    return value || "";
+  }
+
+  const date = new Date(
+    Number(parts[0]),
+    Number(parts[1]) - 1,
+    Number(parts[2])
+  );
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric"
+    }
+  );
+}
+
+function formatTime(value){
+  if(!value) return "";
+
+  const parts = String(value).split(":");
+  const date = new Date();
+
+  date.setHours(
+    Number(parts[0] || 0),
+    Number(parts[1] || 0),
+    0,
+    0
+  );
+
+  return date.toLocaleTimeString(
+    "en-IN",
+    {
+      hour:"2-digit",
+      minute:"2-digit",
+      hour12:true
+    }
+  );
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeJs(value){
+  return String(value ?? "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'");
+}
+
+microphoneButton.addEventListener("click", () => {
+  toggleMicrophone().catch(error => showError(error.message));
+});
+
+cameraButton.addEventListener("click", () => {
+  toggleCamera().catch(error => showError(error.message));
+});
+
+leaveButton.addEventListener("click", leaveConsultation);
+endConsultationButton.addEventListener("click", endConsultation);
+
+window.addEventListener("beforeunload", function(){
+  stopPatientPrescriptionRefresh();
+
+  if(room){
+    room.disconnect();
+  }
 });
 </script>
 

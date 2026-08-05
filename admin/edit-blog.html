@@ -496,6 +496,68 @@ textarea.form-control{
     background:var(--green-light);
 }
 
+
+.upload-box{
+    min-height:155px;
+    padding:22px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:10px;
+    border:2px dashed #cfdcd2;
+    border-radius:14px;
+    color:var(--muted);
+    background:#fbfcfa;
+    text-align:center;
+    transition:.25s ease;
+}
+
+.upload-box:hover,
+.upload-box.dragging{
+    border-color:var(--gold);
+    background:#fffaf0;
+}
+
+.upload-box i{
+    color:var(--gold-dark);
+    font-size:31px;
+}
+
+.upload-box strong{
+    color:var(--dark-green);
+    font-size:13px;
+}
+
+.upload-box span{
+    font-size:11px;
+}
+
+.upload-box input[type="file"]{
+    width:100%;
+    height:100%;
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+}
+
+.selected-file-name{
+    min-height:20px;
+    margin-top:8px;
+    color:var(--success);
+    font-size:11px;
+    font-weight:700;
+}
+
+.image-help{
+    margin-top:7px;
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.5;
+}
+
 /* ACTIONS */
 
 .form-actions{
@@ -980,19 +1042,43 @@ textarea.form-control{
 
                     </div>
 
+                    <input
+                        type="hidden"
+                        id="existingImageUrl"
+                        value=""
+                    >
+
                     <div class="form-group full-width">
 
-                        <label for="imageUrl">
-                            Image URL
+                        <label for="blogImage">
+                            Upload New Image
                         </label>
 
-                        <input
-                            type="text"
-                            id="imageUrl"
-                            class="form-control"
-                            placeholder="Image URL or backend image path"
-                            oninput="previewCurrentImage()"
+                        <div
+                            class="upload-box"
+                            id="uploadBox"
                         >
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <strong>Click or drag an image here</strong>
+                            <span>JPG, JPEG, PNG or WEBP — maximum 5 MB</span>
+
+                            <input
+                                type="file"
+                                id="blogImage"
+                                accept="image/png,image/jpeg,image/webp"
+                                onchange="previewSelectedImage(event)"
+                            >
+                        </div>
+
+                        <div
+                            class="selected-file-name"
+                            id="selectedFileName"
+                        ></div>
+
+                        <p class="image-help">
+                            Leave this empty to keep the current blog image.
+                            Select a new image only when you want to replace it.
+                        </p>
 
                     </div>
 
@@ -1052,27 +1138,30 @@ textarea.form-control{
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
 const params =
-    new URLSearchParams(
-        window.location.search
-    );
+    new URLSearchParams(window.location.search);
 
 const blogId =
     params.get("id");
 
-window.onload =
-    function(){
-        loadBlog();
-    };
+window.addEventListener("load", function(){
+    loadBlog();
+    setupUploadDragAndDrop();
+});
+
+function getAuthToken(){
+    return (
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("jwtToken") ||
+        ""
+    ).trim();
+}
 
 async function loadBlog(){
-    const token =
-        localStorage.getItem(
-            "token"
-        );
+    const token = getAuthToken();
 
     if(!token){
         showAlert(
@@ -1080,13 +1169,10 @@ async function loadBlog(){
             "error"
         );
 
-        setTimeout(
-            function(){
-                window.location.href =
-                    "../frontend/login.html";
-            },
-            1000
-        );
+        setTimeout(function(){
+            window.location.href =
+                "../patient/login.html";
+        }, 1000);
 
         return;
     }
@@ -1097,81 +1183,66 @@ async function loadBlog(){
             "error"
         );
 
-        setTimeout(
-            function(){
-                window.location.href =
-                    "admin-blogs.html";
-            },
-            1000
-        );
+        setTimeout(function(){
+            window.location.href =
+                "admin-blogs.html";
+        }, 1000);
 
         return;
     }
 
     try{
-        const response =
-            await fetch(
-                `${API_BASE_URL}/api/blogs/${blogId}/get`,
-                {
-                    method:"GET",
-
-                    headers:{
-                        "Authorization":
-                            "Bearer " + token
-                    }
+        const response = await fetch(
+            `${API_BASE_URL}/api/blogs/${blogId}/get`,
+            {
+                method:"GET",
+                headers:{
+                    "Authorization":
+                        "Bearer " + token,
+                    "Accept":"application/json"
                 }
-            );
-
-        if(!response.ok){
-            showAlert(
-                "Failed to load blog. Please login again as Admin.",
-                "error"
-            );
-
-            return;
-        }
+            }
+        );
 
         const result =
-            await response.json();
+            await readJsonResponse(response);
 
-        if(result.success){
-            const blog =
-                result.data;
-
-            document.getElementById(
-                "title"
-            ).value =
-                blog.title || "";
-
-            document.getElementById(
-                "authorName"
-            ).value =
-                blog.authorName || "";
-
-            document.getElementById(
-                "imageUrl"
-            ).value =
-                blog.imageUrl || "";
-
-            document.getElementById(
-                "content"
-            ).value =
-                blog.content || "";
-
-            document.getElementById(
-                "currentImage"
-            ).src =
-                getImageUrl(
-                    blog.imageUrl
-                );
-
-        }else{
-            showAlert(
-                result.message ||
-                "Failed to load blog.",
-                "error"
+        if(!response.ok){
+            throw new Error(
+                result?.message ||
+                "Failed to load blog."
             );
         }
+
+        if(!result?.success || !result.data){
+            throw new Error(
+                result?.message ||
+                "Blog details are unavailable."
+            );
+        }
+
+        const blog = result.data;
+
+        document.getElementById("title").value =
+            blog.title || "";
+
+        document.getElementById("authorName").value =
+            blog.authorName ||
+            blog.author ||
+            "";
+
+        document.getElementById("content").value =
+            blog.content || "";
+
+        document.getElementById(
+            "existingImageUrl"
+        ).value =
+            blog.imageUrl || "";
+
+        document.getElementById(
+            "currentImage"
+        ).src =
+            getImageUrl(blog.imageUrl);
 
     }catch(error){
         console.error(error);
@@ -1184,11 +1255,149 @@ async function loadBlog(){
     }
 }
 
-async function updateBlog(){
-    const token =
-        localStorage.getItem(
-            "token"
+function previewSelectedImage(event){
+    const file =
+        event.target.files?.[0];
+
+    const fileNameBox =
+        document.getElementById(
+            "selectedFileName"
         );
+
+    if(!file){
+        fileNameBox.textContent = "";
+        return;
+    }
+
+    if(!file.type.startsWith("image/")){
+        event.target.value = "";
+        fileNameBox.textContent = "";
+
+        showAlert(
+            "Please select a valid image file.",
+            "error"
+        );
+
+        return;
+    }
+
+    const maximumSize =
+        5 * 1024 * 1024;
+
+    if(file.size > maximumSize){
+        event.target.value = "";
+        fileNameBox.textContent = "";
+
+        showAlert(
+            "Image size must be 5 MB or less.",
+            "error"
+        );
+
+        return;
+    }
+
+    fileNameBox.textContent =
+        `Selected: ${file.name}`;
+
+    const previewUrl =
+        URL.createObjectURL(file);
+
+    const preview =
+        document.getElementById(
+            "currentImage"
+        );
+
+    preview.src = previewUrl;
+
+    preview.onload = function(){
+        URL.revokeObjectURL(previewUrl);
+    };
+}
+
+function setupUploadDragAndDrop(){
+    const uploadBox =
+        document.getElementById("uploadBox");
+
+    if(!uploadBox){
+        return;
+    }
+
+    ["dragenter", "dragover"].forEach(
+        eventName => {
+            uploadBox.addEventListener(
+                eventName,
+                function(event){
+                    event.preventDefault();
+                    uploadBox.classList.add(
+                        "dragging"
+                    );
+                }
+            );
+        }
+    );
+
+    ["dragleave", "drop"].forEach(
+        eventName => {
+            uploadBox.addEventListener(
+                eventName,
+                function(event){
+                    event.preventDefault();
+                    uploadBox.classList.remove(
+                        "dragging"
+                    );
+                }
+            );
+        }
+    );
+}
+
+async function uploadBlogImage(file, token){
+    const formData =
+        new FormData();
+
+    /*
+     * Do not manually set Content-Type.
+     * The browser creates the multipart boundary.
+     */
+    formData.append("file", file);
+    formData.append("module", "BLOG");
+
+    const response = await fetch(
+        `${API_BASE_URL}/api/images/upload`,
+        {
+            method:"POST",
+            headers:{
+                "Authorization":
+                    "Bearer " + token
+            },
+            body:formData
+        }
+    );
+
+    const result =
+        await readJsonResponse(response);
+
+    if(!response.ok){
+        throw new Error(
+            result?.message ||
+            "Image upload failed."
+        );
+    }
+
+    if(
+        !result?.success ||
+        !result?.data?.fileUrl
+    ){
+        throw new Error(
+            "The image was uploaded, but no file URL was returned."
+        );
+    }
+
+    return result.data.fileUrl;
+}
+
+async function updateBlog(){
+    const token = getAuthToken();
 
     if(!token){
         showAlert(
@@ -1196,13 +1405,10 @@ async function updateBlog(){
             "error"
         );
 
-        setTimeout(
-            function(){
-                window.location.href =
-                    "../frontend/login.html";
-            },
-            1000
-        );
+        setTimeout(function(){
+            window.location.href =
+                "../patient/login.html";
+        }, 1000);
 
         return;
     }
@@ -1212,7 +1418,6 @@ async function updateBlog(){
             "Blog ID is missing.",
             "error"
         );
-
         return;
     }
 
@@ -1231,7 +1436,6 @@ async function updateBlog(){
             "Please enter the blog title.",
             "error"
         );
-
         return;
     }
 
@@ -1240,101 +1444,106 @@ async function updateBlog(){
             "Please enter the blog content.",
             "error"
         );
-
         return;
     }
 
-    const blog = {
-        title:title,
+    const updateButton =
+        document.querySelector(
+            ".update-button"
+        );
 
-        authorName:
-            document.getElementById(
-                "authorName"
-            ).value.trim(),
-
-        imageUrl:
-            document.getElementById(
-                "imageUrl"
-            ).value.trim(),
-
-        content:content
-    };
+    if(updateButton){
+        updateButton.disabled = true;
+        updateButton.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Updating...
+        `;
+    }
 
     try{
-        const response =
-            await fetch(
-                `${API_BASE_URL}/api/blogs/update/${blogId}`,
-                {
-                    method:"PUT",
+        const selectedFile =
+            document.getElementById(
+                "blogImage"
+            ).files?.[0];
 
-                    headers:{
-                        "Content-Type":
-                            "application/json",
+        let imageUrl =
+            document.getElementById(
+                "existingImageUrl"
+            ).value.trim();
 
-                        "Authorization":
-                            "Bearer " + token
-                    },
-
-                    body:
-                        JSON.stringify(
-                            blog
-                        )
-                }
-            );
-
-        const text =
-            await response.text();
-
-        console.log(
-            "STATUS:",
-            response.status
-        );
-
-        console.log(
-            "RESPONSE:",
-            text
-        );
-
-        if(!response.ok){
+        /*
+         * Upload the new image first.
+         * If no new image is selected, the existing image is retained.
+         */
+        if(selectedFile){
             showAlert(
-                text ||
-                "Failed to update blog.",
-                "error"
+                "Uploading the new blog image...",
+                "info"
             );
 
-            return;
+            imageUrl =
+                await uploadBlogImage(
+                    selectedFile,
+                    token
+                );
         }
+
+        const blog = {
+            title:title,
+
+            authorName:
+                document.getElementById(
+                    "authorName"
+                ).value.trim(),
+
+            imageUrl:imageUrl,
+            content:content
+        };
+
+        const response = await fetch(
+            `${API_BASE_URL}/api/blogs/update/${blogId}`,
+            {
+                method:"PUT",
+                headers:{
+                    "Content-Type":
+                        "application/json",
+                    "Authorization":
+                        "Bearer " + token,
+                    "Accept":
+                        "application/json"
+                },
+                body:
+                    JSON.stringify(blog)
+            }
+        );
 
         const result =
-            text
-                ? JSON.parse(text)
-                : null;
+            await readJsonResponse(response);
 
-        if(
-            result &&
-            result.success
-        ){
-            showAlert(
-                result.message ||
-                "Blog updated successfully.",
-                "success"
-            );
-
-            setTimeout(
-                function(){
-                    window.location.href =
-                        "admin-blogs.html";
-                },
-                900
-            );
-
-        }else{
-            showAlert(
+        if(!response.ok){
+            throw new Error(
                 result?.message ||
-                "Update failed.",
-                "error"
+                "Failed to update blog."
             );
         }
+
+        if(!result?.success){
+            throw new Error(
+                result?.message ||
+                "Blog update failed."
+            );
+        }
+
+        showAlert(
+            result.message ||
+            "Blog updated successfully.",
+            "success"
+        );
+
+        setTimeout(function(){
+            window.location.href =
+                "admin-blogs.html";
+        }, 900);
 
     }catch(error){
         console.error(error);
@@ -1344,26 +1553,37 @@ async function updateBlog(){
             "Unable to update blog.",
             "error"
         );
+
+    }finally{
+        if(updateButton){
+            updateButton.disabled = false;
+            updateButton.innerHTML = `
+                <i class="fa-solid fa-floppy-disk"></i>
+                Update Blog
+            `;
+        }
     }
 }
 
-function previewCurrentImage(){
-    const imageUrl =
-        document.getElementById(
-            "imageUrl"
-        ).value.trim();
+async function readJsonResponse(response){
+    const text =
+        await response.text();
 
-    document.getElementById(
-        "currentImage"
-    ).src =
-        getImageUrl(
-            imageUrl
-        );
+    if(!text){
+        return null;
+    }
+
+    try{
+        return JSON.parse(text);
+    }catch(error){
+        return {
+            success:false,
+            message:text
+        };
+    }
 }
 
-function getImageUrl(
-    value
-){
+function getImageUrl(value){
     if(!value){
         return "../assets/main_logo.jpeg";
     }
@@ -1374,78 +1594,56 @@ function getImageUrl(
     if(
         url.startsWith("http") ||
         url.startsWith("../") ||
-        url.startsWith("data:")
+        url.startsWith("data:") ||
+        url.startsWith("blob:")
     ){
         return url;
     }
 
     if(url.startsWith("/")){
-        return (
-            API_BASE_URL +
-            url
-        );
+        return API_BASE_URL + url;
     }
 
-    return (
-        API_BASE_URL +
-        "/" +
-        url
-    );
+    return API_BASE_URL + "/" + url;
 }
 
 function toggleSidebar(){
     document.getElementById(
         "adminSidebar"
-    ).classList.toggle(
-        "open"
-    );
+    ).classList.toggle("open");
 
     document.getElementById(
         "sidebarOverlay"
-    ).classList.toggle(
-        "show"
-    );
+    ).classList.toggle("show");
 }
 
 function closeSidebar(){
     document.getElementById(
         "adminSidebar"
-    ).classList.remove(
-        "open"
-    );
+    ).classList.remove("open");
 
     document.getElementById(
         "sidebarOverlay"
-    ).classList.remove(
-        "show"
-    );
+    ).classList.remove("show");
 }
 
 function logoutAdmin(){
-    localStorage.removeItem(
-        "token"
-    );
-
-    localStorage.removeItem(
-        "refreshToken"
-    );
-
-    localStorage.removeItem(
-        "role"
-    );
-
-    localStorage.removeItem(
+    [
+        "token",
+        "accessToken",
+        "jwtToken",
+        "refreshToken",
+        "role",
         "userId"
-    );
+    ].forEach(function(key){
+        localStorage.removeItem(key);
+    });
 
     window.location.href =
-                "../patient/login.html";
+        "../patient/login.html";
 }
 
-function showAlert(
-    message,
-    type
-){
+function showAlert(message, type){
     const box =
         document.getElementById(
             "pageAlert"
@@ -1461,16 +1659,11 @@ function showAlert(
             "alertMessage"
         );
 
-    if(
-        !box ||
-        !icon ||
-        !text
-    ){
+    if(!box || !icon || !text){
         return;
     }
 
-    text.textContent =
-        message;
+    text.textContent = message;
 
     box.className =
         `page-alert show ${type}`;

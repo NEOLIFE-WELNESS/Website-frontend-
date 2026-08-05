@@ -1467,18 +1467,19 @@ textarea.form-control {
                     <h4>Choose Previous Medical Reports</h4>
 
                     <p>
-                        The current consultation API does not include a
-                        report-upload endpoint. Selected files are shown
-                        only for review and are not uploaded.
-                    </p>
+    Upload previous medical reports such as blood reports,
+    X-rays, scans or prescriptions. Maximum 10 files,
+    up to 10 MB each.
+</p>
 
                     <input
-                        type="file"
-                        id="medicalReports"
-                        multiple
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onchange="showSelectedFiles()"
-                    >
+    type="file"
+    id="medicalReports"
+    name="medicalReports"
+    multiple
+    accept=".pdf,.jpg,.jpeg,.png"
+    onchange="showSelectedFiles()"
+>
 
                     <div
                         class="selected-files"
@@ -2564,12 +2565,12 @@ function updateSummary() {
             "medicalReports"
         )?.files || [];
 
-    setText(
-        "summaryReports",
-        reports.length
-            ? `${reports.length} file(s) selected — not uploaded by the current consultation API`
-            : "No files selected"
-    );
+   setText(
+    "summaryReports",
+    reports.length
+        ? `${reports.length} medical report file(s) selected`
+        : "No files selected"
+);
 }
 
 /* =========================
@@ -2579,19 +2580,18 @@ function updateSummary() {
 ========================== */
 
 async function submitOnlineConsultation() {
-    if (!getToken()) {
+
+    const token = getToken();
+
+    if (!token) {
         showAlert(
             "Please log in before sending the request.",
             "error"
         );
 
-        setTimeout(
-            function () {
-                window.location.href =
-                    "login.html";
-            },
-            1200
-        );
+        setTimeout(function () {
+            window.location.href = "login.html";
+        }, 1200);
 
         return;
     }
@@ -2614,6 +2614,56 @@ async function submitOnlineConsultation() {
         return;
     }
 
+    const medicalReportsInput =
+        document.getElementById("medicalReports");
+
+    const selectedFiles =
+        medicalReportsInput
+            ? Array.from(medicalReportsInput.files)
+            : [];
+
+    if (selectedFiles.length > 10) {
+        showAlert(
+            "Maximum 10 medical reports can be uploaded.",
+            "error"
+        );
+
+        showStep(3);
+        return;
+    }
+
+    const allowedTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png"
+    ];
+
+    const maximumFileSize =
+        10 * 1024 * 1024;
+
+    for (const file of selectedFiles) {
+
+        if (!allowedTypes.includes(file.type)) {
+            showAlert(
+                `${file.name} is not supported. Only PDF, JPG, JPEG and PNG files are allowed.`,
+                "error"
+            );
+
+            showStep(3);
+            return;
+        }
+
+        if (file.size > maximumFileSize) {
+            showAlert(
+                `${file.name} is larger than 10 MB.`,
+                "error"
+            );
+
+            showStep(3);
+            return;
+        }
+    }
+
     const button =
         document.getElementById(
             "submitRequestButton"
@@ -2629,16 +2679,9 @@ async function submitOnlineConsultation() {
         Sending Request...
     `;
 
-    /*
-     * Exact request fields supported by the backend document.
-     * Unsupported fields are intentionally not sent:
-     * email, currentMedication, availabilityId and medicalReports.
-     */
-    const payload = {
+    const consultationRequest = {
         doctorId:
-            Number(
-                consultationData.doctorId
-            ),
+            Number(consultationData.doctorId),
 
         consultationDate:
             consultationData.preferredDate,
@@ -2649,51 +2692,108 @@ async function submitOnlineConsultation() {
             ),
 
         patientName:
-            getInputValue(
-                "patientName"
-            ),
+            getInputValue("patientName"),
 
         phoneNumber:
-            getInputValue(
-                "phoneNumber"
-            ),
+            getInputValue("phoneNumber"),
 
         age:
-            Number(
-                getInputValue(
-                    "age"
-                )
-            ),
+            Number(getInputValue("age")),
 
         gender:
             formatGenderForApi(
-                getInputValue(
-                    "gender"
-                )
+                getInputValue("gender")
             ),
 
         symptoms:
-            getInputValue(
-                "symptoms"
-            ),
+            getInputValue("symptoms"),
 
         pastMedicalHistory:
             buildPastMedicalHistory()
     };
 
+    const formData =
+        new FormData();
+
+    formData.append(
+        "consultation",
+        new Blob(
+            [
+                JSON.stringify(
+                    consultationRequest
+                )
+            ],
+            {
+                type: "application/json"
+            }
+        )
+    );
+
+    selectedFiles.forEach(function (file) {
+        formData.append(
+            "medicalReports",
+            file
+        );
+    });
+
     try {
-        const result =
-            await apiRequest(
-                "/api/consultations/request",
+
+        const response =
+            await fetch(
+                API_BASE_URL +
+                    "/api/consultations/request",
                 {
                     method: "POST",
-                    body:
-                        JSON.stringify(
-                            payload
-                        )
-                },
-                true
+
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization":
+                            "Bearer " + token
+                    },
+
+                    body: formData
+                }
             );
+
+        const responseText =
+            await response.text();
+
+        let result = {};
+
+        if (responseText) {
+            try {
+                result =
+                    JSON.parse(responseText);
+
+            } catch (error) {
+                result = {
+                    success: false,
+                    message:
+                        responseText ||
+                        "Invalid server response."
+                };
+            }
+        }
+
+        if (
+            response.status === 401 ||
+            response.status === 403
+        ) {
+            throw new Error(
+                result.message ||
+                "Your login session has expired. Please log in again."
+            );
+        }
+
+        if (
+            !response.ok ||
+            result.success === false
+        ) {
+            throw new Error(
+                result.message ||
+                `Request failed (${response.status})`
+            );
+        }
 
         const consultation =
             result.data || {};
@@ -2715,33 +2815,35 @@ async function submitOnlineConsultation() {
             consultation.id ||
             consultation.consultationId;
 
-        setTimeout(
-            function () {
-                if (consultationId) {
-                    window.location.href =
-                        `my-appointments.html?type=ONLINE&id=${encodeURIComponent(
-                            consultationId
-                        )}`;
+        setTimeout(function () {
 
-                } else {
-                    window.location.href =
-                        "my-appointments.html";
-                }
-            },
-            900
-        );
+            if (consultationId) {
+                window.location.href =
+                    `my-appointments.html?type=ONLINE&id=${encodeURIComponent(
+                        consultationId
+                    )}`;
+
+            } else {
+                window.location.href =
+                    "my-appointments.html";
+            }
+
+        }, 900);
 
     } catch (error) {
+
         console.error(
-            "Online consultation failed:",
+            "Consultation request failed:",
             error
         );
 
         showAlert(
             error.message ||
-            "Consultation request could not be sent.",
+            "Unable to send consultation request.",
             "error"
         );
+
+    } finally {
 
         button.disabled = false;
         button.innerHTML =
@@ -2886,6 +2988,7 @@ async function loadProfileIcon() {
 ========================== */
 
 function showSelectedFiles() {
+
     const input =
         document.getElementById(
             "medicalReports"
@@ -2896,35 +2999,112 @@ function showSelectedFiles() {
             "selectedFiles"
         );
 
+    const files =
+        input?.files
+            ? Array.from(input.files)
+            : [];
+
     container.innerHTML = "";
 
-    Array.from(
-        input.files || []
-    ).forEach(
-        function (file) {
-            container.insertAdjacentHTML(
-                "beforeend",
-                `
-                    <div class="selected-file-item">
-                        <i class="fa-solid fa-file"></i>
-                        <span>
-                            ${escapeHtml(file.name)}
-                        </span>
-                    </div>
-                `
-            );
-        }
-    );
-
-    if (
-        input.files &&
-        input.files.length
-    ) {
-        showAlert(
-            "The selected reports are shown for review, but the current consultation API does not upload files.",
-            "info"
-        );
+    if (!files.length) {
+        return;
     }
+
+    const allowedTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png"
+    ];
+
+    const maximumFileSize =
+        10 * 1024 * 1024;
+
+    if (files.length > 10) {
+
+        showAlert(
+            "Maximum 10 medical reports can be uploaded.",
+            "error"
+        );
+
+        input.value = "";
+        return;
+    }
+
+    for (const file of files) {
+
+        if (!allowedTypes.includes(file.type)) {
+
+            showAlert(
+                `${file.name} is not supported. Only PDF, JPG, JPEG and PNG files are allowed.`,
+                "error"
+            );
+
+            input.value = "";
+            container.innerHTML = "";
+            return;
+        }
+
+        if (file.size > maximumFileSize) {
+
+            showAlert(
+                `${file.name} is larger than 10 MB.`,
+                "error"
+            );
+
+            input.value = "";
+            container.innerHTML = "";
+            return;
+        }
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "selected-file-item";
+
+        item.innerHTML = `
+            <i class="fa-solid fa-file-medical"></i>
+
+            <div style="flex:1">
+                <div>
+                    ${escapeHtml(file.name)}
+                </div>
+
+                <small>
+                    ${formatFileSize(file.size)}
+                </small>
+            </div>
+
+            <i
+                class="fa-solid fa-circle-check"
+                style="color:#267044"
+            ></i>
+        `;
+
+        container.appendChild(item);
+    }
+
+    showAlert(
+        `${files.length} medical report file(s) ready to upload.`,
+        "success"
+    );
+}
+
+function formatFileSize(bytes) {
+
+    if (!bytes) {
+        return "0 KB";
+    }
+
+    if (bytes < 1024 * 1024) {
+        return (
+            bytes / 1024
+        ).toFixed(1) + " KB";
+    }
+
+    return (
+        bytes / (1024 * 1024)
+    ).toFixed(1) + " MB";
 }
 
 /* =========================

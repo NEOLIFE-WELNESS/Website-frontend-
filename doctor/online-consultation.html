@@ -1902,6 +1902,14 @@ let filteredConsultations = [];
 let selectedConsultation = null;
 let therapists = [];
 
+const CONSULTATION_CACHE_KEY =
+    "neolifeDoctorConsultationCache";
+
+const CONSULTATION_REFRESH_INTERVAL =
+    30000;
+
+let consultationRefreshTimer = null;
+
 const alertBox =
     document.getElementById(
         "alert"
@@ -1922,6 +1930,8 @@ document.addEventListener(
             loadConsultations(),
             loadTherapists()
         ]);
+
+        startConsultationAutoRefresh();
     }
 );
 
@@ -2201,6 +2211,22 @@ async function loadConsultations() {
                     }
                 );
 
+        /*
+         * Some backend "upcoming" queries stop returning a consultation
+         * as soon as its start time is reached. Merge the last fetched
+         * consultation from local storage and retain it until its scheduled
+         * end time has passed.
+         */
+        consultations =
+            mergeConsultationsWithActiveCache(
+                consultations,
+                doctorId
+            );
+
+        saveConsultationCache(
+            consultations
+        );
+
         consultations.sort(
             function (
                 first,
@@ -2296,6 +2322,16 @@ async function loadConsultations() {
                 consultationMap.values()
             );
 
+        consultations =
+            mergeConsultationsWithActiveCache(
+                consultations,
+                doctorId
+            );
+
+        saveConsultationCache(
+            consultations
+        );
+
         consultations.sort(
             function (
                 first,
@@ -2328,6 +2364,326 @@ async function loadConsultations() {
     }
 }
 
+
+
+function startConsultationAutoRefresh() {
+    stopConsultationAutoRefresh();
+
+    consultationRefreshTimer =
+        window.setInterval(
+            async function () {
+                /*
+                 * Remove a retained consultation only after its scheduled
+                 * end time. Then ask the backend for updated statuses.
+                 */
+                consultations =
+                    consultations.filter(
+                        shouldDisplayConsultation
+                    );
+
+                saveConsultationCache(
+                    consultations
+                );
+
+                applyFilters();
+
+                try {
+                    await loadConsultations();
+                } catch (error) {
+                    console.warn(
+                        "Automatic consultation refresh failed:",
+                        error
+                    );
+                }
+            },
+            CONSULTATION_REFRESH_INTERVAL
+        );
+}
+
+function stopConsultationAutoRefresh() {
+    if (consultationRefreshTimer) {
+        window.clearInterval(
+            consultationRefreshTimer
+        );
+
+        consultationRefreshTimer = null;
+    }
+}
+
+function mergeConsultationsWithActiveCache(
+    serverConsultations,
+    doctorId
+) {
+    const consultationMap =
+        new Map();
+
+    serverConsultations.forEach(
+        function (item) {
+            if (item?.id !== null &&
+                item?.id !== undefined) {
+                consultationMap.set(
+                    String(item.id),
+                    item
+                );
+            }
+        }
+    );
+
+    getConsultationCache()
+        .filter(
+            function (cachedItem) {
+                const sameDoctor =
+                    !doctorId ||
+                    Number(
+                        cachedItem.doctorId
+                    ) ===
+                    Number(doctorId);
+
+                return (
+                    sameDoctor &&
+                    shouldRetainCachedConsultation(
+                        cachedItem
+                    )
+                );
+            }
+        )
+        .forEach(
+            function (cachedItem) {
+                const key =
+                    String(cachedItem.id);
+
+                if (!consultationMap.has(key)) {
+                    consultationMap.set(
+                        key,
+                        cachedItem
+                    );
+                }
+            }
+        );
+
+    return Array.from(
+        consultationMap.values()
+    ).filter(
+        shouldDisplayConsultation
+    );
+}
+
+function shouldRetainCachedConsultation(item) {
+    const status =
+        String(
+            item?.status || ""
+        ).toUpperCase();
+
+    if (
+        [
+            "REJECTED",
+            "CANCELLED",
+            "NO_SHOW"
+        ].includes(status)
+    ) {
+        return false;
+    }
+
+    const endDateTime =
+        getConsultationEndDateTime(
+            item
+        );
+
+    if (!endDateTime) {
+        return false;
+    }
+
+    return (
+        new Date().getTime() <=
+        endDateTime.getTime()
+    );
+}
+
+function shouldDisplayConsultation(item) {
+    /*
+     * Always show records currently returned by the backend. For cached
+     * records, this function removes them only after the scheduled meeting
+     * end time or when they have been rejected/cancelled/no-show.
+     */
+    if (!item) {
+        return false;
+    }
+
+    if (
+        item.__fromActiveCache === true
+    ) {
+        return shouldRetainCachedConsultation(
+            item
+        );
+    }
+
+    return true;
+}
+
+function getConsultationEndDateTime(item) {
+    if (!item?.date) {
+        return null;
+    }
+
+    const startTime =
+        item.startTime ||
+        "00:00:00";
+
+    let endTime =
+        item.endTime;
+
+    if (!endTime) {
+        const startDate =
+            createLocalDateTime(
+                item.date,
+                startTime
+            );
+
+        if (!startDate) {
+            return null;
+        }
+
+        /*
+         * Online consultations are normally 20 minutes. Use 30 minutes
+         * as a safe fallback when the backend response does not include
+         * endTime.
+         */
+        return new Date(
+            startDate.getTime() +
+            30 * 60 * 1000
+        );
+    }
+
+    return createLocalDateTime(
+        item.date,
+        endTime
+    );
+}
+
+function createLocalDateTime(
+    dateValue,
+    timeValue
+) {
+    const dateParts =
+        String(dateValue)
+            .split("-")
+            .map(Number);
+
+    const timeParts =
+        String(timeValue || "00:00:00")
+            .split(":")
+            .map(Number);
+
+    if (
+        dateParts.length !== 3 ||
+        dateParts.some(
+            Number.isNaN
+        )
+    ) {
+        return null;
+    }
+
+    const date =
+        new Date(
+            dateParts[0],
+            dateParts[1] - 1,
+            dateParts[2],
+            timeParts[0] || 0,
+            timeParts[1] || 0,
+            timeParts[2] || 0,
+            0
+        );
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? null
+        : date;
+}
+
+function saveConsultationCache(items) {
+    try {
+        const cacheItems =
+            items
+                .filter(
+                    function (item) {
+                        const status =
+                            String(
+                                item.status || ""
+                            ).toUpperCase();
+
+                        return ![
+                            "REJECTED",
+                            "CANCELLED",
+                            "NO_SHOW"
+                        ].includes(status);
+                    }
+                )
+                .map(
+                    function (item) {
+                        const copy = {
+                            ...item
+                        };
+
+                        delete copy.__fromActiveCache;
+
+                        return copy;
+                    }
+                );
+
+        localStorage.setItem(
+            CONSULTATION_CACHE_KEY,
+            JSON.stringify(
+                cacheItems
+            )
+        );
+
+    } catch (error) {
+        console.warn(
+            "Unable to save consultation cache:",
+            error
+        );
+    }
+}
+
+function getConsultationCache() {
+    try {
+        const value =
+            localStorage.getItem(
+                CONSULTATION_CACHE_KEY
+            );
+
+        if (!value) {
+            return [];
+        }
+
+        const parsed =
+            JSON.parse(value);
+
+        if (!Array.isArray(parsed)) {
+            return [];
+        }
+
+        return parsed.map(
+            function (item) {
+                return {
+                    ...normalizeConsultation(
+                        item
+                    ),
+                    __fromActiveCache:true
+                };
+            }
+        );
+
+    } catch (error) {
+        console.warn(
+            "Unable to read consultation cache:",
+            error
+        );
+
+        return [];
+    }
+}
 
 function extractArray(result) {
     if (Array.isArray(result)) {
