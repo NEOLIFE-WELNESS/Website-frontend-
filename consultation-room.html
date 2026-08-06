@@ -72,13 +72,41 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .alert.success{color:#17623a;background:#e7f7ed;border:1px solid #b8dfc8}
 
 .shell{
-  width:min(1550px,calc(100% - 28px));
-  margin:18px auto 30px;
+  width:min(1600px,calc(100% - 24px));
+  height:calc(100vh - 100px);
+  margin:12px auto;
   display:grid;
-  grid-template-columns:minmax(0,1.45fr) minmax(390px,.75fr);
-  gap:18px
+  grid-template-columns:minmax(0,1.15fr) minmax(480px,.85fr);
+  gap:14px;
+  overflow:hidden;
 }
-.left,.right{min-width:0;display:grid;gap:18px;align-content:start}
+
+.left{
+  min-width:0;
+  height:100%;
+  overflow:hidden;
+}
+
+.right{
+  min-width:0;
+  height:100%;
+  display:grid;
+  gap:14px;
+  align-content:start;
+  overflow-y:auto;
+  padding-right:6px;
+  scrollbar-width:thin;
+  scrollbar-color:#b9c8c0 transparent;
+}
+
+.right::-webkit-scrollbar{
+  width:7px;
+}
+
+.right::-webkit-scrollbar-thumb{
+  background:#b9c8c0;
+  border-radius:20px;
+}
 .panel{
   border:1px solid var(--border);
   border-radius:22px;
@@ -87,62 +115,180 @@ button:disabled{opacity:.55;cursor:not-allowed}
 }
 
 /* VIDEO */
-.video-panel{overflow:hidden;background:#10251f}
+.video-panel{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  background:#10251f;
+  box-shadow:0 18px 48px rgba(7,28,22,.2);
+}
+
 .video-title{
-  min-height:56px;padding:12px 17px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  color:#fff;border-bottom:1px solid rgba(255,255,255,.1)
+  min-height:56px;
+  padding:12px 17px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.1);
 }
-.video-title h2{font-size:16px}
-.video-time{font-size:12px;color:#f3d773;font-weight:700}
+
+.video-title h2{
+  font-size:16px;
+}
+
+.video-time{
+  font-size:12px;
+  color:#f3d773;
+  font-weight:700;
+}
+
 .video-grid{
-  min-height:475px;padding:13px;
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px
+  min-height:0;
+  padding:12px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
 }
+
 .participant-card{
-  min-height:440px;position:relative;overflow:hidden;
-  border-radius:17px;background:#20352e;border:1px solid rgba(255,255,255,.1)
+  min-height:0;
+  height:100%;
+  position:relative;
+  overflow:hidden;
+  border-radius:17px;
+  background:#20352e;
+  border:1px solid rgba(255,255,255,.1);
 }
+
 .participant-video{
-  width:100%;height:100%;min-height:440px;
-  display:grid;place-items:center;color:rgba(255,255,255,.65)
+  width:100%;
+  height:100%;
+  min-height:0;
+  display:grid;
+  place-items:center;
+  color:rgba(255,255,255,.65);
 }
-.participant-video video{width:100%;height:100%;min-height:440px;object-fit:cover}
-.participant-audio{display:none}
+
+.participant-video video{
+  width:100%;
+  height:100%;
+  min-height:0;
+  object-fit:cover;
+}
+
+.participant-audio{
+  display:none;
+}
+
 .participant-name{
-  position:absolute;left:12px;bottom:12px;
-  padding:7px 11px;border-radius:9px;color:#fff;
-  background:rgba(0,0,0,.58);font-size:12px;font-weight:700
+  position:absolute;
+  left:12px;
+  bottom:12px;
+  padding:7px 11px;
+  border-radius:9px;
+  color:#fff;
+  background:rgba(0,0,0,.58);
+  font-size:12px;
+  font-weight:700;
 }
+
 .waiting{
-  grid-column:1/-1;min-height:475px;
-  display:grid;place-items:center;text-align:center;color:rgba(255,255,255,.78)
+  grid-column:1/-1;
+  min-height:0;
+  height:100%;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  color:rgba(255,255,255,.78);
 }
-.waiting i{font-size:34px;color:#f3d773;margin-bottom:14px}
-.waiting h2{margin-bottom:7px}
-.waiting p{font-size:13px}
+
+.waiting i{
+  font-size:34px;
+  color:#f3d773;
+  margin-bottom:14px;
+}
+
+.waiting h2{
+  margin-bottom:7px;
+}
+
+.waiting p{
+  font-size:13px;
+}
+
 .controls{
-  min-height:76px;padding:13px;
-  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
-  border-top:1px solid rgba(255,255,255,.1)
+  min-height:72px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:9px;
+  border-top:1px solid rgba(255,255,255,.1);
 }
+
 .control-btn{
-  min-height:43px;padding:10px 15px;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  border:none;border-radius:12px;color:#fff;
-  background:rgba(255,255,255,.13);font-size:12px;font-weight:800
+  min-height:42px;
+  padding:10px 15px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  background:rgba(255,255,255,.13);
+  font-size:12px;
+  font-weight:800;
 }
-.control-btn:hover{background:rgba(255,255,255,.22)}
-.control-btn.danger{background:var(--danger)}
+
+.control-btn:hover{
+  background:rgba(255,255,255,.22);
+}
+
+.control-btn.danger{
+  background:var(--danger);
+}
+
+.video-sticky-note{
+  display:none;
+}
 
 /* PATIENT INFO */
-.info-panel{padding:20px}
+.info-panel{
+  padding:16px;
+  box-shadow:none;
+}
+
+.info-panel .panel-heading{
+  margin-bottom:12px;
+}
+
+.info-panel .panel-heading h2{
+  font-size:17px;
+}
+
+.patient-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.detail{
+  padding:10px 11px;
+}
+
+.detail.full{
+  grid-column:1/-1;
+}
 .panel-heading{
   margin-bottom:16px;display:flex;align-items:center;justify-content:space-between
 }
 .panel-heading h2{font-size:19px;color:var(--dark)}
 .panel-heading i{color:#987100}
-.patient-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.patient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .detail{
   padding:12px;border-radius:12px;background:#f7faf8;border:1px solid var(--border)
 }
@@ -418,15 +564,60 @@ textarea.form-control{min-height:74px;resize:vertical}
 }
 
 @media(max-width:1150px){
-  .shell{grid-template-columns:1fr}
+  .shell{
+    height:auto;
+    grid-template-columns:1fr;
+    overflow:visible;
+  }
+
+  .left{
+    height:min(620px,72vh);
+    overflow:hidden;
+  }
+
+  .right{
+    height:auto;
+    overflow:visible;
+    padding-right:0;
+  }
 }
+
 @media(max-width:800px){
-  .video-grid{grid-template-columns:1fr}
-  .participant-card,.participant-video,.participant-video video{min-height:300px}
-  .patient-grid{grid-template-columns:1fr 1fr}
+  .left{
+    height:auto;
+  }
+
+  .video-panel{
+    height:auto;
+    min-height:520px;
+    grid-template-rows:auto minmax(340px,1fr) auto;
+  }
+
+  .video-grid{
+    grid-template-columns:1fr;
+  }
+
+  .participant-card,
+  .participant-video,
+  .participant-video video{
+    min-height:300px;
+  }
+
+  .patient-grid{
+    grid-template-columns:1fr 1fr;
+  }
 }
+
 @media(max-width:560px){
   .header{padding:10px 12px}
+  .brand h1{font-size:15px}
+  .brand p,.role-pill{display:none}
+  .brand img{width:44px;height:44px}
+  .shell{width:calc(100% - 16px);margin-top:10px}
+  .controls{justify-content:flex-start}
+  .control-btn{flex:1;min-width:90px}
+  .patient-grid,.form-grid{grid-template-columns:1fr}
+
   .brand h1{font-size:15px}
   .brand p,.role-pill{display:none}
   .brand img{width:44px;height:44px}
@@ -467,7 +658,6 @@ textarea.form-control{min-height:74px;resize:vertical}
 <main class="shell">
 
   <section class="left">
-
     <section class="panel video-panel">
       <div class="video-title">
         <h2>
@@ -517,7 +707,15 @@ textarea.form-control{min-height:74px;resize:vertical}
           End Consultation
         </button>
       </div>
+
+      <div class="video-sticky-note">
+        <i class="fa-solid fa-thumbtack"></i>
+        Video stays visible while the consultation details scroll on the right.
+      </div>
     </section>
+  </section>
+
+  <aside class="right">
 
     <section class="panel info-panel" id="patientDetailsPanel">
       <div class="panel-heading">
@@ -536,11 +734,6 @@ textarea.form-control{min-height:74px;resize:vertical}
           <strong id="patientAgeGender">—</strong>
         </div>
 
-        <div class="detail">
-          <span>Phone</span>
-          <strong id="patientPhone">—</strong>
-        </div>
-
         <div class="detail full">
           <span>Symptoms</span>
           <p id="patientSymptoms">Loading consultation details...</p>
@@ -552,84 +745,6 @@ textarea.form-control{min-height:74px;resize:vertical}
         </div>
       </div>
     </section>
-
-    <section
-      class="panel report-panel"
-      id="reportsPanel"
-    >
-      <div class="report-header">
-        <h2>
-          <i class="fa-solid fa-file-medical"></i>
-          Patient Reports
-        </h2>
-
-        <button
-          type="button"
-          class="report-button"
-          onclick="loadConsultationReports()"
-        >
-          <i class="fa-solid fa-rotate"></i>
-          Refresh
-        </button>
-      </div>
-
-      <div
-        id="patientReportUploadArea"
-        hidden
-      >
-        <div class="report-note">
-          Upload blood reports, X-rays, scans or previous prescriptions for
-          the doctor to review during this consultation.
-        </div>
-
-        <div
-          class="report-upload-box"
-          id="reportUploadBox"
-        >
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <strong>Click or drag reports here</strong>
-          <span>PDF, JPG, JPEG or PNG — maximum 10 MB each</span>
-
-          <input
-            type="file"
-            id="reportFiles"
-            accept=".pdf,image/png,image/jpeg"
-            multiple
-            onchange="handleReportSelection(event)"
-          >
-        </div>
-
-        <div
-          class="report-selected"
-          id="reportSelectedMessage"
-        ></div>
-
-        <button
-          type="button"
-          class="action full"
-          id="uploadReportsButton"
-          onclick="uploadPatientReports()"
-          disabled
-        >
-          <i class="fa-solid fa-upload"></i>
-          Upload Reports
-        </button>
-      </div>
-
-      <div
-        class="report-list"
-        id="consultationReportList"
-      >
-        <div class="empty">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          Loading uploaded reports...
-        </div>
-      </div>
-    </section>
-
-  </section>
-
-  <aside class="right">
 
     <section class="panel prescription-panel">
 
@@ -818,6 +933,80 @@ textarea.form-control{min-height:74px;resize:vertical}
 
         <div class="message" id="prescriptionMessage"></div>
 
+      </div>
+    </section>
+
+    <section
+      class="panel report-panel"
+      id="reportsPanel"
+    >
+      <div class="report-header">
+        <h2>
+          <i class="fa-solid fa-file-medical"></i>
+          Patient Reports
+        </h2>
+
+        <button
+          type="button"
+          class="report-button"
+          onclick="loadConsultationReports()"
+        >
+          <i class="fa-solid fa-rotate"></i>
+          Refresh
+        </button>
+      </div>
+
+      <div
+        id="patientReportUploadArea"
+        hidden
+      >
+        <div class="report-note">
+          Upload blood reports, X-rays, scans or previous prescriptions for
+          the doctor to review during this consultation.
+        </div>
+
+        <div
+          class="report-upload-box"
+          id="reportUploadBox"
+        >
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <strong>Click or drag reports here</strong>
+          <span>PDF, JPG, JPEG or PNG — maximum 10 MB each</span>
+
+          <input
+            type="file"
+            id="reportFiles"
+            accept=".pdf,image/png,image/jpeg"
+            multiple
+            onchange="handleReportSelection(event)"
+          >
+        </div>
+
+        <div
+          class="report-selected"
+          id="reportSelectedMessage"
+        ></div>
+
+        <button
+          type="button"
+          class="action full"
+          id="uploadReportsButton"
+          onclick="uploadPatientReports()"
+          disabled
+        >
+          <i class="fa-solid fa-upload"></i>
+          Upload Reports
+        </button>
+      </div>
+
+      <div
+        class="report-list"
+        id="consultationReportList"
+      >
+        <div class="empty">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Loading uploaded reports...
+        </div>
       </div>
     </section>
 
@@ -1390,13 +1579,7 @@ function renderConsultationDetails(consultation){
       consultation.gender || ""
     ].filter(Boolean).join(" / ") || "—"
   );
-
-  setText(
-    "patientPhone",
-    consultation.phoneNumber || "—"
-  );
-
-  setText(
+setText(
     "patientSymptoms",
     consultation.symptoms || "No symptoms recorded."
   );

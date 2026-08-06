@@ -523,7 +523,7 @@ a{
 
 .doctor-menu a.active{
 
-    color:var(--dark-green);
+    color:var(--dark);
 
     background:#fff;
 
@@ -533,6 +533,7 @@ a{
 
 
 
+.doctor-menu a:hover i,
 .doctor-menu a.active i{
 
     color:var(--gold);
@@ -597,7 +598,7 @@ a{
 
 .sidebar-logout:hover{
 
-    color:var(--dark-green);
+    color:var(--dark);
 
     background:#fff;
 
@@ -1297,7 +1298,6 @@ textarea.control{
 
                 <a
                     href="doctor-dashboard.html"
-                    class="active"
                 >
                     <i class="fa-solid fa-chart-line"></i>
                     Dashboard
@@ -1336,7 +1336,7 @@ textarea.control{
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" class="active">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
@@ -4489,11 +4489,22 @@ function clearSession() {
     );
 }
 
-function logout() {
+function doctorLogout() {
     clearSession();
 
-    location.href =
-        "../patient/login.html";
+    sessionStorage.clear();
+
+    window.location.replace(
+        "../patient/login.html"
+    );
+}
+
+/*
+ * Keep this alias so any older logout button using logout()
+ * also continues to work.
+ */
+function logout() {
+    doctorLogout();
 }
 </script>
 

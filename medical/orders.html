@@ -2557,15 +2557,26 @@
         let selectedOrder = null;
         let selectedSource = "";
 
+        /*
+         * Stores userId -> customer details so the order table can show
+         * the real customer name even when the order API returns only userId.
+         */
+        const customerDirectory = new Map();
+
         let currentPage = 1;
         const pageSize = 8;
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
+            async function () {
                 requireStaffLogin();
-                loadStaffProfile();
-                loadOrders();
+
+                await Promise.allSettled([
+                    loadStaffProfile(),
+                    loadCustomerDirectory()
+                ]);
+
+                await loadOrders();
             }
         );
 
@@ -2713,6 +2724,260 @@
         }
 
         /* =========================
+           CUSTOMER DIRECTORY
+        ========================== */
+
+        async function loadCustomerDirectory() {
+            /*
+             * Different backend versions may expose users/patients through
+             * different endpoints. The first successful response is used.
+             */
+            const endpoints = [
+                "/api/medical-staff/patients",
+                "/api/users/getAll",
+                "/api/admin/users/getAll"
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const result =
+                        await staffApiRequest(
+                            endpoint,
+                            {
+                                method: "GET"
+                            }
+                        );
+
+                    const records =
+                        extractResponseArray(
+                            result
+                        );
+
+                    if (!records.length) {
+                        continue;
+                    }
+
+                    records.forEach(
+                        function (user) {
+                            const userId =
+                                user.userId ??
+                                user.id ??
+                                user.patientId;
+
+                            if (
+                                userId === null ||
+                                userId === undefined
+                            ) {
+                                return;
+                            }
+
+                            const name =
+                                getPersonName(user);
+
+                            customerDirectory.set(
+                                String(userId),
+                                {
+                                    name:
+                                        name ||
+                                        `User ${userId}`,
+
+                                    phone:
+                                        user.phoneNumber ||
+                                        user.phone ||
+                                        user.mobileNumber ||
+                                        user.mobile ||
+                                        "-",
+
+                                    email:
+                                        user.email ||
+                                        "-"
+                                }
+                            );
+                        }
+                    );
+
+                    if (customerDirectory.size) {
+                        console.log(
+                            "Customer directory loaded:",
+                            customerDirectory.size
+                        );
+
+                        return;
+                    }
+
+                } catch (error) {
+                    console.warn(
+                        `Customer directory endpoint failed: ${endpoint}`,
+                        error
+                    );
+                }
+            }
+
+            console.warn(
+                "Customer directory could not be loaded. Order response names will be used."
+            );
+        }
+
+        function extractResponseArray(result) {
+            if (Array.isArray(result)) {
+                return result;
+            }
+
+            if (Array.isArray(result?.data)) {
+                return result.data;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data?.content
+                )
+            ) {
+                return result.data.content;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data?.users
+                )
+            ) {
+                return result.data.users;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data?.patients
+                )
+            ) {
+                return result.data.patients;
+            }
+
+            return [];
+        }
+
+        function getPersonName(person) {
+            if (!person) {
+                return "";
+            }
+
+            const directName =
+                person.customerName ||
+                person.patientName ||
+                person.userName ||
+                person.fullName ||
+                person.name;
+
+            if (
+                directName &&
+                String(directName).trim()
+            ) {
+                return String(
+                    directName
+                ).trim();
+            }
+
+            const combinedName = [
+                person.firstName,
+                person.middleName,
+                person.lastName
+            ]
+                .filter(Boolean)
+                .map(value =>
+                    String(value).trim()
+                )
+                .filter(Boolean)
+                .join(" ");
+
+            return combinedName;
+        }
+
+        function resolveCustomerDetails(item) {
+            const userId =
+                item.userId ??
+                item.customerId ??
+                item.patientId ??
+                item.user?.id ??
+                item.customer?.id ??
+                item.patient?.id;
+
+            const directoryCustomer =
+                userId !== null &&
+                userId !== undefined
+                    ? customerDirectory.get(
+                        String(userId)
+                    )
+                    : null;
+
+            const shippingObject =
+                typeof item.shippingAddress ===
+                "object"
+                    ? item.shippingAddress
+                    : typeof item.deliveryAddress ===
+                      "object"
+                        ? item.deliveryAddress
+                        : null;
+
+            const customerName =
+                getPersonName(item.customer) ||
+                getPersonName(item.patient) ||
+                getPersonName(item.user) ||
+                getPersonName(item) ||
+                getPersonName(shippingObject) ||
+                directoryCustomer?.name ||
+                (
+                    userId
+                        ? `User ${userId}`
+                        : "Customer"
+                );
+
+            const customerPhone =
+                item.customerPhone ||
+                item.phoneNumber ||
+                item.patientPhone ||
+                item.mobileNumber ||
+                item.customer?.phoneNumber ||
+                item.patient?.phoneNumber ||
+                item.user?.phoneNumber ||
+                shippingObject?.phoneNumber ||
+                shippingObject?.phone ||
+                directoryCustomer?.phone ||
+                "-";
+
+            const customerEmail =
+                item.customerEmail ||
+                item.email ||
+                item.patientEmail ||
+                item.customer?.email ||
+                item.patient?.email ||
+                item.user?.email ||
+                shippingObject?.email ||
+                directoryCustomer?.email ||
+                "-";
+
+            return {
+                userId:
+                    userId || null,
+
+                customerName:
+                    String(
+                        customerName ||
+                        "Customer"
+                    ).trim(),
+
+                customerPhone:
+                    String(
+                        customerPhone ||
+                        "-"
+                    ).trim(),
+
+                customerEmail:
+                    String(
+                        customerEmail ||
+                        "-"
+                    ).trim()
+            };
+        }
+
+        /* =========================
            LOAD ORDERS
         ========================== */
 
@@ -2778,6 +3043,9 @@
         }
 
         function normalizeOrder(item) {
+            const customer =
+                resolveCustomerDetails(item);
+
             const items =
                 Array.isArray(item.items)
                     ? item.items
@@ -2859,28 +3127,16 @@
                     `NL-${item.id || item.orderId}`,
 
                 userId:
-                    item.userId ||
-                    item.customerId ||
-                    item.user?.id,
+                    customer.userId,
 
                 customerName:
-                    item.customerName ||
-                    item.patientName ||
-                    item.userName ||
-                    item.user?.name ||
-                    (item.userId ? `User ${item.userId}` : "Customer"),
+                    customer.customerName,
 
                 customerPhone:
-                    item.customerPhone ||
-                    item.phoneNumber ||
-                    item.user?.phoneNumber ||
-                    "-",
+                    customer.customerPhone,
 
                 customerEmail:
-                    item.customerEmail ||
-                    item.email ||
-                    item.user?.email ||
-                    "-",
+                    customer.customerEmail,
 
                 shippingAddress:
                     item.shippingAddress ||
@@ -3548,7 +3804,10 @@
 
                                     <span class="customer-avatar">
                                         ${escapeHtml(
-                                            order.customerName
+                                            (
+                                                order.customerName ||
+                                                "C"
+                                            )
                                                 .charAt(0)
                                                 .toUpperCase()
                                         )}

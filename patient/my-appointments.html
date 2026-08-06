@@ -1065,6 +1065,8 @@ button{
   <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
 </footer>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
@@ -1073,6 +1075,8 @@ const CONSULTATION_ROOM_URL =
 
 let allAppointments = [];
 let activeFilter = "ALL";
+let razorpayInstance = null;
+let activePaymentRecord = null;
 
 document.addEventListener("DOMContentLoaded", function () {
   const token = localStorage.getItem("token");
@@ -2072,22 +2076,432 @@ function closeModal() {
    APPOINTMENT ACTIONS
 ===================================================== */
 
-function payAppointment(id) {
-  window.location.href =
-    `appointment-payment.html?appointmentId=${encodeURIComponent(id)}`;
+async function payAppointment(id) {
+  const record =
+    allAppointments.find(
+      item =>
+        item.recordType === "APPOINTMENT" &&
+        Number(item.id) === Number(id)
+    );
+
+  await initiateRazorpayPayment({
+    record,
+    id,
+    paymentType:"APPOINTMENT",
+    endpoint:
+      `/api/payments/appointment/${encodeURIComponent(id)}/initiate`
+  });
 }
 
-function payConsultation(id) {
-  /*
-   * The API document confirms that consultation payment
-   * is required after doctor acceptance, but does not
-   * provide the exact payment endpoint.
-   *
-   * This redirects to a dedicated consultation payment
-   * page, where your PayU initiation API should be called.
-   */
-  window.location.href =
-    `consultation-payment.html?consultationId=${encodeURIComponent(id)}`;
+async function payConsultation(id) {
+  const record =
+    allAppointments.find(
+      item =>
+        item.recordType === "CONSULTATION" &&
+        Number(item.id) === Number(id)
+    );
+
+  await initiateRazorpayPayment({
+    record,
+    id,
+    paymentType:"CONSULTATION",
+    endpoint:
+      `/api/payments/consultation/${encodeURIComponent(id)}/initiate`
+  });
+}
+
+async function initiateRazorpayPayment({
+  record,
+  id,
+  paymentType,
+  endpoint
+}) {
+  if (!getPaymentToken()) {
+    alert("Please log in to continue payment.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (typeof Razorpay === "undefined") {
+    alert(
+      "Razorpay Checkout could not be loaded. Please check your internet connection."
+    );
+    return;
+  }
+
+  const button =
+    findPaymentButton(
+      id,
+      paymentType
+    );
+
+  setPaymentButtonState(
+    button,
+    true,
+    "Starting Payment..."
+  );
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}${endpoint}`,
+      {
+        method:"POST",
+        headers:authHeaders()
+      }
+    );
+
+    const result =
+      await safelyReadResponse(
+        response
+      );
+
+    if (
+      !response.ok ||
+      result?.success === false
+    ) {
+      throw new Error(
+        result?.message ||
+        "Unable to initiate payment."
+      );
+    }
+
+    const paymentData =
+      result?.data || {};
+
+    validatePaymentData(
+      paymentData
+    );
+
+    activePaymentRecord = {
+      id:Number(id),
+      paymentType,
+      record
+    };
+
+    openRazorpayCheckout(
+      paymentData,
+      activePaymentRecord,
+      button
+    );
+
+  } catch (error) {
+    console.error(
+      `${paymentType} payment initiation failed:`,
+      error
+    );
+
+    setPaymentButtonState(
+      button,
+      false,
+      paymentType === "APPOINTMENT"
+        ? `Pay ₹${formatMoney(record?.bookingFee || 50)}`
+        : `Pay ₹${formatMoney(record?.bookingFee || 200)}`
+    );
+
+    alert(
+      error.message ||
+      "Unable to initiate payment."
+    );
+  }
+}
+
+function openRazorpayCheckout(
+  paymentData,
+  paymentRecord,
+  button
+) {
+  const record =
+    paymentRecord.record || {};
+
+  const options = {
+    key:
+      paymentData.keyId,
+
+    amount:
+      Number(paymentData.amount),
+
+    currency:
+      paymentData.currency || "INR",
+
+    name:
+      paymentData.name ||
+      "Neolife Wellness Center",
+
+    description:
+      paymentData.description ||
+      (
+        paymentRecord.paymentType ===
+        "APPOINTMENT"
+          ? "Offline appointment payment"
+          : "Online consultation payment"
+      ),
+
+    order_id:
+      paymentData.razorpayOrderId,
+
+    prefill:{
+      name:
+        paymentData.customerName ||
+        record.patientName ||
+        "",
+
+      email:
+        paymentData.customerEmail ||
+        "",
+
+      contact:
+        paymentData.customerPhone ||
+        record.phoneNumber ||
+        ""
+    },
+
+    notes:{
+      referenceId:
+        String(paymentRecord.id),
+
+      paymentType:
+        paymentRecord.paymentType
+    },
+
+    theme:{
+      color:"#123524"
+    },
+
+    modal:{
+      ondismiss:function(){
+        razorpayInstance = null;
+
+        setPaymentButtonState(
+          button,
+          false,
+          paymentRecord.paymentType ===
+            "APPOINTMENT"
+            ? `Pay ₹${formatMoney(
+                record.bookingFee || 50
+              )}`
+            : `Pay ₹${formatMoney(
+                record.bookingFee || 200
+              )}`
+        );
+
+        alert(
+          "Payment was not completed. You can try again."
+        );
+      }
+    },
+
+    handler:async function(
+      razorpayResponse
+    ) {
+      await verifyRazorpayPayment(
+        razorpayResponse,
+        paymentRecord,
+        button
+      );
+    }
+  };
+
+  razorpayInstance =
+    new Razorpay(options);
+
+  razorpayInstance.on(
+    "payment.failed",
+    function(response){
+      razorpayInstance = null;
+
+      const message =
+        response?.error?.description ||
+        "Payment failed. Please try again.";
+
+      setPaymentButtonState(
+        button,
+        false,
+        paymentRecord.paymentType ===
+          "APPOINTMENT"
+          ? `Pay ₹${formatMoney(
+              record.bookingFee || 50
+            )}`
+          : `Pay ₹${formatMoney(
+              record.bookingFee || 200
+            )}`
+      );
+
+      alert(message);
+    }
+  );
+
+  razorpayInstance.open();
+}
+
+async function verifyRazorpayPayment(
+  razorpayResponse,
+  paymentRecord,
+  button
+) {
+  setPaymentButtonState(
+    button,
+    true,
+    "Verifying Payment..."
+  );
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/payments/razorpay/verify`,
+      {
+        method:"POST",
+        headers:{
+          ...authHeaders(),
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          razorpayPaymentId:
+            razorpayResponse.razorpay_payment_id,
+
+          razorpayOrderId:
+            razorpayResponse.razorpay_order_id,
+
+          razorpaySignature:
+            razorpayResponse.razorpay_signature
+        })
+      }
+    );
+
+    const result =
+      await safelyReadResponse(
+        response
+      );
+
+    if (
+      !response.ok ||
+      result?.success === false
+    ) {
+      throw new Error(
+        result?.message ||
+        "Payment verification failed."
+      );
+    }
+
+    if (
+      result?.data?.signatureVerified ===
+      false
+    ) {
+      throw new Error(
+        "Payment signature verification failed."
+      );
+    }
+
+    razorpayInstance = null;
+    activePaymentRecord = null;
+
+    setPaymentButtonState(
+      button,
+      true,
+      "Payment Successful"
+    );
+
+    alert(
+      result?.message ||
+      "Payment verified successfully."
+    );
+
+    await loadMyAppointments();
+
+  } catch (error) {
+    console.error(
+      "Payment verification failed:",
+      error
+    );
+
+    razorpayInstance = null;
+
+    setPaymentButtonState(
+      button,
+      false,
+      "Retry Payment"
+    );
+
+    alert(
+      error.message ||
+      "Payment completed, but verification failed. Please contact support before paying again."
+    );
+  }
+}
+
+function validatePaymentData(
+  paymentData
+) {
+  const requiredFields = [
+    "keyId",
+    "razorpayOrderId",
+    "amount",
+    "currency"
+  ];
+
+  const missingField =
+    requiredFields.find(
+      field =>
+        paymentData[field] === null ||
+        paymentData[field] === undefined ||
+        paymentData[field] === ""
+    );
+
+  if (missingField) {
+    throw new Error(
+      `Payment response is missing ${missingField}.`
+    );
+  }
+}
+
+function getPaymentToken() {
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    ""
+  ).trim();
+}
+
+function findPaymentButton(
+  id,
+  paymentType
+) {
+  const expectedHandler =
+    paymentType === "APPOINTMENT"
+      ? `payAppointment(${Number(id)})`
+      : `payConsultation(${Number(id)})`;
+
+  return Array.from(
+    document.querySelectorAll(
+      ".pay-btn"
+    )
+  ).find(
+    button =>
+      String(
+        button.getAttribute("onclick") ||
+        ""
+      ).replaceAll(" ","") ===
+      expectedHandler.replaceAll(" ","")
+  ) || null;
+}
+
+function setPaymentButtonState(
+  button,
+  loading,
+  text
+) {
+  if (!button) {
+    return;
+  }
+
+  button.disabled = loading;
+
+  button.innerHTML =
+    loading
+      ? `
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          ${escapeHtml(text)}
+        `
+      : escapeHtml(text);
 }
 
 function joinConsultation(consultationId) {

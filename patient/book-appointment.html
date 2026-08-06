@@ -1789,7 +1789,7 @@
 
                     <p>
                         Verify your appointment details before
-                        proceeding to the ₹50 PayU payment.
+                        proceeding to the ₹50 secure Razorpay payment.
                     </p>
 
                 </div>
@@ -1941,7 +1941,7 @@
 
                             <i class="fa-solid fa-shield-halved"></i>
 
-                            Secure payment through PayU
+                            Secure payment through Razorpay
 
                         </div>
 
@@ -1974,11 +1974,15 @@
         </p>
 
     </footer>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <script>
         const API_BASE_URL = "http://localhost:8085";
 
         let currentStep = 1;
         let doctors = [];
+        let razorpayInstance = null;
+        let pendingAppointment = null;
 
         const bookingData = {
             bookingType: "OFFLINE",
@@ -2595,34 +2599,88 @@
             const token = getToken();
 
             if(!token){
-                showAlert("Please log in before booking an appointment.", "error");
-                setTimeout(() => window.location.href = "login.html", 1200);
+                showAlert(
+                    "Please log in before booking an appointment.",
+                    "error"
+                );
+
+                setTimeout(
+                    () => window.location.href = "login.html",
+                    1200
+                );
+
                 return;
             }
 
-            if(!validatePatientForm() || !bookingData.doctorId || !bookingData.appointmentDate || !bookingData.appointmentTime){
-                showAlert("Please complete all appointment details.", "error");
+            if(
+                !validatePatientForm() ||
+                !bookingData.doctorId ||
+                !bookingData.appointmentDate ||
+                !bookingData.appointmentTime
+            ){
+                showAlert(
+                    "Please complete all appointment details.",
+                    "error"
+                );
+
                 return;
             }
 
-            const payButton = document.getElementById("payButton");
-            payButton.disabled = true;
-            payButton.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                Creating Appointment...
-            `;
+            const payButton =
+                document.getElementById("payButton");
+
+            setPaymentButtonLoading(
+                payButton,
+                true,
+                "Creating Appointment..."
+            );
 
             const requestBody = {
-                doctorId: Number(bookingData.doctorId),
-                appointmentDate: bookingData.appointmentDate,
-                startTime: String(bookingData.appointmentTime).substring(0, 5),
-                appointmentMode: "OFFLINE",
-                patientName: document.getElementById("patientName").value.trim(),
-                phoneNumber: document.getElementById("phoneNumber").value.trim(),
-                age: Number(document.getElementById("age").value),
-                gender: document.getElementById("gender").value,
-                symptoms: document.getElementById("symptoms").value.trim(),
-                pastMedicalHistory: document.getElementById("pastHistory").value.trim()
+                doctorId:
+                    Number(bookingData.doctorId),
+
+                appointmentDate:
+                    bookingData.appointmentDate,
+
+                startTime:
+                    String(
+                        bookingData.appointmentTime
+                    ).substring(0, 5),
+
+                appointmentMode:
+                    "OFFLINE",
+
+                patientName:
+                    document.getElementById(
+                        "patientName"
+                    ).value.trim(),
+
+                phoneNumber:
+                    document.getElementById(
+                        "phoneNumber"
+                    ).value.trim(),
+
+                age:
+                    Number(
+                        document.getElementById(
+                            "age"
+                        ).value
+                    ),
+
+                gender:
+                    document.getElementById(
+                        "gender"
+                    ).value,
+
+                symptoms:
+                    document.getElementById(
+                        "symptoms"
+                    ).value.trim(),
+
+                pastMedicalHistory:
+                    document.getElementById(
+                        "pastHistory"
+                    ).value.trim()
             };
 
             try{
@@ -2630,47 +2688,396 @@
                     await verifySelectedSlotAvailability();
 
                 if(!stillAvailable){
-                    payButton.disabled = false;
-                    payButton.innerHTML = "Pay ₹50 and Confirm";
+                    setPaymentButtonLoading(
+                        payButton,
+                        false,
+                        "Pay ₹50 and Confirm"
+                    );
+
                     return;
                 }
 
+                /*
+                 * Step 1: Create the appointment.
+                 */
                 const response = await fetch(
                     `${API_BASE_URL}/api/appointments/book`,
                     {
-                        method: "POST",
-                        headers: authHeaders(true),
-                        body: JSON.stringify(requestBody)
+                        method:"POST",
+                        headers:authHeaders(true),
+                        body:JSON.stringify(
+                            requestBody
+                        )
                     }
                 );
 
-                const result = await readJsonResponse(response);
+                const result =
+                    await readJsonResponse(response);
 
-                if(!response.ok || result.success === false){
-                    throw new Error(result.message || "Unable to create appointment.");
+                if(
+                    !response.ok ||
+                    result.success === false
+                ){
+                    throw new Error(
+                        result.message ||
+                        "Unable to create appointment."
+                    );
                 }
 
-                const appointment = result.data || {};
-                const appointmentId = appointment.id || appointment.appointmentId;
+                pendingAppointment =
+                    result.data || {};
+
+                const appointmentId =
+                    pendingAppointment.id ||
+                    pendingAppointment.appointmentId;
 
                 if(!appointmentId){
-                    throw new Error("Appointment was created, but no appointment ID was returned.");
+                    throw new Error(
+                        "Appointment was created, but no appointment ID was returned."
+                    );
                 }
 
-                sessionStorage.setItem("pendingAppointment", JSON.stringify(appointment));
-                localStorage.setItem("pendingAppointmentId", String(appointmentId));
+                sessionStorage.setItem(
+                    "pendingAppointment",
+                    JSON.stringify(
+                        pendingAppointment
+                    )
+                );
 
-                showAlert(result.message || "Appointment created successfully.", "success");
+                localStorage.setItem(
+                    "pendingAppointmentId",
+                    String(appointmentId)
+                );
 
-                setTimeout(() => {
-                    window.location.href = `booking-payment.html?type=OFFLINE&id=${encodeURIComponent(appointmentId)}`;
-                }, 700);
+                showAlert(
+                    result.message ||
+                    "Appointment created. Opening payment...",
+                    "success"
+                );
+
+                /*
+                 * Step 2: Initiate Razorpay payment using:
+                 * POST /api/payments/appointment/{appointmentId}/initiate
+                 */
+                setPaymentButtonLoading(
+                    payButton,
+                    true,
+                    "Starting Payment..."
+                );
+
+                const paymentResponse = await fetch(
+                    `${API_BASE_URL}/api/payments/appointment/${encodeURIComponent(
+                        appointmentId
+                    )}/initiate`,
+                    {
+                        method:"POST",
+                        headers:authHeaders()
+                    }
+                );
+
+                const paymentResult =
+                    await readJsonResponse(
+                        paymentResponse
+                    );
+
+                if(
+                    !paymentResponse.ok ||
+                    paymentResult.success === false
+                ){
+                    throw new Error(
+                        paymentResult.message ||
+                        "Unable to initiate appointment payment."
+                    );
+                }
+
+                setPaymentButtonLoading(
+                    payButton,
+                    false,
+                    "Pay ₹50 and Confirm"
+                );
+
+                openAppointmentRazorpay(
+                    paymentResult.data || {},
+                    pendingAppointment
+                );
+
             }catch(error){
-                console.error("Appointment creation failed:", error);
-                showAlert(error.message || "Appointment could not be created.", "error");
-                payButton.disabled = false;
-                payButton.textContent = "Pay ₹50 and Confirm";
+                console.error(
+                    "Appointment booking/payment failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Appointment could not be booked.",
+                    "error"
+                );
+
+                setPaymentButtonLoading(
+                    payButton,
+                    false,
+                    "Pay ₹50 and Confirm"
+                );
             }
+        }
+
+        function openAppointmentRazorpay(
+            paymentData,
+            appointment
+        ){
+            if(typeof Razorpay === "undefined"){
+                showAlert(
+                    "Razorpay Checkout could not be loaded. Please check your internet connection.",
+                    "error"
+                );
+
+                return;
+            }
+
+            const requiredFields = [
+                "keyId",
+                "razorpayOrderId",
+                "amount",
+                "currency"
+            ];
+
+            const missingField =
+                requiredFields.find(
+                    field =>
+                        paymentData[field] === null ||
+                        paymentData[field] === undefined ||
+                        paymentData[field] === ""
+                );
+
+            if(missingField){
+                showAlert(
+                    `Payment response is missing ${missingField}.`,
+                    "error"
+                );
+
+                return;
+            }
+
+            const options = {
+                key:
+                    paymentData.keyId,
+
+                amount:
+                    Number(paymentData.amount),
+
+                currency:
+                    paymentData.currency || "INR",
+
+                name:
+                    paymentData.name ||
+                    "Neolife Wellness Center",
+
+                description:
+                    paymentData.description ||
+                    "Offline appointment booking",
+
+                order_id:
+                    paymentData.razorpayOrderId,
+
+                prefill:{
+                    name:
+                        paymentData.customerName ||
+                        appointment.patientName ||
+                        document.getElementById(
+                            "patientName"
+                        ).value.trim(),
+
+                    email:
+                        paymentData.customerEmail ||
+                        "",
+
+                    contact:
+                        paymentData.customerPhone ||
+                        appointment.phoneNumber ||
+                        document.getElementById(
+                            "phoneNumber"
+                        ).value.trim()
+                },
+
+                notes:{
+                    appointmentId:
+                        String(
+                            appointment.id ||
+                            appointment.appointmentId ||
+                            ""
+                        ),
+
+                    appointmentType:
+                        "OFFLINE"
+                },
+
+                theme:{
+                    color:"#153d29"
+                },
+
+                modal:{
+                    ondismiss:function(){
+                        showAlert(
+                            "Payment was not completed. The appointment remains pending payment.",
+                            "error"
+                        );
+                    }
+                },
+
+                handler:async function(
+                    razorpayResponse
+                ){
+                    await verifyAppointmentPayment(
+                        razorpayResponse,
+                        appointment
+                    );
+                }
+            };
+
+            razorpayInstance =
+                new Razorpay(options);
+
+            razorpayInstance.on(
+                "payment.failed",
+                function(response){
+                    const message =
+                        response?.error?.description ||
+                        "Payment failed. Please try again.";
+
+                    showAlert(
+                        message,
+                        "error"
+                    );
+                }
+            );
+
+            razorpayInstance.open();
+        }
+
+        async function verifyAppointmentPayment(
+            razorpayResponse,
+            appointment
+        ){
+            const payButton =
+                document.getElementById(
+                    "payButton"
+                );
+
+            setPaymentButtonLoading(
+                payButton,
+                true,
+                "Verifying Payment..."
+            );
+
+            try{
+                const response = await fetch(
+                    `${API_BASE_URL}/api/payments/razorpay/verify`,
+                    {
+                        method:"POST",
+                        headers:authHeaders(true),
+                        body:JSON.stringify({
+                            razorpayPaymentId:
+                                razorpayResponse.razorpay_payment_id,
+
+                            razorpayOrderId:
+                                razorpayResponse.razorpay_order_id,
+
+                            razorpaySignature:
+                                razorpayResponse.razorpay_signature
+                        })
+                    }
+                );
+
+                const result =
+                    await readJsonResponse(response);
+
+                if(
+                    !response.ok ||
+                    result.success === false
+                ){
+                    throw new Error(
+                        result.message ||
+                        "Payment verification failed."
+                    );
+                }
+
+                if(
+                    result?.data?.signatureVerified ===
+                    false
+                ){
+                    throw new Error(
+                        "Payment signature verification failed."
+                    );
+                }
+
+                const appointmentId =
+                    appointment.id ||
+                    appointment.appointmentId;
+
+                localStorage.removeItem(
+                    "pendingAppointmentId"
+                );
+
+                sessionStorage.removeItem(
+                    "pendingAppointment"
+                );
+
+                showAlert(
+                    "Payment verified successfully. Your appointment is being confirmed.",
+                    "success"
+                );
+
+                setPaymentButtonLoading(
+                    payButton,
+                    true,
+                    "Payment Successful"
+                );
+
+                setTimeout(function(){
+                    window.location.href =
+                        `my-appointments.html?payment=success&appointmentId=${encodeURIComponent(
+                            appointmentId
+                        )}`;
+                },1400);
+
+            }catch(error){
+                console.error(
+                    "Appointment payment verification failed:",
+                    error
+                );
+
+                showAlert(
+                    error.message ||
+                    "Payment completed, but verification failed. Please contact support before paying again.",
+                    "error"
+                );
+
+                setPaymentButtonLoading(
+                    payButton,
+                    false,
+                    "Retry Payment"
+                );
+            }
+        }
+
+        function setPaymentButtonLoading(
+            button,
+            loading,
+            text
+        ){
+            if(!button){
+                return;
+            }
+
+            button.disabled = loading;
+
+            button.innerHTML =
+                loading
+                    ? `
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        ${escapeHtml(text)}
+                      `
+                    : escapeHtml(text);
         }
 
         function showStep(stepNumber){

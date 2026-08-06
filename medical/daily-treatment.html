@@ -1701,9 +1701,7 @@
                         </h2>
 
                         <p>
-                            View scheduled therapy sessions, record patient
-                            attendance, add treatment notes, complete sessions
-                            and review each patient's treatment progress.
+                            View scheduled therapy sessions, patient information and treatment progress.
                         </p>
 
                     </div>
@@ -1958,7 +1956,7 @@
                             </h2>
 
                             <p>
-                                Update attendance, session notes and completion status.
+                                View session details and treatment progress.
                             </p>
 
                         </div>
@@ -2330,15 +2328,29 @@
         let filteredTreatments = [];
         let selectedTreatment = null;
 
+        /*
+         * These maps are used to enrich the daily-treatment response when
+         * it contains only patientId/doctorId and does not directly include
+         * the related names, phone number, age or gender.
+         */
+        const doctorDirectory = new Map();
+        const patientDirectory = new Map();
+
         let currentPage = 1;
         const pageSize = 8;
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
+            async function () {
                 requireStaffLogin();
-                loadStaffProfile();
-                loadTreatments();
+
+                await Promise.allSettled([
+                    loadStaffProfile(),
+                    loadDoctorDirectory(),
+                    loadPatientDirectory()
+                ]);
+
+                await loadTreatments();
             }
         );
 
@@ -2486,6 +2498,384 @@
         }
 
         /* =========================
+           RELATED DATA LOOKUPS
+        ========================== */
+
+        async function tryApiEndpoints(endpoints) {
+            for (const endpoint of endpoints) {
+                try {
+                    const result =
+                        await staffApiRequest(
+                            endpoint,
+                            {
+                                method: "GET"
+                            }
+                        );
+
+                    const records =
+                        extractFlexibleArray(
+                            result
+                        );
+
+                    if (records.length) {
+                        return records;
+                    }
+
+                } catch (error) {
+                    console.warn(
+                        `Lookup failed for ${endpoint}:`,
+                        error.message
+                    );
+                }
+            }
+
+            return [];
+        }
+
+        function extractFlexibleArray(result) {
+            const candidates = [
+                result,
+                result?.data,
+                result?.content,
+                result?.users,
+                result?.patients,
+                result?.doctors,
+                result?.sessions,
+                result?.data?.content,
+                result?.data?.users,
+                result?.data?.patients,
+                result?.data?.doctors,
+                result?.data?.sessions
+            ];
+
+            for (const candidate of candidates) {
+                if (Array.isArray(candidate)) {
+                    return candidate;
+                }
+            }
+
+            return [];
+        }
+
+        async function loadDoctorDirectory() {
+            const doctors =
+                await tryApiEndpoints([
+                    "/api/doctors/getAll",
+                    "/api/doctors/active",
+                    "/api/doctors"
+                ]);
+
+            doctors.forEach(function (doctor) {
+                const doctorId =
+                    firstNonEmpty(
+                        doctor.id,
+                        doctor.doctorId
+                    );
+
+                const doctorUserId =
+                    firstNonEmpty(
+                        doctor.userId,
+                        doctor.user?.id
+                    );
+
+                const doctorName =
+                    firstNonEmpty(
+                        doctor.name,
+                        doctor.doctorName,
+                        doctor.fullName,
+                        doctor.user?.name
+                    );
+
+                if (!doctorName) {
+                    return;
+                }
+
+                const details = {
+                    id: doctorId,
+                    userId: doctorUserId,
+                    name: String(doctorName).trim()
+                };
+
+                if (
+                    doctorId !== null &&
+                    doctorId !== undefined
+                ) {
+                    doctorDirectory.set(
+                        String(doctorId),
+                        details
+                    );
+                }
+
+                if (
+                    doctorUserId !== null &&
+                    doctorUserId !== undefined
+                ) {
+                    doctorDirectory.set(
+                        `USER-${doctorUserId}`,
+                        details
+                    );
+                }
+            });
+
+            console.log(
+                "DOCTOR DIRECTORY:",
+                doctorDirectory
+            );
+        }
+
+        async function loadPatientDirectory() {
+            const patients =
+                await tryApiEndpoints([
+                    "/api/medical-staff/patients",
+                    "/api/patient-records/patients",
+                    "/api/patients/getAll"
+                ]);
+
+            patients.forEach(
+                addPatientToDirectory
+            );
+
+            console.log(
+                "PATIENT DIRECTORY:",
+                patientDirectory
+            );
+        }
+
+        function addPatientToDirectory(patient) {
+            if (!patient) {
+                return;
+            }
+
+            const patientId =
+                firstNonEmpty(
+                    patient.patientId,
+                    patient.id
+                );
+
+            const userId =
+                firstNonEmpty(
+                    patient.userId,
+                    patient.user?.id
+                );
+
+            const combinedName = [
+                patient.firstName,
+                patient.middleName,
+                patient.lastName
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .trim();
+
+            const details = {
+                patientId,
+                userId,
+
+                name:
+                    firstNonEmpty(
+                        patient.patientName,
+                        patient.name,
+                        patient.fullName,
+                        patient.userName,
+                        patient.user?.name,
+                        combinedName
+                    ),
+
+                phone:
+                    firstNonEmpty(
+                        patient.patientPhone,
+                        patient.phoneNumber,
+                        patient.mobileNumber,
+                        patient.phone,
+                        patient.user?.phoneNumber
+                    ),
+
+                age:
+                    firstNonEmpty(
+                        patient.patientAge,
+                        patient.age
+                    ),
+
+                gender:
+                    firstNonEmpty(
+                        patient.patientGender,
+                        patient.gender
+                    )
+            };
+
+            if (
+                patientId !== null &&
+                patientId !== undefined
+            ) {
+                patientDirectory.set(
+                    String(patientId),
+                    details
+                );
+            }
+
+            if (
+                userId !== null &&
+                userId !== undefined
+            ) {
+                patientDirectory.set(
+                    `USER-${userId}`,
+                    details
+                );
+            }
+        }
+
+        function getDirectoryPatient(item) {
+            const patientId =
+                firstNonEmpty(
+                    item.patientId,
+                    item.patient?.id,
+                    item.treatmentPlan?.patientId,
+                    item.treatmentPlan?.patient?.id
+                );
+
+            const userId =
+                firstNonEmpty(
+                    item.userId,
+                    item.user?.id,
+                    item.patient?.userId,
+                    item.patient?.user?.id,
+                    item.treatmentPlan?.userId
+                );
+
+            return (
+                (
+                    patientId !== null &&
+                    patientId !== undefined
+                )
+                    ? patientDirectory.get(
+                        String(patientId)
+                    )
+                    : null
+            ) || (
+                (
+                    userId !== null &&
+                    userId !== undefined
+                )
+                    ? patientDirectory.get(
+                        `USER-${userId}`
+                    )
+                    : null
+            ) || null;
+        }
+
+        function getDirectoryDoctor(item) {
+            const doctorId =
+                firstNonEmpty(
+                    item.doctorId,
+                    item.assignedDoctorId,
+                    item.doctor?.id,
+                    item.treatmentPlan?.doctorId,
+                    item.treatmentPlan?.doctor?.id,
+                    item.appointment?.doctorId,
+                    item.consultation?.doctorId
+                );
+
+            const doctorUserId =
+                firstNonEmpty(
+                    item.doctorUserId,
+                    item.doctor?.userId,
+                    item.doctor?.user?.id,
+                    item.treatmentPlan?.doctor?.userId,
+                    item.treatmentPlan?.doctor?.user?.id
+                );
+
+            return (
+                (
+                    doctorId !== null &&
+                    doctorId !== undefined
+                )
+                    ? doctorDirectory.get(
+                        String(doctorId)
+                    )
+                    : null
+            ) || (
+                (
+                    doctorUserId !== null &&
+                    doctorUserId !== undefined
+                )
+                    ? doctorDirectory.get(
+                        `USER-${doctorUserId}`
+                    )
+                    : null
+            ) || null;
+        }
+
+        async function enrichMissingPatientRecords(items) {
+            const unresolvedIds = [
+                ...new Set(
+                    items
+                        .filter(item =>
+                            item.patientId &&
+                            (
+                                isMissingValue(
+                                    item.patientPhone
+                                ) ||
+                                isMissingValue(
+                                    item.patientAge
+                                ) ||
+                                isMissingValue(
+                                    item.patientGender
+                                )
+                            )
+                        )
+                        .map(item =>
+                            String(item.patientId)
+                        )
+                )
+            ];
+
+            await Promise.allSettled(
+                unresolvedIds.map(
+                    async function (patientId) {
+                        try {
+                            const result =
+                                await staffApiRequest(
+                                    `/api/patient-records/patient/${encodeURIComponent(
+                                        patientId
+                                    )}`,
+                                    {
+                                        method: "GET"
+                                    }
+                                );
+
+                            const record =
+                                result?.data ||
+                                result;
+
+                            if (record) {
+                                addPatientToDirectory(
+                                    record
+                                );
+                            }
+
+                        } catch (error) {
+                            console.warn(
+                                `Patient record ${patientId} could not be loaded:`,
+                                error.message
+                            );
+                        }
+                    }
+                )
+            );
+        }
+
+        function isMissingValue(value) {
+            return (
+                value === null ||
+                value === undefined ||
+                String(value).trim() === "" ||
+                String(value).trim() === "-" ||
+                String(value).trim().toLowerCase() ===
+                    "not available"
+            );
+        }
+
+        /* =========================
            LOAD TREATMENTS
         ========================== */
 
@@ -2502,6 +2892,30 @@
                     extractArray(
                         result.data
                     );
+
+                console.log(
+                    "DAILY TREATMENT API RESPONSE:",
+                    result
+                );
+
+                console.log(
+                    "FIRST RAW TREATMENT RECORD:",
+                    data[0]
+                );
+
+                let normalizedTreatments =
+                    data.map(
+                        normalizeTreatment
+                    );
+
+                /*
+                 * If the main session response contains patient IDs but not
+                 * phone/age/gender, try the patient-record endpoint and
+                 * normalize again using the newly loaded directory values.
+                 */
+                await enrichMissingPatientRecords(
+                    normalizedTreatments
+                );
 
                 allTreatments =
                     data
@@ -2591,6 +3005,158 @@
             return [];
         }
 
+        function firstNonEmpty(...values) {
+            for (const value of values) {
+                if (
+                    value !== null &&
+                    value !== undefined &&
+                    String(value).trim() !== ""
+                ) {
+                    return value;
+                }
+            }
+
+            return null;
+        }
+
+        function resolvePatientName(item) {
+            const directoryPatient =
+                getDirectoryPatient(item);
+
+            const combinedName = [
+                item.patient?.firstName,
+                item.patient?.middleName,
+                item.patient?.lastName
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .trim();
+
+            return String(
+                firstNonEmpty(
+                    item.patientName,
+                    item.userName,
+                    item.patient?.name,
+                    item.patient?.fullName,
+                    item.user?.name,
+                    item.treatmentPlan?.patientName,
+                    item.treatmentPlan?.patient?.name,
+                    item.appointment?.patientName,
+                    item.consultation?.patientName,
+                    combinedName,
+                    directoryPatient?.name,
+                    "Patient"
+                )
+            ).trim();
+        }
+
+        function resolvePatientPhone(item) {
+            const directoryPatient =
+                getDirectoryPatient(item);
+
+            return String(
+                firstNonEmpty(
+                    item.patientPhone,
+                    item.patientPhoneNumber,
+                    item.phoneNumber,
+                    item.mobileNumber,
+                    item.phone,
+                    item.patient?.phoneNumber,
+                    item.patient?.mobileNumber,
+                    item.patient?.phone,
+                    item.user?.phoneNumber,
+                    item.treatmentPlan?.patientPhone,
+                    item.treatmentPlan?.patient?.phoneNumber,
+                    item.appointment?.phoneNumber,
+                    item.consultation?.phoneNumber,
+                    directoryPatient?.phone,
+                    "-"
+                )
+            );
+        }
+
+        function resolvePatientAge(item) {
+            const directoryPatient =
+                getDirectoryPatient(item);
+
+            return firstNonEmpty(
+                item.patientAge,
+                item.age,
+                item.patient?.age,
+                item.treatmentPlan?.patientAge,
+                item.treatmentPlan?.patient?.age,
+                item.appointment?.age,
+                item.consultation?.age,
+                directoryPatient?.age,
+                "-"
+            );
+        }
+
+        function resolvePatientGender(item) {
+            const directoryPatient =
+                getDirectoryPatient(item);
+
+            return String(
+                firstNonEmpty(
+                    item.patientGender,
+                    item.gender,
+                    item.patient?.gender,
+                    item.treatmentPlan?.patientGender,
+                    item.treatmentPlan?.patient?.gender,
+                    item.appointment?.gender,
+                    item.consultation?.gender,
+                    directoryPatient?.gender,
+                    "-"
+                )
+            ).toUpperCase();
+        }
+
+        function resolveDoctorName(item) {
+            const directoryDoctor =
+                getDirectoryDoctor(item);
+
+            const doctorUserName =
+                firstNonEmpty(
+                    item.doctor?.user?.name,
+                    item.treatmentPlan?.doctor?.user?.name,
+                    item.appointment?.doctor?.user?.name,
+                    item.consultation?.doctor?.user?.name
+                );
+
+            return String(
+                firstNonEmpty(
+                    item.doctorName,
+                    item.assignedDoctorName,
+                    item.referringDoctorName,
+                    item.doctor?.name,
+                    item.doctor?.doctorName,
+                    doctorUserName,
+                    item.treatmentPlan?.doctorName,
+                    item.treatmentPlan?.assignedDoctorName,
+                    item.treatmentPlan?.doctor?.name,
+                    item.appointment?.doctorName,
+                    item.appointment?.doctor?.name,
+                    item.consultation?.doctorName,
+                    item.consultation?.doctor?.name,
+                    directoryDoctor?.name,
+                    "-"
+                )
+            ).trim();
+        }
+
+        function resolveTherapyName(item) {
+            return firstNonEmpty(
+                item.therapyName,
+                item.treatmentName,
+                item.serviceName,
+                item.therapy?.name,
+                item.treatmentPlan?.therapyName,
+                item.treatmentPlan?.treatmentName,
+                item.treatmentPlan?.therapy?.name,
+                "Therapy"
+            );
+        }
+
         function normalizeTreatment(item) {
             const totalSessions =
                 Number(
@@ -2616,6 +3182,7 @@
 
                 treatmentPlanId:
                     item.treatmentPlanId ??
+                    item.treatmentPlan?.id ??
                     null,
 
                 treatmentNumber:
@@ -2623,44 +3190,56 @@
 
                 patientId:
                     item.patientId ??
+                    item.patient?.id ??
+                    item.userId ??
+                    item.user?.id ??
+                    item.treatmentPlan?.patientId ??
+                    item.treatmentPlan?.patient?.id ??
                     null,
 
                 patientName:
-                    item.patientName ||
-                    "Patient",
+                    resolvePatientName(item),
 
                 patientPhone:
-                    item.phoneNumber ||
-                    item.patientPhoneNumber ||
-                    "-",
+                    resolvePatientPhone(item),
 
                 patientAge:
-                    item.age ?? "-",
+                    resolvePatientAge(item),
 
                 patientGender:
-                    String(
-                        item.gender || "-"
-                    ).toUpperCase(),
+                    resolvePatientGender(item),
 
                 doctorId:
                     item.doctorId ??
+                    item.assignedDoctorId ??
+                    item.doctor?.id ??
+                    item.treatmentPlan?.doctorId ??
+                    item.treatmentPlan?.doctor?.id ??
+                    item.appointment?.doctorId ??
+                    item.appointment?.doctor?.id ??
+                    item.consultation?.doctorId ??
+                    item.consultation?.doctor?.id ??
                     null,
 
                 doctorName:
-                    item.doctorName ||
-                    "-",
+                    resolveDoctorName(item),
 
                 therapistId:
                     item.therapistId ??
+                    item.therapist?.id ??
                     null,
 
                 therapistName:
-                    item.therapistName ||
-                    "Therapist",
+                    firstNonEmpty(
+                        item.therapistName,
+                        item.therapist?.name,
+                        item.treatmentPlan?.therapistName,
+                        item.treatmentPlan?.therapist?.name,
+                        "Therapist"
+                    ),
 
                 therapyName:
-                    item.treatmentName ||
-                    "Therapy",
+                    resolveTherapyName(item),
 
                 treatmentDate:
                     item.sessionDate ||
@@ -3113,7 +3692,7 @@
                             </td>
 
                             <td>
-                                ${escapeHtml(
+                                ${displayValue(
                                     item.doctorName
                                 )}
                             </td>
@@ -3209,30 +3788,6 @@
                                     >
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button attendance-button"
-                                        onclick="openAttendanceModal('${item.id}')"
-                                        title="Update attendance"
-                                    >
-                                        <i class="fa-solid fa-user-check"></i>
-                                    </button>
-
-                                    ${
-                                        canComplete
-                                            ? `
-                                            <button
-                                                type="button"
-                                                class="action-button complete-button"
-                                                onclick="openCompleteModal('${item.id}')"
-                                                title="Complete session"
-                                            >
-                                                <i class="fa-solid fa-check"></i>
-                                            </button>
-                                            `
-                                            : ""
-                                    }
 
                                     <button
                                         type="button"
@@ -3442,7 +3997,7 @@
                         <span>Patient Phone</span>
 
                         <strong>
-                            ${escapeHtml(
+                            ${displayValue(
                                 selectedTreatment.patientPhone
                             )}
                         </strong>
@@ -3452,14 +4007,9 @@
                         <span>Age / Gender</span>
 
                         <strong>
-                            ${escapeHtml(
-                                selectedTreatment.patientAge
-                            )}
-                            /
-                            ${escapeHtml(
-                                formatStatus(
-                                    selectedTreatment.patientGender
-                                )
+                            ${formatAgeGender(
+                                selectedTreatment.patientAge,
+                                selectedTreatment.patientGender
                             )}
                         </strong>
                     </div>
@@ -3468,7 +4018,7 @@
                         <span>Doctor</span>
 
                         <strong>
-                            ${escapeHtml(
+                            ${displayValue(
                                 selectedTreatment.doctorName
                             )}
                         </strong>
@@ -3611,42 +4161,15 @@
                 </div>
             `;
 
-            let actions = `
+            const actions = `
                 <button
                     type="button"
-                    class="modal-button modal-cancel-button"
+                    class="modal-button modal-submit-button"
                     onclick="closeDetailsModal()"
                 >
                     Close
                 </button>
-
-                <button
-                    type="button"
-                    class="modal-button modal-submit-button"
-                    onclick="openAttendanceFromDetails()"
-                >
-                    <i class="fa-solid fa-user-check"></i>
-                    Attendance
-                </button>
             `;
-
-            if (
-                selectedTreatment.status !==
-                    "COMPLETED" &&
-                selectedTreatment.attendance !==
-                    "ABSENT"
-            ) {
-                actions += `
-                    <button
-                        type="button"
-                        class="modal-button modal-complete-button"
-                        onclick="openCompleteFromDetails()"
-                    >
-                        <i class="fa-solid fa-check"></i>
-                        Complete Session
-                    </button>
-                `;
-            }
 
             document.getElementById(
                 "detailsModalActions"
@@ -4389,6 +4912,34 @@
                 ).padStart(2, "0");
 
             return `${year}-${month}-${day}`;
+        }
+
+        function displayValue(value) {
+            return isMissingValue(value)
+                ? "—"
+                : escapeHtml(String(value));
+        }
+
+        function formatAgeGender(age, gender) {
+            const ageText =
+                !isMissingValue(age)
+                    ? escapeHtml(
+                        `${String(age)} years`
+                    )
+                    : "";
+
+            const genderText =
+                !isMissingValue(gender)
+                    ? escapeHtml(
+                        formatStatus(gender)
+                    )
+                    : "";
+
+            if (ageText && genderText) {
+                return `${ageText} / ${genderText}`;
+            }
+
+            return ageText || genderText || "—";
         }
 
         function formatDate(value) {

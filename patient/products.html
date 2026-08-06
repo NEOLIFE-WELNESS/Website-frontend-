@@ -742,6 +742,116 @@ button{
   color:white;
 }
 
+
+.payment-method-card{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:15px;
+  border:1px solid rgba(212,175,55,.35);
+  border-radius:14px;
+  background:#fbfcf8;
+}
+
+.payment-method-icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  border-radius:12px;
+  color:white;
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  font-size:17px;
+}
+
+.payment-method-card strong{
+  display:block;
+  color:var(--green-dark);
+  font-size:14px;
+}
+
+.payment-method-card span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.coupon-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+}
+
+.coupon-input{
+  width:100%;
+  min-height:44px;
+  padding:10px 13px;
+  border:1px solid #d8ded8;
+  border-radius:11px;
+  outline:none;
+}
+
+.coupon-input:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(212,175,55,.12);
+}
+
+.apply-coupon-btn{
+  min-height:44px;
+  padding:10px 18px;
+  border-radius:11px;
+  color:white;
+  background:var(--green-dark);
+  font-size:12px;
+  font-weight:800;
+}
+
+.checkout-message{
+  margin-top:13px;
+  padding:11px 13px;
+  display:none;
+  border-radius:10px;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.checkout-message.show{display:block}
+.checkout-message.success{color:#17623a;background:#e5f5eb}
+.checkout-message.error{color:#a33b3b;background:#fde9e9}
+
+.order-summary-breakdown{
+  margin-top:13px;
+  padding:14px;
+  border:1px solid rgba(212,175,55,.25);
+  border-radius:14px;
+  background:#fbfcf8;
+}
+
+.order-summary-row{
+  padding:7px 0;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  color:#536059;
+  font-size:13px;
+}
+
+.order-summary-row.discount{
+  color:#267047;
+}
+
+.order-summary-row.total{
+  margin-top:5px;
+  padding-top:12px;
+  border-top:1px solid #e1e5e1;
+  color:var(--gold-dark);
+  font-size:18px;
+  font-weight:800;
+}
+
 /* ===== FOOTER ===== */
 .footer{
   background:#0d281b;
@@ -1291,15 +1401,24 @@ button{
 
     <span class="details-close" onclick="closeCheckoutModal()">×</span>
 
-    <h2 class="checkout-title">Checkout</h2>
+    <h2 class="checkout-title">Secure Checkout</h2>
 
     <div id="addressStep" class="checkout-step">
       <h3>1. Select Delivery Address</h3>
       <div id="addressList"></div>
 
       <div class="checkout-actions">
-        <button class="back-checkout-btn" onclick="closeCheckoutModal()">Cancel</button>
-        <button class="continue-checkout-btn" onclick="continueToSummary()">Continue</button>
+        <button class="back-checkout-btn" onclick="closeCheckoutModal()">
+          Cancel
+        </button>
+
+        <button
+          class="continue-checkout-btn"
+          id="continueSummaryButton"
+          onclick="continueToSummary()"
+        >
+          Continue
+        </button>
       </div>
     </div>
 
@@ -1307,33 +1426,59 @@ button{
       <h3>Selected Address</h3>
       <div id="checkoutAddress" class="address-card"></div>
 
-      <h3>2. Order Summary</h3>
-      <div id="checkoutItems"></div>
+      <h3>2. Apply Coupon</h3>
 
-      <h3>3. Delivery Option</h3>
-      <label class="address-card">
-        <input type="radio" checked>
-        Standard Delivery - 3 to 5 days - ₹50
-      </label>
+      <div class="coupon-row">
+        <input
+          type="text"
+          id="couponCode"
+          class="coupon-input"
+          placeholder="Enter coupon code (optional)"
+        >
 
-      <h3>4. Payment Method</h3>
-      <label class="address-card">
-        <input type="radio" name="paymentMethod" value="COD" checked>
-        Cash on Delivery
-      </label>
-
-      <label class="address-card">
-        <input type="radio" name="paymentMethod" value="ONLINE">
-        Online Payment
-      </label>
-
-      <div class="checkout-total">
-        Total: ₹<span id="checkoutTotal">0</span>
+        <button
+          type="button"
+          class="apply-coupon-btn"
+          onclick="refreshOrderSummary()"
+        >
+          Apply
+        </button>
       </div>
 
+      <h3 style="margin-top:22px;">3. Order Summary</h3>
+      <div id="checkoutItems"></div>
+      <div id="orderSummaryBreakdown" class="order-summary-breakdown"></div>
+
+      <h3 style="margin-top:22px;">4. Payment Method</h3>
+
+      <div class="payment-method-card">
+        <div class="payment-method-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <div>
+          <strong>Secure Online Payment</strong>
+          <span>Pay using Razorpay: UPI, cards, net banking or supported wallets.</span>
+        </div>
+      </div>
+
+      <div
+        id="checkoutMessage"
+        class="checkout-message"
+      ></div>
+
       <div class="checkout-actions">
-        <button class="back-checkout-btn" onclick="backToAddress()">Back</button>
-        <button class="continue-checkout-btn" onclick="confirmPlaceOrder()">Confirm Order</button>
+        <button class="back-checkout-btn" onclick="backToAddress()">
+          Back
+        </button>
+
+        <button
+          class="continue-checkout-btn"
+          id="confirmOrderButton"
+          onclick="confirmPlaceOrder()"
+        >
+          Create Order &amp; Pay
+        </button>
       </div>
     </div>
 
@@ -1349,11 +1494,17 @@ button{
 </a>
 
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 const API_BASE_URL = "http://localhost:8085";
-const DELIVERY_CHARGE = 50;
 
 let cart = [];
+
+let checkoutAddressId = null;
+let currentOrderSummary = null;
+let pendingOrder = null;
+let razorpayInstance = null;
 
 let selectedProduct = {};
 let productImages = [];
@@ -1439,10 +1590,9 @@ async function clearBackendCart() {
   }
 }
 async function confirmPlaceOrder(){
-  const token = localStorage.getItem("token");
-  const confirmButton = document.querySelector(
-    "#summaryStep .continue-checkout-btn"
-  );
+  const token = getUserToken();
+  const confirmButton =
+    document.getElementById("confirmOrderButton");
 
   if(!token){
     alert("Please login first.");
@@ -1450,94 +1600,521 @@ async function confirmPlaceOrder(){
     return;
   }
 
-  const selectedPayment = document.querySelector(
-    'input[name="paymentMethod"]:checked'
-  );
-
-  if(!selectedPayment){
-    alert("Please select a payment method.");
+  if(!checkoutAddressId){
+    showCheckoutMessage(
+      "Please select a delivery address.",
+      "error"
+    );
     return;
   }
 
-  const orderRequest = {
-    addressId: Number(checkoutAddressId),
-    paymentMethod: selectedPayment.value,
-    items: cart.map(item => ({
-      productId: Number(item.productId),
-      quantity: Number(item.quantity)
-    }))
-  };
-
-  if(!orderRequest.addressId){
-    alert("Please select an address.");
+  if(!Array.isArray(cart) || cart.length === 0){
+    showCheckoutMessage(
+      "Your cart is empty.",
+      "error"
+    );
     return;
   }
 
-  if(orderRequest.items.length === 0){
-    alert("Cart is empty.");
-    return;
-  }
-
-  if(confirmButton){
-    confirmButton.disabled = true;
-    confirmButton.textContent = "Placing Order...";
-  }
-
-  try{
-    const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify(orderRequest)
-    });
-
-    if(response.status === 401 || response.status === 403){
-      localStorage.clear();
-      alert("Your session has expired. Please login again.");
-      window.location.href = "login.html";
-      return;
-    }
-
-    const result = await response.json().catch(() => ({}));
-
-    if(!response.ok || !result.success){
-      alert(result.message || "Failed to place order");
-      return;
-    }
-
-    await clearBackendCart();
-    cart = [];
-    updateCart([]);
-    closeCheckoutModal();
-    closeCart();
-
-    const orderNumber = result.data?.orderNumber || result.data?.id || "";
-    alert(
-      orderNumber
-        ? `Order placed successfully!
-Order No: ${orderNumber}`
-        : "Order placed successfully!"
+  if(
+    !currentOrderSummary ||
+    currentOrderSummary.shippingCharge === null ||
+    currentOrderSummary.shippingCharge === undefined ||
+    currentOrderSummary.total === null ||
+    currentOrderSummary.total === undefined
+  ){
+    showCheckoutMessage(
+      "Please calculate the order summary again. Shipping charge and total are required.",
+      "error"
     );
 
-    if(selectedPayment.value === "ONLINE" && result.data?.paymentUrl){
-      window.location.href = result.data.paymentUrl;
-      return;
+    await refreshOrderSummary();
+    return;
+  }
+
+  const orderRequest = buildOrderRequest();
+
+  setCheckoutButtonLoading(
+    confirmButton,
+    true,
+    "Creating Order..."
+  );
+
+  try{
+    /*
+     * Step 1: Create order.
+     * The backend creates it as PENDING_PAYMENT and does not reduce stock.
+     */
+    const createResult = await apiRequest(
+      "/api/orders/create",
+      {
+        method:"POST",
+        body:JSON.stringify(orderRequest)
+      }
+    );
+
+    pendingOrder = createResult.data;
+
+    console.log(
+      "CREATED ORDER RESPONSE:",
+      pendingOrder
+    );
+
+    const createdShippingCharge =
+      toNullableNumber(
+        pendingOrder?.shippingCharge ??
+        pendingOrder?.deliveryCharge
+      );
+
+    const createdTotal =
+      toNullableNumber(
+        pendingOrder?.totalAmount ??
+        pendingOrder?.total
+      );
+
+    if(
+      createdShippingCharge !== null &&
+      currentOrderSummary?.shippingCharge !== null &&
+      Math.abs(
+        createdShippingCharge -
+        Number(currentOrderSummary.shippingCharge)
+      ) > 0.01
+    ){
+      throw new Error(
+        "The created order shipping charge does not match the checkout summary. Please refresh and try again."
+      );
     }
 
-    window.location.href = "my-orders.html";
+    if(
+      createdTotal !== null &&
+      currentOrderSummary?.total !== null &&
+      Math.abs(
+        createdTotal -
+        Number(currentOrderSummary.total)
+      ) > 0.01
+    ){
+      throw new Error(
+        "The created order total does not match the checkout summary. Please refresh and try again."
+      );
+    }
+
+    const orderId =
+      pendingOrder?.id;
+
+    if(!orderId){
+      throw new Error(
+        "Order was created but the order ID is missing."
+      );
+    }
+
+    showCheckoutMessage(
+      `Order ${pendingOrder.orderNumber || orderId} created. Opening secure payment...`,
+      "success"
+    );
+
+    /*
+     * Step 2: Initiate Razorpay payment for the newly created order.
+     */
+    const paymentResult = await apiRequest(
+      `/api/payments/order/${encodeURIComponent(orderId)}/initiate`,
+      {
+        method:"POST"
+      }
+    );
+
+    const paymentData =
+      paymentResult.data || {};
+
+    setCheckoutButtonLoading(
+      confirmButton,
+      false,
+      "Create Order & Pay"
+    );
+
+    openRazorpayCheckout(
+      paymentData,
+      pendingOrder
+    );
 
   }catch(error){
-    console.error(error);
-    alert("Unable to place the order. Please check the backend connection.");
-  }finally{
-    if(confirmButton){
-      confirmButton.disabled = false;
-      confirmButton.textContent = "Confirm Order";
-    }
+    console.error(
+      "Order/payment initiation failed:",
+      error
+    );
+
+    showCheckoutMessage(
+      error.message ||
+      "Unable to create the order or initiate payment.",
+      "error"
+    );
+
+    setCheckoutButtonLoading(
+      confirmButton,
+      false,
+      "Create Order & Pay"
+    );
   }
 }
+
+function openRazorpayCheckout(
+  paymentData,
+  order
+){
+  if(typeof Razorpay === "undefined"){
+    showCheckoutMessage(
+      "Razorpay Checkout could not be loaded. Please check your internet connection.",
+      "error"
+    );
+    return;
+  }
+
+  const requiredFields = [
+    "keyId",
+    "razorpayOrderId",
+    "amount",
+    "currency"
+  ];
+
+  const missingField =
+    requiredFields.find(
+      field =>
+        paymentData[field] === null ||
+        paymentData[field] === undefined ||
+        paymentData[field] === ""
+    );
+
+  if(missingField){
+    showCheckoutMessage(
+      `Payment initiation response is missing ${missingField}.`,
+      "error"
+    );
+    return;
+  }
+
+  const options = {
+    key:paymentData.keyId,
+    amount:Number(paymentData.amount),
+    currency:paymentData.currency || "INR",
+    name:
+      paymentData.name ||
+      "NeoLife Wellness Center",
+    description:
+      paymentData.description ||
+      `Order ${order?.orderNumber || order?.id || ""}`,
+    order_id:paymentData.razorpayOrderId,
+
+    prefill:{
+      name:
+        paymentData.customerName || "",
+      email:
+        paymentData.customerEmail || "",
+      contact:
+        paymentData.customerPhone || ""
+    },
+
+    notes:{
+      orderId:
+        String(order?.id || ""),
+      orderNumber:
+        String(order?.orderNumber || "")
+    },
+
+    theme:{
+      color:"#123524"
+    },
+
+    modal:{
+      ondismiss:function(){
+        showCheckoutMessage(
+          "Payment was not completed. Your order remains pending and you can retry payment from My Orders.",
+          "error"
+        );
+
+        setTimeout(function(){
+          window.location.href =
+            "my-orders.html";
+        },1800);
+      }
+    },
+
+    handler:async function(response){
+      await verifyRazorpayPayment(
+        response,
+        order
+      );
+    }
+  };
+
+  razorpayInstance =
+    new Razorpay(options);
+
+  razorpayInstance.on(
+    "payment.failed",
+    function(response){
+      const description =
+        response?.error?.description ||
+        "Payment failed. Please try again.";
+
+      showCheckoutMessage(
+        description,
+        "error"
+      );
+    }
+  );
+
+  razorpayInstance.open();
+}
+
+async function verifyRazorpayPayment(
+  razorpayResponse,
+  order
+){
+  const confirmButton =
+    document.getElementById(
+      "confirmOrderButton"
+    );
+
+  setCheckoutButtonLoading(
+    confirmButton,
+    true,
+    "Verifying Payment..."
+  );
+
+  try{
+    const verifyResult = await apiRequest(
+      "/api/payments/razorpay/verify",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          razorpayPaymentId:
+            razorpayResponse.razorpay_payment_id,
+          razorpayOrderId:
+            razorpayResponse.razorpay_order_id,
+          razorpaySignature:
+            razorpayResponse.razorpay_signature
+        })
+      }
+    );
+
+    if(
+      verifyResult?.data?.signatureVerified ===
+      false
+    ){
+      throw new Error(
+        "Payment signature verification failed."
+      );
+    }
+
+    /*
+     * Signature verification succeeds immediately. The signed Razorpay
+     * webhook is responsible for changing the order to PAID, reducing
+     * stock exactly once and sending the success notification.
+     */
+    await clearBackendCart();
+
+    cart = [];
+    updateCart([]);
+
+    closeCart();
+
+    showCheckoutMessage(
+      "Payment verified successfully. Your order is being confirmed.",
+      "success"
+    );
+
+    localStorage.setItem(
+      "lastPaidOrderId",
+      String(order?.id || "")
+    );
+
+    setTimeout(function(){
+      closeCheckoutModal();
+
+      window.location.href =
+        `my-orders.html?payment=success&orderId=${encodeURIComponent(
+          order?.id || ""
+        )}`;
+    },1400);
+
+  }catch(error){
+    console.error(
+      "Payment verification failed:",
+      error
+    );
+
+    showCheckoutMessage(
+      error.message ||
+      "Payment completed, but verification failed. Please contact support before paying again.",
+      "error"
+    );
+
+    setCheckoutButtonLoading(
+      confirmButton,
+      false,
+      "Retry Verification"
+    );
+  }
+}
+
+
+function getUserToken(){
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("jwtToken") ||
+    sessionStorage.getItem("token") ||
+    ""
+  ).trim();
+}
+
+async function apiRequest(
+  endpoint,
+  options = {}
+){
+  const token =
+    getUserToken();
+
+  if(!token){
+    throw new Error(
+      "Please login to continue."
+    );
+  }
+
+  const headers = {
+    Accept:"application/json",
+    ...(options.headers || {}),
+    Authorization:
+      `Bearer ${token}`
+  };
+
+  if(
+    options.body &&
+    !(options.body instanceof FormData)
+  ){
+    headers["Content-Type"] =
+      "application/json";
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}${endpoint}`,
+    {
+      ...options,
+      headers
+    }
+  );
+
+  const text =
+    await response.text();
+
+  let result = {};
+
+  if(text){
+    try{
+      result = JSON.parse(text);
+    }catch(error){
+      result = {
+        success:false,
+        message:text
+      };
+    }
+  }
+
+  if(
+    response.status === 401 ||
+    response.status === 403
+  ){
+    throw new Error(
+      result.message ||
+      "Your session has expired. Please login again."
+    );
+  }
+
+  if(
+    !response.ok ||
+    result.success === false
+  ){
+    throw new Error(
+      result.message ||
+      `Request failed (${response.status})`
+    );
+  }
+
+  return result;
+}
+
+function setCheckoutButtonLoading(
+  button,
+  loading,
+  text
+){
+  if(!button){
+    return;
+  }
+
+  button.disabled = loading;
+
+  button.innerHTML =
+    loading
+      ? `
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          ${escapeHtml(text)}
+        `
+      : escapeHtml(text);
+}
+
+function showCheckoutMessage(
+  message,
+  type
+){
+  const box =
+    document.getElementById(
+      "checkoutMessage"
+    );
+
+  if(!box){
+    return;
+  }
+
+  box.textContent = message;
+  box.className =
+    `checkout-message show ${type}`;
+}
+
+function clearCheckoutMessage(){
+  const box =
+    document.getElementById(
+      "checkoutMessage"
+    );
+
+  if(!box){
+    return;
+  }
+
+  box.textContent = "";
+  box.className =
+    "checkout-message";
+}
+
+function formatMoney(value){
+  return Number(value || 0)
+    .toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+      }
+    );
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
 function getImages(product){
   let urls = product.imageUrls || [];
 
@@ -1688,8 +2265,6 @@ function addProductToCart(index){
 //     alert("Unable to place order. Check backend.");
 //   }
 // }
-let checkoutAddressId = null;
-
 async function placeOrder(){
   const token = localStorage.getItem("token");
 
@@ -1704,8 +2279,21 @@ async function placeOrder(){
     return;
   }
 
+  currentOrderSummary = null;
+  pendingOrder = null;
+  checkoutAddressId = null;
+
   document.getElementById("summaryStep").style.display = "none";
   document.getElementById("addressStep").style.display = "block";
+
+  const couponInput =
+    document.getElementById("couponCode");
+
+  if(couponInput){
+    couponInput.value = "";
+  }
+
+  clearCheckoutMessage();
 
   await loadUserAddresses();
 
@@ -1713,54 +2301,426 @@ async function placeOrder(){
   document.getElementById("checkoutModal").style.display = "block";
 }
 function closeCheckoutModal(){
-  document.getElementById("checkoutModal").style.display = "none";
+  document.getElementById(
+    "checkoutModal"
+  ).style.display = "none";
+
+  clearCheckoutMessage();
 }
-function continueToSummary(){
-  const selected = document.querySelector('input[name="address"]:checked');
+async function continueToSummary(){
+  const selected =
+    document.querySelector(
+      'input[name="address"]:checked'
+    );
 
   if(!selected){
     alert("Please select address.");
     return;
   }
 
-  checkoutAddressId = Number(selected.value);
+  checkoutAddressId =
+    Number(selected.value);
 
-  document.getElementById("checkoutAddress").innerText =
+  document.getElementById(
+    "checkoutAddress"
+  ).innerText =
     selected.closest("label").innerText;
 
-  let total = 0;
-  let html = "";
+  document.getElementById(
+    "addressStep"
+  ).style.display = "none";
 
-  cart.forEach(item => {
-    const subtotal = Number(item.price) * Number(item.quantity);
-    total += subtotal;
+  document.getElementById(
+    "summaryStep"
+  ).style.display = "block";
 
-    html += `
-      <div class="summary-item">
-        <div>
-          <b>${item.productName}</b><br>
-          Qty: ${item.quantity}
-        </div>
-        <div>₹${subtotal}</div>
+  renderCheckoutItems();
+
+  await refreshOrderSummary();
+}
+
+function renderCheckoutItems(){
+  const container =
+    document.getElementById(
+      "checkoutItems"
+    );
+
+  if(!Array.isArray(cart) || !cart.length){
+    container.innerHTML = `
+      <div class="product-status">
+        Your cart is empty.
       </div>
     `;
-  });
+    return;
+  }
 
-  total += DELIVERY_CHARGE;
+  container.innerHTML =
+    cart.map(item => {
+      const quantity =
+        Number(item.quantity || 0);
 
-  html += `
-    <div class="summary-item">
-      <div>Delivery Charge</div>
-      <div>₹${DELIVERY_CHARGE}</div>
+      const price =
+        Number(item.price || 0);
+
+      const subtotal =
+        Number(
+          item.totalPrice ||
+          price * quantity
+        );
+
+      return `
+        <div class="summary-item">
+          <div>
+            <b>${escapeHtml(
+              item.productName || "Product"
+            )}</b><br>
+            Qty: ${quantity}
+          </div>
+
+          <div>
+            ₹${formatMoney(subtotal)}
+          </div>
+        </div>
+      `;
+    }).join("");
+}
+
+async function refreshOrderSummary(){
+  const continueButton =
+    document.getElementById(
+      "continueSummaryButton"
+    );
+
+  const applyButton =
+    document.querySelector(
+      ".apply-coupon-btn"
+    );
+
+  if(!checkoutAddressId){
+    showCheckoutMessage(
+      "Please select an address.",
+      "error"
+    );
+    return;
+  }
+
+  if(!Array.isArray(cart) || !cart.length){
+    showCheckoutMessage(
+      "Your cart is empty.",
+      "error"
+    );
+    return;
+  }
+
+  const requestBody =
+    buildOrderRequest();
+
+  setCheckoutButtonLoading(
+    continueButton,
+    true,
+    "Calculating..."
+  );
+
+  setCheckoutButtonLoading(
+    applyButton,
+    true,
+    "Applying..."
+  );
+
+  clearCheckoutMessage();
+
+  try{
+    console.log(
+      "ORDER SUMMARY REQUEST:",
+      requestBody
+    );
+
+    const result = await apiRequest(
+      "/api/orders/summary",
+      {
+        method:"POST",
+        body:JSON.stringify(
+          requestBody
+        )
+      }
+    );
+
+    console.log(
+      "ORDER SUMMARY RESPONSE:",
+      result
+    );
+
+    currentOrderSummary =
+      normalizeOrderSummary(
+        result.data
+      );
+
+    renderOrderSummaryBreakdown(
+      currentOrderSummary
+    );
+
+    showCheckoutMessage(
+      result.message ||
+      "Order total calculated successfully.",
+      "success"
+    );
+
+  }catch(error){
+    console.error(
+      "Order summary failed:",
+      error
+    );
+
+    currentOrderSummary = null;
+
+    renderOrderSummaryUnavailable();
+
+    showCheckoutMessage(
+      error.message ||
+      "Unable to calculate the order summary.",
+      "error"
+    );
+
+  }finally{
+    setCheckoutButtonLoading(
+      continueButton,
+      false,
+      "Continue"
+    );
+
+    setCheckoutButtonLoading(
+      applyButton,
+      false,
+      "Apply"
+    );
+  }
+}
+
+function buildOrderRequest(){
+  const couponCode =
+    document.getElementById(
+      "couponCode"
+    )?.value.trim();
+
+  const request = {
+    addressId:
+      Number(checkoutAddressId),
+
+    items:
+      cart.map(item => ({
+        productId:
+          Number(item.productId),
+        quantity:
+          Number(item.quantity)
+      }))
+  };
+
+  if(couponCode){
+    request.couponCode =
+      couponCode;
+  }
+
+  return request;
+}
+
+function normalizeOrderSummary(data){
+  const summary =
+    data && typeof data === "object"
+      ? data
+      : {};
+
+  /*
+   * The documented API returns shippingCharge, discount and total.
+   * Alternate names are accepted only for compatibility with older
+   * backend response DTOs.
+   */
+  const subtotal =
+    toNullableNumber(
+      summary.subtotal ??
+      summary.subTotal
+    );
+
+  const discount =
+    toNullableNumber(
+      summary.discount ??
+      summary.discountAmount
+    );
+
+  const shippingCharge =
+    toNullableNumber(
+      summary.shippingCharge ??
+      summary.deliveryCharge ??
+      summary.shippingFee ??
+      summary.deliveryFee
+    );
+
+  const gst =
+    toNullableNumber(
+      summary.gst ??
+      summary.gstAmount ??
+      summary.taxAmount
+    );
+
+  const total =
+    toNullableNumber(
+      summary.total ??
+      summary.totalAmount ??
+      summary.grandTotal
+    );
+
+  return {
+    ...summary,
+
+    subtotal:
+      subtotal ?? 0,
+
+    couponCode:
+      summary.couponCode ||
+      summary.appliedCouponCode ||
+      null,
+
+    discount:
+      discount ?? 0,
+
+    shippingCharge:
+      shippingCharge,
+
+    gst:
+      gst ?? 0,
+
+    total:
+      total
+  };
+}
+
+function toNullableNumber(value){
+  if(
+    value === null ||
+    value === undefined ||
+    value === ""
+  ){
+    return null;
+  }
+
+  const number =
+    Number(value);
+
+  return Number.isFinite(number)
+    ? number
+    : null;
+}
+
+function formatSummaryMoney(value){
+  return value === null ||
+         value === undefined
+    ? "Not calculated"
+    : `₹${formatMoney(value)}`;
+}
+
+function renderOrderSummaryBreakdown(summary){
+  const container =
+    document.getElementById(
+      "orderSummaryBreakdown"
+    );
+
+  if(!container){
+    return;
+  }
+
+  const shippingDisplay =
+    formatSummaryMoney(
+      summary.shippingCharge
+    );
+
+  const totalDisplay =
+    formatSummaryMoney(
+      summary.total
+    );
+
+  container.innerHTML = `
+    <div class="order-summary-row">
+      <span>Subtotal</span>
+
+      <strong>
+        ₹${formatMoney(
+          summary.subtotal ?? 0
+        )}
+      </strong>
+    </div>
+
+    ${
+      summary.couponCode
+        ? `
+          <div class="order-summary-row">
+            <span>Coupon</span>
+
+            <strong>
+              ${escapeHtml(
+                summary.couponCode
+              )}
+            </strong>
+          </div>
+        `
+        : ""
+    }
+
+    <div class="order-summary-row discount">
+      <span>Discount</span>
+
+      <strong>
+        - ₹${formatMoney(
+          summary.discount ?? 0
+        )}
+      </strong>
+    </div>
+
+    <div class="order-summary-row">
+      <span>Shipping Charge</span>
+
+      <strong>
+        ${shippingDisplay}
+      </strong>
+    </div>
+
+    <div class="order-summary-row">
+      <span>GST</span>
+
+      <strong>
+        ₹${formatMoney(
+          summary.gst ?? 0
+        )}
+      </strong>
+    </div>
+
+    <div class="order-summary-row total">
+      <span>Total</span>
+
+      <strong>
+        ${totalDisplay}
+      </strong>
     </div>
   `;
-
-  document.getElementById("checkoutItems").innerHTML = html;
-  document.getElementById("checkoutTotal").innerText = total;
-
-  document.getElementById("addressStep").style.display = "none";
-  document.getElementById("summaryStep").style.display = "block";
 }
+
+function renderOrderSummaryUnavailable(){
+  const container =
+    document.getElementById(
+      "orderSummaryBreakdown"
+    );
+
+  if(!container){
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="product-status">
+      Order summary could not be calculated.
+      Shipping charge and final total must be returned
+      by the backend before payment can continue.
+    </div>
+  `;
+}
+
 function viewDetails(index){
   const product = window.loadedProducts[index];
 

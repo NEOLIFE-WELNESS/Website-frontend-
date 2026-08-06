@@ -1627,6 +1627,8 @@ textarea.form-control {
     </p>
 </footer>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 const API_BASE_URL = "http://localhost:8085";
 
@@ -1643,6 +1645,8 @@ const consultationData = {
 };
 
 let doctors = [];
+let razorpayInstance = null;
+let pendingConsultation = null;
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -2795,40 +2799,83 @@ async function submitOnlineConsultation() {
             );
         }
 
-        const consultation =
+        pendingConsultation =
             result.data || {};
 
         sessionStorage.setItem(
             "onlineConsultation",
             JSON.stringify(
-                consultation
+                pendingConsultation
             )
         );
 
-        showAlert(
-            result.message ||
-            "Consultation request sent successfully.",
-            "success"
+        const consultationId =
+            pendingConsultation.id ||
+            pendingConsultation.consultationId;
+
+        if(!consultationId){
+            throw new Error(
+                "Consultation was created, but no consultation ID was returned."
+            );
+        }
+
+        localStorage.setItem(
+            "pendingConsultationId",
+            String(consultationId)
         );
 
-        const consultationId =
-            consultation.id ||
-            consultation.consultationId;
+        const consultationStatus =
+            String(
+                pendingConsultation.status ||
+                pendingConsultation.consultationStatus ||
+                ""
+            ).toUpperCase();
 
-        setTimeout(function () {
+        /*
+         * Online-consultation payment is normally allowed only after the
+         * doctor confirms or accepts the consultation request.
+         */
+        const paymentAllowed =
+            [
+                "CONFIRMED",
+                "ACCEPTED",
+                "DOCTOR_CONFIRMED",
+                "PAYMENT_PENDING",
+                "PENDING_PAYMENT"
+            ].includes(
+                consultationStatus
+            );
 
-            if (consultationId) {
+        if(paymentAllowed){
+            showAlert(
+                "Consultation confirmed. Opening secure payment...",
+                "success"
+            );
+
+            button.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Starting Payment...
+            `;
+
+            await initiateConsultationPayment(
+                consultationId,
+                pendingConsultation
+            );
+
+        }else{
+            showAlert(
+                result.message ||
+                "Consultation request sent. Payment will be available after doctor confirmation.",
+                "success"
+            );
+
+            setTimeout(function () {
                 window.location.href =
                     `my-appointments.html?type=ONLINE&id=${encodeURIComponent(
                         consultationId
-                    )}`;
-
-            } else {
-                window.location.href =
-                    "my-appointments.html";
-            }
-
-        }, 900);
+                    )}&status=pending-confirmation`;
+            },900);
+        }
 
     } catch (error) {
 
@@ -2845,9 +2892,316 @@ async function submitOnlineConsultation() {
 
     } finally {
 
+        if(!razorpayInstance){
+            button.disabled = false;
+            button.innerHTML =
+                originalContent;
+        }
+    }
+}
+
+async function initiateConsultationPayment(
+    consultationId,
+    consultation
+) {
+    const button =
+        document.getElementById(
+            "submitRequestButton"
+        );
+
+    try {
+        const result =
+            await apiRequest(
+                `/api/payments/consultation/${encodeURIComponent(
+                    consultationId
+                )}/initiate`,
+                {
+                    method: "POST"
+                },
+                true
+            );
+
+        openConsultationRazorpay(
+            result.data || {},
+            consultation
+        );
+
+    } catch (error) {
+        console.error(
+            "Consultation payment initiation failed:",
+            error
+        );
+
+        razorpayInstance = null;
+
         button.disabled = false;
         button.innerHTML =
-            originalContent;
+            "Retry ₹200 Payment";
+
+        button.onclick =
+            function () {
+                initiateConsultationPayment(
+                    consultationId,
+                    consultation
+                );
+            };
+
+        showAlert(
+            error.message ||
+            "Unable to initiate consultation payment.",
+            "error"
+        );
+
+        throw error;
+    }
+}
+
+function openConsultationRazorpay(
+    paymentData,
+    consultation
+) {
+    if(typeof Razorpay === "undefined"){
+        razorpayInstance = null;
+
+        showAlert(
+            "Razorpay Checkout could not be loaded. Please check your internet connection.",
+            "error"
+        );
+
+        return;
+    }
+
+    const requiredFields = [
+        "keyId",
+        "razorpayOrderId",
+        "amount",
+        "currency"
+    ];
+
+    const missingField =
+        requiredFields.find(
+            field =>
+                paymentData[field] === null ||
+                paymentData[field] === undefined ||
+                paymentData[field] === ""
+        );
+
+    if(missingField){
+        razorpayInstance = null;
+
+        showAlert(
+            `Payment response is missing ${missingField}.`,
+            "error"
+        );
+
+        return;
+    }
+
+    const consultationId =
+        consultation.id ||
+        consultation.consultationId;
+
+    const options = {
+        key:
+            paymentData.keyId,
+
+        amount:
+            Number(paymentData.amount),
+
+        currency:
+            paymentData.currency || "INR",
+
+        name:
+            paymentData.name ||
+            "Neolife Wellness Center",
+
+        description:
+            paymentData.description ||
+            "Online consultation payment",
+
+        order_id:
+            paymentData.razorpayOrderId,
+
+        prefill: {
+            name:
+                paymentData.customerName ||
+                consultation.patientName ||
+                getInputValue("patientName"),
+
+            email:
+                paymentData.customerEmail ||
+                "",
+
+            contact:
+                paymentData.customerPhone ||
+                consultation.phoneNumber ||
+                getInputValue("phoneNumber")
+        },
+
+        notes: {
+            consultationId:
+                String(
+                    consultationId || ""
+                ),
+
+            consultationType:
+                "ONLINE"
+        },
+
+        theme: {
+            color:"#143d29"
+        },
+
+        modal: {
+            ondismiss:function(){
+                razorpayInstance = null;
+
+                const button =
+                    document.getElementById(
+                        "submitRequestButton"
+                    );
+
+                button.disabled = false;
+                button.innerHTML =
+                    "Retry ₹200 Payment";
+
+                button.onclick =
+                    function () {
+                        initiateConsultationPayment(
+                            consultationId,
+                            consultation
+                        );
+                    };
+
+                showAlert(
+                    "Payment was not completed. You can retry after doctor confirmation from My Appointments.",
+                    "error"
+                );
+            }
+        },
+
+        handler:async function(
+            razorpayResponse
+        ) {
+            await verifyConsultationPayment(
+                razorpayResponse,
+                consultation
+            );
+        }
+    };
+
+    razorpayInstance =
+        new Razorpay(options);
+
+    razorpayInstance.on(
+        "payment.failed",
+        function(response){
+            razorpayInstance = null;
+
+            const message =
+                response?.error?.description ||
+                "Payment failed. Please try again.";
+
+            showAlert(
+                message,
+                "error"
+            );
+        }
+    );
+
+    razorpayInstance.open();
+}
+
+async function verifyConsultationPayment(
+    razorpayResponse,
+    consultation
+) {
+    const button =
+        document.getElementById(
+            "submitRequestButton"
+        );
+
+    button.disabled = true;
+    button.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Verifying Payment...
+    `;
+
+    try {
+        const result =
+            await apiRequest(
+                "/api/payments/razorpay/verify",
+                {
+                    method:"POST",
+                    body:JSON.stringify({
+                        razorpayPaymentId:
+                            razorpayResponse.razorpay_payment_id,
+
+                        razorpayOrderId:
+                            razorpayResponse.razorpay_order_id,
+
+                        razorpaySignature:
+                            razorpayResponse.razorpay_signature
+                    })
+                },
+                true
+            );
+
+        if(
+            result?.data?.signatureVerified ===
+            false
+        ){
+            throw new Error(
+                "Payment signature verification failed."
+            );
+        }
+
+        const consultationId =
+            consultation.id ||
+            consultation.consultationId;
+
+        localStorage.removeItem(
+            "pendingConsultationId"
+        );
+
+        sessionStorage.removeItem(
+            "onlineConsultation"
+        );
+
+        razorpayInstance = null;
+
+        button.innerHTML =
+            "Payment Successful";
+
+        showAlert(
+            "Payment verified successfully. Your consultation is being confirmed.",
+            "success"
+        );
+
+        setTimeout(function () {
+            window.location.href =
+                `my-appointments.html?type=ONLINE&payment=success&consultationId=${encodeURIComponent(
+                    consultationId
+                )}`;
+        },1400);
+
+    } catch (error) {
+        console.error(
+            "Consultation payment verification failed:",
+            error
+        );
+
+        razorpayInstance = null;
+
+        button.disabled = false;
+        button.innerHTML =
+            "Retry Payment Verification";
+
+        showAlert(
+            error.message ||
+            "Payment completed, but verification failed. Please contact support before paying again.",
+            "error"
+        );
     }
 }
 
