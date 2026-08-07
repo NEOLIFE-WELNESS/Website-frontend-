@@ -1029,6 +1029,31 @@ a{
     background:var(--info-light);
 }
 
+.start-visit-btn{
+    color:var(--success);
+    background:var(--success-light);
+}
+
+.start-visit-btn:hover{
+    color:var(--white);
+    background:var(--success);
+}
+
+.status-waiting{
+    color:var(--info);
+    background:var(--info-light);
+}
+
+.status-in-progress{
+    color:var(--warning);
+    background:var(--warning-light);
+}
+
+.status-completed{
+    color:var(--success);
+    background:var(--success-light);
+}
+
 .action-btn:hover{
     color:var(--white);
     background:var(--dark);
@@ -1463,15 +1488,13 @@ a{
                     <i class="fa-solid fa-users"></i>
                     Patient Dashboard
                 </a>
-                <a href="walk-in-patients.html">
-    <i class="fa-solid fa-person-walking-luggage"></i>
-    Walk-in Patients
-</a>
 
-<a href="add-patient.html">
-    <i class="fa-solid fa-user-plus"></i>
-    Add Walk-in Patient
-</a>
+                <a href="patients.html?view=walkin">
+                    <i class="fa-solid fa-person-walking"></i>
+                    Walk-in Patients
+                </a>
+                
+
 
                 <a href="appointment-calendar.html">
                     <i class="fa-solid fa-calendar-days"></i>
@@ -1561,6 +1584,45 @@ a{
     <article class="summary-card"><div class="summary-icon icon-warning"><i class="fa-solid fa-clock-rotate-left"></i></div><div><p>Recent Interactions</p><h3 id="recentInteractions">0</h3></div></article>
   </div>
 
+  <div
+    style="
+        display:inline-flex;
+        gap:6px;
+        padding:6px;
+        margin-bottom:18px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background:#fff;
+    "
+  >
+    <button
+      type="button"
+      class="button primary"
+      id="allPatientsTab"
+      onclick="setPatientView('ALL')"
+    >
+      All Patients
+    </button>
+
+    <button
+      type="button"
+      class="button secondary"
+      id="registeredPatientsTab"
+      onclick="setPatientView('REGISTERED')"
+    >
+      Registered
+    </button>
+
+    <button
+      type="button"
+      class="button secondary"
+      id="walkInPatientsTab"
+      onclick="setPatientView('WALK_IN')"
+    >
+      Walk-in Patients
+    </button>
+  </div>
+
   <section class="filter-panel">
     <div class="form-group">
       <label for="patientSearch">Search Patient</label>
@@ -1588,8 +1650,26 @@ a{
     </div>
     <div class="table-wrap">
       <table class="patient-table">
-        <thead><tr><th>Patient</th><th>Contact</th><th>Age / Gender</th><th>Appointments</th><th>Consultations</th><th>Total Interactions</th><th>Last Interaction</th><th>Actions</th></tr></thead>
-        <tbody id="patientTableBody"><tr><td colspan="8" class="table-message"><i class="fa-solid fa-spinner fa-spin"></i>Loading patients...</td></tr></tbody>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Phone</th>
+            <th>Age / Gender</th>
+            <th>Patient Type</th>
+            <th>Visit Date</th>
+            <th>Visit Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="patientTableBody">
+          <tr>
+            <td colspan="8" class="table-message">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Loading patients...
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
     <div class="pagination">
@@ -1619,15 +1699,35 @@ let filteredPatients=[];
 let currentPage=1;
 const pageSize=8;
 let selectedPatientId=null;
+let selectedPatientView="ALL";
 
 document.addEventListener("DOMContentLoaded", async ()=>{
   if(!requireDoctorLogin()){
     return;
   }
 
+  setActivePatientSidebar();
   await loadDoctorProfile();
   await loadPatients();
+  applyInitialPatientView();
 });
+
+function setActivePatientSidebar(){
+  const params=new URLSearchParams(location.search);
+  const isWalkIn=
+    String(params.get("view")||"").toLowerCase()==="walkin";
+
+  document.querySelectorAll(".doctor-menu a")
+    .forEach(link=>link.classList.remove("active"));
+
+  const target=isWalkIn
+    ? document.querySelector('.doctor-menu a[href="patients.html?view=walkin"]')
+    : document.querySelector('.doctor-menu a[href="patients.html"]');
+
+  if(target){
+    target.classList.add("active");
+  }
+}
 
 function getToken(){return localStorage.getItem("token")||localStorage.getItem("doctorToken")}
 
@@ -1665,10 +1765,25 @@ async function apiRequest(endpoint,options={}){
     result={success:false,message:text||`Invalid server response (${response.status}).`};
   }
 
-  if(response.status===401||response.status===403){
+  /*
+   * 401 = authentication is invalid/expired, so clear the session.
+   * 403 = the doctor is logged in but is not allowed to access this
+   * particular endpoint. Do NOT clear the JWT or redirect to login.
+   */
+  if(response.status===401){
     clearDoctorSession();
     window.location.href="../patient/login.html";
-    throw new Error(result.message||"Doctor session expired.");
+    throw new Error(
+      result.message||
+      "Doctor session expired. Please login again."
+    );
+  }
+
+  if(response.status===403){
+    throw new Error(
+      result.message||
+      "You do not have permission to access this resource."
+    );
   }
 
   if(!response.ok||result.success===false){
@@ -1775,38 +1890,238 @@ function updateDoctorHeader(name){
 
 async function loadPatients(){
   showLoading();
+
   try{
-    const result=await apiRequest("/api/doctor-dashboard/patients");
-    const data=Array.isArray(result.data)?result.data:[];
-    allPatients=data.map(normalizePatient).filter(patient=>patient.id!==null);
+    const results=
+      await Promise.allSettled([
+        apiRequest(
+          "/api/doctor-dashboard/patients"
+        ),
+
+        apiRequest(
+          "/api/walk-in-patients/doctor/my-patients"
+        )
+      ]);
+
+    const regularResult=
+      results[0].status==="fulfilled"
+        ? results[0].value
+        : {data:[]};
+
+    const walkInResult=
+      results[1].status==="fulfilled"
+        ? results[1].value
+        : {data:[]};
+
+    if(
+      results[0].status==="rejected"
+    ){
+      console.warn(
+        "Registered patients could not be loaded:",
+        results[0].reason
+      );
+    }
+
+    if(
+      results[1].status==="rejected"
+    ){
+      console.warn(
+        "Walk-in patients could not be loaded:",
+        results[1].reason
+      );
+    }
+
+    const regularData=
+      Array.isArray(
+        regularResult.data
+      )
+        ? regularResult.data
+        : [];
+
+    const walkInData=
+      Array.isArray(
+        walkInResult.data
+      )
+        ? walkInResult.data
+        : [];
+
+    const regularPatients=
+      regularData
+        .map(
+          normalizePatient
+        )
+        .filter(
+          patient =>
+            patient.id!==null
+        );
+
+    const walkInPatients=
+      walkInData
+        .map(
+          normalizeWalkInPatient
+        )
+        .filter(
+          patient =>
+            patient.walkInPatientId!==null
+        );
+
+    allPatients=[
+      ...regularPatients,
+      ...walkInPatients
+    ];
+
     updateSummary();
     applyFilters();
+
+    if(
+      results.every(
+        result =>
+          result.status==="rejected"
+      )
+    ){
+      throw new Error(
+        "Unable to load patient records."
+      );
+    }
+
   }catch(error){
     allPatients=[];
     filteredPatients=[];
     updateSummary();
     renderPatients();
-    showAlert(error.message||"Unable to load patients.","error");
+
+    showAlert(
+      error.message||
+      "Unable to load patients.",
+      "error"
+    );
   }
 }
 
 function normalizePatient(patient){
-  const id=patient.patientId??patient.id??patient.userId??null;
-  const appointments=Number(patient.totalAppointments||0);
-  const consultations=Number(patient.totalConsultations||0);
+  const id=
+    patient.patientId??
+    patient.id??
+    patient.userId??
+    null;
+
+  const appointments=
+    Number(
+      patient.totalAppointments||0
+    );
+
+  const consultations=
+    Number(
+      patient.totalConsultations||0
+    );
 
   return{
     id,
-    code:id!==null?`NL-P-${id}`:"-",
-    name:patient.patientName||patient.name||"Patient",
-    phone:patient.phoneNumber||patient.phone||"-",
-    email:patient.email||"-",
-    age:patient.age??"-",
-    gender:String(patient.gender||"-").toUpperCase(),
-    totalAppointments:appointments,
-    totalConsultations:consultations,
-    totalInteractions:appointments+consultations,
-    lastInteractionAt:patient.lastInteractionAt||null
+    walkInPatientId:null,
+    isWalkInPatient:false,
+    code:
+      id!==null
+        ? `NL-P-${id}`
+        : "-",
+    name:
+      patient.patientName||
+      patient.name||
+      "Patient",
+    phone:
+      patient.phoneNumber||
+      patient.phone||
+      "-",
+    email:
+      patient.email||
+      "-",
+    age:
+      patient.age??"-",
+    gender:
+      String(
+        patient.gender||"-"
+      ).toUpperCase(),
+    patientType:"REGISTERED",
+    visitDate:
+      patient.lastInteractionAt||
+      null,
+    visitTime:
+      patient.startTime||
+      null,
+    status:
+      patient.status||
+      "REGISTERED",
+    totalAppointments:
+      appointments,
+    totalConsultations:
+      consultations,
+    totalInteractions:
+      appointments+
+      consultations,
+    lastInteractionAt:
+      patient.lastInteractionAt||
+      null,
+    symptoms:
+      patient.symptoms||
+      "",
+    pastMedicalHistory:
+      patient.pastMedicalHistory||
+      ""
+  };
+}
+
+function normalizeWalkInPatient(patient){
+  const walkInPatientId=
+    patient.id??
+    patient.walkInPatientId??
+    null;
+
+  return{
+    id:
+      `WALK-${walkInPatientId}`,
+    walkInPatientId,
+    isWalkInPatient:true,
+    code:
+      walkInPatientId!==null
+        ? `WALK-${walkInPatientId}`
+        : "-",
+    name:
+      patient.name||
+      patient.patientName||
+      "Walk-in Patient",
+    phone:
+      patient.phoneNumber||
+      "-",
+    email:"-",
+    age:
+      patient.age??"-",
+    gender:
+      String(
+        patient.gender||"-"
+      ).toUpperCase(),
+    patientType:"WALK_IN",
+    visitDate:
+      patient.appointmentDate||
+      null,
+    visitTime:
+      patient.startTime||
+      null,
+    status:
+      String(
+        patient.status||
+        "WAITING"
+      ).toUpperCase(),
+    totalAppointments:0,
+    totalConsultations:0,
+    totalInteractions:1,
+    lastInteractionAt:
+      patient.appointmentDate||
+      null,
+    symptoms:
+      patient.symptoms||
+      "",
+    pastMedicalHistory:
+      patient.pastMedicalHistory||
+      ""
   };
 }
 
@@ -1818,25 +2133,153 @@ function updateSummary(){
 }
 
 function applyFilters(){
-  const search=document.getElementById("patientSearch").value.trim().toLowerCase();
-  const gender=document.getElementById("genderFilter").value;
-  const days=Number(document.getElementById("interactionFilter").value||0);
+  const search=
+    document
+      .getElementById("patientSearch")
+      .value
+      .trim()
+      .toLowerCase();
 
-  filteredPatients=allPatients.filter(patient=>{
-    const matchesSearch=!search||
-      patient.name.toLowerCase().includes(search)||
-      patient.phone.toLowerCase().includes(search)||
-      patient.email.toLowerCase().includes(search)||
-      patient.code.toLowerCase().includes(search);
+  const gender=
+    document
+      .getElementById("genderFilter")
+      .value;
 
-    const matchesGender=!gender||patient.gender===gender;
-    const matchesDate=!days||isWithinDays(patient.lastInteractionAt,days);
+  const days=
+    Number(
+      document
+        .getElementById("interactionFilter")
+        .value||0
+    );
 
-    return matchesSearch&&matchesGender&&matchesDate;
-  });
+  filteredPatients=
+    allPatients.filter(
+      patient=>{
+        const matchesSearch=
+          !search||
+          patient.name
+            .toLowerCase()
+            .includes(search)||
+          String(patient.phone)
+            .toLowerCase()
+            .includes(search)||
+          String(patient.code)
+            .toLowerCase()
+            .includes(search);
+
+        const matchesGender=
+          !gender||
+          patient.gender===gender;
+
+        const matchesDate=
+          !days||
+          isWithinDays(
+            patient.visitDate||
+            patient.lastInteractionAt,
+            days
+          );
+
+        const matchesView=
+          selectedPatientView==="ALL"||
+          (
+            selectedPatientView==="WALK_IN"&&
+            patient.isWalkInPatient
+          )||
+          (
+            selectedPatientView==="REGISTERED"&&
+            !patient.isWalkInPatient
+          );
+
+        return (
+          matchesSearch&&
+          matchesGender&&
+          matchesDate&&
+          matchesView
+        );
+      }
+    );
 
   currentPage=1;
   renderPatients();
+}
+
+function setPatientView(view){
+  selectedPatientView=view;
+
+  const tabs={
+    ALL:
+      document.getElementById(
+        "allPatientsTab"
+      ),
+    REGISTERED:
+      document.getElementById(
+        "registeredPatientsTab"
+      ),
+    WALK_IN:
+      document.getElementById(
+        "walkInPatientsTab"
+      )
+  };
+
+  Object.entries(tabs)
+    .forEach(
+      ([key,button])=>{
+        if(!button){
+          return;
+        }
+
+        button.classList.toggle(
+          "primary",
+          key===view
+        );
+
+        button.classList.toggle(
+          "secondary",
+          key!==view
+        );
+      }
+    );
+
+  applyFilters();
+}
+
+function applyInitialPatientView(){
+  const params=
+    new URLSearchParams(
+      location.search
+    );
+
+  if(
+    String(
+      params.get("view")||""
+    ).toLowerCase()==="walkin"
+  ){
+    setPatientView(
+      "WALK_IN"
+    );
+  }
+
+  const walkInId=
+    params.get(
+      "walkInPatientId"
+    );
+
+  if(walkInId){
+    const patient=
+      allPatients.find(
+        item =>
+          item.isWalkInPatient&&
+          String(
+            item.walkInPatientId
+          )===String(walkInId)
+      );
+
+    if(patient){
+      openWalkInPatient(
+        patient.walkInPatientId
+      );
+    }
+  }
 }
 
 function isWithinDays(value,days){
@@ -1853,47 +2296,505 @@ function showLoading(){
 }
 
 function renderPatients(){
-  const body=document.getElementById("patientTableBody");
-  const totalPages=Math.max(1,Math.ceil(filteredPatients.length/pageSize));
-  if(currentPage>totalPages)currentPage=totalPages;
+  const body=
+    document.getElementById(
+      "patientTableBody"
+    );
 
-  const start=(currentPage-1)*pageSize;
-  const pagePatients=filteredPatients.slice(start,start+pageSize);
+  const totalPages=
+    Math.max(
+      1,
+      Math.ceil(
+        filteredPatients.length/
+        pageSize
+      )
+    );
 
-  document.getElementById("resultCount").textContent=
-    `${filteredPatients.length} Patient${filteredPatients.length===1?"":"s"}`;
+  if(
+    currentPage>totalPages
+  ){
+    currentPage=totalPages;
+  }
 
-  if(pagePatients.length===0){
-    body.innerHTML='<tr><td colspan="8" class="table-message"><i class="fa-solid fa-user-slash"></i>No patients found.</td></tr>';
-    updatePagination(0,0,0);
+  const start=
+    (currentPage-1)*
+    pageSize;
+
+  const pagePatients=
+    filteredPatients.slice(
+      start,
+      start+pageSize
+    );
+
+  document
+    .getElementById(
+      "resultCount"
+    )
+    .textContent=
+      `${filteredPatients.length} Patient${filteredPatients.length===1?"":"s"}`;
+
+  if(
+    pagePatients.length===0
+  ){
+    body.innerHTML=
+      '<tr><td colspan="8" class="table-message"><i class="fa-solid fa-user-slash"></i>No patients found.</td></tr>';
+
+    updatePagination(
+      0,
+      0,
+      0
+    );
+
     return;
   }
 
-  body.innerHTML=pagePatients.map(patient=>`
-    <tr>
-      <td>
-        <div class="patient-cell">
-          <span class="patient-avatar">${escapeHtml(patient.name.charAt(0).toUpperCase())}</span>
-          <div><strong>${escapeHtml(patient.name)}</strong><small>${escapeHtml(patient.code)}</small></div>
-        </div>
-      </td>
-      <td><div>${escapeHtml(patient.phone)}</div><small>${escapeHtml(patient.email)}</small></td>
-      <td>${escapeHtml(patient.age)} / ${escapeHtml(formatLabel(patient.gender))}</td>
-      <td><span class="badge badge-green"><i class="fa-solid fa-calendar-check"></i>${patient.totalAppointments}</span></td>
-      <td><span class="badge badge-blue"><i class="fa-solid fa-video"></i>${patient.totalConsultations}</span></td>
-      <td><span class="badge badge-gold">${patient.totalInteractions}</span></td>
-      <td>${formatDateTime(patient.lastInteractionAt)}</td>
-      <td>
-        <div class="actions">
-          <button class="action-btn view-btn" title="View Medical Record" onclick="openPatientRecord(${patient.id})"><i class="fa-solid fa-file-medical"></i></button>
-          <button class="action-btn appointments-btn" title="View Appointments" onclick="openPatientAppointments(${patient.id})"><i class="fa-solid fa-calendar-days"></i></button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
+  body.innerHTML=
+    pagePatients.map(
+      patient=>`
+        <tr>
+          <td>
+            <div class="patient-cell">
+              <span class="patient-avatar">
+                ${escapeHtml(
+                  patient.name
+                    .charAt(0)
+                    .toUpperCase()
+                )}
+              </span>
 
-  updatePagination(start+1,Math.min(start+pageSize,filteredPatients.length),filteredPatients.length);
-  renderPageButtons(totalPages);
+              <div>
+                <strong>
+                  ${escapeHtml(
+                    patient.name
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    patient.code
+                  )}
+                </small>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              patient.phone
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              patient.age
+            )}
+            /
+            ${escapeHtml(
+              formatLabel(
+                patient.gender
+              )
+            )}
+          </td>
+
+          <td>
+            <span
+              class="badge ${
+                patient.isWalkInPatient
+                  ? "badge-gold"
+                  : "badge-green"
+              }"
+            >
+              ${
+                patient.isWalkInPatient
+                  ? "Walk-in"
+                  : "Registered"
+              }
+            </span>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatDateOnly(
+                patient.visitDate
+              )
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatTimeOnly(
+                patient.visitTime
+              )
+            )}
+          </td>
+
+          <td>
+            <span class="badge ${getStatusBadgeClass(patient.status)}">
+              ${escapeHtml(
+                formatLabel(
+                  patient.status
+                )
+              )}
+            </span>
+          </td>
+
+          <td>
+            <div class="actions">
+
+              ${
+                patient.isWalkInPatient
+                  ? `
+                    <button
+                      class="action-btn view-btn"
+                      title="View walk-in patient"
+                      onclick="openWalkInPatient(${Number(
+                        patient.walkInPatientId
+                      )})"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+
+                    ${
+                      patient.status === "WAITING"
+                        ? `
+                          <button
+                            class="action-btn start-visit-btn"
+                            title="Start Visit"
+                            onclick="startWalkInVisit(${Number(
+                              patient.walkInPatientId
+                            )})"
+                          >
+                            <i class="fa-solid fa-play"></i>
+                          </button>
+                        `
+                        : patient.status === "IN_PROGRESS"
+                          ? `
+                            <button
+                              class="action-btn appointments-btn"
+                              title="Continue Prescription"
+                              onclick="openWalkInPrescription(${Number(
+                                patient.walkInPatientId
+                              )})"
+                            >
+                              <i class="fa-solid fa-file-pen"></i>
+                            </button>
+                          `
+                          : `
+                            <button
+                              class="action-btn appointments-btn"
+                              title="View Prescription"
+                              onclick="openWalkInPrescription(${Number(
+                                patient.walkInPatientId
+                              )})"
+                            >
+                              <i class="fa-solid fa-file-prescription"></i>
+                            </button>
+                          `
+                    }
+                  `
+                  : `
+                    <button
+                      class="action-btn view-btn"
+                      title="View Medical Record"
+                      onclick="openPatientRecord(${Number(
+                        patient.id
+                      )})"
+                    >
+                      <i class="fa-solid fa-file-medical"></i>
+                    </button>
+
+                    <button
+                      class="action-btn appointments-btn"
+                      title="View Appointments"
+                      onclick="openPatientAppointments(${Number(
+                        patient.id
+                      )})"
+                    >
+                      <i class="fa-solid fa-calendar-days"></i>
+                    </button>
+                  `
+              }
+
+            </div>
+          </td>
+        </tr>
+      `
+    ).join("");
+
+  updatePagination(
+    start+1,
+    Math.min(
+      start+pageSize,
+      filteredPatients.length
+    ),
+    filteredPatients.length
+  );
+
+  renderPageButtons(
+    totalPages
+  );
+}
+
+function formatDateOnly(value){
+  if(!value){
+    return "-";
+  }
+
+  const clean=
+    String(value)
+      .split("T")[0];
+
+  const date=
+    new Date(
+      `${clean}T00:00:00`
+    );
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  ){
+    return clean;
+  }
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric"
+    }
+  );
+}
+
+function formatTimeOnly(value){
+  if(!value){
+    return "-";
+  }
+
+  const parts=
+    String(value)
+      .split(":");
+
+  if(
+    parts.length<2
+  ){
+    return String(value);
+  }
+
+  let hour=
+    Number(parts[0]);
+
+  const minute=
+    String(
+      parts[1]
+    ).padStart(
+      2,
+      "0"
+    );
+
+  const suffix=
+    hour>=12
+      ? "PM"
+      : "AM";
+
+  hour=
+    hour%12||12;
+
+  return `${hour}:${minute} ${suffix}`;
+}
+
+function openWalkInPatient(
+  walkInPatientId
+){
+  const patient=
+    allPatients.find(
+      item =>
+        item.isWalkInPatient&&
+        String(
+          item.walkInPatientId
+        )===String(
+          walkInPatientId
+        )
+    );
+
+  if(!patient){
+    showAlert(
+      "Walk-in patient not found.",
+      "error"
+    );
+
+    return;
+  }
+
+  selectedPatientId=
+    walkInPatientId;
+
+  document
+    .getElementById(
+      "recordModalTitle"
+    )
+    .textContent=
+      "Walk-in Patient Details";
+
+  document
+    .getElementById(
+      "recordModal"
+    )
+    .classList.add(
+      "show"
+    );
+
+  document.body.style.overflow=
+    "hidden";
+
+  document
+    .getElementById(
+      "recordModalBody"
+    )
+    .innerHTML=`
+      <div class="record-grid">
+        <div class="record-box">
+          <span>Patient</span>
+          <strong>${escapeHtml(patient.name)}</strong>
+        </div>
+
+        <div class="record-box">
+          <span>Phone</span>
+          <strong>${escapeHtml(patient.phone)}</strong>
+        </div>
+
+        <div class="record-box">
+          <span>Age / Gender</span>
+          <strong>
+            ${escapeHtml(patient.age)}
+            /
+            ${escapeHtml(formatLabel(patient.gender))}
+          </strong>
+        </div>
+
+        <div class="record-box">
+          <span>Visit Date</span>
+          <strong>${escapeHtml(formatDateOnly(patient.visitDate))}</strong>
+        </div>
+
+        <div class="record-box">
+          <span>Visit Time</span>
+          <strong>${escapeHtml(formatTimeOnly(patient.visitTime))}</strong>
+        </div>
+
+        <div class="record-box">
+          <span>Status</span>
+          <strong>${escapeHtml(formatLabel(patient.status))}</strong>
+        </div>
+
+        <div class="record-box full-width">
+          <span>Symptoms</span>
+          <strong>${escapeHtml(patient.symptoms||"-")}</strong>
+        </div>
+
+        <div class="record-box full-width">
+          <span>Past Medical History</span>
+          <strong>${escapeHtml(patient.pastMedicalHistory||"-")}</strong>
+        </div>
+      </div>
+    `;
+
+  const button=
+    document.getElementById(
+      "viewAppointmentsButton"
+    );
+
+  button.style.display="inline-flex";
+
+  if(patient.status === "WAITING"){
+    button.innerHTML=
+      '<i class="fa-solid fa-play"></i> Start Visit';
+
+    button.onclick=
+      ()=>startWalkInVisit(
+        walkInPatientId
+      );
+
+  }else if(patient.status === "IN_PROGRESS"){
+    button.innerHTML=
+      '<i class="fa-solid fa-file-pen"></i> Continue Prescription';
+
+    button.onclick=
+      ()=>openWalkInPrescription(
+        walkInPatientId
+      );
+
+  }else{
+    button.innerHTML=
+      '<i class="fa-solid fa-eye"></i> View Prescription';
+
+    button.onclick=
+      ()=>openWalkInPrescription(
+        walkInPatientId
+      );
+  }
+}
+
+function getStatusBadgeClass(status){
+  const value=String(status||"").toUpperCase();
+
+  if(value === "COMPLETED"){
+    return "status-completed";
+  }
+
+  if(value === "IN_PROGRESS"){
+    return "status-in-progress";
+  }
+
+  return "status-waiting";
+}
+
+function startWalkInVisit(
+  walkInPatientId
+){
+  const patient=
+    allPatients.find(
+      item =>
+        item.isWalkInPatient&&
+        String(item.walkInPatientId)===String(walkInPatientId)
+    );
+
+  if(!patient){
+    showAlert(
+      "Walk-in patient not found.",
+      "error"
+    );
+    return;
+  }
+
+  if(patient.status === "COMPLETED"){
+    showAlert(
+      "This walk-in visit is already completed.",
+      "info"
+    );
+    return;
+  }
+
+  /*
+   * Start Visit only opens the walk-in prescription pad.
+   * The prescription pad uses:
+   * POST /api/prescriptions/walk-in/create
+   * and after draft creation the backend should return/update IN_PROGRESS.
+   */
+  window.location.href=
+    `prescription-pad.html?walkInPatientId=${encodeURIComponent(
+      walkInPatientId
+    )}&source=walkin&startVisit=true`;
+}
+
+function openWalkInPrescription(
+  walkInPatientId
+){
+  window.location.href=
+    `prescription-pad.html?walkInPatientId=${encodeURIComponent(
+      walkInPatientId
+    )}&source=walkin`;
 }
 
 function updatePagination(start,end,total){

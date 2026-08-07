@@ -807,6 +807,16 @@
             background: var(--info-light);
         }
 
+        .type-walkin {
+            color: var(--gold-dark);
+            background: #fff7df;
+        }
+
+        .type-consultation {
+            color: var(--purple);
+            background: var(--purple-light);
+        }
+
         .status-issued {
             color: var(--success);
             background: var(--success-light);
@@ -1697,8 +1707,8 @@
                         <h2>Prescription Records</h2>
 
                         <p>
-                            Review prescriptions issued by doctors for online
-                            and offline consultations. Medical staff can view
+                            Review prescriptions issued by doctors for offline appointments,
+                            walk-in visits and consultations. Medical staff can view
                             medicine details, print prescriptions and download
                             prescription PDFs for medicine packing.
                         </p>
@@ -1892,7 +1902,7 @@
                             <h2>Prescription List</h2>
 
                             <p>
-                                Only finalized prescriptions linked to offline appointments are displayed.
+                                Finalized prescriptions from offline appointments, walk-in visits and consultations are displayed.
                             </p>
 
                         </div>
@@ -1915,7 +1925,7 @@
                                     <th>Prescription ID</th>
                                     <th>Patient</th>
                                     <th>Doctor</th>
-                                    <th>Appointment</th>
+                                    <th>Source</th>
                                     <th>Finalized Date</th>
                                     <th>Diagnosis</th>
                                     <th>Medicines</th>
@@ -2200,9 +2210,6 @@
                         )
                         .filter(
                             prescription =>
-                                prescription.consultationType ===
-                                    "OFFLINE" &&
-                                prescription.appointmentId &&
                                 prescription.status ===
                                     "FINALIZED" &&
                                 prescription.medicines.length > 0
@@ -2315,6 +2322,11 @@
                 item.consultationId ??
                 null;
 
+            const walkInPatientId =
+                item.walkInPatientId ??
+                item.walkInPatient?.id ??
+                null;
+
             return {
                 id:
                     item.id ||
@@ -2327,11 +2339,16 @@
 
                 patientId:
                     item.patientId ||
-                    item.patient?.id,
+                    item.patient?.id ||
+                    null,
+
+                walkInPatientId,
 
                 patientName:
+                    item.walkInPatientName ||
                     item.patientName ||
                     item.patient?.name ||
+                    item.walkInPatient?.name ||
                     "Patient",
 
                 patientPhone:
@@ -2363,15 +2380,17 @@
                     "-",
 
                 consultationType:
-                    appointmentId &&
-                    !consultationId
-                        ? "OFFLINE"
-                        : consultationId
-                            ? "ONLINE"
-                            : "UNKNOWN",
+                    walkInPatientId
+                        ? "WALK_IN"
+                        : appointmentId
+                            ? "OFFLINE"
+                            : consultationId
+                                ? "CONSULTATION"
+                                : "UNKNOWN",
 
                 appointmentId,
                 consultationId,
+                walkInPatientId,
 
                 issuedDate:
                     item.finalizedAt ||
@@ -2519,10 +2538,12 @@
                 ).value =
                     allPrescriptions.find(
                         item =>
-                            String(
-                                item.patientId
-                            ) ===
-                            String(patientId)
+                            (
+                                String(item.patientId) ===
+                                    String(patientId) ||
+                                String(item.walkInPatientId) ===
+                                    String(patientId)
+                            )
                     )?.patientName || "";
             }
         }
@@ -2845,12 +2866,7 @@
                             </td>
 
                             <td>
-                                <span class="type-badge type-offline">
-                                    <i class="fa-solid fa-hospital-user"></i>
-                                    Offline #${escapeHtml(
-                                        item.appointmentId
-                                    )}
-                                </span>
+                                ${createSourceBadge(item)}
                             </td>
 
                             <td>
@@ -2965,12 +2981,65 @@
             );
         }
 
-        function createTypeBadge(type) {
-            if (type === "ONLINE") {
+        function createSourceBadge(item) {
+            if (item.walkInPatientId) {
                 return `
-                    <span class="type-badge type-online">
+                    <span class="type-badge type-walkin">
+                        <i class="fa-solid fa-person-walking"></i>
+                        Walk-in #${escapeHtml(
+                            item.walkInPatientId
+                        )}
+                    </span>
+                `;
+            }
+
+            if (item.appointmentId) {
+                return `
+                    <span class="type-badge type-offline">
+                        <i class="fa-solid fa-hospital-user"></i>
+                        Offline #${escapeHtml(
+                            item.appointmentId
+                        )}
+                    </span>
+                `;
+            }
+
+            if (item.consultationId) {
+                return `
+                    <span class="type-badge type-consultation">
                         <i class="fa-solid fa-video"></i>
-                        Online
+                        Consultation #${escapeHtml(
+                            item.consultationId
+                        )}
+                    </span>
+                `;
+            }
+
+            return `
+                <span class="type-badge">
+                    Unknown
+                </span>
+            `;
+        }
+
+        function createTypeBadge(type) {
+            if (type === "WALK_IN") {
+                return `
+                    <span class="type-badge type-walkin">
+                        <i class="fa-solid fa-person-walking"></i>
+                        Walk-in
+                    </span>
+                `;
+            }
+
+            if (
+                type === "CONSULTATION" ||
+                type === "ONLINE"
+            ) {
+                return `
+                    <span class="type-badge type-consultation">
+                        <i class="fa-solid fa-video"></i>
+                        Consultation
                     </span>
                 `;
             }
@@ -3157,14 +3226,24 @@
                         </div>
 
                         <div class="detail-box">
-                            <span>Consultation</span>
+                            <span>Source</span>
 
                             <strong>
-                                ${escapeHtml(
-                                    formatStatus(
-                                        selectedPrescription.consultationType
-                                    )
-                                )}
+                                ${
+                                    selectedPrescription.walkInPatientId
+                                        ? `Walk-in #${escapeHtml(
+                                            selectedPrescription.walkInPatientId
+                                        )}`
+                                        : selectedPrescription.appointmentId
+                                            ? `Offline #${escapeHtml(
+                                                selectedPrescription.appointmentId
+                                            )}`
+                                            : selectedPrescription.consultationId
+                                                ? `Consultation #${escapeHtml(
+                                                    selectedPrescription.consultationId
+                                                )}`
+                                                : "Unknown"
+                                }
                             </strong>
                         </div>
 

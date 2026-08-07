@@ -620,26 +620,7 @@
             font-weight: 800;
         }
 
-        .profile-upload-button {
-            width: 35px;
-            height: 35px;
-
-            position: absolute;
-            right: -1px;
-            bottom: 3px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border: 3px solid var(--white);
-            border-radius: 50%;
-
-            color: var(--white);
-            background: var(--dark-green);
-
-            font-size: 12px;
-        }
+        
 
         .profile-card-body h2 {
             margin-bottom: 5px;
@@ -920,77 +901,6 @@
         }
 
         /* =========================
-           PROFILE PHOTO UPLOAD
-        ========================== */
-
-        .photo-upload-box {
-            min-height: 118px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 1px dashed #b9c9bd;
-            border-radius: 14px;
-            background: #f8fbf8;
-            transition: 0.2s;
-        }
-
-        .photo-upload-box:hover {
-            border-color: var(--gold);
-            background: #fffdf6;
-        }
-
-        .photo-upload-preview {
-            width: 82px;
-            height: 82px;
-            flex-shrink: 0;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            border: 3px solid var(--white);
-            background: var(--green-light);
-            box-shadow: 0 5px 18px rgba(21,61,41,.14);
-        }
-
-        .photo-upload-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-upload-preview i {
-            color: var(--dark-green);
-            font-size: 25px;
-        }
-
-        .photo-upload-content { flex: 1; min-width: 0; }
-        .photo-upload-content strong { display:block; margin-bottom:5px; font-size:12px; color:var(--dark-green); }
-        .photo-upload-content p { margin-bottom:10px; color:var(--muted); font-size:10px; line-height:1.5; }
-
-        .choose-photo-button {
-            min-height: 38px;
-            padding: 9px 14px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            border: none;
-            border-radius: 9px;
-            color: var(--white);
-            background: var(--dark-green);
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .choose-photo-button:hover { background: var(--gold-dark); }
-        .choose-photo-button.disabled { opacity:.55; pointer-events:none; }
-        .upload-file-name { display:block; margin-top:8px; color:var(--muted); font-size:9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .upload-progress-text { display:none; margin-top:8px; color:var(--info); font-size:10px; font-weight:700; }
-        .upload-progress-text.show { display:block; }
-
-        /* =========================
            PASSWORD
         ========================== */
 
@@ -1199,11 +1109,6 @@
 
             .form-actions {
                 flex-direction: column-reverse;
-            }
-
-            .photo-upload-box {
-                align-items: flex-start;
-                flex-direction: column;
             }
 
             .cancel-button,
@@ -1462,35 +1367,12 @@
 
                             <div class="profile-image-wrapper">
 
-                                <img
-                                    id="staffProfileImage"
-                                    src=""
-                                    alt="Medical Staff Profile"
-                                    style="display:none;"
-                                >
-
                                 <div
                                     class="profile-image-placeholder"
                                     id="profileImagePlaceholder"
                                 >
                                     S
                                 </div>
-
-                                <label
-                                    for="profileImageInput"
-                                    class="profile-upload-button" style="display:none;"
-                                    title="Change profile image"
-                                >
-                                    <i class="fa-solid fa-camera"></i>
-                                </label>
-
-                                <input
-                                    type="file"
-                                    id="profileImageInput"
-                                    accept="image/*"
-                                    hidden
-                                    
-                                >
 
                             </div>
 
@@ -1748,34 +1630,6 @@
                                         >
                                     </div>
 
-                                    <div class="form-group">
-                                        <label>Profile Photo</label>
-
-                                        <div class="photo-upload-box">
-                                            <div class="photo-upload-preview">
-                                                <img id="formPhotoPreview" alt="Profile photo preview" style="display:none;">
-                                                <i id="formPhotoPlaceholder" class="fa-solid fa-user"></i>
-                                            </div>
-
-                                            <div class="photo-upload-content">
-                                                <strong>Upload profile photo</strong>
-                                                <p>Choose a JPG, JPEG, PNG or WEBP image. Maximum size: 5 MB.</p>
-
-                                                <label for="profileImageInput" class="choose-photo-button professional-upload-control" id="choosePhotoButton">
-                                                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                                                    Choose Photo
-                                                </label>
-
-                                                <span class="upload-file-name" id="selectedPhotoName">No new photo selected</span>
-                                                <span class="upload-progress-text" id="photoUploadStatus">
-                                                    <i class="fa-solid fa-spinner fa-spin"></i> Uploading photo...
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <input type="hidden" id="profileImageUrl">
-                                    </div>
-
                                     <div class="form-group full-width">
                                         <label for="about">
                                             About
@@ -1840,8 +1694,6 @@
         let originalProfessionalData = {};
         let isProfileCompleted = false;
         let currentMedicalStaffId = null;
-        let uploadedProfileImageUrl = "";
-        let profileImageUploading = false;
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -1857,9 +1709,6 @@
                     Boolean(
                         currentMedicalStaffId
                     );
-
-                document.getElementById("profileImageInput")
-                    ?.addEventListener("change", handleProfilePhotoSelection);
 
                 loadStaffProfile();
             }
@@ -1979,8 +1828,7 @@
                     );
 
                 if (
-                    response.status === 401 ||
-                    response.status === 403
+                    response.status === 401
                 ) {
                     clearAuthentication();
 
@@ -1990,23 +1838,43 @@
                     return;
                 }
 
-                /*
-                 * When the professional profile has not been created,
-                 * the backend may return 404 or a profile-not-found
-                 * message. In that case, keep the page in Complete
-                 * Profile mode.
-                 */
                 if (
+                    response.status === 403
+                ) {
+                    throw new Error(
+                        result?.message ||
+                        "You do not have permission to access this medical staff profile."
+                    );
+                }
+
+                /*
+                 * A newly created MEDICAL_STAFF user may not yet have
+                 * a row in the medical_staff table.
+                 *
+                 * The backend may return HTTP 404, or HTTP 200 with:
+                 * { success:false, message:"Medical staff profile not found" }.
+                 * Both cases mean first-time profile completion.
+                 */
+                const responseMessage =
+                    String(
+                        result?.message || ""
+                    ).toLowerCase();
+
+                const profileNotFound =
                     response.status === 404 ||
                     (
-                        !response.ok &&
-                        String(
-                            result?.message || ""
+                        result?.success === false &&
+                        (
+                            responseMessage.includes(
+                                "medical staff profile not found"
+                            ) ||
+                            responseMessage.includes(
+                                "profile not found"
+                            )
                         )
-                            .toLowerCase()
-                            .includes("profile")
-                    )
-                ) {
+                    );
+
+                if (profileNotFound) {
                     currentMedicalStaffId = null;
                     isProfileCompleted = false;
 
@@ -2014,6 +1882,11 @@
                         "medicalStaffId"
                     );
 
+                    localStorage.removeItem(
+                        "staffId"
+                    );
+
+                    loadBasicAccountFallback();
                     setPageMode();
                     return;
                 }
@@ -2104,6 +1977,50 @@
             }
         }
 
+        function loadBasicAccountFallback() {
+            const fallbackProfile = {
+                id: "",
+                name:
+                    localStorage.getItem("staffName") ||
+                    localStorage.getItem("userName") ||
+                    localStorage.getItem("name") ||
+                    "Medical Staff",
+                email:
+                    localStorage.getItem("email") ||
+                    "",
+                phoneNumber:
+                    localStorage.getItem("phoneNumber") ||
+                    localStorage.getItem("phone") ||
+                    "",
+                age:
+                    localStorage.getItem("age") ||
+                    "",
+                gender:
+                    localStorage.getItem("gender") ||
+                    "",
+                designation: "",
+                department: "",
+                experienceYears: "",
+                about: "",
+                active: true
+            };
+
+            displayBasicProfile(
+                fallbackProfile
+            );
+
+            fillProfessionalForm(
+                fallbackProfile
+            );
+
+            originalProfessionalData = {
+                designation: "",
+                department: "",
+                experienceYears: "",
+                about: ""
+            };
+        }
+
         function normalizeProfile(data) {
             return {
                 id:
@@ -2158,12 +2075,6 @@
                     data.about ||
                     "",
 
-                profileImage:
-                    data.profileImage ||
-                    data.profileImageUrl ||
-                    data.imageUrl ||
-                    "",
-
                 active:
                     data.active !== false
             };
@@ -2175,9 +2086,10 @@
                 "Medical Staff";
 
             const initial =
-                name
+                String(name || "S")
+                    .trim()
                     .charAt(0)
-                    .toUpperCase();
+                    .toUpperCase() || "S";
 
             setText(
                 "profileStaffName",
@@ -2275,9 +2187,6 @@
                 profile.id
             );
 
-            showProfileImage(
-                profile.profileImage
-            );
         }
 
         function fillProfessionalForm(profile) {
@@ -2301,10 +2210,6 @@
                 profile.about
             );
 
-            uploadedProfileImageUrl = profile.profileImage || "";
-            setInputValue("profileImageUrl", uploadedProfileImageUrl);
-            updateFormPhotoPreview(uploadedProfileImageUrl);
-            setText("selectedPhotoName", uploadedProfileImageUrl ? "Current profile photo" : "No photo uploaded");
         }
 
         /* =========================
@@ -2313,11 +2218,6 @@
 
         async function saveStaffProfile(event) {
             event.preventDefault();
-
-            if (profileImageUploading) {
-                showAlert("Please wait until the profile photo upload is complete.", "info");
-                return;
-            }
 
             const payload =
                 getProfessionalPayload();
@@ -2425,12 +2325,12 @@
 
                     localStorage.setItem(
                         "medicalStaffId",
-                        saved.id
+                        String(saved.id)
                     );
 
                     localStorage.setItem(
                         "staffId",
-                        saved.id
+                        String(saved.id)
                     );
                 }
 
@@ -2476,11 +2376,10 @@
 
                 if (!updating) {
                     setTimeout(
-                        function () {
-                            window.location.href =
-                                "staff-dashboard.html";
+                        async function () {
+                            await loadStaffProfile();
                         },
-                        1400
+                        700
                     );
                 }
 
@@ -2541,11 +2440,6 @@
                 about:
                     getValue(
                         "about"
-                    ),
-
-                profileImage:
-                    getValue(
-                        "profileImageUrl"
                     )
             };
         }
@@ -2680,6 +2574,12 @@
                     ? "inline-flex"
                     : "none";
 
+            document.getElementById(
+                "profileFormActions"
+            ).classList.add(
+                "show"
+            );
+
             if (completed) {
                 disableProfileEditing();
 
@@ -2705,10 +2605,6 @@
         }
 
         function enableProfessionalFields() {
-            document.getElementById("choosePhotoButton")?.classList.remove("disabled");
-            const cameraButton = document.querySelector(".profile-upload-button");
-            if (cameraButton) cameraButton.style.display = "flex";
-
             document
                 .querySelectorAll(
                     ".professional-field"
@@ -2722,10 +2618,6 @@
         }
 
         function disableProfileEditing() {
-            const cameraButton = document.querySelector(".profile-upload-button");
-            if (cameraButton) cameraButton.style.display = "none";
-            document.getElementById("choosePhotoButton")?.classList.add("disabled");
-
             if (
                 !currentMedicalStaffId
             ) {
@@ -2775,125 +2667,6 @@
             });
 
             disableProfileEditing();
-        }
-
-        /* =========================
-           IMAGE
-        ========================== */
-
-        async function handleProfilePhotoSelection(event) {
-            const file = event.target.files?.[0];
-            if (!file) return;
-
-            const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-            if (!allowedTypes.includes(file.type)) {
-                showAlert("Please select a JPG, PNG or WEBP image.", "error");
-                event.target.value = "";
-                return;
-            }
-
-            if (file.size > 5 * 1024 * 1024) {
-                showAlert("Profile photo must be smaller than 5 MB.", "error");
-                event.target.value = "";
-                return;
-            }
-
-            setText("selectedPhotoName", file.name);
-            const localPreview = URL.createObjectURL(file);
-            updateFormPhotoPreview(localPreview);
-            showProfileImage(localPreview);
-
-            try {
-                profileImageUploading = true;
-                setPhotoUploadState(true);
-
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("module", "MEDICAL_STAFF");
-
-                const response = await fetch(API_BASE_URL + "/api/images/upload", {
-                    method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Authorization": "Bearer " + getStaffToken()
-                    },
-                    body: formData
-                });
-
-                const result = await safelyReadResponse(response);
-                if (!response.ok || result?.success === false) {
-                    throw new Error(result?.message || "Unable to upload profile photo.");
-                }
-
-                const fileUrl = result?.data?.fileUrl || result?.data?.url || "";
-                if (!fileUrl) throw new Error("The upload response did not contain a file URL.");
-
-                uploadedProfileImageUrl = makeAbsoluteFileUrl(fileUrl);
-                setInputValue("profileImageUrl", uploadedProfileImageUrl);
-                updateFormPhotoPreview(uploadedProfileImageUrl);
-                showProfileImage(uploadedProfileImageUrl);
-                setText("selectedPhotoName", file.name + " — uploaded");
-                showAlert("Profile photo uploaded successfully. Click Save Changes to update your profile.", "success");
-            } catch (error) {
-                uploadedProfileImageUrl = originalProfessionalData.profileImage || "";
-                setInputValue("profileImageUrl", uploadedProfileImageUrl);
-                updateFormPhotoPreview(uploadedProfileImageUrl);
-                showProfileImage(uploadedProfileImageUrl);
-                setText("selectedPhotoName", uploadedProfileImageUrl ? "Current profile photo" : "No photo uploaded");
-                event.target.value = "";
-                showAlert(error.message || "Unable to upload profile photo.", "error");
-            } finally {
-                profileImageUploading = false;
-                setPhotoUploadState(false);
-                URL.revokeObjectURL(localPreview);
-            }
-        }
-
-        function setPhotoUploadState(uploading) {
-            document.getElementById("photoUploadStatus")?.classList.toggle("show", uploading);
-            document.getElementById("choosePhotoButton")?.classList.toggle("disabled", uploading);
-            const saveButton = document.getElementById("saveProfileButton");
-            if (saveButton) saveButton.disabled = uploading;
-        }
-
-        function makeAbsoluteFileUrl(url) {
-            if (!url) return "";
-            if (/^https?:\/\//i.test(url) || url.startsWith("blob:")) return url;
-            return API_BASE_URL + (url.startsWith("/") ? url : "/" + url);
-        }
-
-        function updateFormPhotoPreview(url) {
-            const image = document.getElementById("formPhotoPreview");
-            const placeholder = document.getElementById("formPhotoPlaceholder");
-            if (!image || !placeholder) return;
-            const finalUrl = makeAbsoluteFileUrl(url);
-            if (!finalUrl) {
-                image.style.display = "none";
-                placeholder.style.display = "block";
-                return;
-            }
-            image.src = finalUrl;
-            image.style.display = "block";
-            placeholder.style.display = "none";
-            image.onerror = () => { image.style.display = "none"; placeholder.style.display = "block"; };
-        }
-
-        function showProfileImage(url) {
-            const image = document.getElementById("staffProfileImage");
-            const placeholder = document.getElementById("profileImagePlaceholder");
-            const finalUrl = makeAbsoluteFileUrl(url);
-            if (!finalUrl) {
-                image.style.display = "none";
-                placeholder.style.display = "flex";
-                return;
-            }
-            image.src = finalUrl;
-            image.style.display = "block";
-            placeholder.style.display = "none";
-            image.onerror = function () {
-                image.style.display = "none";
-                placeholder.style.display = "flex";
-            };
         }
 
         /* =========================

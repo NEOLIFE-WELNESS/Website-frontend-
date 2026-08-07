@@ -1293,6 +1293,16 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label>Consultation Type</label>
+                    <select id="consultationType">
+                        <option value="">Select consultation type</option>
+                        <option value="OFFLINE">Offline Consultation</option>
+                        <option value="ONLINE">Online Consultation</option>
+                        <option value="BOTH">Both Online &amp; Offline</option>
+                    </select>
+                </div>
+
                 <div class="form-group full-width">
                     <small style="color:#6e7871;line-height:1.6;">
                         After creation, the doctor will receive a password setup link by email.
@@ -1373,6 +1383,15 @@
                 <div class="form-group">
                     <label for="editExperience">Experience in Years</label>
                     <input type="number" id="editExperience" min="0" max="80">
+                </div>
+
+                <div class="form-group">
+                    <label for="editConsultationType">Consultation Type</label>
+                    <select id="editConsultationType">
+                        <option value="OFFLINE">Offline Consultation</option>
+                        <option value="ONLINE">Online Consultation</option>
+                        <option value="BOTH">Both Online &amp; Offline</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1615,9 +1634,18 @@ async function saveDoctor(){
     const phoneNumber = document.getElementById("phoneNumber").value.trim();
     const ageValue = document.getElementById("doctorAge").value;
     const gender = document.getElementById("doctorGender").value;
+    const consultationType =
+        document.getElementById("consultationType").value;
 
-    if(!name || !email || !phoneNumber || !ageValue || !gender){
-        alert("Please fill all doctor details.");
+    if(
+        !name ||
+        !email ||
+        !phoneNumber ||
+        !ageValue ||
+        !gender ||
+        !consultationType
+    ){
+        alert("Please fill all doctor details, including consultation type.");
         return;
     }
 
@@ -1628,10 +1656,11 @@ async function saveDoctor(){
 
     const doctor = {
         name,
-        email,
         phoneNumber,
         age: Number(ageValue),
-        gender
+        gender,
+        consultationType,
+        email
     };
 
     try{
@@ -1727,6 +1756,8 @@ async function editDoctor(id){
         document.getElementById("editPhoneNumber").value = doctor.phoneNumber || "";
         document.getElementById("editDoctorEmail").value = doctor.email || "";
         document.getElementById("editImageUrl").value = doctor.imageUrl || "";
+        document.getElementById("editConsultationType").value =
+            doctor.consultationType || "BOTH";
         document.getElementById("editActive").value = doctor.active === false ? "false" : "true";
 
         document.getElementById("editDoctorModal").style.display = "block";
@@ -1783,6 +1814,8 @@ async function updateDoctor(){
         phoneNumber,
         email,
         imageUrl: document.getElementById("editImageUrl").value.trim(),
+        consultationType:
+            document.getElementById("editConsultationType").value,
         active: document.getElementById("editActive").value === "true"
     };
 
@@ -1863,7 +1896,8 @@ function clearAddDoctorForm(){
         "doctorEmail",
         "phoneNumber",
         "doctorAge",
-        "doctorGender"
+        "doctorGender",
+        "consultationType"
     ].forEach(id => {
         const element = document.getElementById(id);
         if(element){

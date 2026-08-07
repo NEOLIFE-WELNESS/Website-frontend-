@@ -1484,7 +1484,7 @@
                     <h2>Select Doctor</h2>
 
                     <p>
-                        Choose the doctor you want to consult. Doctors are loaded directly from the Neolife system.
+                        Choose a doctor available for offline clinic consultation.
                     </p>
 
                 </div>
@@ -2088,7 +2088,7 @@
 
             try{
                 const response = await fetch(
-                    `${API_BASE_URL}/api/doctors/getAll`,
+                    `${API_BASE_URL}/api/doctors/offline/getAll`,
                     { headers: authHeaders() }
                 );
 
@@ -2124,7 +2124,7 @@
             if(doctors.length === 0){
                 doctorGrid.innerHTML = `
                     <div class="empty-message">
-                        No active doctors are currently available.
+                        No offline-consultation doctors are currently available.
                     </div>
                 `;
                 return;

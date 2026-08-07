@@ -2346,8 +2346,7 @@
 
                 await Promise.allSettled([
                     loadStaffProfile(),
-                    loadDoctorDirectory(),
-                    loadPatientDirectory()
+                    loadDoctorDirectory()
                 ]);
 
                 await loadTreatments();
@@ -2426,12 +2425,20 @@
             }
 
             if (
-                response.status === 401 ||
-                response.status === 403
+                response.status === 401
             ) {
                 throw new Error(
                     result.message ||
                     "Medical staff session expired."
+                );
+            }
+
+            if (
+                response.status === 403
+            ) {
+                throw new Error(
+                    result.message ||
+                    "You do not have permission to access this resource."
                 );
             }
 
@@ -2501,37 +2508,6 @@
            RELATED DATA LOOKUPS
         ========================== */
 
-        async function tryApiEndpoints(endpoints) {
-            for (const endpoint of endpoints) {
-                try {
-                    const result =
-                        await staffApiRequest(
-                            endpoint,
-                            {
-                                method: "GET"
-                            }
-                        );
-
-                    const records =
-                        extractFlexibleArray(
-                            result
-                        );
-
-                    if (records.length) {
-                        return records;
-                    }
-
-                } catch (error) {
-                    console.warn(
-                        `Lookup failed for ${endpoint}:`,
-                        error.message
-                    );
-                }
-            }
-
-            return [];
-        }
-
         function extractFlexibleArray(result) {
             const candidates = [
                 result,
@@ -2558,86 +2534,134 @@
         }
 
         async function loadDoctorDirectory() {
-            const doctors =
-                await tryApiEndpoints([
-                    "/api/doctors/getAll",
-                    "/api/doctors/active",
-                    "/api/doctors"
+            doctorDirectory.clear();
+
+            const results =
+                await Promise.allSettled([
+                    staffApiRequest(
+                        "/api/doctors/offline/getAll",
+                        {
+                            method: "GET"
+                        }
+                    ),
+
+                    staffApiRequest(
+                        "/api/doctors/online/getAll",
+                        {
+                            method: "GET"
+                        }
+                    )
                 ]);
 
-            doctors.forEach(function (doctor) {
-                const doctorId =
-                    firstNonEmpty(
-                        doctor.id,
-                        doctor.doctorId
-                    );
+            const doctorMap =
+                new Map();
 
-                const doctorUserId =
-                    firstNonEmpty(
-                        doctor.userId,
-                        doctor.user?.id
-                    );
+            results.forEach(
+                function (result) {
+                    if (
+                        result.status !==
+                        "fulfilled"
+                    ) {
+                        console.warn(
+                            "Doctor directory source failed:",
+                            result.reason?.message ||
+                            result.reason
+                        );
 
-                const doctorName =
-                    firstNonEmpty(
-                        doctor.name,
-                        doctor.doctorName,
-                        doctor.fullName,
-                        doctor.user?.name
-                    );
+                        return;
+                    }
 
-                if (!doctorName) {
-                    return;
+                    const doctors =
+                        extractFlexibleArray(
+                            result.value
+                        );
+
+                    doctors.forEach(
+                        function (doctor) {
+                            const doctorId =
+                                firstNonEmpty(
+                                    doctor.id,
+                                    doctor.doctorId
+                                );
+
+                            const doctorUserId =
+                                firstNonEmpty(
+                                    doctor.userId,
+                                    doctor.user?.id
+                                );
+
+                            const doctorName =
+                                firstNonEmpty(
+                                    doctor.name,
+                                    doctor.doctorName,
+                                    doctor.fullName,
+                                    doctor.user?.name
+                                );
+
+                            if (!doctorName) {
+                                return;
+                            }
+
+                            const uniqueKey =
+                                doctorId !== null &&
+                                doctorId !== undefined
+                                    ? `DOCTOR-${doctorId}`
+                                    : doctorUserId !== null &&
+                                      doctorUserId !== undefined
+                                        ? `USER-${doctorUserId}`
+                                        : String(
+                                            doctorName
+                                        ).toLowerCase();
+
+                            doctorMap.set(
+                                uniqueKey,
+                                {
+                                    id:
+                                        doctorId,
+
+                                    userId:
+                                        doctorUserId,
+
+                                    name:
+                                        String(
+                                            doctorName
+                                        ).trim()
+                                }
+                            );
+                        }
+                    );
                 }
+            );
 
-                const details = {
-                    id: doctorId,
-                    userId: doctorUserId,
-                    name: String(doctorName).trim()
-                };
+            doctorMap.forEach(
+                function (details) {
+                    if (
+                        details.id !== null &&
+                        details.id !== undefined
+                    ) {
+                        doctorDirectory.set(
+                            String(
+                                details.id
+                            ),
+                            details
+                        );
+                    }
 
-                if (
-                    doctorId !== null &&
-                    doctorId !== undefined
-                ) {
-                    doctorDirectory.set(
-                        String(doctorId),
-                        details
-                    );
+                    if (
+                        details.userId !== null &&
+                        details.userId !== undefined
+                    ) {
+                        doctorDirectory.set(
+                            `USER-${details.userId}`,
+                            details
+                        );
+                    }
                 }
-
-                if (
-                    doctorUserId !== null &&
-                    doctorUserId !== undefined
-                ) {
-                    doctorDirectory.set(
-                        `USER-${doctorUserId}`,
-                        details
-                    );
-                }
-            });
+            );
 
             console.log(
                 "DOCTOR DIRECTORY:",
                 doctorDirectory
-            );
-        }
-
-        async function loadPatientDirectory() {
-            const patients =
-                await tryApiEndpoints([
-                    "/api/medical-staff/patients",
-                    "/api/patient-records/patients",
-                    "/api/patients/getAll"
-                ]);
-
-            patients.forEach(
-                addPatientToDirectory
-            );
-
-            console.log(
-                "PATIENT DIRECTORY:",
-                patientDirectory
             );
         }
 
@@ -2809,58 +2833,83 @@
             const unresolvedIds = [
                 ...new Set(
                     items
-                        .filter(item =>
-                            item.patientId &&
-                            (
-                                isMissingValue(
-                                    item.patientPhone
-                                ) ||
-                                isMissingValue(
-                                    item.patientAge
-                                ) ||
-                                isMissingValue(
-                                    item.patientGender
+                        .filter(
+                            item =>
+                                item.patientId !==
+                                    null &&
+                                item.patientId !==
+                                    undefined &&
+                                (
+                                    isMissingValue(
+                                        item.patientPhone
+                                    ) ||
+                                    isMissingValue(
+                                        item.patientAge
+                                    ) ||
+                                    isMissingValue(
+                                        item.patientGender
+                                    )
                                 )
-                            )
                         )
-                        .map(item =>
-                            String(item.patientId)
+                        .map(
+                            item =>
+                                String(
+                                    item.patientId
+                                )
                         )
                 )
             ];
 
-            await Promise.allSettled(
-                unresolvedIds.map(
-                    async function (patientId) {
-                        try {
-                            const result =
-                                await staffApiRequest(
-                                    `/api/patient-records/patient/${encodeURIComponent(
-                                        patientId
-                                    )}`,
-                                    {
-                                        method: "GET"
-                                    }
-                                );
+            if (!unresolvedIds.length) {
+                return;
+            }
 
-                            const record =
-                                result?.data ||
-                                result;
+            const results =
+                await Promise.allSettled(
+                    unresolvedIds.map(
+                        patientId =>
+                            staffApiRequest(
+                                `/api/patient-records/patient/${encodeURIComponent(
+                                    patientId
+                                )}`,
+                                {
+                                    method: "GET"
+                                }
+                            )
+                    )
+                );
 
-                            if (record) {
-                                addPatientToDirectory(
-                                    record
-                                );
-                            }
+            results.forEach(
+                function (
+                    result,
+                    index
+                ) {
+                    const patientId =
+                        unresolvedIds[index];
 
-                        } catch (error) {
-                            console.warn(
-                                `Patient record ${patientId} could not be loaded:`,
-                                error.message
-                            );
-                        }
+                    if (
+                        result.status !==
+                        "fulfilled"
+                    ) {
+                        console.warn(
+                            `Patient record ${patientId} could not be loaded:`,
+                            result.reason?.message ||
+                            result.reason
+                        );
+
+                        return;
                     }
-                )
+
+                    const record =
+                        result.value?.data ||
+                        result.value;
+
+                    if (record) {
+                        addPatientToDirectory(
+                            record
+                        );
+                    }
+                }
             );
         }
 

@@ -1729,7 +1729,10 @@
         );
 
         async function initializePage() {
-            requireStaffLogin();
+            if (!requireProductManagementAccess()) {
+                return;
+            }
+
             setMinimumExpiryDate();
             loadStaffProfile();
 
@@ -1794,18 +1797,37 @@
 
         /* AUTH */
 
-        function getStaffToken() {
+        function getAccessToken() {
             return (
+                localStorage.getItem("adminToken") ||
                 localStorage.getItem("staffToken") ||
-                localStorage.getItem("token")
+                localStorage.getItem("token") ||
+                ""
             );
         }
 
-        function requireStaffLogin() {
-            if (!getStaffToken()) {
+        function getCurrentRole() {
+            return String(
+                localStorage.getItem("role") || ""
+            ).toUpperCase();
+        }
+
+        function requireProductManagementAccess() {
+            const token = getAccessToken();
+            const role = getCurrentRole();
+
+            const allowed =
+                role === "ADMIN" ||
+                role === "MEDICAL_STAFF" ||
+                role === "MEDICAL";
+
+            if (!token || !allowed) {
                 window.location.href =
-                    "staff-login.html";
+                    "../patient/login.html";
+                return false;
             }
+
+            return true;
         }
 
         async function staffApiRequest(
@@ -1813,7 +1835,7 @@
             options = {}
         ) {
             const token =
-                getStaffToken();
+                getAccessToken();
 
             if (!token) {
                 window.location.href =
@@ -1862,13 +1884,17 @@
                 };
             }
 
-            if (
-                response.status === 401 ||
-                response.status === 403
-            ) {
+            if (response.status === 401) {
                 throw new Error(
                     result.message ||
-                    "Medical staff session expired."
+                    "Your login session has expired. Please login again."
+                );
+            }
+
+            if (response.status === 403) {
+                throw new Error(
+                    result.message ||
+                    "You are logged in, but this account is not permitted to manage products."
                 );
             }
 
@@ -1886,12 +1912,15 @@
         }
 
         function staffLogout() {
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminRefreshToken");
             localStorage.removeItem("staffToken");
             localStorage.removeItem("staffRefreshToken");
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
             localStorage.removeItem("staffId");
+            localStorage.removeItem("adminId");
             localStorage.removeItem("userId");
 
             window.location.href =
@@ -1907,18 +1936,30 @@
                         "/api/users/getProfile"
                     );
 
+                const fallbackName =
+                    getCurrentRole() === "ADMIN"
+                        ? "Admin"
+                        : "Medical Staff";
+
                 updateStaffProfile(
                     result.data?.name ||
                     result.data?.staffName ||
-                    "Medical Staff"
+                    result.data?.adminName ||
+                    localStorage.getItem("staffName") ||
+                    localStorage.getItem("adminName") ||
+                    fallbackName
                 );
 
             } catch (error) {
+                const fallbackName =
+                    getCurrentRole() === "ADMIN"
+                        ? "Admin"
+                        : "Medical Staff";
+
                 updateStaffProfile(
-                    localStorage.getItem(
-                        "staffName"
-                    ) ||
-                    "Medical Staff"
+                    localStorage.getItem("staffName") ||
+                    localStorage.getItem("adminName") ||
+                    fallbackName
                 );
             }
         }
@@ -2279,6 +2320,13 @@
         /* LOAD PRODUCT */
 
         async function loadProduct() {
+            console.log(
+                "Loading product as role:",
+                getCurrentRole(),
+                "productId:",
+                productId
+            );
+
             const result =
                 await staffApiRequest(
                     `/api/products/getById/${encodeURIComponent(productId)}`

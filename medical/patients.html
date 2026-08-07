@@ -989,7 +989,135 @@
             cursor: not-allowed;
         }
 
-        /* MODAL */
+        
+        /* ADD WALK-IN PATIENT */
+
+        .add-walkin-button {
+            min-height: 43px;
+            padding: 10px 16px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            border: none;
+            border-radius: 11px;
+
+            color: var(--white);
+            background: var(--dark-green);
+
+            font-size: 11px;
+            font-weight: 800;
+
+            box-shadow:
+                0 8px 20px rgba(21, 61, 41, 0.15);
+        }
+
+        .add-walkin-button:hover {
+            background: var(--gold-dark);
+            transform: translateY(-1px);
+        }
+
+        .walkin-form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .walkin-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .walkin-form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .walkin-form-group label {
+            margin-bottom: 7px;
+
+            color: var(--dark-green);
+
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .walkin-required {
+            color: var(--danger);
+        }
+
+        .walkin-form-control {
+            width: 100%;
+            min-height: 45px;
+            padding: 11px 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            color: #354039;
+            background: var(--white);
+
+            outline: none;
+        }
+
+        textarea.walkin-form-control {
+            min-height: 88px;
+            resize: vertical;
+        }
+
+        .walkin-form-control:focus {
+            border-color: var(--gold);
+
+            box-shadow:
+                0 0 0 3px rgba(201, 154, 22, 0.12);
+        }
+
+        .walkin-form-note {
+            margin-top: 15px;
+            padding: 11px 13px;
+
+            border-radius: 10px;
+
+            color: var(--muted);
+            background: var(--green-light);
+
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        .walkin-save-button {
+            color: var(--white);
+            border: 1px solid var(--dark-green);
+            background: var(--dark-green);
+        }
+
+        .walkin-save-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 650px) {
+            .walkin-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .walkin-form-group.full-width {
+                grid-column: auto;
+            }
+
+            .topbar-actions {
+                align-items: flex-end;
+                flex-direction: column-reverse;
+            }
+
+            .add-walkin-button {
+                width: 100%;
+            }
+        }
+
+/* MODAL */
 
         .modal-overlay {
             position: fixed;
@@ -1510,6 +1638,15 @@
 
                 <div class="topbar-actions">
 
+                    <button
+                        type="button"
+                        class="add-walkin-button"
+                        onclick="openWalkInPatientModal()"
+                    >
+                        <i class="fa-solid fa-user-plus"></i>
+                        Add Walk-in Patient
+                    </button>
+
                     <div class="staff-profile-box">
 
                         <span
@@ -1546,9 +1683,9 @@
                         <h2>Patient Records</h2>
 
                         <p>
-                            Search patients, review offline and online visit
-                            history, view medical details and open or download
-                            prescriptions issued during consultations.
+                            Search registered and walk-in patients, review
+                            visit history, view medical details and open or
+                            download available prescriptions.
                         </p>
 
                     </div>
@@ -1642,6 +1779,15 @@
                         onclick="setPatientTypeFilter(this)"
                     >
                         Online
+                    </button>
+
+                    <button
+                        type="button"
+                        class="toggle-button"
+                        data-type="WALK_IN"
+                        onclick="setPatientTypeFilter(this)"
+                    >
+                        Walk-in Patients
                     </button>
 
                 </div>
@@ -1784,9 +1930,10 @@
                                     <th>Patient</th>
                                     <th>Patient ID</th>
                                     <th>Age / Gender</th>
-                                    <th>Contact</th>
+                                    <th>Doctor</th>
                                     <th>Visit Type</th>
-                                    <th>Last Visit</th>
+                                    <th>Visit Date</th>
+                                    <th>Visit Time</th>
                                     <th>Total Visits</th>
                                     <th>Prescription</th>
                                     <th>Actions</th>
@@ -1797,7 +1944,7 @@
 
                                 <tr>
                                     <td
-                                        colspan="9"
+                                        colspan="10"
                                         class="table-message"
                                     >
                                         <i class="fa-solid fa-spinner fa-spin"></i>
@@ -1918,13 +2065,250 @@
 
     </div>
 
-    <script>
+    
+    <div
+        class="modal-overlay"
+        id="walkInPatientModal"
+        onclick="closeWalkInPatientModalOnBackdrop(event)"
+    >
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h2>
+                    <i class="fa-solid fa-person-walking"></i>
+                    Add Walk-in Patient
+                </h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closeWalkInPatientModal()"
+                    aria-label="Close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="modal-content">
+
+                <form
+                    id="walkInPatientForm"
+                    onsubmit="submitWalkInPatient(event)"
+                >
+
+                    <div class="walkin-form-grid">
+
+                        <div class="walkin-form-group">
+                            <label for="walkInName">
+                                Patient Name
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="walkInName"
+                                class="walkin-form-control"
+                                placeholder="Enter patient name"
+                                required
+                            >
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInPhone">
+                                Phone Number
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="walkInPhone"
+                                class="walkin-form-control"
+                                placeholder="10-digit phone number"
+                                maxlength="10"
+                                inputmode="numeric"
+                                oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                                required
+                            >
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInAge">
+                                Age
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <input
+                                type="number"
+                                id="walkInAge"
+                                class="walkin-form-control"
+                                placeholder="Enter age"
+                                min="1"
+                                max="120"
+                                required
+                            >
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInGender">
+                                Gender
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <select
+                                id="walkInGender"
+                                class="walkin-form-control"
+                                required
+                            >
+                                <option value="">Select gender</option>
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInEmail">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="walkInEmail"
+                                class="walkin-form-control"
+                                placeholder="Enter email address"
+                            >
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInAddress">
+                                Address
+                            </label>
+
+                            <input
+                                type="text"
+                                id="walkInAddress"
+                                class="walkin-form-control"
+                                placeholder="Enter address"
+                            >
+                        </div>
+
+                        <div class="walkin-form-group full-width">
+                            <label for="walkInSymptoms">
+                                Symptoms
+                            </label>
+
+                            <textarea
+                                id="walkInSymptoms"
+                                class="walkin-form-control"
+                                placeholder="Enter symptoms or reason for visit"
+                            ></textarea>
+                        </div>
+
+                        <div class="walkin-form-group full-width">
+                            <label for="walkInPastHistory">
+                                Past Medical History
+                            </label>
+
+                            <textarea
+                                id="walkInPastHistory"
+                                class="walkin-form-control"
+                                placeholder="Enter past medical history"
+                            ></textarea>
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInDoctorId">
+                                Doctor
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <select
+                                id="walkInDoctorId"
+                                class="walkin-form-control"
+                                required
+                            >
+                                <option value="">
+                                    Select doctor
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInAppointmentDate">
+                                Appointment Date
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <input
+                                type="date"
+                                id="walkInAppointmentDate"
+                                class="walkin-form-control"
+                                required
+                            >
+                        </div>
+
+                        <div class="walkin-form-group">
+                            <label for="walkInStartTime">
+                                Start Time
+                                <span class="walkin-required">*</span>
+                            </label>
+
+                            <input
+                                type="time"
+                                id="walkInStartTime"
+                                class="walkin-form-control"
+                                step="60"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="walkin-form-note">
+                        Enter the patient details, assign an offline doctor,
+                        and select the appointment date and start time. The
+                        assigned doctor will then see this walk-in patient.
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-button modal-close-button"
+                    onclick="closeWalkInPatientModal()"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    form="walkInPatientForm"
+                    class="modal-button walkin-save-button"
+                    id="saveWalkInPatientButton"
+                >
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Patient
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+<script>
 const API_BASE_URL = "http://localhost:8085";
 
 let allPatients = [];
 let filteredPatients = [];
 let selectedPatient = null;
 let selectedPatientType = "";
+let offlineDoctors = [];
 
 let currentPage = 1;
 const pageSize = 8;
@@ -1938,8 +2322,11 @@ document.addEventListener(
 
         await Promise.allSettled([
             loadStaffProfile(),
+            loadOfflineDoctors(),
             loadPatients()
         ]);
+
+        applyInitialPatientViewFromUrl();
     }
 );
 
@@ -2166,6 +2553,688 @@ async function loadStaffProfile() {
     }
 }
 
+
+/* =========================
+   WALK-IN PATIENTS
+========================= */
+
+async function loadOfflineDoctors() {
+    try {
+        const result =
+            await staffApiRequest(
+                "/api/doctors/offline/getAll",
+                {
+                    method: "GET"
+                }
+            );
+
+        offlineDoctors =
+            extractArray(
+                result.data
+            );
+
+        populateWalkInDoctorSelect();
+
+    } catch (error) {
+        console.error(
+            "Offline doctors loading failed:",
+            error
+        );
+
+        offlineDoctors = [];
+
+        const select =
+            document.getElementById(
+                "walkInDoctorId"
+            );
+
+        if (select) {
+            select.innerHTML = `
+                <option value="">
+                    Unable to load doctors
+                </option>
+            `;
+        }
+    }
+}
+
+function populateWalkInDoctorSelect() {
+    const select =
+        document.getElementById(
+            "walkInDoctorId"
+        );
+
+    if (!select) {
+        return;
+    }
+
+    const currentValue =
+        select.value;
+
+    select.innerHTML = `
+        <option value="">
+            Select doctor
+        </option>
+    `;
+
+    const uniqueDoctors =
+        new Map();
+
+    offlineDoctors.forEach(
+        doctor => {
+            const id =
+                doctor.id ??
+                doctor.doctorId;
+
+            const name =
+                doctor.name ||
+                doctor.doctorName ||
+                doctor.fullName ||
+                doctor.user?.name ||
+                `Doctor ${id}`;
+
+            if (
+                id !== null &&
+                id !== undefined
+            ) {
+                uniqueDoctors.set(
+                    String(id),
+                    String(name)
+                );
+            }
+        }
+    );
+
+    [...uniqueDoctors.entries()]
+        .sort(
+            (first, second) =>
+                first[1].localeCompare(
+                    second[1]
+                )
+        )
+        .forEach(
+            ([id, name]) => {
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value = id;
+                option.textContent = name;
+
+                select.appendChild(
+                    option
+                );
+            }
+        );
+
+    if (
+        currentValue &&
+        uniqueDoctors.has(
+            String(currentValue)
+        )
+    ) {
+        select.value =
+            currentValue;
+    }
+}
+
+async function openWalkInPatientModal() {
+    clearWalkInPatientForm();
+    setWalkInAppointmentDefaults();
+
+    if (!offlineDoctors.length) {
+        await loadOfflineDoctors();
+    }
+
+    populateWalkInDoctorSelect();
+
+    document
+        .getElementById(
+            "walkInPatientModal"
+        )
+        .classList.add("show");
+
+    document.body.style.overflow =
+        "hidden";
+
+    setTimeout(
+        () =>
+            document
+                .getElementById(
+                    "walkInName"
+                )
+                ?.focus(),
+        50
+    );
+}
+
+function closeWalkInPatientModal() {
+    document
+        .getElementById(
+            "walkInPatientModal"
+        )
+        .classList.remove("show");
+
+    document.body.style.overflow =
+        "";
+}
+
+function closeWalkInPatientModalOnBackdrop(
+    event
+) {
+    if (
+        event.target.id ===
+        "walkInPatientModal"
+    ) {
+        closeWalkInPatientModal();
+    }
+}
+
+function clearWalkInPatientForm() {
+    document
+        .getElementById(
+            "walkInPatientForm"
+        )
+        ?.reset();
+}
+
+function setWalkInAppointmentDefaults() {
+    const dateInput =
+        document.getElementById(
+            "walkInAppointmentDate"
+        );
+
+    const timeInput =
+        document.getElementById(
+            "walkInStartTime"
+        );
+
+    const today =
+        getLocalDateValue();
+
+    if (dateInput) {
+        dateInput.min = today;
+
+        if (!dateInput.value) {
+            dateInput.value = today;
+        }
+    }
+
+    if (
+        timeInput &&
+        !timeInput.value
+    ) {
+        const now = new Date();
+
+        now.setMinutes(
+            Math.ceil(
+                now.getMinutes() / 15
+            ) * 15
+        );
+
+        if (now.getMinutes() === 60) {
+            now.setHours(
+                now.getHours() + 1,
+                0,
+                0,
+                0
+            );
+        }
+
+        timeInput.value =
+            String(
+                now.getHours()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                now.getMinutes()
+            ).padStart(2, "0");
+    }
+}
+
+function getLocalDateValue() {
+    const now = new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function normalizeApiTime(value) {
+    if (!value) {
+        return "";
+    }
+
+    const parts =
+        String(value).split(":");
+
+    const hours =
+        String(
+            parts[0] || "00"
+        ).padStart(2, "0");
+
+    const minutes =
+        String(
+            parts[1] || "00"
+        ).padStart(2, "0");
+
+    const seconds =
+        String(
+            parts[2] || "00"
+        ).padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+async function submitWalkInPatient(event) {
+    event.preventDefault();
+
+    const name =
+        document
+            .getElementById(
+                "walkInName"
+            )
+            .value
+            .trim();
+
+    const phoneNumber =
+        document
+            .getElementById(
+                "walkInPhone"
+            )
+            .value
+            .trim();
+
+    const age =
+        Number(
+            document
+                .getElementById(
+                    "walkInAge"
+                )
+                .value
+        );
+
+    const gender =
+        document
+            .getElementById(
+                "walkInGender"
+            )
+            .value;
+
+    const email =
+        document
+            .getElementById(
+                "walkInEmail"
+            )
+            .value
+            .trim();
+
+    const address =
+        document
+            .getElementById(
+                "walkInAddress"
+            )
+            .value
+            .trim();
+
+    const symptoms =
+        document
+            .getElementById(
+                "walkInSymptoms"
+            )
+            .value
+            .trim();
+
+    const pastMedicalHistory =
+        document
+            .getElementById(
+                "walkInPastHistory"
+            )
+            .value
+            .trim();
+
+    const doctorIdValue =
+        document
+            .getElementById(
+                "walkInDoctorId"
+            )
+            .value;
+
+    const doctorId =
+        Number(
+            doctorIdValue
+        );
+
+    const appointmentDate =
+        document
+            .getElementById(
+                "walkInAppointmentDate"
+            )
+            .value;
+
+    const startTimeValue =
+        document
+            .getElementById(
+                "walkInStartTime"
+            )
+            .value;
+
+    const startTime =
+        startTimeValue
+            ? normalizeApiTime(
+                startTimeValue
+              )
+            : "";
+
+    if (!name) {
+        showAlert(
+            "Please enter the patient name.",
+            "info"
+        );
+        return;
+    }
+
+    if (!/^[0-9]{10}$/.test(phoneNumber)) {
+        showAlert(
+            "Please enter a valid 10-digit phone number.",
+            "info"
+        );
+        return;
+    }
+
+    if (
+        !Number.isInteger(age) ||
+        age < 1 ||
+        age > 120
+    ) {
+        showAlert(
+            "Please enter a valid patient age.",
+            "info"
+        );
+        return;
+    }
+
+    if (!gender) {
+        showAlert(
+            "Please select the patient gender.",
+            "info"
+        );
+        return;
+    }
+
+    if (
+        !doctorIdValue ||
+        !Number.isInteger(doctorId) ||
+        doctorId <= 0
+    ) {
+        showAlert(
+            "Please select the doctor.",
+            "info"
+        );
+        return;
+    }
+
+    if (!appointmentDate) {
+        showAlert(
+            "Please select the appointment date.",
+            "info"
+        );
+        return;
+    }
+
+    if (
+        appointmentDate <
+        getLocalDateValue()
+    ) {
+        showAlert(
+            "Appointment date cannot be in the past.",
+            "info"
+        );
+        return;
+    }
+
+    if (!startTime) {
+        showAlert(
+            "Please select the appointment start time.",
+            "info"
+        );
+        return;
+    }
+
+    const payload = {
+        name,
+        phoneNumber,
+        age,
+        gender,
+        email: email || null,
+        address: address || null,
+        symptoms: symptoms || null,
+        pastMedicalHistory:
+            pastMedicalHistory || null,
+        doctorId,
+        appointmentDate,
+        startTime
+    };
+
+    const saveButton =
+        document.getElementById(
+            "saveWalkInPatientButton"
+        );
+
+    try {
+        saveButton.disabled = true;
+
+        saveButton.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Saving...
+        `;
+
+        const result =
+            await staffApiRequest(
+                "/api/walk-in-patients/create",
+                {
+                    method: "POST",
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
+            );
+
+        closeWalkInPatientModal();
+
+        showAlert(
+            result.message ||
+            "Walk-in patient created successfully.",
+            "success"
+        );
+
+        await loadPatients();
+
+    } catch (error) {
+        console.error(
+            "Walk-in patient creation failed:",
+            error
+        );
+
+        showAlert(
+            error.message ||
+            "Unable to create walk-in patient.",
+            "error"
+        );
+
+    } finally {
+        saveButton.disabled = false;
+
+        saveButton.innerHTML = `
+            <i class="fa-solid fa-floppy-disk"></i>
+            Save Patient
+        `;
+    }
+}
+
+function normalizeWalkInPatient(patient) {
+    const createdAt =
+        patient.createdAt ||
+        patient.updatedAt ||
+        null;
+
+    const visit = {
+        type: "OFFLINE",
+        id:
+            `WALKIN-${patient.id}`,
+        date:
+            patient.appointmentDate ||
+            createdAt,
+        startTime:
+            patient.startTime ||
+            null,
+        endTime: null,
+        doctorId:
+            patient.doctorId ??
+            null,
+        doctorName:
+            patient.doctorName ||
+            "-",
+        symptoms:
+            patient.symptoms || "",
+        pastMedicalHistory:
+            patient.pastMedicalHistory ||
+            "",
+        status: "WALK_IN",
+        paymentStatus: null,
+        raw: patient
+    };
+
+    return {
+        id:
+            `WALKIN-${patient.id}`,
+
+        walkInId:
+            patient.id,
+
+        patientNumber:
+            `WALK-${patient.id}`,
+
+        name:
+            patient.name ||
+            "Walk-in Patient",
+
+        phone:
+            patient.phoneNumber ||
+            "-",
+
+        email:
+            patient.email ||
+            "-",
+
+        age:
+            patient.age ?? "-",
+
+        gender:
+            String(
+                patient.gender || "-"
+            ).toUpperCase(),
+
+        address:
+            patient.address ||
+            "-",
+
+        symptoms:
+            patient.symptoms ||
+            "-",
+
+        pastMedicalHistory:
+            patient.pastMedicalHistory ||
+            "-",
+
+        doctorId:
+            patient.doctorId ??
+            null,
+
+        doctorName:
+            patient.doctorName ||
+            "-",
+
+        walkInStatus:
+            String(
+                patient.status ||
+                "WAITING"
+            ).toUpperCase(),
+
+        appointments: [],
+        consultations: [],
+        prescriptions: [],
+        therapies: [],
+        notes: [],
+        visits: [visit],
+
+        visitType: "OFFLINE",
+        lastVisitDate:
+            patient.appointmentDate ||
+            createdAt,
+        totalVisits: 1,
+        latestPrescription: null,
+        prescriptionStatus:
+            "NOT_ISSUED",
+
+        isWalkInPatient: true,
+        active:
+            patient.active !== false
+    };
+}
+
+function mergePatientLists(
+    registeredPatients,
+    walkInPatients
+) {
+    const list =
+        [...registeredPatients];
+
+    walkInPatients.forEach(
+        walkInPatient => {
+            const duplicate =
+                list.some(
+                    patient =>
+                        normalizePhone(
+                            patient.phone
+                        ) &&
+                        normalizePhone(
+                            patient.phone
+                        ) ===
+                        normalizePhone(
+                            walkInPatient.phone
+                        )
+                );
+
+            if (!duplicate) {
+                list.push(
+                    walkInPatient
+                );
+            }
+        }
+    );
+
+    return list;
+}
+
+function normalizePhone(value) {
+    return String(value || "")
+        .replace(/\D/g, "");
+}
+
 /* =========================
    LOAD PATIENTS
 ========================= */
@@ -2198,6 +3267,10 @@ async function loadPatients() {
 
             staffApiRequest(
                 "/api/daily-treatments/admin/getAll"
+            ),
+
+            staffApiRequest(
+                "/api/walk-in-patients/getAll"
             )
         ]);
 
@@ -2213,6 +3286,9 @@ async function loadPatients() {
     const treatments =
         getFulfilledArray(results[3]);
 
+    const walkInPatients =
+        getFulfilledArray(results[4]);
+
     const patientMap =
         buildPatientMap(
             appointments,
@@ -2222,7 +3298,16 @@ async function loadPatients() {
         );
 
     if (!patientMap.size) {
-        allPatients = [];
+        allPatients =
+            walkInPatients
+                .filter(
+                    patient =>
+                        patient.active !== false
+                )
+                .map(
+                    normalizeWalkInPatient
+                );
+
         updateSummary();
         applyFilters();
 
@@ -2233,7 +3318,10 @@ async function loadPatients() {
                     "rejected"
             );
 
-        if (failure) {
+        if (
+            failure &&
+            !allPatients.length
+        ) {
             showAlert(
                 failure.reason?.message ||
                 "Unable to load patient records.",
@@ -2254,7 +3342,7 @@ async function loadPatients() {
             )
         );
 
-    allPatients =
+    const registeredPatients =
         detailedPatients
             .map(
                 patient =>
@@ -2265,14 +3353,30 @@ async function loadPatients() {
                         prescriptions,
                         treatments
                     )
-            )
-            .sort(
-                (first, second) =>
-                    String(first.name)
-                        .localeCompare(
-                            String(second.name)
-                        )
             );
+
+    const normalizedWalkInPatients =
+        walkInPatients
+            .filter(
+                patient =>
+                    patient.active !== false
+            )
+            .map(
+                normalizeWalkInPatient
+            );
+
+    allPatients =
+        mergePatientLists(
+            registeredPatients,
+            normalizedWalkInPatients
+        )
+        .sort(
+            (first, second) =>
+                String(first.name)
+                    .localeCompare(
+                        String(second.name)
+                    )
+        );
 
     updateSummary();
     applyFilters();
@@ -2777,6 +3881,36 @@ function updateSummary() {
     );
 }
 
+function applyInitialPatientViewFromUrl() {
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const requestedView =
+        String(
+            params.get("view") || ""
+        ).toLowerCase();
+
+    if (
+        requestedView !==
+        "walkin"
+    ) {
+        return;
+    }
+
+    const walkInButton =
+        document.querySelector(
+            '.toggle-button[data-type="WALK_IN"]'
+        );
+
+    if (walkInButton) {
+        setPatientTypeFilter(
+            walkInButton
+        );
+    }
+}
+
 function setPatientTypeFilter(button) {
     document
         .querySelectorAll(
@@ -2853,10 +3987,21 @@ function applyFilters() {
 
                 const matchesType =
                     !selectedPatientType ||
-                    patient.visitType ===
-                        selectedPatientType ||
-                    patient.visitType ===
-                        "BOTH";
+                    (
+                        selectedPatientType ===
+                        "WALK_IN"
+                            ? patient.isWalkInPatient ===
+                                true
+                            : (
+                                !patient.isWalkInPatient &&
+                                (
+                                    patient.visitType ===
+                                        selectedPatientType ||
+                                    patient.visitType ===
+                                        "BOTH"
+                                )
+                            )
+                    );
 
                 const matchesGender =
                     !gender ||
@@ -2934,7 +4079,7 @@ function showPatientLoading() {
     ).innerHTML = `
         <tr>
             <td
-                colspan="9"
+                colspan="10"
                 class="table-message"
             >
                 <i class="fa-solid fa-spinner fa-spin"></i>
@@ -2942,6 +4087,33 @@ function showPatientLoading() {
             </td>
         </tr>
     `;
+}
+
+function getPatientLatestVisit(patient) {
+    if (
+        !patient ||
+        !Array.isArray(
+            patient.visits
+        ) ||
+        !patient.visits.length
+    ) {
+        return null;
+    }
+
+    return patient.visits[0];
+}
+
+function getPatientLatestDoctorName(patient) {
+    const latestVisit =
+        getPatientLatestVisit(
+            patient
+        );
+
+    return String(
+        patient.doctorName ||
+        latestVisit?.doctorName ||
+        "-"
+    );
 }
 
 function renderPatients() {
@@ -3038,7 +4210,7 @@ function renderPatients() {
 
                                     <small>
                                         ${escapeHtml(
-                                            patient.email
+                                            patient.phone || "-"
                                         )}
                                     </small>
                                 </div>
@@ -3066,7 +4238,9 @@ function renderPatients() {
 
                         <td>
                             ${escapeHtml(
-                                patient.phone
+                                getPatientLatestDoctorName(
+                                    patient
+                                )
                             )}
                         </td>
 
@@ -3079,7 +4253,20 @@ function renderPatients() {
                         <td>
                             ${escapeHtml(
                                 formatDate(
+                                    getPatientLatestVisit(
+                                        patient
+                                    )?.date ||
                                     patient.lastVisitDate
+                                )
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                formatTime(
+                                    getPatientLatestVisit(
+                                        patient
+                                    )?.startTime
                                 )
                             )}
                         </td>
@@ -3285,8 +4472,10 @@ function openPatientModal(id) {
             )}
 
             ${detailBox(
-                "Email",
-                selectedPatient.email
+                "Doctor",
+                selectedPatient.doctorName ||
+                selectedPatient.visits?.[0]?.doctorName ||
+                "-"
             )}
 
             ${detailBox(
@@ -3294,6 +4483,13 @@ function openPatientModal(id) {
                 `${selectedPatient.age} / ${formatStatus(
                     selectedPatient.gender
                 )}`
+            )}
+
+            ${detailBox(
+                "Time",
+                formatTime(
+                    selectedPatient.visits?.[0]?.startTime
+                )
             )}
 
             ${detailBox(
@@ -3327,7 +4523,9 @@ function openPatientModal(id) {
 
             ${detailBox(
                 "Past Medical History",
-                selectedPatient.pastHistory,
+                selectedPatient.pastMedicalHistory ||
+                selectedPatient.visits?.[0]?.pastMedicalHistory ||
+                "-",
                 true
             )}
 

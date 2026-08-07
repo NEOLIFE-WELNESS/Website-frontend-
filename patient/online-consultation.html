@@ -1804,7 +1804,7 @@ function setMinimumDate() {
 
 /* =========================
    DOCTORS
-   GET /api/doctors/getAll
+   GET /api/doctors/online/getAll
 ========================== */
 
 function buildBackendFileUrl(fileUrl) {
@@ -1865,7 +1865,7 @@ async function loadDoctors() {
     try {
         const result =
             await apiRequest(
-                "/api/doctors/getAll",
+                "/api/doctors/online/getAll",
                 {
                     method: "GET"
                 },
@@ -1916,7 +1916,7 @@ function displayDoctors() {
     if (!doctors.length) {
         grid.innerHTML = `
             <div class="empty-message">
-                No active doctors are currently available.
+                No online consultation doctors are currently available.
             </div>
         `;
 

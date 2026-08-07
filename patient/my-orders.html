@@ -629,6 +629,181 @@ a{
   font-weight:800;
 }
 
+
+/* PRODUCT REVIEW */
+
+.item-main{min-width:0}
+.item-review-row{margin-top:10px}
+
+.review-product-btn{
+  min-height:34px;
+  padding:7px 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:none;
+  border-radius:9px;
+  color:#fff;
+  background:var(--success);
+  font-size:10px;
+  font-weight:800;
+}
+
+.review-product-btn:hover{
+  transform:translateY(-1px);
+  background:#1f603a;
+}
+
+.review-modal-content{max-width:520px}
+.review-modal-body{padding:22px}
+
+.review-product-summary{
+  margin-bottom:18px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-radius:13px;
+  background:var(--soft-green);
+  border:1px solid #dce8de;
+}
+
+.review-product-icon{
+  width:43px;
+  height:43px;
+  min-width:43px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  color:var(--gold-dark);
+  background:#fff7df;
+  font-size:17px;
+}
+
+.review-product-summary strong{
+  display:block;
+  margin-bottom:3px;
+  color:var(--dark-green);
+  font-size:14px;
+}
+
+.review-product-summary span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.review-field{margin-bottom:17px}
+
+.review-field label{
+  display:block;
+  margin-bottom:8px;
+  color:var(--dark-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+.review-stars-input{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.review-star{
+  padding:0;
+  border:none;
+  color:#d7ddd8;
+  background:transparent;
+  font-size:28px;
+  line-height:1;
+  transition:.18s ease;
+}
+
+.review-star.active,
+.review-star:hover{
+  color:#d1a300;
+  transform:scale(1.08);
+}
+
+.review-rating-text{
+  margin-left:6px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.review-field textarea{
+  width:100%;
+  min-height:120px;
+  resize:vertical;
+  padding:13px 14px;
+  border:1px solid #d8ded9;
+  border-radius:12px;
+  outline:none;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.review-field textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(36,95,60,.10);
+}
+
+.review-character-count{
+  margin-top:6px;
+  display:block;
+  text-align:right;
+  color:var(--muted);
+  font-size:9px;
+}
+
+.review-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.review-cancel-btn,
+.review-submit-btn{
+  min-height:42px;
+  padding:10px 17px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.review-cancel-btn{
+  color:var(--dark-green);
+  background:#fff;
+  border:1px solid #d7ded8;
+}
+
+.review-submit-btn{
+  color:#fff;
+  background:var(--dark-green);
+  border:none;
+}
+
+.review-submit-btn:disabled{
+  cursor:not-allowed;
+  opacity:.65;
+}
+
+@media(max-width:560px){
+  .review-modal-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .review-cancel-btn,
+  .review-submit-btn{
+    width:100%;
+  }
+}
+
 /* MODAL */
 
 .modal{
@@ -1121,11 +1296,97 @@ a{
 
 </div>
 
+
+<div class="modal" id="productReviewModal">
+
+  <div class="modal-content review-modal-content">
+
+    <div class="modal-header">
+      <h2>Review Product</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        onclick="closeProductReviewModal()"
+        aria-label="Close review form"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="review-modal-body">
+
+      <div class="review-product-summary">
+        <div class="review-product-icon">
+          <i class="fa-solid fa-box-open"></i>
+        </div>
+
+        <div>
+          <strong id="reviewProductName">Product</strong>
+          <span>Share your experience with this delivered product.</span>
+        </div>
+      </div>
+
+      <div class="review-field">
+        <label>Your Rating</label>
+
+        <div class="review-stars-input" id="reviewStarsInput">
+          <button type="button" class="review-star" data-rating="1" onclick="selectReviewRating(1)" aria-label="1 star"><i class="fa-solid fa-star"></i></button>
+          <button type="button" class="review-star" data-rating="2" onclick="selectReviewRating(2)" aria-label="2 stars"><i class="fa-solid fa-star"></i></button>
+          <button type="button" class="review-star" data-rating="3" onclick="selectReviewRating(3)" aria-label="3 stars"><i class="fa-solid fa-star"></i></button>
+          <button type="button" class="review-star" data-rating="4" onclick="selectReviewRating(4)" aria-label="4 stars"><i class="fa-solid fa-star"></i></button>
+          <button type="button" class="review-star" data-rating="5" onclick="selectReviewRating(5)" aria-label="5 stars"><i class="fa-solid fa-star"></i></button>
+
+          <span class="review-rating-text" id="reviewRatingText">
+            Select rating
+          </span>
+        </div>
+      </div>
+
+      <div class="review-field">
+        <label for="reviewComment">Your Review</label>
+
+        <textarea
+          id="reviewComment"
+          maxlength="500"
+          placeholder="Tell us about the product quality and your experience..."
+          oninput="updateReviewCharacterCount()"
+        ></textarea>
+
+        <span class="review-character-count" id="reviewCharacterCount">
+          0 / 500
+        </span>
+      </div>
+
+      <div class="review-modal-actions">
+        <button type="button" class="review-cancel-btn" onclick="closeProductReviewModal()">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="review-submit-btn"
+          id="submitProductReviewButton"
+          onclick="submitProductReview()"
+        >
+          <i class="fa-solid fa-paper-plane"></i>
+          Submit Review
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <script>
 const API_BASE_URL =
   "http://localhost:8085";
 
 let orders = [];
+
+let reviewProductId = null;
+let reviewOrderId = null;
+let selectedReviewRating = 0;
 
 window.onload =
   function(){
@@ -1303,7 +1564,7 @@ function displayOrders(){
                 return `
                   <div class="item-row">
 
-                    <div>
+                    <div class="item-main">
                       <strong>
                         ${escapeHtml(
                           item.productName ||
@@ -1322,6 +1583,28 @@ function displayOrders(){
                           item.price
                         )}
                       </small>
+
+                      ${
+                        isDeliveredOrder(order.status) &&
+                        item.productId
+                          ? `
+                            <div class="item-review-row">
+                              <button
+                                type="button"
+                                class="review-product-btn"
+                                onclick="openProductReviewModal(
+                                  ${Number(item.productId)},
+                                  '${escapeJsString(item.productName || "Product")}',
+                                  ${Number(order.id)}
+                                )"
+                              >
+                                <i class="fa-solid fa-star"></i>
+                                Review Product
+                              </button>
+                            </div>
+                          `
+                          : ""
+                      }
                     </div>
 
                     <span class="item-subtotal">
@@ -1720,6 +2003,200 @@ async function cancelOrder(id){
   }
 }
 
+
+function isDeliveredOrder(status){
+  return String(status || "")
+    .trim()
+    .toUpperCase() === "DELIVERED";
+}
+
+function openProductReviewModal(productId, productName, orderId){
+  const order = orders.find(
+    currentOrder =>
+      Number(currentOrder.id) === Number(orderId)
+  );
+
+  if(!order || !isDeliveredOrder(order.status)){
+    showAlert(
+      "You can review products only after the order is delivered.",
+      "info"
+    );
+    return;
+  }
+
+  reviewProductId = Number(productId);
+  reviewOrderId = Number(orderId);
+  selectedReviewRating = 0;
+
+  setText("reviewProductName", productName || "Product");
+
+  const comment = document.getElementById("reviewComment");
+  if(comment){
+    comment.value = "";
+  }
+
+  updateReviewStars();
+  updateReviewCharacterCount();
+
+  document.getElementById("productReviewModal").style.display = "flex";
+}
+
+function closeProductReviewModal(){
+  const modal = document.getElementById("productReviewModal");
+  if(modal){
+    modal.style.display = "none";
+  }
+
+  reviewProductId = null;
+  reviewOrderId = null;
+  selectedReviewRating = 0;
+}
+
+function selectReviewRating(rating){
+  selectedReviewRating = Math.max(
+    1,
+    Math.min(5, Number(rating || 0))
+  );
+
+  updateReviewStars();
+}
+
+function updateReviewStars(){
+  const labels = {
+    0:"Select rating",
+    1:"Poor",
+    2:"Fair",
+    3:"Good",
+    4:"Very Good",
+    5:"Excellent"
+  };
+
+  document
+    .querySelectorAll("#reviewStarsInput .review-star")
+    .forEach(button => {
+      const value = Number(button.dataset.rating);
+
+      button.classList.toggle(
+        "active",
+        value <= selectedReviewRating
+      );
+    });
+
+  setText(
+    "reviewRatingText",
+    labels[selectedReviewRating] || "Select rating"
+  );
+}
+
+function updateReviewCharacterCount(){
+  const comment = document.getElementById("reviewComment");
+  const length = comment ? comment.value.length : 0;
+
+  setText("reviewCharacterCount", `${length} / 500`);
+}
+
+async function submitProductReview(){
+  const token = localStorage.getItem("token");
+  const commentElement = document.getElementById("reviewComment");
+  const submitButton = document.getElementById("submitProductReviewButton");
+  const comment = commentElement ? commentElement.value.trim() : "";
+
+  if(!token){
+    showAlert("Please login to submit a review.", "error");
+    return;
+  }
+
+  if(!reviewProductId){
+    showAlert("Product information is missing.", "error");
+    return;
+  }
+
+  if(selectedReviewRating < 1){
+    showAlert("Please select a rating.", "info");
+    return;
+  }
+
+  if(comment.length < 3){
+    showAlert("Please enter a short review.", "info");
+    return;
+  }
+
+  const order = orders.find(
+    currentOrder =>
+      Number(currentOrder.id) === Number(reviewOrderId)
+  );
+
+  if(!order || !isDeliveredOrder(order.status)){
+    showAlert("Only delivered products can be reviewed.", "error");
+    return;
+  }
+
+  try{
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Submitting...
+    `;
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/product-reviews/${reviewProductId}/create-review`,
+      {
+        method:"POST",
+        headers:{
+          "Authorization":"Bearer " + token,
+          "Content-Type":"application/json",
+          "Accept":"application/json"
+        },
+        body:JSON.stringify({
+          rating:selectedReviewRating,
+          comment:comment
+        })
+      }
+    );
+
+    const text = await response.text();
+
+    let result = null;
+    try{
+      result = text ? JSON.parse(text) : null;
+    }catch(parseError){
+      result = null;
+    }
+
+    if(response.ok && result?.success){
+      closeProductReviewModal();
+
+      showAlert(
+        result.message ||
+        "Review submitted successfully. It will appear after approval.",
+        "success"
+      );
+    }else{
+      throw new Error(
+        result?.message ||
+        text ||
+        "Failed to submit product review."
+      );
+    }
+
+  }catch(error){
+    console.error("Product review submission failed:", error);
+
+    showAlert(
+      error.message ||
+      "Unable to submit product review.",
+      "error"
+    );
+
+  }finally{
+    submitButton.disabled = false;
+    submitButton.innerHTML = `
+      <i class="fa-solid fa-paper-plane"></i>
+      Submit Review
+    `;
+  }
+}
+
 async function loadProfileIcon(){
   const icon =
     document.getElementById(
@@ -2038,6 +2515,15 @@ function setText(
   }
 }
 
+
+function escapeJsString(value){
+  return String(value || "")
+    .replaceAll("\\","\\\\")
+    .replaceAll("'","\\'")
+    .replaceAll("\r"," ")
+    .replaceAll("\n"," ");
+}
+
 function escapeHtml(value){
   if(
     value === null ||
@@ -2057,15 +2543,22 @@ function escapeHtml(value){
 window.addEventListener(
   "click",
   function(event){
-    const modal =
+    const orderModal =
       document.getElementById(
         "orderModal"
       );
 
-    if(
-      event.target === modal
-    ){
+    const reviewModal =
+      document.getElementById(
+        "productReviewModal"
+      );
+
+    if(event.target === orderModal){
       closeOrderModal();
+    }
+
+    if(event.target === reviewModal){
+      closeProductReviewModal();
     }
   }
 );

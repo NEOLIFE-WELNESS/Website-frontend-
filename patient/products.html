@@ -218,6 +218,93 @@ button{
 }
 
 
+
+/* ===== PRODUCT SEARCH ===== */
+.product-search-wrap{
+  position:relative;
+  z-index:2;
+  width:min(760px,92%);
+  margin:-28px auto 42px;
+}
+
+.product-search-box{
+  min-height:60px;
+  padding:8px 10px 8px 20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:1px solid rgba(212,175,55,.35);
+  border-radius:18px;
+  background:rgba(255,255,255,.98);
+  box-shadow:0 16px 38px rgba(18,53,36,.15);
+}
+
+.product-search-box > i{
+  color:var(--gold-dark);
+  font-size:18px;
+}
+
+.product-search-input{
+  min-width:0;
+  flex:1;
+  border:none;
+  outline:none;
+  color:var(--green-dark);
+  background:transparent;
+  font-size:15px;
+}
+
+.product-search-input::placeholder{
+  color:#8b958f;
+}
+
+.product-search-clear{
+  width:42px;
+  height:42px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  border-radius:12px;
+  color:var(--green-dark);
+  background:var(--green-soft);
+  font-size:15px;
+}
+
+.product-search-clear.show{
+  display:flex;
+}
+
+.product-search-clear:hover{
+  color:white;
+  background:var(--green-dark);
+}
+
+.product-search-result{
+  min-height:20px;
+  margin-top:10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+}
+
+@media(max-width:700px){
+  .product-search-wrap{
+    width:100%;
+    margin:-35px auto 28px;
+  }
+
+  .product-search-box{
+    min-height:54px;
+    padding-left:15px;
+    border-radius:15px;
+  }
+
+  .product-search-input{
+    font-size:14px;
+  }
+}
+
 /* ===== PRODUCT CARDS ===== */
 .product-card{
   background:white;
@@ -295,13 +382,29 @@ button{
 .details-page{
   width:100%;
   min-height:100vh;
-  padding:45px 6%;
+  padding:45px 6% 70px;
   display:grid;
-  grid-template-columns:1.08fr .92fr;
-  gap:38px;
+  grid-template-columns:minmax(0,1.05fr) minmax(390px,.95fr);
+  grid-template-areas:
+    "gallery details"
+    "reviews reviews";
+  align-items:start;
+  gap:28px 38px;
   background:
     radial-gradient(circle at top right,rgba(212,175,55,.08),transparent 26%),
     var(--cream);
+}
+
+.details-left{
+  grid-area:gallery;
+  min-width:0;
+  position:relative;
+  top:auto;
+  align-self:start;
+}
+
+.details-right{
+  grid-area:details;
 }
 
 .details-close{
@@ -336,7 +439,12 @@ button{
   display:flex;
   gap:14px;
   margin-top:18px;
+  padding-bottom:4px;
   overflow-x:auto;
+}
+
+.details-left{
+  height:max-content;
 }
 
 .details-thumbs img{
@@ -356,7 +464,7 @@ button{
 
 .details-right{
   background:white;
-  padding:36px;
+  padding:32px;
   border-radius:26px;
   border:1px solid rgba(212,175,55,.28);
   box-shadow:var(--shadow);
@@ -479,6 +587,267 @@ button{
 
 .share-btn:hover{
   color:var(--gold-dark);
+}
+
+
+/* ===== PRODUCT REVIEWS ===== */
+.product-reviews-section{
+  grid-area:reviews;
+  width:100%;
+  margin-top:4px;
+  padding:28px;
+  border-radius:24px;
+  background:#fff;
+  border:1px solid rgba(212,175,55,.25);
+  box-shadow:var(--shadow);
+}
+
+.product-reviews-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.product-reviews-title-row h2{
+  margin:0;
+  color:var(--green-dark);
+  font-size:26px;
+}
+
+.product-reviews-title-row button{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  color:var(--green-dark);
+  background:var(--green-soft);
+}
+
+.product-rating-overview{
+  display:grid;
+  grid-template-columns:220px minmax(280px,1fr);
+  gap:36px;
+  align-items:center;
+  padding:22px;
+  border-radius:18px;
+  background:#f8faf7;
+  border:1px solid #e3e8e3;
+}
+
+.rating-main{
+  text-align:center;
+  padding-right:30px;
+  border-right:1px solid #dfe5df;
+}
+
+.rating-main strong{
+  display:block;
+  color:var(--green-dark);
+  font-size:46px;
+  line-height:1;
+}
+
+.rating-main .rating-label{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin:9px 0 6px;
+  padding:5px 10px;
+  border-radius:16px;
+  color:#17623a;
+  background:#e7f6eb;
+  font-size:12px;
+  font-weight:800;
+}
+
+.rating-main p{
+  margin:0;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.rating-bars{
+  display:grid;
+  gap:8px;
+}
+
+.rating-bar-row{
+  display:grid;
+  grid-template-columns:34px 1fr 36px;
+  gap:10px;
+  align-items:center;
+  color:#536059;
+  font-size:12px;
+}
+
+.rating-bar-track{
+  height:8px;
+  overflow:hidden;
+  border-radius:20px;
+  background:#e2e6e2;
+}
+
+.rating-bar-fill{
+  height:100%;
+  border-radius:20px;
+  background:#188b3b;
+}
+
+.product-review-list{
+  margin-top:22px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.product-review-card{
+  min-height:190px;
+  padding:18px;
+  border-radius:18px;
+  background:#f8f9f7;
+  border:1px solid #e2e6e2;
+}
+
+.product-review-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.product-review-score{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 8px;
+  border-radius:8px;
+  color:#fff;
+  background:#188b3b;
+  font-size:12px;
+  font-weight:800;
+}
+
+.product-review-date{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.product-review-comment{
+  margin:14px 0 18px !important;
+  color:#303a34 !important;
+  font-size:14px !important;
+  line-height:1.65 !important;
+}
+
+.product-review-footer{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.product-review-user strong{
+  display:block;
+  color:var(--green-dark);
+  font-size:13px;
+}
+
+.verified-review{
+  margin-top:4px;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  color:#5d6861;
+  font-size:10px;
+}
+
+.product-review-actions{
+  display:flex;
+  gap:8px;
+}
+
+.review-action{
+  min-width:34px;
+  height:32px;
+  padding:0 9px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  border-radius:17px;
+  color:#66716a;
+  background:#fff;
+  border:1px solid #dce2dc;
+  font-size:11px;
+}
+
+.product-reviews-status{
+  grid-column:1/-1;
+  padding:30px 16px;
+  border-radius:16px;
+  text-align:center;
+  color:var(--muted);
+  background:#f8faf7;
+  border:1px dashed #ccd6ce;
+  font-size:12px;
+}
+
+.show-all-reviews-btn{
+  width:100%;
+  min-height:48px;
+  margin-top:18px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border-radius:14px;
+  color:var(--green-dark);
+  background:#fff;
+  border:1px solid #cfd7d0;
+  font-size:14px;
+  font-weight:800;
+}
+
+.show-all-reviews-btn.show{
+  display:flex;
+}
+
+@media(max-width:900px){
+  .details-page{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "gallery"
+      "details"
+      "reviews";
+  }
+
+  .product-rating-overview{
+    grid-template-columns:1fr;
+  }
+
+  .rating-main{
+    padding-right:0;
+    padding-bottom:18px;
+    border-right:none;
+    border-bottom:1px solid #dfe5df;
+  }
+}
+
+@media(max-width:700px){
+  .product-reviews-section{
+    padding:20px 14px;
+  }
+
+  .product-review-list{
+    grid-template-columns:1fr;
+  }
+
+  .product-reviews-title-row h2{
+    font-size:22px;
+  }
 }
 
 /* ===== CART SIDEBAR ===== */
@@ -1327,6 +1696,38 @@ button{
   <h2 class="section-title">Neolife Wellness Products</h2>
   <p class="section-desc">Pure, natural and trusted Ayurvedic products for daily wellness.</p>
 
+  <div class="product-search-wrap">
+    <div class="product-search-box">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+
+      <input
+        type="search"
+        id="productSearchInput"
+        class="product-search-input"
+        placeholder="Search products by name, category or indication..."
+        autocomplete="off"
+        aria-label="Search products"
+      >
+
+      <button
+        type="button"
+        id="clearProductSearch"
+        class="product-search-clear"
+        onclick="clearProductSearch()"
+        aria-label="Clear product search"
+        title="Clear search"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div
+      id="productSearchResult"
+      class="product-search-result"
+      aria-live="polite"
+    ></div>
+  </div>
+
   <div class="products-grid" id="productsGrid"></div>
 </section>
 
@@ -1369,6 +1770,75 @@ button{
         <span>Share</span>
       </button>
     </div>
+
+    <section class="product-reviews-section">
+
+      <div class="product-reviews-title-row">
+        <h2>Ratings and Reviews</h2>
+
+        <button type="button" aria-label="Reviews section">
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+      </div>
+
+      <div class="product-rating-overview">
+
+        <div class="rating-main" id="productReviewSummary">
+          <strong>—</strong>
+          <div class="rating-label">
+            <i class="fa-solid fa-star"></i>
+            No rating
+          </div>
+          <p>No approved reviews</p>
+        </div>
+
+        <div class="rating-bars" id="productRatingBars">
+          <div class="rating-bar-row">
+            <span>5 ★</span>
+            <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div>
+            <span>0</span>
+          </div>
+          <div class="rating-bar-row">
+            <span>4 ★</span>
+            <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div>
+            <span>0</span>
+          </div>
+          <div class="rating-bar-row">
+            <span>3 ★</span>
+            <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div>
+            <span>0</span>
+          </div>
+          <div class="rating-bar-row">
+            <span>2 ★</span>
+            <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div>
+            <span>0</span>
+          </div>
+          <div class="rating-bar-row">
+            <span>1 ★</span>
+            <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div>
+            <span>0</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="product-review-list" id="productReviewList">
+        <div class="product-reviews-status">
+          Select a product to view reviews.
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="show-all-reviews-btn"
+        id="showAllReviewsButton"
+        onclick="toggleAllProductReviews()"
+      >
+        Show all reviews
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+    </section>
 
   </div>
 </div>
@@ -1507,14 +1977,38 @@ let pendingOrder = null;
 let razorpayInstance = null;
 
 let selectedProduct = {};
+let allProducts = [];
 let productImages = [];
 let currentImageIndex = 0;
 let modalQty = 1;
+let allApprovedProductReviews = null;
+let productReviewsRequest = null;
+let currentProductReviews = [];
+let showingAllProductReviews = false;
 
 window.addEventListener("DOMContentLoaded", async () => {
   await loadProducts();
   await loadCartFromBackend();
   await loadProfileIcon();
+
+  const searchInput =
+    document.getElementById("productSearchInput");
+
+  if(searchInput){
+    searchInput.addEventListener(
+      "input",
+      filterProducts
+    );
+
+    searchInput.addEventListener(
+      "keydown",
+      event => {
+        if(event.key === "Escape"){
+          clearProductSearch();
+        }
+      }
+    );
+  }
 
   const params = new URLSearchParams(window.location.search);
   const sharedProductId = Number(params.get("productId"));
@@ -1551,7 +2045,12 @@ async function loadProducts(){
       return;
     }
 
-    displayProducts(Array.isArray(result.data) ? result.data : []);
+    allProducts = Array.isArray(result.data)
+      ? result.data
+      : [];
+
+    displayProducts(allProducts);
+    updateProductSearchResult(allProducts.length, "");
 
   }catch(error){
     console.error(error);
@@ -1562,6 +2061,113 @@ async function loadProducts(){
     `;
   }
 }
+function normalizeSearchValue(value){
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function filterProducts(){
+  const input =
+    document.getElementById("productSearchInput");
+
+  const clearButton =
+    document.getElementById("clearProductSearch");
+
+  if(!input){
+    return;
+  }
+
+  const query =
+    normalizeSearchValue(input.value);
+
+  clearButton?.classList.toggle(
+    "show",
+    query.length > 0
+  );
+
+  if(!query){
+    displayProducts(allProducts);
+    updateProductSearchResult(
+      allProducts.length,
+      ""
+    );
+    return;
+  }
+
+  const filteredProducts =
+    allProducts.filter(product => {
+      const searchableText = [
+        product.productName,
+        product.name,
+        product.category,
+        product.manufacturerName,
+        product.manufacturer,
+        product.indication,
+        product.description,
+        product.productCode,
+        product.netQty
+      ]
+        .map(normalizeSearchValue)
+        .join(" ");
+
+      return searchableText.includes(query);
+    });
+
+  displayProducts(
+    filteredProducts,
+    query
+  );
+
+  updateProductSearchResult(
+    filteredProducts.length,
+    query
+  );
+}
+
+function clearProductSearch(){
+  const input =
+    document.getElementById("productSearchInput");
+
+  const clearButton =
+    document.getElementById("clearProductSearch");
+
+  if(input){
+    input.value = "";
+    input.focus();
+  }
+
+  clearButton?.classList.remove("show");
+
+  displayProducts(allProducts);
+  updateProductSearchResult(
+    allProducts.length,
+    ""
+  );
+}
+
+function updateProductSearchResult(
+  resultCount,
+  query
+){
+  const resultBox =
+    document.getElementById("productSearchResult");
+
+  if(!resultBox){
+    return;
+  }
+
+  if(!query){
+    resultBox.textContent =
+      `${resultCount} product${resultCount === 1 ? "" : "s"} available`;
+    return;
+  }
+
+  resultBox.textContent =
+    `${resultCount} result${resultCount === 1 ? "" : "s"} found for “${query}”`;
+}
+
 function formatExpiryDate(date){
     if(!date) return "-";
 
@@ -2146,12 +2752,19 @@ function backToAddress(){
   document.getElementById("addressStep").style.display = "block";
 }
 
-function displayProducts(products){
+function displayProducts(products, searchQuery = ""){
   const grid = document.getElementById("productsGrid");
   grid.innerHTML = "";
 
   if(!products.length){
-    grid.innerHTML = `<div class="product-status">No products are available right now.</div>`;
+    grid.innerHTML = `
+      <div class="product-status">
+        ${searchQuery
+          ? `No products found for “${escapeHtml(searchQuery)}”.`
+          : "No products are available right now."}
+      </div>
+    `;
+
     window.loadedProducts = [];
     return;
   }
@@ -2172,12 +2785,12 @@ function displayProducts(products){
         tabindex="0"
         onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); viewDetails(${index}); }"
       >
-        <img src="${mainImage}" alt="${productName}">
+        <img src="${escapeHtml(mainImage)}" alt="${escapeHtml(productName)}">
 
         <div class="product-content">
-          <h3>${productName}</h3>
+          <h3>${escapeHtml(productName)}</h3>
 
-          <div class="price">₹${price}</div>
+          <div class="price">₹${formatMoney(price)}</div>
 
           <button
             type="button"
@@ -2752,7 +3365,420 @@ document.getElementById("modalExpiryDate").innerText = formatExpiryDate(product.
   showProductImage();
 
   document.getElementById("detailsModal").style.display = "block";
-console.log(product);
+
+  loadProductReviews(product.id);
+
+  console.log(product);
+}
+
+
+async function loadProductReviews(productId){
+  const list =
+    document.getElementById(
+      "productReviewList"
+    );
+
+  const summary =
+    document.getElementById(
+      "productReviewSummary"
+    );
+
+  if(!list || !summary){
+    return;
+  }
+
+  list.innerHTML = `
+    <div class="product-reviews-status">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Loading reviews...
+    </div>
+  `;
+
+  summary.innerHTML = `
+    <strong>—</strong>
+    <div class="rating-label">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Loading
+    </div>
+    <p>Fetching reviews</p>
+  `;
+
+  try{
+    const reviews =
+      await getApprovedProductReviews();
+
+    const matchingReviews =
+      reviews.filter(review =>
+        Number(review.productId) ===
+        Number(productId)
+      );
+
+    renderProductReviews(
+      matchingReviews
+    );
+
+  }catch(error){
+    console.error(
+      "Product reviews loading failed:",
+      error
+    );
+
+    list.innerHTML = `
+      <div class="product-reviews-status">
+        Product reviews could not be loaded.
+      </div>
+    `;
+
+    summary.innerHTML = `
+      <strong>—</strong>
+      <div class="rating-label">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Unavailable
+      </div>
+      <p>Could not load reviews</p>
+    `;
+  }
+}
+
+async function getApprovedProductReviews(){
+  if(
+    Array.isArray(
+      allApprovedProductReviews
+    )
+  ){
+    return allApprovedProductReviews;
+  }
+
+  if(productReviewsRequest){
+    return productReviewsRequest;
+  }
+
+  productReviewsRequest =
+    fetch(
+      `${API_BASE_URL}/api/product-reviews/getAll`,
+      {
+        method:"GET",
+        headers:{
+          Accept:"application/json"
+        }
+      }
+    )
+    .then(async response => {
+      const result =
+        await response.json()
+          .catch(() => ({}));
+
+      if(
+        !response.ok ||
+        result.success === false
+      ){
+        throw new Error(
+          result.message ||
+          "Unable to fetch product reviews."
+        );
+      }
+
+      const reviews =
+        Array.isArray(result.data)
+          ? result.data
+          : [];
+
+      /*
+       * The public endpoint normally returns approved reviews.
+       * The additional filter prevents pending or rejected reviews
+       * from appearing if the backend response ever includes them.
+       */
+      allApprovedProductReviews =
+        reviews.filter(review =>
+          !review.status ||
+          String(review.status)
+            .toUpperCase() ===
+            "APPROVED"
+        );
+
+      return allApprovedProductReviews;
+    })
+    .finally(() => {
+      productReviewsRequest = null;
+    });
+
+  return productReviewsRequest;
+}
+
+function renderProductReviews(reviews){
+  const list =
+    document.getElementById("productReviewList");
+
+  const summary =
+    document.getElementById("productReviewSummary");
+
+  const bars =
+    document.getElementById("productRatingBars");
+
+  const showAllButton =
+    document.getElementById("showAllReviewsButton");
+
+  if(!list || !summary || !bars || !showAllButton){
+    return;
+  }
+
+  currentProductReviews =
+    Array.isArray(reviews)
+      ? [...reviews].sort(
+          (a,b) =>
+            new Date(b.createdAt || 0) -
+            new Date(a.createdAt || 0)
+        )
+      : [];
+
+  showingAllProductReviews = false;
+
+  if(currentProductReviews.length === 0){
+    summary.innerHTML = `
+      <strong>—</strong>
+      <div class="rating-label">
+        <i class="fa-solid fa-star"></i>
+        No rating
+      </div>
+      <p>No approved reviews</p>
+    `;
+
+    bars.innerHTML =
+      createRatingBars([]);
+
+    list.innerHTML = `
+      <div class="product-reviews-status">
+        No approved reviews are available for this product yet.
+      </div>
+    `;
+
+    showAllButton.classList.remove("show");
+    return;
+  }
+
+  const averageRating =
+    currentProductReviews.reduce(
+      (sum,review) =>
+        sum + normalizeRating(review.rating),
+      0
+    ) / currentProductReviews.length;
+
+  summary.innerHTML = `
+    <strong>${averageRating.toFixed(1)}</strong>
+    <div class="rating-label">
+      <i class="fa-solid fa-star"></i>
+      ${getRatingText(averageRating)}
+    </div>
+    <p>
+      Based on ${currentProductReviews.length}
+      ${currentProductReviews.length === 1 ? "rating" : "ratings"}
+    </p>
+  `;
+
+  bars.innerHTML =
+    createRatingBars(currentProductReviews);
+
+  renderVisibleProductReviews();
+
+  showAllButton.classList.toggle(
+    "show",
+    currentProductReviews.length > 4
+  );
+}
+
+function renderVisibleProductReviews(){
+  const list =
+    document.getElementById("productReviewList");
+
+  const showAllButton =
+    document.getElementById("showAllReviewsButton");
+
+  if(!list || !showAllButton){
+    return;
+  }
+
+  const visibleReviews =
+    showingAllProductReviews
+      ? currentProductReviews
+      : currentProductReviews.slice(0,4);
+
+  list.innerHTML =
+    visibleReviews.map(review => {
+      const userName =
+        review.userName || "Customer";
+
+      const rating =
+        normalizeRating(review.rating);
+
+      const verified =
+        review.verifiedPurchase === true;
+
+      return `
+        <article class="product-review-card">
+
+          <div class="product-review-top">
+            <div class="product-review-score">
+              ${rating.toFixed(1)}
+              <i class="fa-solid fa-star"></i>
+            </div>
+
+            <span class="product-review-date">
+              ${formatReviewDate(review.createdAt)}
+            </span>
+          </div>
+
+          <p class="product-review-comment">
+            ${escapeHtml(
+              review.comment || "No written comment."
+            )}
+          </p>
+
+          <div class="product-review-footer">
+
+            <div class="product-review-user">
+              <strong>${escapeHtml(userName)}</strong>
+
+              ${verified
+                ? `
+                    <span class="verified-review">
+                      <i class="fa-solid fa-circle-check"></i>
+                      Verified Purchase
+                    </span>
+                  `
+                : ""
+              }
+            </div>
+
+            <div class="product-review-actions">
+              <span class="review-action">
+                <i class="fa-regular fa-thumbs-up"></i>
+              </span>
+
+              <span class="review-action">
+                <i class="fa-regular fa-thumbs-down"></i>
+              </span>
+            </div>
+
+          </div>
+
+        </article>
+      `;
+    }).join("");
+
+  showAllButton.innerHTML =
+    showingAllProductReviews
+      ? `
+          Show fewer reviews
+          <i class="fa-solid fa-chevron-up"></i>
+        `
+      : `
+          Show all reviews
+          <i class="fa-solid fa-chevron-right"></i>
+        `;
+}
+
+function toggleAllProductReviews(){
+  showingAllProductReviews =
+    !showingAllProductReviews;
+
+  renderVisibleProductReviews();
+}
+
+function createRatingBars(reviews){
+  const counts = {
+    5:0,
+    4:0,
+    3:0,
+    2:0,
+    1:0
+  };
+
+  reviews.forEach(review => {
+    const rounded =
+      Math.max(
+        1,
+        Math.min(
+          5,
+          Math.round(
+            normalizeRating(review.rating)
+          )
+        )
+      );
+
+    counts[rounded] += 1;
+  });
+
+  const maxCount =
+    Math.max(
+      1,
+      ...Object.values(counts)
+    );
+
+  return [5,4,3,2,1]
+    .map(star => {
+      const count = counts[star];
+      const width =
+        (count / maxCount) * 100;
+
+      return `
+        <div class="rating-bar-row">
+          <span>${star} ★</span>
+
+          <div class="rating-bar-track">
+            <div
+              class="rating-bar-fill"
+              style="width:${width}%"
+            ></div>
+          </div>
+
+          <span>${count}</span>
+        </div>
+      `;
+    }).join("");
+}
+
+function normalizeRating(value){
+  return Math.max(
+    0,
+    Math.min(
+      5,
+      Number(value || 0)
+    )
+  );
+}
+
+function getRatingText(rating){
+  if(rating >= 4.5) return "Excellent";
+  if(rating >= 3.5) return "Good";
+  if(rating >= 2.5) return "Average";
+  if(rating >= 1.5) return "Fair";
+  return "Poor";
+}
+
+function formatReviewDate(value){
+  if(!value){
+    return "Date not available";
+  }
+
+  const date =
+    new Date(value);
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  ){
+    return "Date not available";
+  }
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric"
+    }
+  );
 }
 
 function loadThumbnails(){

@@ -1597,15 +1597,13 @@
                     <i class="fa-solid fa-users"></i>
                     Patient Dashboard
                 </a>
-                <a href="walk-in-patients.html">
-    <i class="fa-solid fa-person-walking-luggage"></i>
-    Walk-in Patients
-</a>
 
-<a href="add-patient.html">
-    <i class="fa-solid fa-user-plus"></i>
-    Add Walk-in Patient
-</a>
+                <a href="patients.html?view=walkin">
+                    <i class="fa-solid fa-person-walking"></i>
+                    Walk-in Patients
+                </a>
+              
+
 
                 <a href="appointment-calendar.html">
                     <i class="fa-solid fa-calendar-days"></i>
@@ -1880,7 +1878,7 @@
                                 <h2>Today's Schedule</h2>
 
                                 <p>
-                                    Offline and online appointments for today.
+                                    Offline, online and assigned walk-in patients for today.
                                 </p>
                             </div>
 
@@ -2589,13 +2587,49 @@
                 );
 
             try {
-                const result =
-                    await doctorApiRequest(
-                        "/api/doctor-dashboard/today"
+                const todayDate =
+                    getLocalDateValue();
+
+                const results =
+                    await Promise.allSettled([
+                        doctorApiRequest(
+                            "/api/doctor-dashboard/today"
+                        ),
+
+                        doctorApiRequest(
+                            `/api/walk-in-patients/doctor/date/${encodeURIComponent(
+                                todayDate
+                            )}`
+                        )
+                    ]);
+
+                const dashboardResult =
+                    results[0].status === "fulfilled"
+                        ? results[0].value
+                        : { data: {} };
+
+                const walkInResult =
+                    results[1].status === "fulfilled"
+                        ? results[1].value
+                        : { data: [] };
+
+                if (
+                    results[0].status === "rejected"
+                ) {
+                    throw results[0].reason;
+                }
+
+                if (
+                    results[1].status === "rejected"
+                ) {
+                    console.warn(
+                        "Today's walk-in patients could not be loaded:",
+                        results[1].reason
                     );
+                }
 
                 const data =
-                    result.data || {};
+                    dashboardResult.data || {};
 
                 const appointments =
                     Array.isArray(
@@ -2609,6 +2643,13 @@
                         data.consultations
                     )
                         ? data.consultations
+                        : [];
+
+                const walkInPatients =
+                    Array.isArray(
+                        walkInResult.data
+                    )
+                        ? walkInResult.data
                         : [];
 
                 const todayItems = [
@@ -2642,6 +2683,24 @@
                                     consultation.consultationTime
                             };
                         }
+                    ),
+
+                    ...walkInPatients.map(
+                        function (patient) {
+                            return {
+                                ...patient,
+                                patientName:
+                                    patient.name ||
+                                    patient.patientName ||
+                                    "Walk-in Patient",
+                                scheduleKind:
+                                    "WALK_IN",
+                                appointmentType:
+                                    "WALK-IN",
+                                appointmentTime:
+                                    patient.startTime
+                            };
+                        }
                     )
                 ].sort(
                     compareTodayScheduleItems
@@ -2667,6 +2726,26 @@
                     </div>
                 `;
             }
+        }
+
+        function getLocalDateValue() {
+            const now =
+                new Date();
+
+            const year =
+                now.getFullYear();
+
+            const month =
+                String(
+                    now.getMonth() + 1
+                ).padStart(2, "0");
+
+            const day =
+                String(
+                    now.getDate()
+                ).padStart(2, "0");
+
+            return `${year}-${month}-${day}`;
         }
 
         function compareTodayScheduleItems(
@@ -2799,13 +2878,26 @@
             id,
             scheduleKind
         ) {
-            if (
+            const kind =
                 String(scheduleKind)
-                    .toUpperCase() ===
+                    .toUpperCase();
+
+            if (
+                kind ===
                 "CONSULTATION"
             ) {
                 window.location.href =
                     `consultation-details.html?id=${encodeURIComponent(id)}`;
+
+                return;
+            }
+
+            if (
+                kind ===
+                "WALK_IN"
+            ) {
+                window.location.href =
+                    `patients.html?view=walkin&walkInPatientId=${encodeURIComponent(id)}`;
 
                 return;
             }
@@ -3227,12 +3319,14 @@
                         "Patient";
 
                     const date =
-                        request.preferredDate ||
-                        request.consultationDate;
+                        getConsultationRequestDate(
+                            request
+                        );
 
                     const time =
-                        request.preferredTime ||
-                        request.consultationTime;
+                        getConsultationRequestTime(
+                            request
+                        );
 
                     const symptoms =
                         request.symptoms ||
@@ -4062,6 +4156,108 @@
             }
 
             return value;
+        }
+
+        function getConsultationRequestDate(
+            request
+        ) {
+            if (!request) {
+                return null;
+            }
+
+            return (
+                request.preferredDate ||
+                request.consultationDate ||
+                request.scheduledDate ||
+                request.appointmentDate ||
+                request.rescheduledDate ||
+                extractDateFromDateTime(
+                    request.consultationDateTime ||
+                    request.scheduledDateTime ||
+                    request.preferredDateTime ||
+                    request.slotDateTime
+                )
+            );
+        }
+
+        function getConsultationRequestTime(
+            request
+        ) {
+            if (!request) {
+                return null;
+            }
+
+            return (
+                request.preferredTime ||
+                request.consultationTime ||
+                request.startTime ||
+                request.scheduledTime ||
+                request.appointmentTime ||
+                request.rescheduledTime ||
+                request.slotStartTime ||
+                extractTimeFromDateTime(
+                    request.consultationDateTime ||
+                    request.scheduledDateTime ||
+                    request.preferredDateTime ||
+                    request.slotDateTime
+                )
+            );
+        }
+
+        function extractDateFromDateTime(
+            dateTimeValue
+        ) {
+            if (!dateTimeValue) {
+                return null;
+            }
+
+            const value =
+                String(dateTimeValue).trim();
+
+            if (
+                value.includes("T")
+            ) {
+                return value.split("T")[0];
+            }
+
+            if (
+                value.includes(" ")
+            ) {
+                return value.split(" ")[0];
+            }
+
+            return null;
+        }
+
+        function extractTimeFromDateTime(
+            dateTimeValue
+        ) {
+            if (!dateTimeValue) {
+                return null;
+            }
+
+            const value =
+                String(dateTimeValue).trim();
+
+            if (
+                value.includes("T")
+            ) {
+                return value
+                    .split("T")[1]
+                    ?.substring(0, 8) ||
+                    null;
+            }
+
+            if (
+                value.includes(" ")
+            ) {
+                return value
+                    .split(" ")[1]
+                    ?.substring(0, 8) ||
+                    null;
+            }
+
+            return null;
         }
 
         function formatTime(timeValue) {

@@ -892,15 +892,13 @@ textarea.control{min-height:112px;}
                     <i class="fa-solid fa-users"></i>
                     Patient Dashboard
                 </a>
-                <a href="walk-in-patients.html">
-    <i class="fa-solid fa-person-walking-luggage"></i>
-    Walk-in Patients
-</a>
 
-<a href="add-patient.html">
-    <i class="fa-solid fa-user-plus"></i>
-    Add Walk-in Patient
-</a>
+                <a href="patients.html?view=walkin">
+                    <i class="fa-solid fa-person-walking"></i>
+                    Walk-in Patients
+                </a>
+               
+
 
                 <a href="appointment-calendar.html">
                     <i class="fa-solid fa-calendar-days"></i>
@@ -971,7 +969,7 @@ textarea.control{min-height:112px;}
 <header class="topbar">
   <div class="topbar-left">
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-    <div><h1>Prescription Pad</h1><p>Create and finalize a prescription for an appointment.</p></div>
+    <div><h1>Prescription Pad</h1><p>Create and finalize a prescription for an appointment or walk-in patient.</p></div>
   </div>
   <div class="doctor-box">
       <div class="avatar" id="doctorInitial">D</div>
@@ -983,14 +981,14 @@ textarea.control{min-height:112px;}
 </header>
 
 <section class="content">
-  <div class="hero"><div><h2>Digital Prescription</h2><p>The appointment and patient details are loaded automatically from the selected appointment.</p></div><div class="hero-icon"><i class="fa-solid fa-file-prescription"></i></div></div>
+  <div class="hero"><div><h2>Digital Prescription</h2><p>Patient details are loaded automatically from the selected appointment or walk-in record.</p></div><div class="hero-icon"><i class="fa-solid fa-file-prescription"></i></div></div>
   <div id="alertBox" class="alert"></div>
 
   <section class="patient-card">
     <div class="patient-grid">
       <div class="patient-main"><div class="patient-avatar" id="patientInitial">P</div><div><h3 id="patientName">Loading patient...</h3><p id="patientPhone">-</p></div></div>
       <div class="info-box"><span>Age / Gender</span><strong id="patientAgeGender">-</strong></div>
-      <div class="info-box"><span>Appointment</span><strong id="appointmentDate">-</strong></div>
+      <div class="info-box"><span id="visitDateLabel">Visit Date</span><strong id="appointmentDate">-</strong></div>
       <div class="info-box"><span>Time</span><strong id="appointmentTime">-</strong></div>
       <div class="info-box"><span>Status</span><strong id="appointmentStatus">-</strong></div>
     </div>
@@ -1006,6 +1004,7 @@ textarea.control{min-height:112px;}
             <div class="full"><label>Past Medical History</label><textarea id="history" class="control" readonly></textarea></div>
             <div class="full"><label>Diagnosis *</label><textarea id="diagnosis" class="control" placeholder="Enter diagnosis"></textarea></div>
             <div class="full"><label>Advice *</label><textarea id="advice" class="control" placeholder="Enter diet, lifestyle, follow-up and treatment advice"></textarea></div>
+            <div class="full"><label>Additional Notes</label><textarea id="notes" class="control" placeholder="Enter follow-up notes, precautions or additional clinical information"></textarea></div>
           </div>
         </div>
       </section>
@@ -1060,6 +1059,9 @@ const sidebarOverlay =
   document.getElementById("sidebarOverlay");
 
 let appointmentId=null;
+let walkInPatientId=null;
+let prescriptionMode="APPOINTMENT";
+let walkInPatient=null;
 let patientId=null;
 let prescriptionId=null;
 let appointment=null;
@@ -1072,17 +1074,98 @@ document.addEventListener("DOMContentLoaded",async()=>{
     return;
   }
 
-  const params=new URLSearchParams(location.search);
-  appointmentId=params.get("appointmentId")||params.get("id");
-  patientId=params.get("patientId");
-  if(!appointmentId){
-    showAlert("Appointment ID is missing. Open this page from Appointment Details.","error");
+  const params=
+    new URLSearchParams(
+      location.search
+    );
+
+  appointmentId=
+    params.get("appointmentId")||
+    (
+      String(
+        params.get("source")||""
+      ).toLowerCase()!=="walkin"
+        ? params.get("id")
+        : null
+    );
+
+  walkInPatientId=
+    params.get(
+      "walkInPatientId"
+    );
+
+  patientId=
+    params.get(
+      "patientId"
+    );
+
+  const source=
+    String(
+      params.get("source")||""
+    ).toLowerCase();
+
+  if(walkInPatientId){
+    prescriptionMode="WALK_IN";
+    appointmentId=null;
+    patientId=null;
+  }else{
+    prescriptionMode="APPOINTMENT";
+  }
+
+  if(
+    prescriptionMode==="WALK_IN" &&
+    (
+      !walkInPatientId ||
+      Number.isNaN(Number(walkInPatientId)) ||
+      Number(walkInPatientId)<=0
+    )
+  ){
+    showAlert(
+      "Valid Walk-in Patient ID is missing.",
+      "error"
+    );
+
     disableFinalize();
     return;
   }
+
+  if(
+    prescriptionMode==="APPOINTMENT" &&
+    !appointmentId
+  ){
+    showAlert(
+      "Appointment ID is missing.",
+      "error"
+    );
+
+    disableFinalize();
+    return;
+  }
+
+  console.log(
+    "Prescription source:",
+    {
+      prescriptionMode,
+      walkInPatientId,
+      appointmentId,
+      source
+    }
+  );
+
   addMedicineRow();
-  await Promise.all([loadDoctorProfile(),loadProducts()]);
-  await loadAppointment();
+
+  await Promise.all([
+    loadDoctorProfile(),
+    loadProducts()
+  ]);
+
+  if(
+    prescriptionMode==="WALK_IN"
+  ){
+    await loadWalkInPatient();
+  }else{
+    await loadAppointment();
+  }
 });
 
 function token(){return localStorage.getItem("token")||localStorage.getItem("doctorToken")}
@@ -1115,15 +1198,33 @@ async function api(endpoint,options={}){
   const text=await response.text();
   let result={};
   try{result=text?JSON.parse(text):{}}catch{result={success:false,message:text||`Server error (${response.status})`}}
-  if(response.status===401||response.status===403){
+  /*
+   * Only a real authentication failure (401) should log the doctor out.
+   * A 403 means the token is valid but that endpoint denied access.
+   * Keep the doctor logged in and show the actual backend error instead.
+   */
+  if(response.status===401){
     clearDoctorSession();
     location.href="../patient/login.html";
     throw new Error(
       result.message||
-      "Session expired"
+      "Session expired. Please login again."
     );
   }
-  if(!response.ok||result.success===false)throw new Error(result.message||"Request failed");
+
+  if(response.status===403){
+    throw new Error(
+      result.message||
+      "You do not have permission to access this resource."
+    );
+  }
+
+  if(!response.ok||result.success===false){
+    throw new Error(
+      result.message||
+      "Request failed"
+    );
+  }
   return result;
 }
 async function loadDoctorProfile(){
@@ -1180,10 +1281,9 @@ async function loadDoctorProfile(){
 
     updateDoctorHeader(storedName);
 
-    showAlert(
-      error.message||
-      "Unable to load doctor profile.",
-      "error"
+    console.warn(
+      "Doctor profile API failed; using the stored doctor name.",
+      error.message
     );
   }
 }
@@ -1224,6 +1324,218 @@ async function loadProducts(){
     refreshProductOptions();
   }catch(e){products=[]}
 }
+async function loadWalkInPatient(){
+  try{
+    const result=
+      await api(
+        "/api/walk-in-patients/doctor/my-patients"
+      );
+
+    const records=
+      Array.isArray(
+        result.data
+      )
+        ? result.data
+        : [];
+
+    walkInPatient=
+      records.find(
+        item =>
+          String(
+            item.id??
+            item.walkInPatientId
+          )===String(
+            walkInPatientId
+          )
+      );
+
+    if(!walkInPatient){
+      throw new Error(
+        "This walk-in patient is not assigned to the logged-in doctor."
+      );
+    }
+
+    renderWalkInPatient();
+
+    /*
+     * A new walk-in patient normally has status WAITING.
+     * At this stage there is no prescription yet, so do not call
+     * GET /api/prescriptions/walk-in/{id}. Some backend versions
+     * still validate appointmentId/consultationId when no draft exists,
+     * which produces the misleading:
+     * "Appointment id or consultation id is required".
+     *
+     * Only look for an existing walk-in prescription when the patient
+     * is already IN_PROGRESS or COMPLETED.
+     */
+    const walkInStatus=
+      String(
+        walkInPatient.status||
+        "WAITING"
+      ).toUpperCase();
+
+    if(
+      walkInStatus==="IN_PROGRESS"||
+      walkInStatus==="COMPLETED"
+    ){
+      try{
+        const prescriptionResult=
+          await api(
+            `/api/prescriptions/walk-in/${encodeURIComponent(
+              walkInPatientId
+            )}`
+          );
+
+        const existing=
+          prescriptionResult.data||
+          null;
+
+        if(existing?.id){
+          prescriptionId=
+            existing.id;
+
+          diagnosis.value=
+            existing.diagnosis||
+            "";
+
+          advice.value=
+            existing.advice||
+            "";
+
+          notes.value=
+            existing.notes||
+            "";
+
+          if(Array.isArray(existing.items)){
+            renderExistingMedicineItems(existing.items);
+          }
+
+          draftStatus.textContent=
+            `${format(
+              existing.status||
+              "DRAFT"
+            )} #${prescriptionId}`;
+
+          if(
+            String(
+              existing.status||
+              ""
+            ).toUpperCase()==="FINALIZED"
+          ){
+            prescriptionFinalized=true;
+            setPrescriptionReadOnly();
+          }
+        }
+
+      }catch(error){
+
+        const message=
+          String(
+            error.message||""
+          );
+
+        /*
+         * Some older backend versions return
+         * "Appointment id or consultation id is required"
+         * when there is no walk-in prescription yet.
+         * Do not block the walk-in prescription form for that case.
+         */
+        if(
+          message
+            .toLowerCase()
+            .includes(
+              "appointment id or consultation id is required"
+            )
+        ){
+          console.warn(
+            "No walk-in prescription draft exists yet. A new draft will be created when the doctor saves the prescription."
+          );
+        }else{
+          console.warn(
+            "Existing walk-in prescription could not be loaded:",
+            message
+          );
+        }
+      }
+    }
+
+  }catch(error){
+    showAlert(
+      error.message||
+      "Unable to load walk-in patient.",
+      "error"
+    );
+
+    disableFinalize();
+  }
+}
+
+function renderWalkInPatient(){
+  const patient=
+    walkInPatient||{};
+
+  const name=
+    patient.name||
+    patient.patientName||
+    "Walk-in Patient";
+
+  patientName.textContent=
+    name;
+
+  patientInitial.textContent=
+    name
+      .charAt(0)
+      .toUpperCase();
+
+  patientPhone.textContent=
+    patient.phoneNumber||
+    "-";
+
+  patientAgeGender.textContent=
+    `${patient.age??"-"} / ${format(
+      patient.gender
+    )}`;
+
+  appointmentDate.textContent=
+    formatDate(
+      patient.appointmentDate
+    );
+
+  appointmentTime.textContent=
+    time(
+      patient.startTime
+    );
+
+  appointmentStatus.textContent=
+    format(
+      patient.status||
+      "WAITING"
+    );
+
+  appointmentDoctor.textContent=
+    localStorage.getItem(
+      "doctorName"
+    )||
+    "-";
+
+  appointmentSpecialization.textContent=
+    "Walk-in Patient";
+
+  appointmentMode.textContent=
+    "Walk-in";
+
+  paymentStatus.textContent=
+    "Not Required";
+
+  symptoms.value=
+    patient.symptoms||
+    "";
+
+  history.value=
+    patient.pastMedicalHistory||
+    "";
+}
+
 async function loadAppointment(){
   try{
     /*
@@ -1326,6 +1638,43 @@ function addMedicineRow(){
   });
   medicineBody.appendChild(tr);
 }
+function renderExistingMedicineItems(items){
+  if(!Array.isArray(items)||items.length===0){
+    return;
+  }
+
+  medicineBody.innerHTML="";
+  savedMedicineKeys=new Set();
+
+  items.forEach(item=>{
+    addMedicineRow();
+    const tr=medicineBody.lastElementChild;
+    if(!tr)return;
+
+    const productId=item.productId??item.product?.id??null;
+    const medicineName=item.medicineName||item.productName||item.product?.name||"";
+
+    refreshProductOptions();
+    tr.querySelector(".product-select").value=productId!=null?String(productId):"";
+    tr.querySelector(".custom-name").value=medicineName;
+    tr.querySelector(".dosage").value=item.dosage||"";
+    tr.querySelector(".frequency").value=item.frequency||"";
+    tr.querySelector(".days").value=Number(item.durationDays||1);
+    tr.querySelector(".qty").value=Number(item.quantity||1);
+    tr.querySelector(".instructions").value=item.instructions||"";
+
+    savedMedicineKeys.add(medicineKey({
+      productId:productId!=null?Number(productId):null,
+      medicineName,
+      dosage:item.dosage||"",
+      frequency:item.frequency??null,
+      durationDays:Number(item.durationDays||0),
+      quantity:Number(item.quantity||0),
+      instructions:item.instructions??null
+    }));
+  });
+}
+
 function productOptions(){return products.map(p=>`<option value="${p.id}">${escapeHtml(p.productName||p.name||"Product")}</option>`).join("")}
 function refreshProductOptions(){document.querySelectorAll(".product-select").forEach(s=>{const v=s.value;s.innerHTML='<option value="">Custom medicine</option>'+productOptions();s.value=v})}
 function collectMedicines(){
@@ -1345,6 +1694,7 @@ function collectMedicines(){
 async function ensureDraft(){
   const diagnosisValue=diagnosis.value.trim();
   const adviceValue=advice.value.trim();
+  const notesValue=notes.value.trim();
 
   if(!diagnosisValue||!adviceValue){
     throw new Error("Enter diagnosis and advice first.");
@@ -1355,14 +1705,68 @@ async function ensureDraft(){
     return prescriptionId;
   }
 
-  const requestBody={
-    appointmentId:Number(appointmentId),
-    diagnosis:diagnosisValue,
-    advice:adviceValue
-  };
+  let requestBody;
+
+  if(prescriptionMode==="WALK_IN"){
+
+    const numericWalkInPatientId=
+      Number(walkInPatientId);
+
+    if(
+      !numericWalkInPatientId ||
+      Number.isNaN(numericWalkInPatientId)
+    ){
+      throw new Error(
+        "Valid Walk-in Patient ID is required."
+      );
+    }
+
+    requestBody={
+      walkInPatientId:numericWalkInPatientId,
+      diagnosis:diagnosisValue,
+      advice:adviceValue,
+      notes:notesValue||null
+    };
+
+  }else{
+
+    const numericAppointmentId=
+      Number(appointmentId);
+
+    if(
+      !numericAppointmentId ||
+      Number.isNaN(numericAppointmentId)
+    ){
+      throw new Error(
+        "Valid Appointment ID is required."
+      );
+    }
+
+    requestBody={
+      appointmentId:numericAppointmentId,
+      diagnosis:diagnosisValue,
+      advice:adviceValue,
+      notes:notesValue||null
+    };
+  }
+
+  console.log(
+    "Creating prescription with payload:",
+    requestBody
+  );
+
+  const createEndpoint=
+    prescriptionMode==="WALK_IN"
+      ? "/api/prescriptions/walk-in/create"
+      : "/api/prescriptions/create";
+
+  console.log(
+    "Creating prescription using endpoint:",
+    createEndpoint
+  );
 
   const r=await api(
-    "/api/prescriptions/create",
+    createEndpoint,
     {
       method:"POST",
       body:JSON.stringify(requestBody)
@@ -1390,7 +1794,8 @@ async function updatePrescriptionDetails(){
 
   const requestBody={
     diagnosis:diagnosis.value.trim(),
-    advice:advice.value.trim()
+    advice:advice.value.trim(),
+    notes:notes.value.trim()||null
   };
 
   const r=await api(
@@ -1589,8 +1994,18 @@ async function finalizePrescription(){
 
     await updatePrescriptionDetails();
 
+    const finalizeEndpoint=
+      prescriptionMode==="WALK_IN"
+        ? `/api/prescriptions/walk-in/${encodeURIComponent(id)}/finalize`
+        : `/api/prescriptions/${encodeURIComponent(id)}/finalize`;
+
+    console.log(
+      "Finalizing prescription using endpoint:",
+      finalizeEndpoint
+    );
+
     const result=await api(
-      `/api/prescriptions/${id}/finalize`,
+      finalizeEndpoint,
       {
         method:"PUT"
       }
@@ -1605,6 +2020,7 @@ async function finalizePrescription(){
 
     diagnosis.disabled=true;
     advice.disabled=true;
+    notes.disabled=true;
 
     medicineBody
       .querySelectorAll(
@@ -1625,8 +2041,19 @@ async function finalizePrescription(){
 
     setTimeout(
       ()=>{
-        location.href=
-          `doctor-appointments.html?prescriptionCompleted=true&appointmentId=${encodeURIComponent(appointmentId)}`;
+        if(
+          prescriptionMode==="WALK_IN"
+        ){
+          location.href=
+            `patients.html?view=walkin&prescriptionCompleted=true&walkInPatientId=${encodeURIComponent(
+              walkInPatientId
+            )}`;
+        }else{
+          location.href=
+            `doctor-appointments.html?prescriptionCompleted=true&appointmentId=${encodeURIComponent(
+              appointmentId
+            )}`;
+        }
       },
       1200
     );
@@ -1671,12 +2098,41 @@ function disableFinalize(){
   finalizeBtn.disabled=true;
   saveDraftBtn.disabled=true;
 }
+
+function setPrescriptionReadOnly(){
+  disableFinalize();
+  diagnosis.disabled=true;
+  advice.disabled=true;
+  notes.disabled=true;
+
+  medicineBody
+    .querySelectorAll("input,select,button")
+    .forEach(element=>{
+      element.disabled=true;
+    });
+
+  const addButton=document.querySelector(".add-btn");
+  if(addButton){
+    addButton.disabled=true;
+  }
+}
 function showAlert(msg,type="info"){alertBox.textContent=msg;alertBox.className=`alert show ${type}`;scrollTo({top:0,behavior:"smooth"})}
 function format(v){return v?String(v).replaceAll("_"," ").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):"-"}
 function formatDate(v){if(!v)return"-";const d=new Date(v+"T00:00:00");return isNaN(d)?v:d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}
 function time(v){return v?String(v).slice(0,5):"-"}
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-function goBack(){location.href="doctor-appointments.html"}
+function goBack(){
+  if(
+    prescriptionMode==="WALK_IN"
+  ){
+    location.href=
+      "patients.html?view=walkin";
+    return;
+  }
+
+  location.href=
+    "doctor-appointments.html";
+}
 function toggleSidebar(){
   doctorSidebar.classList.toggle("open");
   sidebarOverlay.classList.toggle("show");
