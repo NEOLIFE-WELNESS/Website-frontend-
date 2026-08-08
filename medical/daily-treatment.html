@@ -1978,7 +1978,7 @@
                                 <tr>
                                     <th>Treatment ID</th>
                                     <th>Patient</th>
-                                    <th>Doctor</th>
+                                    <th>Therapist</th>
                                     <th>Therapy</th>
                                     <th>Session</th>
                                     <th>Date</th>
@@ -3742,7 +3742,7 @@
 
                             <td>
                                 ${displayValue(
-                                    item.doctorName
+                                  item.therapistName
                                 )}
                             </td>
 
@@ -4042,36 +4042,7 @@
 
                 <div class="details-grid">
 
-                    <div class="detail-box">
-                        <span>Patient Phone</span>
-
-                        <strong>
-                            ${displayValue(
-                                selectedTreatment.patientPhone
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Age / Gender</span>
-
-                        <strong>
-                            ${formatAgeGender(
-                                selectedTreatment.patientAge,
-                                selectedTreatment.patientGender
-                            )}
-                        </strong>
-                    </div>
-
-                    <div class="detail-box">
-                        <span>Doctor</span>
-
-                        <strong>
-                            ${displayValue(
-                                selectedTreatment.doctorName
-                            )}
-                        </strong>
-                    </div>
+                
 
                     <div class="detail-box">
                         <span>Therapy</span>
@@ -4155,15 +4126,7 @@
                         </strong>
                     </div>
 
-                    <div class="detail-box full-width">
-                        <span>Symptoms / Reason</span>
-
-                        <p>
-                            ${escapeHtml(
-                                selectedTreatment.symptoms
-                            )}
-                        </p>
-                    </div>
+                    
 
                     <div class="detail-box full-width">
                         <span>Medical History</span>
@@ -4195,17 +4158,7 @@
                         </p>
                     </div>
 
-                    <div class="detail-box full-width">
-                        <span>Next Session</span>
-
-                        <p>
-                            ${escapeHtml(
-                                formatDate(
-                                    selectedTreatment.nextSessionDate
-                                )
-                            )}
-                        </p>
-                    </div>
+                    
 
                 </div>
             `;
