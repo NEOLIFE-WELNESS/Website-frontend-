@@ -375,18 +375,12 @@
             box-shadow: 0 8px 25px rgba(21, 61, 41, 0.17);
         }
 
-        .image-wrap img,
         .placeholder {
             width: 100%;
             height: 100%;
             border-radius: 50%;
         }
-
-        .image-wrap img {
-            object-fit: cover;
-        }
-
-        .placeholder {
+.placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -681,6 +675,117 @@
                 width: 100%;
             }
         }
+
+        /* MEDICAL-STAFF STYLE PROFILE DETAILS */
+
+        .profile-info-list {
+            margin-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .profile-info-item {
+            min-height: 57px;
+            padding: 11px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #edf0ed;
+            text-align: left;
+        }
+
+        .profile-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-info-item i {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 10px;
+            color: var(--dark-green);
+            background: var(--green-light);
+            font-size: 13px;
+        }
+
+        .profile-info-item span {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+        }
+
+        .profile-info-item strong {
+            display: block;
+            color: var(--dark-green);
+            font-size: 11px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .edit-profile-button {
+            min-height: 39px;
+            padding: 9px 14px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            flex-shrink: 0;
+            border: none;
+            border-radius: 9px;
+            color: var(--white);
+            background: var(--dark-green);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .edit-profile-button:hover {
+            background: var(--gold-dark);
+        }
+
+        .form-section-title {
+            margin: 5px 0 16px;
+            padding-bottom: 9px;
+            color: var(--dark-green);
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .form-section-title.professional-section {
+            margin-top: 25px;
+        }
+
+        .control[readonly],
+        .control:disabled {
+            color: #59665e;
+            background: #f4f7f4;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 700px) {
+            .card-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .edit-profile-button {
+                width: 100%;
+            }
+        }
+
     </style>
 </head>
 
@@ -800,15 +905,7 @@
                         <div class="profile-body">
 
                             <div class="image-wrap">
-
-                                <img
-                                    id="profileImage"
-                                    src=""
-                                    alt="Therapist"
-                                    style="display:none"
-                                >
-
-                                <div
+<div
                                     class="placeholder"
                                     id="profilePlaceholder"
                                 >
@@ -828,12 +925,48 @@
                                 Account Activated
                             </span>
 
-                            <div class="notice" id="profileNotice">
-                                <strong>Important:</strong>
-                                Your name, email, phone, age and gender were
-                                already saved when the administrator created
-                                your account. Complete only your professional
-                                information here.
+                            <div class="profile-info-list">
+
+                                <div class="profile-info-item">
+                                    <i class="fa-solid fa-id-badge"></i>
+                                    <div>
+                                        <span>Therapist ID</span>
+                                        <strong id="profileTherapistId">-</strong>
+                                    </div>
+                                </div>
+
+                                <div class="profile-info-item">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <div>
+                                        <span>Email</span>
+                                        <strong id="profileEmail">-</strong>
+                                    </div>
+                                </div>
+
+                                <div class="profile-info-item">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <div>
+                                        <span>Phone</span>
+                                        <strong id="profilePhone">-</strong>
+                                    </div>
+                                </div>
+
+                                <div class="profile-info-item">
+                                    <i class="fa-solid fa-user-graduate"></i>
+                                    <div>
+                                        <span>Qualification</span>
+                                        <strong id="profileQualification">-</strong>
+                                    </div>
+                                </div>
+
+                                <div class="profile-info-item">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                    <div>
+                                        <span>Experience</span>
+                                        <strong id="profileExperience">-</strong>
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
@@ -843,10 +976,24 @@
                     <section class="card">
 
                         <div class="card-header">
-                            <h2 id="formHeading">Professional Information</h2>
-                            <p id="formDescription">
-                                All required fields must be completed before submission.
-                            </p>
+
+                            <div>
+                                <h2 id="formHeading">Complete Professional Profile</h2>
+                                <p id="formDescription">
+                                    Enter the professional information required for your therapist account.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="edit-profile-button"
+                                id="editProfileButton"
+                                onclick="enableProfileEditing()"
+                            >
+                                <i class="fa-solid fa-pen"></i>
+                                Edit Profile
+                            </button>
+
                         </div>
 
                         <form
@@ -854,6 +1001,81 @@
                             id="completeProfileForm"
                             novalidate
                         >
+
+                            <h3 class="form-section-title">
+                                Account Information
+                            </h3>
+
+                            <div class="form-grid">
+
+                                <div class="group">
+                                    <label for="accountName">Full Name</label>
+                                    <input
+                                        id="accountName"
+                                        class="control"
+                                        type="text"
+                                        readonly
+                                    >
+                                </div>
+
+                                <div class="group">
+                                    <label for="accountEmail">Email Address</label>
+                                    <input
+                                        id="accountEmail"
+                                        class="control"
+                                        type="email"
+                                        readonly
+                                    >
+                                </div>
+
+                                <div class="group">
+                                    <label for="accountPhone">Phone Number</label>
+                                    <input
+                                        id="accountPhone"
+                                        class="control"
+                                        type="text"
+                                        readonly
+                                    >
+                                </div>
+
+                                <div class="group">
+                                    <label for="accountGender">Gender</label>
+                                    <input
+                                        id="accountGender"
+                                        class="control"
+                                        type="text"
+                                        readonly
+                                        placeholder="Not available"
+                                    >
+                                </div>
+
+                                <div class="group">
+                                    <label for="accountAge">Age</label>
+                                    <input
+                                        id="accountAge"
+                                        class="control"
+                                        type="text"
+                                        readonly
+                                        placeholder="Not available"
+                                    >
+                                </div>
+
+                                <div class="group">
+                                    <label for="therapistIdField">Therapist ID</label>
+                                    <input
+                                        id="therapistIdField"
+                                        class="control"
+                                        type="text"
+                                        readonly
+                                        placeholder="Created after profile completion"
+                                    >
+                                </div>
+
+                            </div>
+
+                            <h3 class="form-section-title professional-section">
+                                Professional Information
+                            </h3>
 
                             <div class="form-grid">
 
@@ -866,7 +1088,7 @@
 
                                     <input
                                         id="qualification"
-                                        class="control"
+                                        class="control professional-field"
                                         type="text"
                                         placeholder="Example: Diploma in Panchakarma"
                                         required
@@ -883,7 +1105,7 @@
 
                                     <input
                                         id="specialization"
-                                        class="control"
+                                        class="control professional-field"
                                         type="text"
                                         placeholder="Example: Panchakarma"
                                         required
@@ -900,7 +1122,7 @@
 
                                     <input
                                         id="experienceYears"
-                                        class="control"
+                                        class="control professional-field"
                                         type="number"
                                         min="0"
                                         max="60"
@@ -909,27 +1131,7 @@
                                     >
 
                                 </div>
-
-                                <div class="group">
-
-                                    <label for="profileImage">
-                                        Profile Image URL
-                                    </label>
-
-                                    <input
-                                        id="profileImageUrl"
-                                        class="control"
-                                        type="url"
-                                        placeholder="https://example.com/therapist.jpg"
-                                    >
-
-                                    <p class="help">
-                                        Enter a public image URL. Leave blank if no image is available.
-                                    </p>
-
-                                </div>
-
-                                <div class="group full">
+<div class="group full">
 
                                     <label for="about">
                                         About Therapist
@@ -938,7 +1140,7 @@
 
                                     <textarea
                                         id="about"
-                                        class="control"
+                                        class="control professional-field"
                                         placeholder="Write a brief professional introduction"
                                         required
                                     ></textarea>
@@ -947,7 +1149,7 @@
 
                             </div>
 
-                            <div class="actions">
+                            <div class="actions" id="formActions">
 
                                 <button
                                     type="button"
@@ -1001,15 +1203,7 @@ document.addEventListener(
                 "submit",
                 saveTherapistProfile
             );
-
-        document
-            .getElementById("profileImageUrl")
-            .addEventListener(
-                "input",
-                previewProfileImage
-            );
-
-        loadStoredBasicInformation();
+loadStoredBasicInformation();
         setLoadingMode();
 
         await loadTherapistProfile();
@@ -1297,6 +1491,22 @@ function normalizeProfile(item) {
             ) ||
             "",
 
+        age:
+            item.age ||
+            item.user?.age ||
+            localStorage.getItem(
+                "age"
+            ) ||
+            "",
+
+        gender:
+            item.gender ||
+            item.user?.gender ||
+            localStorage.getItem(
+                "gender"
+            ) ||
+            "",
+
         qualification:
             item.qualification || "",
 
@@ -1312,14 +1522,7 @@ function normalizeProfile(item) {
 
         about:
             item.about || "",
-
-        profileImage:
-            item.profileImage ||
-            item.profileImageUrl ||
-            item.imageUrl ||
-            "",
-
-        active:
+active:
             item.active !== false,
 
         profileCompleted:
@@ -1428,15 +1631,6 @@ function setCompleteMode(
     );
 
     document.getElementById(
-        "profileNotice"
-    ).innerHTML = `
-        <strong>Important:</strong>
-        Your basic account details were already saved when the
-        administrator created your account. Complete only your
-        professional information here.
-    `;
-
-    document.getElementById(
         "saveButton"
     ).innerHTML = `
         <i class="fa-solid fa-circle-check"></i>
@@ -1446,6 +1640,16 @@ function setCompleteMode(
     document.getElementById(
         "saveButton"
     ).disabled = false;
+
+    document.getElementById(
+        "editProfileButton"
+    ).style.display = "none";
+
+    document.getElementById(
+        "formActions"
+    ).style.display = "flex";
+
+    setProfessionalFieldsDisabled(false);
 
     setText(
         "secondaryButton",
@@ -1520,14 +1724,6 @@ function setExistingProfileMode(
     );
 
     document.getElementById(
-        "profileNotice"
-    ).innerHTML = `
-        <strong>Profile completed:</strong>
-        Your therapist account is ready. You can access the dashboard,
-        manage availability and handle assigned treatment sessions.
-    `;
-
-    document.getElementById(
         "saveButton"
     ).innerHTML = `
         <i class="fa-solid fa-floppy-disk"></i>
@@ -1537,6 +1733,16 @@ function setExistingProfileMode(
     document.getElementById(
         "saveButton"
     ).disabled = false;
+
+    document.getElementById(
+        "editProfileButton"
+    ).style.display = "inline-flex";
+
+    document.getElementById(
+        "formActions"
+    ).style.display = "none";
+
+    setProfessionalFieldsDisabled(true);
 
     setText(
         "secondaryButton",
@@ -1814,18 +2020,10 @@ function fillProfileForm(profile) {
         "experienceYears",
         profile.experienceYears
     );
-
-    setValue(
-        "profileImageUrl",
-        profile.profileImage
-    );
-
-    setValue(
+setValue(
         "about",
         profile.about
     );
-
-    previewProfileImage();
 }
 
 function getPayload() {
@@ -1844,13 +2042,7 @@ function getPayload() {
             ),
 
         about:
-            getValue("about"),
-
-        profileImage:
-            getValue(
-                "profileImageUrl"
-            )
-    };
+            getValue("about")};
 }
 
 function validatePayload(payload) {
@@ -1928,40 +2120,34 @@ function validatePayload(payload) {
 
         return false;
     }
-
-    if (
-        payload.profileImage &&
-        !isValidUrl(
-            payload.profileImage
-        )
-    ) {
-        showAlert(
-            "Enter a valid profile image URL.",
-            "error"
-        );
-
-        document
-            .getElementById(
-                "profileImageUrl"
-            )
-            .focus();
-
-        return false;
-    }
-
-    return true;
+return true;
 }
 
 function handleSecondaryAction() {
+
     if (
         profileMode === "EDIT" &&
-        originalFormData
+        therapistProfile
     ) {
+
         fillProfileForm(
-            {
-                ...therapistProfile,
-                ...originalFormData
-            }
+            therapistProfile
+        );
+
+        updateBasicProfileDisplay(
+            therapistProfile
+        );
+
+        document.getElementById(
+            "editProfileButton"
+        ).style.display = "inline-flex";
+
+        document.getElementById(
+            "formActions"
+        ).style.display = "none";
+
+        setProfessionalFieldsDisabled(
+            true
         );
 
         showAlert(
@@ -1973,6 +2159,45 @@ function handleSecondaryAction() {
     }
 
     resetForm();
+}
+
+function enableProfileEditing() {
+
+    if (
+        profileMode !== "EDIT"
+    ) {
+        return;
+    }
+
+    document.getElementById(
+        "editProfileButton"
+    ).style.display = "none";
+
+    document.getElementById(
+        "formActions"
+    ).style.display = "flex";
+
+    setProfessionalFieldsDisabled(
+        false
+    );
+
+    document.getElementById(
+        "qualification"
+    ).focus();
+}
+
+function setProfessionalFieldsDisabled(
+    disabled
+) {
+
+    document.querySelectorAll(
+        ".professional-field"
+    ).forEach(
+        element => {
+            element.disabled =
+                disabled;
+        }
+    );
 }
 
 function resetForm() {
@@ -2010,11 +2235,24 @@ function loadStoredBasicInformation() {
     updateBasicProfileDisplay(
         {
             name,
+            email:
+                localStorage.getItem(
+                    "email"
+                ) || "",
+            phoneNumber:
+                localStorage.getItem(
+                    "phoneNumber"
+                ) || "",
+            age:
+                localStorage.getItem(
+                    "age"
+                ) || "",
+            gender:
+                localStorage.getItem(
+                    "gender"
+                ) || "",
             specialization:
-                "Therapist",
-            profileImage:
-                ""
-        }
+                "Therapist"}
     );
 }
 
@@ -2063,60 +2301,66 @@ function updateBasicProfileDisplay(
         );
     }
 
-    if (
-        profile.profileImage
-    ) {
-        setValue(
-            "profileImageUrl",
-            profile.profileImage
-        );
+    setText(
+        "profileTherapistId",
+        profile.id || "-"
+    );
 
-        previewProfileImage();
-    }
+    setText(
+        "profileEmail",
+        profile.email || "-"
+    );
+
+    setText(
+        "profilePhone",
+        profile.phoneNumber || "-"
+    );
+
+    setText(
+        "profileQualification",
+        profile.qualification || "-"
+    );
+
+    setText(
+        "profileExperience",
+        Number(profile.experienceYears) > 0
+            ? `${profile.experienceYears} Years`
+            : "-"
+    );
+
+    setValue(
+        "accountName",
+        name
+    );
+
+    setValue(
+        "accountEmail",
+        profile.email || ""
+    );
+
+    setValue(
+        "accountPhone",
+        profile.phoneNumber || ""
+    );
+
+    setValue(
+        "accountAge",
+        profile.age || ""
+    );
+
+    setValue(
+        "accountGender",
+        profile.gender
+            ? formatStatus(profile.gender)
+            : ""
+    );
+
+    setValue(
+        "therapistIdField",
+        profile.id || ""
+    );
 }
 
-function previewProfileImage() {
-    const url =
-        getValue(
-            "profileImageUrl"
-        );
-
-    const image =
-        document.getElementById(
-            "profileImage"
-        );
-
-    const placeholder =
-        document.getElementById(
-            "profilePlaceholder"
-        );
-
-    if (!url) {
-        image.style.display =
-            "none";
-
-        placeholder.style.display =
-            "flex";
-
-        return;
-    }
-
-    image.src = url;
-    image.style.display =
-        "block";
-
-    placeholder.style.display =
-        "none";
-
-    image.onerror =
-        function () {
-            image.style.display =
-                "none";
-
-            placeholder.style.display =
-                "flex";
-        };
-}
 
 /* =========================
    HELPERS
@@ -2172,13 +2416,15 @@ function setText(id, value) {
     }
 }
 
-function isValidUrl(value) {
-    try {
-        new URL(value);
-        return true;
-    } catch {
-        return false;
-    }
+function formatStatus(value) {
+    return String(value || "-")
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
 }
 
 function showAlert(
