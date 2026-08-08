@@ -223,95 +223,6 @@
       margin-bottom:22px;
     }
 
-    .social-title{
-      color:var(--green-900);
-      font-size:13px;
-      font-weight:800;
-      margin-bottom:9px;
-    }
-
-    .social-buttons{
-      display:flex;
-      gap:10px;
-      margin-bottom:18px;
-    }
-
-    .social-btn{
-      width:100%;
-      height:48px;
-      border-radius:13px;
-      border:1px solid rgba(13,40,27,.12);
-      background:rgba(255,255,255,.88);
-      color:var(--text);
-      font-weight:800;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:9px;
-      cursor:pointer;
-      transition:.3s;
-    }
-
-    .social-btn:hover{
-      transform:translateY(-3px);
-      border-color:rgba(212,175,55,.65);
-      box-shadow:0 10px 24px rgba(13,40,27,.12);
-    }
-
-    .google span{
-      color:#db4437;
-      font-size:20px;
-      font-weight:900;
-    }
-
-    .divider{
-      text-align:center;
-      color:#8d9991;
-      font-size:12px;
-      margin:16px 0;
-      position:relative;
-    }
-
-    .divider::before,
-    .divider::after{
-      content:"";
-      position:absolute;
-      top:50%;
-      width:42%;
-      height:1px;
-      background:rgba(13,40,27,.13);
-    }
-
-    .divider::before{left:0;}
-    .divider::after{right:0;}
-
-    .tabs{
-      display:flex;
-      padding:4px;
-      margin-bottom:17px;
-      border-radius:13px;
-      background:rgba(223,234,221,.85);
-      border:1px solid rgba(13,40,27,.07);
-    }
-
-    .tab-btn{
-      flex:1;
-      padding:10px;
-      border:none;
-      border-radius:10px;
-      background:transparent;
-      color:#617067;
-      font-weight:800;
-      cursor:pointer;
-      transition:.3s;
-    }
-
-    .tab-btn.active{
-      color:white;
-      background:linear-gradient(135deg,var(--green-900),var(--green-700));
-      box-shadow:0 7px 18px rgba(13,40,27,.19);
-    }
-
     .form-group{
       margin-bottom:14px;
       position:relative;
@@ -384,15 +295,6 @@
     .login-btn:hover{
       transform:translateY(-3px);
       background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-    }
-
-    .otp-btn{
-      margin-top:3px;
-      background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-    }
-
-    .otp-btn:hover{
-      background:linear-gradient(135deg,var(--green-900),var(--green-700));
     }
 
     .signup{
@@ -550,37 +452,7 @@
           <h2>Patient Login</h2>
 
           <p>Welcome back. Continue your Neolife wellness journey.</p>
-
-          <div class="social-title">Continue with</div>
-
-          <div class="social-buttons">
-            <button class="social-btn google"
-                    type="button"
-                    onclick="startGoogleLogin()">
-              <span>G</span>
-              Google
-            </button>
-          </div>
-
-          <div class="divider">or</div>
-
-          <div class="tabs">
-            <button class="tab-btn active"
-                    id="emailTab"
-                    type="button"
-                    onclick="showEmailLogin()">
-              Email Login
-            </button>
-
-            <button class="tab-btn"
-                    id="phoneTab"
-                    type="button"
-                    onclick="showPhoneLogin()">
-              Phone OTP
-            </button>
-          </div>
-
-          <form id="emailLoginForm"
+<form id="emailLoginForm"
                 onsubmit="return emailLogin(event)">
 
             <div id="loginMessage" class="form-message"></div>
@@ -623,40 +495,7 @@
             </button>
 
           </form>
-
-          <form id="phoneLoginForm"
-                class="hide"
-                onsubmit="return verifyOTP()">
-
-            <div class="form-group">
-              <input type="tel"
-                     id="phone"
-                     placeholder="Enter Phone Number"
-                     maxlength="10"
-                     oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-            </div>
-
-            <button type="button"
-                    class="login-btn otp-btn"
-                    onclick="sendOTP()">
-              Send OTP
-            </button>
-
-            <div class="form-group" style="margin-top:15px;">
-              <input type="text"
-                     id="otp"
-                     placeholder="Enter OTP"
-                     maxlength="6"
-                     oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-            </div>
-
-            <button type="submit" class="login-btn">
-              Verify OTP & Login
-            </button>
-
-          </form>
-
-          <div class="signup">
+<div class="signup">
             New patient?
             <a href="register.html">Create account</a>
           </div>
@@ -695,46 +534,6 @@ document.addEventListener(
     }
   }
 );
-
-function showEmailLogin() {
-  document
-    .getElementById("emailLoginForm")
-    .classList.remove("hide");
-
-  document
-    .getElementById("phoneLoginForm")
-    .classList.add("hide");
-
-  document
-    .getElementById("emailTab")
-    .classList.add("active");
-
-  document
-    .getElementById("phoneTab")
-    .classList.remove("active");
-
-  clearLoginMessage();
-}
-
-function showPhoneLogin() {
-  document
-    .getElementById("phoneLoginForm")
-    .classList.remove("hide");
-
-  document
-    .getElementById("emailLoginForm")
-    .classList.add("hide");
-
-  document
-    .getElementById("phoneTab")
-    .classList.add("active");
-
-  document
-    .getElementById("emailTab")
-    .classList.remove("active");
-
-  clearLoginMessage();
-}
 
 function showLoginMessage(
   message,
@@ -1059,31 +858,6 @@ async function emailLogin(event) {
   return false;
 }
 
-function sendOTP() {
-  showLoginMessage(
-    "Phone OTP login is not available yet. Please use Email Login.",
-    "error"
-  );
-
-  showEmailLogin();
-}
-
-function verifyOTP() {
-  showLoginMessage(
-    "Phone OTP login is not available yet. Please use Email Login.",
-    "error"
-  );
-
-  showEmailLogin();
-  return false;
-}
-
-function startGoogleLogin() {
-  showLoginMessage(
-    "Google login is not available yet. Please use Email Login.",
-    "error"
-  );
-}
 </script>
 </body>
 </html>

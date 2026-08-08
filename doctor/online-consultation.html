@@ -3822,20 +3822,21 @@ async function submitReschedule() {
                 {
                     method: "PUT",
 
-                    body:
-                        JSON.stringify({
-                            newDate:
-                                newDate,
+                    
+            body:
+                JSON.stringify({
+                    consultationDate:
+                        newDate,
 
-                            newTime:
-                                normalizeApiTime(
-                                    newTime
-                                ),
+                    startTime:
+                        normalizeApiTime(
+                            newTime
+                        ),
 
-                            reason:
-                                reason ||
-                                "Rescheduled by doctor"
-                        })
+                    reason:
+                        reason ||
+                        "Rescheduled by doctor"
+                })
                 }
             );
 
