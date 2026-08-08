@@ -130,7 +130,7 @@ a{
   overflow-y:auto;
   overflow-x:hidden;
   scrollbar-width:thin;
-  scrollbar-color: #eeedeb transparent;
+  scrollbar-color:var(--gold) transparent;
 }
 
 .admin-menu::-webkit-scrollbar{
@@ -861,7 +861,10 @@ tbody tr:hover{
       Offers & Banners
     </a>
 
-    
+    <a href="admin-images.html">
+      <i class="fa-solid fa-photo-film"></i>
+      Image Management
+    </a>
 
     <a href="admin-clinic-reviews.html">
       <i class="fa-solid fa-star"></i>
@@ -912,10 +915,8 @@ tbody tr:hover{
       Notification Templates
     </a>
 
-    <a href="admin-profile.html">
-      <i class="fa-solid fa-user-gear"></i>
-      My Profile
-    </a>
+    
+    
 
   </nav>
 
@@ -1143,7 +1144,7 @@ tbody tr:hover{
 
         <div class="panel-header">
           <h2>Doctor-wise Performance</h2>
-          <p>Consultations completed and generated revenue.</p>
+          <p>Offline appointments + online consultations, completion and generated revenue.</p>
         </div>
 
         <div class="table-wrapper">
@@ -1152,7 +1153,7 @@ tbody tr:hover{
             <thead>
               <tr>
                 <th>Doctor</th>
-                <th>Appointments</th>
+                <th>Bookings</th>
                 <th>Completed</th>
                 <th>Revenue</th>
                 <th>Completion Rate</th>
@@ -1254,94 +1255,226 @@ tbody tr:hover{
 </div>
 
 <script>
-const API_BASE_URL =
-  "http://localhost:8085";
+const API_BASE_URL = "http://localhost:8085";
 
-let revenueChart;
-let revenueDistributionChart;
+let revenueChart = null;
+let revenueDistributionChart = null;
 let reportData = null;
 
-window.onload = function(){
+window.addEventListener("DOMContentLoaded", async function () {
   setDefaultDates();
-  loadReports();
-};
+  await loadReports();
+});
 
-function getToken(){
-  return localStorage.getItem("token");
-}
+/* =========================
+   AUTH / API
+========================= */
 
-function setDefaultDates(){
-  const today = new Date();
-  const firstDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    1
+function getToken() {
+  return (
+    localStorage.getItem("adminToken") ||
+    localStorage.getItem("token") ||
+    ""
   );
-
-  document.getElementById("fromDate").value =
-    toInputDate(firstDay);
-
-  document.getElementById("toDate").value =
-    toInputDate(today);
 }
 
-async function loadReports(){
+async function adminApiRequest(endpoint) {
   const token = getToken();
 
-  if(!token){
-    showAlert(
-      "Please login as admin first.",
-      "error"
-    );
+  if (!token) {
+    throw new Error("Please login as admin first.");
+  }
 
-    setTimeout(function(){
-      window.location.href =
-        "../frontend/login.html";
-    },1000);
+  const response = await fetch(
+    API_BASE_URL + endpoint,
+    {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Accept": "application/json"
+      }
+    }
+  );
+
+  let result;
+
+  try {
+    result = await response.json();
+  } catch (error) {
+    throw new Error("Invalid response from server.");
+  }
+
+  if (response.status === 401) {
+    throw new Error("Admin session expired. Please login again.");
+  }
+
+  if (response.status === 403) {
+    throw new Error(
+      result.message ||
+      "You do not have permission to view this report."
+    );
+  }
+
+  if (!response.ok || result.success === false) {
+    throw new Error(
+      result.message ||
+      "Unable to load report data."
+    );
+  }
+
+  return result;
+}
+
+function extractArray(result) {
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.data?.content)) return result.data.content;
+  if (Array.isArray(result?.content)) return result.content;
+  return [];
+}
+
+/* =========================
+   LOAD REAL DATA
+========================= */
+
+async function loadReports() {
+  const token = getToken();
+
+  if (!token) {
+    showAlert("Please login as admin first.", "error");
+
+    setTimeout(function () {
+      window.location.href = "../patient/login.html";
+    }, 1000);
 
     return;
   }
 
-  const fromDate =
-    document.getElementById("fromDate").value;
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
 
-  const toDate =
-    document.getElementById("toDate").value;
+  if (
+    fromDate &&
+    toDate &&
+    new Date(toDate + "T00:00:00") <
+      new Date(fromDate + "T00:00:00")
+  ) {
+    showAlert(
+      "To date cannot be before From date.",
+      "error"
+    );
+    return;
+  }
 
-  try{
+  setLoadingState();
+
+  try {
+    /*
+     * These are the existing APIs from your backend documentation.
+     * No /api/admin/reports/overview API is required.
+     */
+    const results = await Promise.allSettled([
+      adminApiRequest("/api/orders/getAll"),
+      adminApiRequest("/api/payments/admin/getAll"),
+      adminApiRequest("/api/appointments/admin/getAll"),
+      adminApiRequest("/api/consultations/admin/getAll"),
+      adminApiRequest("/api/daily-treatments/admin/getAll")
+    ]);
+
+    const names = [
+      "Orders",
+      "Payments",
+      "Appointments",
+      "Consultations",
+      "Daily Treatments"
+    ];
+
+    const failures = [];
+
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        failures.push(
+          `${names[index]}: ${result.reason?.message || "Failed"}`
+        );
+      }
+    });
 
     /*
-    Enable this when your backend Reports API is ready:
-
-    const response = await fetch(
-      `${API_BASE_URL}/api/admin/reports/overview?fromDate=${fromDate}&toDate=${toDate}`,
-      {
-        method:"GET",
-        headers:{
-          "Authorization":"Bearer " + token
-        }
-      }
-    );
-
-    const result = await response.json();
-
-    if(!response.ok || result.success === false){
+     * Orders, appointments, consultations and daily treatments are needed
+     * for the operational reports. Payments are needed for real revenue.
+     */
+    if (
+      results[0].status !== "fulfilled" ||
+      results[2].status !== "fulfilled" ||
+      results[3].status !== "fulfilled" ||
+      results[4].status !== "fulfilled"
+    ) {
       throw new Error(
-        result.message ||
-        "Failed to load reports."
+        failures.join(" | ") ||
+        "Required report APIs could not be loaded."
       );
     }
 
-    reportData = result.data;
-    */
+    const orders =
+      results[0].status === "fulfilled"
+        ? extractArray(results[0].value)
+        : [];
 
-    // Demo data for frontend testing.
-    reportData = getDemoReportData();
+    const payments =
+      results[1].status === "fulfilled"
+        ? extractArray(results[1].value)
+        : [];
+
+    const appointments =
+      results[2].status === "fulfilled"
+        ? extractArray(results[2].value)
+        : [];
+
+    const consultations =
+      results[3].status === "fulfilled"
+        ? extractArray(results[3].value)
+        : [];
+
+    const treatments =
+      results[4].status === "fulfilled"
+        ? extractArray(results[4].value)
+        : [];
+
+    console.log("REPORT ORDERS:", orders);
+    console.log("REPORT PAYMENTS:", payments);
+    console.log("REPORT APPOINTMENTS:", appointments);
+    console.log("REPORT CONSULTATIONS:", consultations);
+    console.log("REPORT DAILY TREATMENTS:", treatments);
+
+    reportData = buildReportData({
+      orders,
+      payments,
+      appointments,
+      consultations,
+      treatments,
+      fromDate,
+      toDate
+    });
 
     renderReports(reportData);
 
-  }catch(error){
-    console.error(error);
+    if (failures.length) {
+      showAlert(
+        "Reports loaded, but some optional data could not be loaded: " +
+          failures.join(" | "),
+        "info"
+      );
+    } else {
+      showAlert(
+        "Real-time report data loaded successfully.",
+        "success"
+      );
+    }
+
+  } catch (error) {
+    console.error("Reports loading failed:", error);
+
+    clearReportDisplay();
 
     showAlert(
       error.message ||
@@ -1351,18 +1484,696 @@ async function loadReports(){
   }
 }
 
-function applyReportFilter(){
-  const fromDate =
-    document.getElementById("fromDate").value;
+/* =========================
+   BUILD REPORT DATA
+========================= */
 
-  const toDate =
-    document.getElementById("toDate").value;
+function buildReportData({
+  orders,
+  payments,
+  appointments,
+  consultations,
+  treatments,
+  fromDate,
+  toDate
+}) {
+  const filteredOrders = orders.filter(item =>
+    isWithinPeriod(
+      firstValue(
+        item.orderDate,
+        item.createdAt,
+        item.updatedAt
+      ),
+      fromDate,
+      toDate
+    )
+  );
 
-  if(
+  const filteredPayments = payments.filter(item =>
+    isSuccessfulPayment(item) &&
+    isWithinPeriod(
+      firstValue(
+        item.paidAt,
+        item.createdAt,
+        item.updatedAt,
+        item.refundRequestedAt
+      ),
+      fromDate,
+      toDate
+    )
+  );
+
+  const filteredAppointments = appointments.filter(item =>
+    isWithinPeriod(
+      firstValue(
+        item.appointmentDate,
+        item.createdAt
+      ),
+      fromDate,
+      toDate
+    )
+  );
+
+  const filteredConsultations = consultations.filter(item =>
+    isWithinPeriod(
+      firstValue(
+        item.consultationDate,
+        item.createdAt
+      ),
+      fromDate,
+      toDate
+    )
+  );
+
+  const filteredTreatments = treatments.filter(item =>
+    isWithinPeriod(
+      firstValue(
+        item.sessionDate,
+        item.createdAt
+      ),
+      fromDate,
+      toDate
+    )
+  );
+
+  const totalRevenue = roundMoney(
+    filteredPayments.reduce(
+      (sum, payment) =>
+        sum + getNetPaymentAmount(payment),
+      0
+    )
+  );
+
+  const deliveredOrders = filteredOrders.filter(
+    item => normalizeStatus(item.status) === "DELIVERED"
+  ).length;
+
+  const completedConsultations = filteredConsultations.filter(
+    item => normalizeStatus(item.status) === "COMPLETED"
+  ).length;
+
+  const completedTherapySessions = filteredTreatments.filter(
+    item => normalizeStatus(item.status) === "COMPLETED"
+  ).length;
+
+  return {
+    summary: {
+      totalRevenue,
+      totalOrders: filteredOrders.length,
+      deliveredOrders,
+      totalConsultations: filteredConsultations.length,
+      completedConsultations,
+      totalTherapySessions: filteredTreatments.length,
+      completedTherapySessions
+    },
+
+    revenueTrend: buildRevenueTrend(
+      filteredPayments,
+      fromDate,
+      toDate
+    ),
+
+    doctorPerformance: buildDoctorPerformance(
+      filteredAppointments,
+      filteredConsultations,
+      filteredPayments
+    ),
+
+    therapistUtilization: buildTherapistUtilization(
+      filteredTreatments
+    ),
+
+    orderFulfillment: buildOrderFulfillment(
+      filteredOrders
+    ),
+
+    revenueBreakdown: buildRevenueBreakdown(
+      filteredPayments
+    ),
+
+    raw: {
+      orders: filteredOrders,
+      payments: filteredPayments,
+      appointments: filteredAppointments,
+      consultations: filteredConsultations,
+      treatments: filteredTreatments
+    }
+  };
+}
+
+/* =========================
+   REVENUE
+========================= */
+
+function isSuccessfulPayment(payment) {
+  const status = normalizeStatus(
+    firstValue(
+      payment.status,
+      payment.paymentStatus
+    )
+  );
+
+  return [
+    "SUCCESS",
+    "PAID",
+    "CAPTURED",
+    "PARTIALLY_REFUNDED"
+  ].includes(status);
+}
+
+function getNetPaymentAmount(payment) {
+  const amount = numberValue(payment.amount);
+  const refundedAmount = numberValue(payment.refundedAmount);
+
+  return Math.max(
+    0,
+    amount - refundedAmount
+  );
+}
+
+function getPaymentCategory(payment) {
+  const type = normalizeStatus(
+    firstValue(
+      payment.paymentType,
+      payment.type
+    )
+  );
+
+  if (type === "ORDER") {
+    return "Products";
+  }
+
+  if (
+    type === "CONSULTATION" ||
+    type === "APPOINTMENT"
+  ) {
+    return "Consultations";
+  }
+
+  if (
+    type === "THERAPY" ||
+    type === "TREATMENT" ||
+    type === "DAILY_TREATMENT"
+  ) {
+    return "Therapies";
+  }
+
+  return "Other";
+}
+
+function buildRevenueBreakdown(payments) {
+  const categories = new Map([
+    ["Consultations", { transactions: 0, revenue: 0 }],
+    ["Therapies", { transactions: 0, revenue: 0 }],
+    ["Products", { transactions: 0, revenue: 0 }]
+  ]);
+
+  let otherTransactions = 0;
+  let otherRevenue = 0;
+
+  payments.forEach(payment => {
+    const category = getPaymentCategory(payment);
+    const amount = getNetPaymentAmount(payment);
+
+    if (categories.has(category)) {
+      const value = categories.get(category);
+      value.transactions += 1;
+      value.revenue += amount;
+    } else {
+      otherTransactions += 1;
+      otherRevenue += amount;
+    }
+  });
+
+  if (otherTransactions > 0 || otherRevenue > 0) {
+    categories.set("Other", {
+      transactions: otherTransactions,
+      revenue: otherRevenue
+    });
+  }
+
+  const total = [...categories.values()].reduce(
+    (sum, item) => sum + item.revenue,
+    0
+  );
+
+  return [...categories.entries()].map(
+    ([category, item]) => ({
+      category,
+      transactions: item.transactions,
+      revenue: roundMoney(item.revenue),
+      share:
+        total > 0
+          ? roundPercent(
+              (item.revenue / total) * 100
+            )
+          : 0
+    })
+  );
+}
+
+function buildRevenueTrend(payments, fromDate, toDate) {
+  const buckets = createDateBuckets(fromDate, toDate);
+
+  payments.forEach(payment => {
+    const dateValue = firstValue(
+      payment.paidAt,
+      payment.createdAt,
+      payment.updatedAt
+    );
+
+    const dateKey = toDateKey(dateValue);
+
+    if (!dateKey) {
+      return;
+    }
+
+    const bucket = buckets.find(
+      item =>
+        dateKey >= item.start &&
+        dateKey <= item.end
+    );
+
+    if (!bucket) {
+      return;
+    }
+
+    const category = getPaymentCategory(payment);
+    const amount = getNetPaymentAmount(payment);
+
+    if (category === "Consultations") {
+      bucket.consultation += amount;
+    } else if (category === "Therapies") {
+      bucket.therapy += amount;
+    } else if (category === "Products") {
+      bucket.products += amount;
+    }
+  });
+
+  return buckets.map(item => ({
+    label: item.label,
+    consultation: roundMoney(item.consultation),
+    therapy: roundMoney(item.therapy),
+    products: roundMoney(item.products)
+  }));
+}
+
+function createDateBuckets(fromDate, toDate) {
+  const start = parseDateOnly(fromDate);
+  const end = parseDateOnly(toDate);
+
+  if (!start || !end) {
+    return [];
+  }
+
+  const dayCount = Math.floor(
+    (end - start) / 86400000
+  ) + 1;
+
+  /* Up to 14 days: one point per day. */
+  if (dayCount <= 14) {
+    const buckets = [];
+
+    for (let i = 0; i < dayCount; i++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+
+      const key = toInputDate(date);
+
+      buckets.push({
+        start: key,
+        end: key,
+        label: date.toLocaleDateString(
+          "en-IN",
+          {
+            day: "2-digit",
+            month: "short"
+          }
+        ),
+        consultation: 0,
+        therapy: 0,
+        products: 0
+      });
+    }
+
+    return buckets;
+  }
+
+  /* Longer periods: weekly buckets. */
+  const buckets = [];
+  let cursor = new Date(start);
+  let weekNumber = 1;
+
+  while (cursor <= end) {
+    const bucketStart = new Date(cursor);
+    const bucketEnd = new Date(cursor);
+
+    bucketEnd.setDate(
+      bucketEnd.getDate() + 6
+    );
+
+    if (bucketEnd > end) {
+      bucketEnd.setTime(end.getTime());
+    }
+
+    buckets.push({
+      start: toInputDate(bucketStart),
+      end: toInputDate(bucketEnd),
+      label:
+        `Week ${weekNumber} (${bucketStart.toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short"
+        })})`,
+      consultation: 0,
+      therapy: 0,
+      products: 0
+    });
+
+    cursor.setDate(
+      cursor.getDate() + 7
+    );
+
+    weekNumber += 1;
+  }
+
+  return buckets;
+}
+
+/* =========================
+   DOCTOR PERFORMANCE
+========================= */
+
+function buildDoctorPerformance(
+  appointments,
+  consultations,
+  payments
+) {
+  const doctors = new Map();
+
+  function ensureDoctor(id, name) {
+    const key =
+      id !== null &&
+      id !== undefined &&
+      id !== ""
+        ? String(id)
+        : String(name || "Unknown Doctor");
+
+    if (!doctors.has(key)) {
+      doctors.set(key, {
+        doctorId: id ?? null,
+        doctorName: name || "Unknown Doctor",
+        appointments: 0,
+        completed: 0,
+        revenue: 0
+      });
+    }
+
+    return doctors.get(key);
+  }
+
+  appointments.forEach(item => {
+    const doctor = ensureDoctor(
+      firstValue(
+        item.doctorId,
+        item.doctor?.id
+      ),
+      firstValue(
+        item.doctorName,
+        item.doctor?.name
+      )
+    );
+
+    doctor.appointments += 1;
+
+    if (normalizeStatus(item.status) === "COMPLETED") {
+      doctor.completed += 1;
+    }
+  });
+
+  consultations.forEach(item => {
+    const doctor = ensureDoctor(
+      firstValue(
+        item.doctorId,
+        item.doctor?.id
+      ),
+      firstValue(
+        item.doctorName,
+        item.doctor?.name
+      )
+    );
+
+    /* Existing table column is named Appointments. Here it represents
+       total doctor bookings: offline appointments + online consultations. */
+    doctor.appointments += 1;
+
+    if (normalizeStatus(item.status) === "COMPLETED") {
+      doctor.completed += 1;
+    }
+  });
+
+  const appointmentById = new Map(
+    appointments
+      .filter(item => item.id !== null && item.id !== undefined)
+      .map(item => [String(item.id), item])
+  );
+
+  const consultationById = new Map(
+    consultations
+      .filter(item => item.id !== null && item.id !== undefined)
+      .map(item => [String(item.id), item])
+  );
+
+  payments.forEach(payment => {
+    const type = normalizeStatus(payment.paymentType);
+    const referenceId = firstValue(
+      payment.referenceId,
+      payment.appointmentId,
+      payment.consultationId
+    );
+
+    if (referenceId === null || referenceId === undefined) {
+      return;
+    }
+
+    let source = null;
+
+    if (type === "APPOINTMENT") {
+      source = appointmentById.get(
+        String(referenceId)
+      );
+    } else if (type === "CONSULTATION") {
+      source = consultationById.get(
+        String(referenceId)
+      );
+    }
+
+    if (!source) {
+      return;
+    }
+
+    const doctor = ensureDoctor(
+      firstValue(
+        source.doctorId,
+        source.doctor?.id
+      ),
+      firstValue(
+        source.doctorName,
+        source.doctor?.name
+      )
+    );
+
+    doctor.revenue += getNetPaymentAmount(payment);
+  });
+
+  return [...doctors.values()]
+    .map(item => ({
+      doctorName: item.doctorName,
+      appointments: item.appointments,
+      completed: item.completed,
+      revenue: roundMoney(item.revenue),
+      completionRate:
+        item.appointments > 0
+          ? roundPercent(
+              (item.completed / item.appointments) * 100
+            )
+          : 0
+    }))
+    .sort(
+      (a, b) =>
+        b.appointments - a.appointments ||
+        b.revenue - a.revenue
+    );
+}
+
+/* =========================
+   THERAPIST UTILIZATION
+========================= */
+
+function buildTherapistUtilization(treatments) {
+  const therapists = new Map();
+
+  treatments.forEach(item => {
+    const therapistId = firstValue(
+      item.therapistId,
+      item.therapist?.id
+    );
+
+    const therapistName = firstValue(
+      item.therapistName,
+      item.therapist?.name,
+      "Unknown Therapist"
+    );
+
+    const key =
+      therapistId !== null &&
+      therapistId !== undefined
+        ? String(therapistId)
+        : String(therapistName);
+
+    if (!therapists.has(key)) {
+      therapists.set(key, {
+        therapistName,
+        scheduled: 0,
+        completed: 0,
+        missed: 0
+      });
+    }
+
+    const data = therapists.get(key);
+    const status = normalizeStatus(item.status);
+
+    data.scheduled += 1;
+
+    if (status === "COMPLETED") {
+      data.completed += 1;
+    }
+
+    if (status === "MISSED") {
+      data.missed += 1;
+    }
+  });
+
+  return [...therapists.values()]
+    .map(item => ({
+      ...item,
+      utilization:
+        item.scheduled > 0
+          ? roundPercent(
+              (item.completed / item.scheduled) * 100
+            )
+          : 0
+    }))
+    .sort(
+      (a, b) =>
+        b.scheduled - a.scheduled
+    );
+}
+
+/* =========================
+   ORDER FULFILLMENT
+========================= */
+
+function buildOrderFulfillment(orders) {
+  const statusMap = new Map();
+
+  orders.forEach(order => {
+    const status = normalizeStatus(
+      order.status || "UNKNOWN"
+    );
+
+    if (!statusMap.has(status)) {
+      statusMap.set(status, {
+        count: 0,
+        durations: []
+      });
+    }
+
+    const value = statusMap.get(status);
+    value.count += 1;
+
+    const duration = calculateDurationHours(
+      firstValue(
+        order.orderDate,
+        order.createdAt
+      ),
+      order.updatedAt
+    );
+
+    if (duration !== null) {
+      value.durations.push(duration);
+    }
+  });
+
+  const preferredOrder = [
+    "PENDING_PAYMENT",
+    "PAYMENT_FAILED",
+    "PAID",
+    "CONFIRMED",
+    "PROCESSING",
+    "PACKED",
+    "SHIPMENT_CREATED",
+    "SHIPPED",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+    "CANCELLED",
+    "RETURNED",
+    "REFUNDED"
+  ];
+
+  const statuses = [...statusMap.keys()].sort(
+    (a, b) => {
+      const ai = preferredOrder.indexOf(a);
+      const bi = preferredOrder.indexOf(b);
+
+      return (
+        (ai === -1 ? 999 : ai) -
+        (bi === -1 ? 999 : bi)
+      );
+    }
+  );
+
+  return statuses.map(status => {
+    const value = statusMap.get(status);
+
+    const averageHours =
+      value.durations.length > 0
+        ? value.durations.reduce(
+            (sum, hours) => sum + hours,
+            0
+          ) / value.durations.length
+        : null;
+
+    return {
+      status: formatStatus(status),
+      orders: value.count,
+      percentage:
+        orders.length > 0
+          ? roundPercent(
+              (value.count / orders.length) * 100
+            )
+          : 0,
+      averageTime:
+        averageHours === null
+          ? "-"
+          : formatDuration(averageHours)
+    };
+  });
+}
+
+/* =========================
+   FILTER / RENDER
+========================= */
+
+function applyReportFilter() {
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
+
+  if (
     fromDate &&
     toDate &&
-    new Date(toDate) < new Date(fromDate)
-  ){
+    new Date(toDate + "T00:00:00") <
+      new Date(fromDate + "T00:00:00")
+  ) {
     showAlert(
       "To date cannot be before From date.",
       "error"
@@ -1373,7 +2184,7 @@ function applyReportFilter(){
   loadReports();
 }
 
-function renderReports(data){
+function renderReports(data) {
   setText(
     "totalRevenue",
     formatCurrency(data.summary.totalRevenue)
@@ -1409,130 +2220,120 @@ function renderReports(data){
     `${data.summary.completedTherapySessions} completed`
   );
 
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
+
+  setText(
+    "revenuePeriod",
+    fromDate && toDate
+      ? `${formatSimpleDate(fromDate)} - ${formatSimpleDate(toDate)}`
+      : "Selected period"
+  );
+
   renderRevenueChart(data.revenueTrend);
-  renderRevenueDistributionChart(
-    data.revenueBreakdown
-  );
-
-  renderDoctorReport(
-    data.doctorPerformance
-  );
-
-  renderTherapistReport(
-    data.therapistUtilization
-  );
-
-  renderOrderReport(
-    data.orderFulfillment
-  );
-
-  renderRevenueReport(
-    data.revenueBreakdown
-  );
+  renderRevenueDistributionChart(data.revenueBreakdown);
+  renderDoctorReport(data.doctorPerformance);
+  renderTherapistReport(data.therapistUtilization);
+  renderOrderReport(data.orderFulfillment);
+  renderRevenueReport(data.revenueBreakdown);
 }
 
-function renderRevenueChart(data){
-  const context =
-    document.getElementById(
-      "revenueChart"
-    );
+function renderRevenueChart(data) {
+  const context = document.getElementById("revenueChart");
 
-  if(revenueChart){
+  if (revenueChart) {
     revenueChart.destroy();
   }
 
-  revenueChart = new Chart(
-    context,
-    {
-      type:"line",
-      data:{
-        labels:data.map(item => item.label),
-        datasets:[
-          {
-            label:"Consultation",
-            data:data.map(item => item.consultation),
-            borderWidth:2,
-            tension:.35
-          },
-          {
-            label:"Therapy",
-            data:data.map(item => item.therapy),
-            borderWidth:2,
-            tension:.35
-          },
-          {
-            label:"Products",
-            data:data.map(item => item.products),
-            borderWidth:2,
-            tension:.35
-          }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{
-          legend:{
-            position:"bottom"
-          }
+  revenueChart = new Chart(context, {
+    type: "line",
+    data: {
+      labels: data.map(item => item.label),
+      datasets: [
+        {
+          label: "Consultations",
+          data: data.map(item => item.consultation),
+          borderWidth: 2,
+          tension: .35
         },
-        scales:{
-          y:{
-            beginAtZero:true,
-            ticks:{
-              callback:value =>
-                "₹" +
-                Number(value).toLocaleString("en-IN")
-            }
+        {
+          label: "Therapies",
+          data: data.map(item => item.therapy),
+          borderWidth: 2,
+          tension: .35
+        },
+        {
+          label: "Products",
+          data: data.map(item => item.products),
+          borderWidth: 2,
+          tension: .35
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value =>
+              "₹" + Number(value).toLocaleString("en-IN")
           }
         }
       }
     }
-  );
+  });
 }
 
-function renderRevenueDistributionChart(data){
-  const context =
-    document.getElementById(
-      "revenueDistributionChart"
-    );
+function renderRevenueDistributionChart(data) {
+  const context = document.getElementById("revenueDistributionChart");
 
-  if(revenueDistributionChart){
+  if (revenueDistributionChart) {
     revenueDistributionChart.destroy();
   }
 
-  revenueDistributionChart = new Chart(
-    context,
-    {
-      type:"doughnut",
-      data:{
-        labels:data.map(item => item.category),
-        datasets:[
-          {
-            data:data.map(item => item.revenue)
-          }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{
-          legend:{
-            position:"bottom"
-          }
+  revenueDistributionChart = new Chart(context, {
+    type: "doughnut",
+    data: {
+      labels: data.map(item => item.category),
+      datasets: [
+        {
+          data: data.map(item => item.revenue)
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom"
         }
       }
     }
-  );
+  });
 }
 
-function renderDoctorReport(list){
-  const table =
-    document.getElementById(
-      "doctorReportTable"
-    );
-
+function renderDoctorReport(list) {
+  const table = document.getElementById("doctorReportTable");
   table.innerHTML = "";
+
+  if (!list.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center; color:#6e7871;">
+          No doctor activity found for this period.
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   list.forEach(item => {
     table.insertAdjacentHTML(
@@ -1554,13 +2355,20 @@ function renderDoctorReport(list){
   });
 }
 
-function renderTherapistReport(list){
-  const table =
-    document.getElementById(
-      "therapistReportTable"
-    );
-
+function renderTherapistReport(list) {
+  const table = document.getElementById("therapistReportTable");
   table.innerHTML = "";
+
+  if (!list.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center; color:#6e7871;">
+          No therapy sessions found for this period.
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   list.forEach(item => {
     table.insertAdjacentHTML(
@@ -1582,13 +2390,20 @@ function renderTherapistReport(list){
   });
 }
 
-function renderOrderReport(list){
-  const table =
-    document.getElementById(
-      "orderReportTable"
-    );
-
+function renderOrderReport(list) {
+  const table = document.getElementById("orderReportTable");
   table.innerHTML = "";
+
+  if (!list.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; color:#6e7871;">
+          No orders found for this period.
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   list.forEach(item => {
     table.insertAdjacentHTML(
@@ -1605,12 +2420,8 @@ function renderOrderReport(list){
   });
 }
 
-function renderRevenueReport(list){
-  const table =
-    document.getElementById(
-      "revenueReportTable"
-    );
-
+function renderRevenueReport(list) {
+  const table = document.getElementById("revenueReportTable");
   table.innerHTML = "";
 
   list.forEach(item => {
@@ -1628,8 +2439,52 @@ function renderRevenueReport(list){
   });
 }
 
-function exportReport(){
-  if(!reportData){
+function setLoadingState() {
+  setText("totalRevenue", "Loading...");
+  setText("totalOrders", "...");
+  setText("deliveredOrders", "Loading...");
+  setText("totalConsultations", "...");
+  setText("completedConsultations", "Loading...");
+  setText("totalTherapySessions", "...");
+  setText("completedTherapySessions", "Loading...");
+}
+
+function clearReportDisplay() {
+  setText("totalRevenue", "₹0");
+  setText("totalOrders", "0");
+  setText("deliveredOrders", "0 delivered");
+  setText("totalConsultations", "0");
+  setText("completedConsultations", "0 completed");
+  setText("totalTherapySessions", "0");
+  setText("completedTherapySessions", "0 completed");
+
+  [
+    "doctorReportTable",
+    "therapistReportTable",
+    "orderReportTable",
+    "revenueReportTable"
+  ].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.innerHTML = "";
+  });
+
+  if (revenueChart) {
+    revenueChart.destroy();
+    revenueChart = null;
+  }
+
+  if (revenueDistributionChart) {
+    revenueDistributionChart.destroy();
+    revenueDistributionChart = null;
+  }
+}
+
+/* =========================
+   EXPORT
+========================= */
+
+function exportReport() {
+  if (!reportData) {
     showAlert(
       "No report data available.",
       "error"
@@ -1639,17 +2494,47 @@ function exportReport(){
 
   const rows = [
     ["Neolife Reports & Analytics"],
+    [
+      "Period",
+      `${document.getElementById("fromDate").value} to ${document.getElementById("toDate").value}`
+    ],
     [],
-    ["Metric","Value"],
-    ["Total Revenue",reportData.summary.totalRevenue],
-    ["Total Orders",reportData.summary.totalOrders],
-    ["Delivered Orders",reportData.summary.deliveredOrders],
-    ["Consultations",reportData.summary.totalConsultations],
-    ["Completed Consultations",reportData.summary.completedConsultations],
-    ["Therapy Sessions",reportData.summary.totalTherapySessions],
-    ["Completed Therapy Sessions",reportData.summary.completedTherapySessions],
+    ["Metric", "Value"],
+    ["Total Revenue", reportData.summary.totalRevenue],
+    ["Total Orders", reportData.summary.totalOrders],
+    ["Delivered Orders", reportData.summary.deliveredOrders],
+    ["Consultations", reportData.summary.totalConsultations],
+    ["Completed Consultations", reportData.summary.completedConsultations],
+    ["Therapy Sessions", reportData.summary.totalTherapySessions],
+    ["Completed Therapy Sessions", reportData.summary.completedTherapySessions],
     [],
-    ["Revenue Category","Transactions","Revenue","Share"],
+    ["Doctor", "Bookings", "Completed", "Revenue", "Completion Rate"],
+    ...reportData.doctorPerformance.map(item => [
+      item.doctorName,
+      item.appointments,
+      item.completed,
+      item.revenue,
+      item.completionRate + "%"
+    ]),
+    [],
+    ["Therapist", "Scheduled", "Completed", "Missed", "Utilization"],
+    ...reportData.therapistUtilization.map(item => [
+      item.therapistName,
+      item.scheduled,
+      item.completed,
+      item.missed,
+      item.utilization + "%"
+    ]),
+    [],
+    ["Order Status", "Orders", "Percentage", "Average Processing"],
+    ...reportData.orderFulfillment.map(item => [
+      item.status,
+      item.orders,
+      item.percentage + "%",
+      item.averageTime
+    ]),
+    [],
+    ["Revenue Category", "Transactions", "Revenue", "Share"],
     ...reportData.revenueBreakdown.map(item => [
       item.category,
       item.transactions,
@@ -1662,26 +2547,21 @@ function exportReport(){
     .map(row =>
       row
         .map(value =>
-          `"${String(value ?? "")
-            .replaceAll('"','""')}"`
+          `"${String(value ?? "").replaceAll('"', '""')}"`
         )
         .join(",")
     )
     .join("\n");
 
-  const blob =
-    new Blob(
-      [csv],
-      {
-        type:"text/csv;charset=utf-8;"
-      }
-    );
+  const blob = new Blob(
+    ["\ufeff" + csv],
+    {
+      type: "text/csv;charset=utf-8;"
+    }
+  );
 
-  const url =
-    URL.createObjectURL(blob);
-
-  const link =
-    document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
   link.href = url;
   link.download =
@@ -1699,214 +2579,233 @@ function exportReport(){
   );
 }
 
-function getDemoReportData(){
-  return {
-    summary:{
-      totalRevenue:284500,
-      totalOrders:146,
-      deliveredOrders:112,
-      totalConsultations:218,
-      completedConsultations:194,
-      totalTherapySessions:312,
-      completedTherapySessions:279
-    },
+/* =========================
+   DATE / CALCULATION HELPERS
+========================= */
 
-    revenueTrend:[
-      {
-        label:"Week 1",
-        consultation:22000,
-        therapy:34000,
-        products:18000
-      },
-      {
-        label:"Week 2",
-        consultation:28000,
-        therapy:39000,
-        products:24000
-      },
-      {
-        label:"Week 3",
-        consultation:31000,
-        therapy:42000,
-        products:27000
-      },
-      {
-        label:"Week 4",
-        consultation:26000,
-        therapy:36000,
-        products:23500
-      }
-    ],
+function setDefaultDates() {
+  const today = new Date();
+  const firstDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
 
-    doctorPerformance:[
-      {
-        doctorName:"Dr. N. G. Muraleedhara",
-        appointments:84,
-        completed:78,
-        revenue:78000,
-        completionRate:93
-      },
-      {
-        doctorName:"Dr. Aditi",
-        appointments:56,
-        completed:50,
-        revenue:50000,
-        completionRate:89
-      },
-      {
-        doctorName:"Dr. Sibagath Ulla",
-        appointments:42,
-        completed:36,
-        revenue:36000,
-        completionRate:86
-      }
-    ],
+  document.getElementById("fromDate").value =
+    toInputDate(firstDay);
 
-    therapistUtilization:[
-      {
-        therapistName:"Therapist 1",
-        scheduled:88,
-        completed:81,
-        missed:7,
-        utilization:92
-      },
-      {
-        therapistName:"Therapist 2",
-        scheduled:74,
-        completed:66,
-        missed:8,
-        utilization:89
-      },
-      {
-        therapistName:"Therapist 3",
-        scheduled:61,
-        completed:52,
-        missed:9,
-        utilization:85
-      }
-    ],
-
-    orderFulfillment:[
-      {
-        status:"Pending Payment",
-        orders:18,
-        percentage:12,
-        averageTime:"-"
-      },
-      {
-        status:"Processing",
-        orders:10,
-        percentage:7,
-        averageTime:"8 hours"
-      },
-      {
-        status:"Shipped",
-        orders:6,
-        percentage:4,
-        averageTime:"1.2 days"
-      },
-      {
-        status:"Delivered",
-        orders:112,
-        percentage:77,
-        averageTime:"3.4 days"
-      }
-    ],
-
-    revenueBreakdown:[
-      {
-        category:"Consultations",
-        transactions:218,
-        revenue:87000,
-        share:31
-      },
-      {
-        category:"Therapies",
-        transactions:312,
-        revenue:151000,
-        share:53
-      },
-      {
-        category:"Products",
-        transactions:146,
-        revenue:46500,
-        share:16
-      }
-    ]
-  };
+  document.getElementById("toDate").value =
+    toInputDate(today);
 }
 
-function toInputDate(date){
+function isWithinPeriod(value, fromDate, toDate) {
+  if (!value) {
+    return false;
+  }
+
+  const key = toDateKey(value);
+
+  if (!key) {
+    return false;
+  }
+
+  if (fromDate && key < fromDate) {
+    return false;
+  }
+
+  if (toDate && key > toDate) {
+    return false;
+  }
+
+  return true;
+}
+
+function toDateKey(value) {
+  if (!value) {
+    return null;
+  }
+
+  const text = String(value).trim();
+
+  const directMatch = text.match(/^\d{4}-\d{2}-\d{2}/);
+
+  if (directMatch) {
+    return directMatch[0];
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return toInputDate(date);
+}
+
+function parseDateOnly(value) {
+  if (!value) return null;
+
+  const date = new Date(value + "T00:00:00");
+
+  return Number.isNaN(date.getTime())
+    ? null
+    : date;
+}
+
+function toInputDate(date) {
   const year = date.getFullYear();
-  const month =
-    String(date.getMonth() + 1)
-      .padStart(2,"0");
-  const day =
-    String(date.getDate())
-      .padStart(2,"0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
 
-function formatCurrency(value){
+function formatSimpleDate(value) {
+  if (!value) return "-";
+
+  const date = parseDateOnly(value);
+
+  if (!date) return value;
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }
+  );
+}
+
+function calculateDurationHours(startValue, endValue) {
+  if (!startValue || !endValue) {
+    return null;
+  }
+
+  const start = new Date(startValue);
+  const end = new Date(endValue);
+
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime()) ||
+    end < start
+  ) {
+    return null;
+  }
+
+  return (
+    end.getTime() -
+    start.getTime()
+  ) / 3600000;
+}
+
+function formatDuration(hours) {
+  if (!Number.isFinite(hours)) {
+    return "-";
+  }
+
+  if (hours < 24) {
+    return `${roundPercent(hours)} hours`;
+  }
+
+  return `${roundPercent(hours / 24)} days`;
+}
+
+function firstValue(...values) {
+  for (const value of values) {
+    if (
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== ""
+    ) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function numberValue(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function normalizeStatus(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replaceAll(" ", "_");
+}
+
+function roundMoney(value) {
+  return Math.round(
+    (Number(value || 0) + Number.EPSILON) * 100
+  ) / 100;
+}
+
+function roundPercent(value) {
+  return Math.round(
+    (Number(value || 0) + Number.EPSILON) * 10
+  ) / 10;
+}
+
+function formatCurrency(value) {
   return "₹" +
-    Number(value || 0)
-      .toLocaleString(
-        "en-IN",
-        {
-          minimumFractionDigits:0,
-          maximumFractionDigits:2
-        }
-      );
+    Number(value || 0).toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }
+    );
 }
 
-function toggleSidebar(){
-  document.getElementById(
-    "adminSidebar"
-  ).classList.toggle("open");
-
-  document.getElementById(
-    "sidebarOverlay"
-  ).classList.toggle("show");
+function formatStatus(value) {
+  return String(value || "-")
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(
+      /\b\w/g,
+      character => character.toUpperCase()
+    );
 }
 
-function closeSidebar(){
-  document.getElementById(
-    "adminSidebar"
-  ).classList.remove("open");
+/* =========================
+   UI HELPERS
+========================= */
 
-  document.getElementById(
-    "sidebarOverlay"
-  ).classList.remove("show");
+function toggleSidebar() {
+  document.getElementById("adminSidebar").classList.toggle("open");
+  document.getElementById("sidebarOverlay").classList.toggle("show");
 }
 
-function logoutAdmin(){
+function closeSidebar() {
+  document.getElementById("adminSidebar").classList.remove("open");
+  document.getElementById("sidebarOverlay").classList.remove("show");
+}
+
+function logoutAdmin() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("adminRefreshToken");
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("role");
   localStorage.removeItem("userId");
 
-  window.location.href =
-    "../patient/login.html";
+  window.location.href = "../patient/login.html";
 }
 
-function showAlert(message,type){
-  const box =
-    document.getElementById("pageAlert");
+function showAlert(message, type) {
+  const box = document.getElementById("pageAlert");
+  const icon = document.getElementById("alertIcon");
+  const text = document.getElementById("alertMessage");
 
-  const icon =
-    document.getElementById("alertIcon");
-
-  const text =
-    document.getElementById("alertMessage");
-
-  if(!box || !icon || !text){
+  if (!box || !icon || !text) {
     return;
   }
 
   text.textContent = message;
-  box.className =
-    `page-alert show ${type}`;
+  box.className = `page-alert show ${type}`;
 
   icon.className =
     type === "success"
@@ -1915,39 +2814,35 @@ function showAlert(message,type){
         ? "fa-solid fa-circle-exclamation"
         : "fa-solid fa-circle-info";
 
-  clearTimeout(
-    window.reportAlertTimer
-  );
+  clearTimeout(window.reportAlertTimer);
 
-  window.reportAlertTimer =
-    setTimeout(function(){
+  window.reportAlertTimer = setTimeout(
+    function () {
       box.classList.remove("show");
-    },4000);
+    },
+    4500
+  );
 }
 
-function setText(id,value){
-  const element =
-    document.getElementById(id);
+function setText(id, value) {
+  const element = document.getElementById(id);
 
-  if(element){
+  if (element) {
     element.textContent = value;
   }
 }
 
-function escapeHtml(value){
-  if(
-    value === null ||
-    value === undefined
-  ){
+function escapeHtml(value) {
+  if (value === null || value === undefined) {
     return "";
   }
 
   return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 </script>
 

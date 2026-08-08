@@ -1561,11 +1561,7 @@
                     Notification Templates
                 </a>
 
-                <a href="admin-profile.html">
-                    <i class="fa-solid fa-user-gear"></i>
-                    My Profile
-                </a>
-
+                
             </nav>
 
             <div class="sidebar-footer">
@@ -1878,7 +1874,7 @@
                                     <th>Staff Member</th>
                                     <th>Department</th>
                                     <th>Designation</th>
-                                    <th>Qualification</th>
+                                    
                                     <th>Phone</th>
                                     <th>Joined On</th>
                                     <th>Status</th>
@@ -2779,11 +2775,7 @@
                                 )}
                             </td>
 
-                            <td>
-                                ${escapeHtml(
-                                    staff.qualification
-                                )}
-                            </td>
+                            
 
                             <td>
                                 ${escapeHtml(
@@ -2826,32 +2818,7 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        class="action-button edit-button"
-                                        onclick="editStaff('${staff.id}')"
-                                        title="Edit staff"
-                                    >
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button toggle-button"
-                                        onclick="toggleStaffStatus('${staff.id}')"
-                                        title="Activate or deactivate"
-                                    >
-                                        <i class="fa-solid fa-power-off"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="action-button delete-button"
-                                        onclick="openDeleteModal('${staff.id}')"
-                                        title="Remove staff"
-                                    >
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
+                                    
 
                                 </div>
 

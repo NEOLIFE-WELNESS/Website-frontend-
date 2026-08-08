@@ -1028,11 +1028,7 @@
                     Notification Templates
                 </a>
 
-                <a href="admin-profile.html">
-                    <i class="fa-solid fa-user-gear"></i>
-                    My Profile
-                </a>
-
+               
             </nav>
 
             <div class="sidebar-footer">
@@ -1211,7 +1207,7 @@
                                     <th>Specialization</th>
                                     <th>Experience</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    
                                 </tr>
                             </thead>
 
@@ -1594,27 +1590,7 @@ function displayDoctors(doctors){
                     </span>
                 </td>
 
-                <td>
-                    <div class="action-buttons">
-                        <button
-                            type="button"
-                            class="action-btn edit-btn"
-                            onclick="editDoctor(${doctor.id})"
-                            title="Edit doctor"
-                        >
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-
-                        <button
-                            type="button"
-                            class="action-btn delete-btn"
-                            onclick="deleteDoctor(${doctor.id})"
-                            title="Delete doctor"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
+                
             </tr>
         `;
     });
@@ -1722,51 +1698,6 @@ async function readApiResponse(response){
     }
 }
 
-async function editDoctor(id){
-    const token = localStorage.getItem("token");
-
-    if(!token){
-        alert("Please login as Admin.");
-        return;
-    }
-
-    try{
-        const response = await fetch(`${API_BASE_URL}/api/doctors/${id}/get`, {
-            method:"GET",
-            headers:{
-                "Authorization":"Bearer " + token,
-                "Accept":"application/json"
-            }
-        });
-
-        const result = await readApiResponse(response);
-
-        if(!response.ok || result.success === false){
-            throw new Error(result.message || "Unable to fetch doctor details.");
-        }
-
-        const doctor = result.data || {};
-        currentDoctorId = Number(id);
-
-        document.getElementById("editName").value = doctor.name || "";
-        document.getElementById("editQualification").value = doctor.qualification || "";
-        document.getElementById("editSpecialization").value = doctor.specialization || "";
-        document.getElementById("editExperience").value = doctor.experience ?? "";
-        document.getElementById("editAbout").value = doctor.about || "";
-        document.getElementById("editPhoneNumber").value = doctor.phoneNumber || "";
-        document.getElementById("editDoctorEmail").value = doctor.email || "";
-        document.getElementById("editImageUrl").value = doctor.imageUrl || "";
-        document.getElementById("editConsultationType").value =
-            doctor.consultationType || "BOTH";
-        document.getElementById("editActive").value = doctor.active === false ? "false" : "true";
-
-        document.getElementById("editDoctorModal").style.display = "block";
-
-    }catch(error){
-        console.error("EDIT DOCTOR LOAD ERROR:", error);
-        alert(error.message || "Unable to open doctor details.");
-    }
-}
 
 function closeEditModal(){
     const modal = document.getElementById("editDoctorModal");
@@ -1854,41 +1785,7 @@ async function updateDoctor(){
     }
 }
 
-async function deleteDoctor(id){
-    const token = localStorage.getItem("token");
 
-    if(!token){
-        alert("Please login as Admin.");
-        return;
-    }
-
-    if(!confirm("Are you sure you want to remove this doctor?")){
-        return;
-    }
-
-    try{
-        const response = await fetch(`${API_BASE_URL}/api/doctors/remove/${id}`, {
-            method:"DELETE",
-            headers:{
-                "Authorization":"Bearer " + token,
-                "Accept":"application/json"
-            }
-        });
-
-        const result = await readApiResponse(response);
-
-        if(!response.ok || result.success === false){
-            throw new Error(result.message || "Failed to remove doctor.");
-        }
-
-        alert(result.message || "Doctor removed successfully.");
-        await loadDoctors();
-
-    }catch(error){
-        console.error("DELETE DOCTOR ERROR:", error);
-        alert(error.message || "Failed to remove doctor.");
-    }
-}
 
 function clearAddDoctorForm(){
     [

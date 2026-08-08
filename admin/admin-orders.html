@@ -1063,8 +1063,13 @@ function displayOrders(orders){
     table.innerHTML += `
       <tr>
         <td>#${order.orderNumber || order.id}</td>
-        <td>User ${order.userId || "-"}</td>
-        <td>-</td>
+        <td>
+  ${order.userName || order.customerName || order.name || ("User " + (order.userId || "-"))}
+</td>
+
+<td>
+  ${order.phoneNumber || order.customerPhone || order.phone || "-"}
+</td>
         <td>${productName}</td>
         <td>${qty}</td>
         <td>₹${order.totalAmount || 0}</td>
@@ -1123,8 +1128,17 @@ function viewOrder(id){
     : "-";
 
   document.getElementById("mOrderId").innerText = order.orderNumber || order.id;
-  document.getElementById("mCustomer").innerText = "User " + (order.userId || "-");
-  document.getElementById("mPhone").innerText = "-";
+  document.getElementById("mCustomer").innerText =
+  order.userName ||
+  order.customerName ||
+  order.name ||
+  ("User " + (order.userId || "-"));
+
+document.getElementById("mPhone").innerText =
+  order.phoneNumber ||
+  order.customerPhone ||
+  order.phone ||
+  "-";
   document.getElementById("mProduct").innerText = productText;
   document.getElementById("mQty").innerText = qtyText;
   document.getElementById("mTotal").innerText = "₹" + (order.totalAmount || 0);
