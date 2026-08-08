@@ -1367,6 +1367,7 @@ textarea.form-control{
 
 <script>
 const API_BASE_URL = "http://localhost:8085";
+<<<<<<< Updated upstream
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -1784,6 +1785,75 @@ function escapeHtml(value){
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+=======
+
+document.getElementById("productForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login as admin first");
+    window.location.href = "../pages/login.html";
+    return;
+  }
+
+  const imageFile = document.getElementById("productImage").files[0];
+
+  const product = {
+    name: document.getElementById("name").value.trim(),
+    category: document.getElementById("category").value,
+    productCode: document.getElementById("productNo").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    price: Number(document.getElementById("price").value),
+    stock: Number(document.getElementById("stock").value),
+    netQty: document.getElementById("netQty").value.trim(),
+    indication: document.getElementById("indication").value.trim(),
+    manufacturingDate: new Date().toISOString().split("T")[0],
+    expiryDate: document.getElementById("expiryDate").value + "-01",
+    imageUrl: imageFile ? imageFile.name : ""
+  };
+
+  try{
+    const response = await fetch(`${API_BASE_URL}/api/products/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(product)
+    });
+
+    const result = await response.json();
+
+    if(result.success === true){
+      document.getElementById("message").style.color = "green";
+      document.getElementById("message").innerText = "Product created successfully!";
+
+      document.getElementById("productForm").reset();
+      document.getElementById("imagePreview").style.display = "none";
+      document.getElementById("imagePreview").src = "";
+    }else{
+      document.getElementById("message").style.color = "red";
+      document.getElementById("message").innerText = result.message || "Failed to add product";
+    }
+
+  }catch(error){
+    console.log(error);
+    document.getElementById("message").style.color = "red";
+    document.getElementById("message").innerText = "Backend not connected or admin token invalid";
+  }
+});
+
+function previewImage(event){
+  const preview = document.getElementById("imagePreview");
+  const file = event.target.files[0];
+
+  if(file){
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+  }
+>>>>>>> Stashed changes
 }
 </script>
 

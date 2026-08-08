@@ -3144,13 +3144,33 @@ function escapeHtml(value){
 }
 
 function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("open");
-  document.getElementById("overlay").classList.toggle("show");
+
+    document.getElementById(
+        "doctorSidebar"
+    ).classList.toggle(
+        "open"
+    );
+
+    document.getElementById(
+        "overlay"
+    ).classList.toggle(
+        "show"
+    );
 }
 
 function closeSidebar(){
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("overlay").classList.remove("show");
+
+    document.getElementById(
+        "doctorSidebar"
+    ).classList.remove(
+        "open"
+    );
+
+    document.getElementById(
+        "overlay"
+    ).classList.remove(
+        "show"
+    );
 }
 
 function clearDoctorSession(){

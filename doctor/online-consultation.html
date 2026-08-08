@@ -1256,6 +1256,27 @@ textarea.control{
         width:100%;
     }
 }
+@media(max-width:900px){
+
+    .doctor-sidebar{
+        transform:translateX(-100%);
+    }
+
+    .doctor-sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        width:100%;
+        margin-left:0;
+    }
+
+    .toggle{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+}
 </style>
 </head>
 
@@ -4441,21 +4462,55 @@ function escapeJs(value) {
 }
 
 function toggleSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "doctorSidebar"
+        );
+
+    const overlay =
+        document.getElementById(
+            "mobileOverlay"
+        );
+
+    if (!sidebar || !overlay) {
+        console.error(
+            "Sidebar or mobile overlay not found."
+        );
+        return;
+    }
+
     sidebar.classList.toggle(
         "open"
     );
 
-    mobileOverlay.classList.toggle(
+    overlay.classList.toggle(
         "show"
     );
 }
 
+
 function closeSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "doctorSidebar"
+        );
+
+    const overlay =
+        document.getElementById(
+            "mobileOverlay"
+        );
+
+    if (!sidebar || !overlay) {
+        return;
+    }
+
     sidebar.classList.remove(
         "open"
     );
 
-    mobileOverlay.classList.remove(
+    overlay.classList.remove(
         "show"
     );
 }
