@@ -563,7 +563,7 @@ a{
 
 table{
     width:100%;
-    min-width:1650px;
+    min-width:1150px;
     border-collapse:collapse;
 }
 
@@ -1018,7 +1018,7 @@ tbody tr:hover{
 
             <a href="admin-users.html">
                 <i class="fa-solid fa-users"></i>
-                Patients / Users
+                Users
             </a>
 
             <span class="menu-label">Clinical Oversight</span>
@@ -1388,11 +1388,8 @@ tbody tr:hover{
                             <tr>
                                 <th>ID</th>
                                 <th>Patient</th>
-                                <th>Age</th>
-                                <th>Health Issue</th>
                                 <th>Doctor</th>
-                                <th>Date</th>
-                                <th>Time</th>
+                                <th>Date & Time</th>
                                 <th>Meeting Link</th>
                                 <th>Status</th>
                                 <th>Payment Status</th>
@@ -1649,7 +1646,7 @@ async function loadConsultations() {
     body.innerHTML = `
         <tr>
             <td
-                colspan="11"
+                colspan="8"
                 class="table-message"
             >
                 <i class="fa-solid fa-spinner fa-spin"></i>
@@ -1692,7 +1689,7 @@ async function loadConsultations() {
         body.innerHTML = `
             <tr>
                 <td
-                    colspan="11"
+                    colspan="8"
                     class="table-message"
                 >
                     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -2065,7 +2062,7 @@ function renderConsultations() {
         body.innerHTML = `
             <tr>
                 <td
-                    colspan="11"
+                    colspan="8"
                     class="table-message"
                 >
                     <i class="fa-solid fa-video-slash"></i>
@@ -2123,18 +2120,6 @@ function renderConsultations() {
                         </td>
 
                         <td>
-                            ${escapeHtml(
-                                consultation.age
-                            )}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(
-                                consultation.healthIssue
-                            )}
-                        </td>
-
-                        <td>
                             <strong>
                                 ${escapeHtml(
                                     consultation.doctor
@@ -2151,29 +2136,31 @@ function renderConsultations() {
                         </td>
 
                         <td>
-                            ${escapeHtml(
-                                formatDate(
-                                    consultation.date
-                                )
-                            )}
-                        </td>
+                            <strong>
+                                ${escapeHtml(
+                                    formatDate(
+                                        consultation.date
+                                    )
+                                )}
+                            </strong>
 
-                        <td>
-                            ${escapeHtml(
-                                formatTime(
-                                    consultation.startTime
-                                )
-                            )}
+                            <br>
 
-                            ${
-                                consultation.endTime
-                                    ? `<br><small>to ${escapeHtml(
-                                        formatTime(
-                                            consultation.endTime
-                                        )
-                                    )}</small>`
-                                    : ""
-                            }
+                            <small>
+                                ${escapeHtml(
+                                    formatTime(
+                                        consultation.startTime
+                                    )
+                                )}${
+                                    consultation.endTime
+                                        ? ` - ${escapeHtml(
+                                            formatTime(
+                                                consultation.endTime
+                                            )
+                                        )}`
+                                        : ""
+                                }
+                            </small>
                         </td>
 
                         <td>
