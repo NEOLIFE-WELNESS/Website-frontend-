@@ -1186,6 +1186,10 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
                 <a href="doctor-availability.html" class="active">
                     <i class="fa-solid fa-calendar-xmark"></i>
                     Manage Availability
@@ -1197,16 +1201,16 @@
 
                 
 
-                <a href="doctor-appointments.html">
+                <a href="doctor-appointments.html" id="appointmentDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" id="consultationDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
 
-                <a href="video-recordings.html">
+                <a href="video-recordings.html" id="videoRecordingsMenu">
                     <i class="fa-solid fa-video"></i>
                     Video Recordings
                 </a>
@@ -1654,6 +1658,31 @@ document.addEventListener("DOMContentLoaded", async function(){
     .addEventListener("submit", blockDoctorSlot);
 
   await loadDoctorHeader();
+
+  /*
+   * Apply the last known sidebar mode immediately, then refresh it
+   * again from the live availability API in loadAvailability().
+   */
+  const cachedOnline=
+    localStorage.getItem(
+      "doctorHasOnline"
+    );
+
+  const cachedOffline=
+    localStorage.getItem(
+      "doctorHasOffline"
+    );
+
+  if(
+    cachedOnline!==null||
+    cachedOffline!==null
+  ){
+    applyDoctorConsultationMode(
+      cachedOnline==="true",
+      cachedOffline==="true"
+    );
+  }
+
   await Promise.all([
     loadAvailability(),
     loadBlockedSlots()
@@ -2007,6 +2036,14 @@ async function loadAvailability(){
     currentAvailabilitySlots = extractArray(result);
     renderAvailability(currentAvailabilitySlots);
 
+    /*
+     * Use the doctor's active availability records to control
+     * Clinical sidebar visibility.
+     */
+    applyDoctorConsultationModeFromAvailability(
+      currentAvailabilitySlots
+    );
+
   }catch(error){
     console.error("Load availability failed:", error);
 
@@ -2016,6 +2053,159 @@ async function loadAvailability(){
     );
   }
 }
+
+
+function applyDoctorConsultationModeFromAvailability(slots){
+  const records=
+    Array.isArray(slots)
+      ? slots
+      : [];
+
+  const activeSlots=
+    records.filter(
+      slot=>
+        slot&&
+        slot.active!==false
+    );
+
+  const hasOnline=
+    activeSlots.some(
+      slot=>
+        String(
+          slot.appointmentMode||
+          ""
+        )
+          .trim()
+          .toUpperCase()==="ONLINE"
+    );
+
+  const hasOffline=
+    activeSlots.some(
+      slot=>
+        String(
+          slot.appointmentMode||
+          ""
+        )
+          .trim()
+          .toUpperCase()==="OFFLINE"
+    );
+
+  /*
+   * If no active availability exists yet, preserve the
+   * current sidebar instead of hiding both options.
+   */
+  if(
+    !hasOnline&&
+    !hasOffline
+  ){
+    localStorage.removeItem(
+      "doctorHasOnline"
+    );
+
+    localStorage.removeItem(
+      "doctorHasOffline"
+    );
+
+    applyDoctorConsultationMode(
+      null,
+      null
+    );
+
+    return;
+  }
+
+  localStorage.setItem(
+    "doctorHasOnline",
+    String(hasOnline)
+  );
+
+  localStorage.setItem(
+    "doctorHasOffline",
+    String(hasOffline)
+  );
+
+  applyDoctorConsultationMode(
+    hasOnline,
+    hasOffline
+  );
+
+  console.log(
+    "Doctor consultation modes:",
+    {
+      hasOnline,
+      hasOffline
+    }
+  );
+}
+
+
+function applyDoctorConsultationMode(
+  hasOnline,
+  hasOffline
+){
+  const appointmentMenu=
+    document.getElementById(
+      "appointmentDetailsMenu"
+    );
+
+  const consultationMenu=
+    document.getElementById(
+      "consultationDetailsMenu"
+    );
+
+  const videoMenu=
+    document.getElementById(
+      "videoRecordingsMenu"
+    );
+
+  /*
+   * null means mode could not be determined.
+   * Keep the original sidebar unchanged.
+   */
+  if(
+    hasOnline===null||
+    hasOffline===null
+  ){
+    if(appointmentMenu){
+      appointmentMenu.style.display=
+        "flex";
+    }
+
+    if(consultationMenu){
+      consultationMenu.style.display=
+        "flex";
+    }
+
+    if(videoMenu){
+      videoMenu.style.display=
+        "flex";
+    }
+
+    return;
+  }
+
+  if(appointmentMenu){
+    appointmentMenu.style.display=
+      hasOffline
+        ? "flex"
+        : "none";
+  }
+
+  if(consultationMenu){
+    consultationMenu.style.display=
+      hasOnline
+        ? "flex"
+        : "none";
+  }
+
+  if(videoMenu){
+    videoMenu.style.display=
+      hasOnline
+        ? "flex"
+        : "none";
+  }
+}
+
 
 function renderAvailability(slots){
   const list = document.getElementById("slotList");

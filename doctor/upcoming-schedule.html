@@ -1,0 +1,3284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upcoming Schedule - Neolife Doctor Portal</title>
+<link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<style>
+:root{
+    --dark-green:#153d29;
+    --green:#2d6844;
+    --green-light:#edf5ef;
+    --gold:#c99a16;
+    --gold-dark:#9b7200;
+    --cream:#f6f8f4;
+    --white:#ffffff;
+    --text:#173c29;
+    --muted:#6e7871;
+    --border:#dfe7e1;
+    --danger:#c74747;
+    --danger-light:#fff0f0;
+    --warning:#d88b18;
+    --warning-light:#fff6e8;
+    --success:#287146;
+    --success-light:#ebf7ef;
+    --info:#31708f;
+    --info-light:#edf6fb;
+    --purple:#76548f;
+    --purple-light:#f5effb;
+    --sidebar-width:270px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    color:var(--text);
+    background:var(--cream);
+}
+
+button,
+input,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.doctor-layout{
+    min-height:100vh;
+    display:flex;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.doctor-sidebar{
+    width:var(--sidebar-width);
+    height:100vh;
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    color:var(--white);
+    background:linear-gradient(180deg,#123824,#1e5134);
+    box-shadow:8px 0 30px rgba(18,56,36,.14);
+    transition:transform .3s ease;
+}
+
+.doctor-brand{
+    min-height:104px;
+    padding:20px 18px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.doctor-brand img{
+    width:58px;
+    height:58px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    background:var(--white);
+}
+
+.doctor-brand h2{
+    margin-bottom:5px;
+    font-size:18px;
+    font-weight:800;
+}
+
+.doctor-brand span{
+    color:#f2cf69;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+}
+
+.doctor-menu{
+    flex:1;
+    min-height:0;
+    padding:20px 13px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:thin;
+    scrollbar-color:#fff transparent;
+}
+
+.doctor-menu::-webkit-scrollbar{
+    width:6px;
+}
+
+.doctor-menu::-webkit-scrollbar-thumb{
+    background:#fff;
+    border-radius:10px;
+}
+
+.doctor-menu::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.menu-label{
+    display:block;
+    margin:8px 12px 10px;
+    color:rgba(255,255,255,.48);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+}
+
+.doctor-menu a{
+    min-height:49px;
+    margin-bottom:7px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border-radius:12px;
+    color:rgba(255,255,255,.82);
+    font-size:14px;
+    font-weight:700;
+    transition:.25s;
+}
+
+.doctor-menu a i{
+    width:21px;
+    text-align:center;
+    font-size:17px;
+}
+
+.doctor-menu a:hover,
+.doctor-menu a.active{
+    color:var(--dark-green);
+    background:var(--white);
+    transform:translateX(3px);
+}
+
+.doctor-menu a:hover i,
+.doctor-menu a.active i{
+    color:var(--gold);
+}
+
+.sidebar-footer{
+    padding:17px 13px;
+    border-top:1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-logout{
+    width:100%;
+    min-height:46px;
+    padding:11px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:12px;
+    color:var(--white);
+    background:rgba(255,255,255,.08);
+    font-size:14px;
+    font-weight:800;
+    transition:.25s;
+}
+
+.sidebar-logout:hover{
+    color:var(--dark-green);
+    background:var(--white);
+}
+
+/* =========================
+   MAIN / TOPBAR
+========================= */
+
+.doctor-main{
+    width:calc(100% - var(--sidebar-width));
+    min-height:100vh;
+    margin-left:var(--sidebar-width);
+}
+
+.doctor-topbar{
+    min-height:86px;
+    padding:15px 28px;
+    position:sticky;
+    top:0;
+    z-index:900;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    background:rgba(255,255,255,.96);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 4px 18px rgba(18,56,36,.06);
+    backdrop-filter:blur(14px);
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.sidebar-toggle{
+    display:none;
+    width:43px;
+    height:43px;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:11px;
+    color:var(--white);
+    background:var(--dark-green);
+    font-size:18px;
+}
+
+.page-title h1{
+    margin-bottom:5px;
+    color:var(--dark-green);
+    font-size:27px;
+    font-weight:800;
+}
+
+.page-title p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.doctor-profile-box{
+    padding:6px 11px 6px 7px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border:1px solid var(--border);
+    border-radius:30px;
+    background:var(--white);
+}
+
+.doctor-avatar{
+    width:39px;
+    height:39px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    color:var(--white);
+    background:linear-gradient(145deg,var(--gold),var(--gold-dark));
+    font-size:16px;
+    font-weight:800;
+}
+
+.doctor-profile-text strong{
+    display:block;
+    margin-bottom:2px;
+    color:var(--dark-green);
+    font-size:13px;
+}
+
+.doctor-profile-text span{
+    color:var(--muted);
+    font-size:10px;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.doctor-content{
+    padding:28px;
+}
+
+.page-banner{
+    margin-bottom:23px;
+    padding:26px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    position:relative;
+    overflow:hidden;
+    border-radius:21px;
+    color:var(--white);
+    background:linear-gradient(120deg,var(--dark-green),#347650);
+    box-shadow:0 16px 38px rgba(21,61,41,.15);
+}
+
+.page-banner::before{
+    content:"";
+    width:220px;
+    height:220px;
+    position:absolute;
+    top:-130px;
+    right:-50px;
+    border-radius:50%;
+    background:rgba(255,255,255,.07);
+}
+
+.page-banner-content,
+.page-banner-icon{
+    position:relative;
+    z-index:2;
+}
+
+.page-banner h2{
+    margin-bottom:8px;
+    font-size:27px;
+    font-weight:800;
+}
+
+.page-banner p{
+    max-width:760px;
+    color:rgba(255,255,255,.82);
+    font-size:13px;
+    line-height:1.7;
+}
+
+.page-banner-icon{
+    width:66px;
+    height:66px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    border-radius:18px;
+    color:#ffe28b;
+    background:rgba(255,255,255,.10);
+    font-size:28px;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+.summary-grid{
+    margin-bottom:23px;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:16px;
+}
+
+.summary-card{
+    padding:18px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border:1px solid var(--border);
+    border-radius:17px;
+    background:var(--white);
+    box-shadow:0 9px 25px rgba(21,61,41,.06);
+}
+
+.summary-icon{
+    width:48px;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    border-radius:14px;
+    font-size:19px;
+}
+
+.summary-icon.total{
+    color:var(--dark-green);
+    background:var(--green-light);
+}
+
+.summary-icon.offline{
+    color:var(--success);
+    background:var(--success-light);
+}
+
+.summary-icon.online{
+    color:var(--info);
+    background:var(--info-light);
+}
+
+.summary-icon.next{
+    color:var(--gold-dark);
+    background:#fff7df;
+}
+
+.summary-card p{
+    margin-bottom:5px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:700;
+}
+
+.summary-card h3{
+    color:var(--dark-green);
+    font-size:22px;
+    font-weight:800;
+}
+
+/* =========================
+   FILTERS
+========================= */
+
+.filter-panel{
+    margin-bottom:22px;
+    padding:20px;
+    display:grid;
+    grid-template-columns:minmax(250px,1.5fr) repeat(3,minmax(150px,.7fr)) auto;
+    gap:13px;
+    align-items:end;
+    border:1px solid var(--border);
+    border-radius:18px;
+    background:var(--white);
+    box-shadow:0 9px 25px rgba(21,61,41,.06);
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:7px;
+    color:var(--dark-green);
+    font-size:11px;
+    font-weight:800;
+}
+
+.input-wrapper{
+    position:relative;
+}
+
+.input-wrapper i{
+    position:absolute;
+    top:50%;
+    left:14px;
+    color:#7c877f;
+    font-size:13px;
+    transform:translateY(-50%);
+}
+
+.form-control{
+    width:100%;
+    min-height:46px;
+    padding:11px 13px;
+    border:1px solid var(--border);
+    border-radius:11px;
+    color:#354039;
+    background:var(--white);
+    outline:none;
+}
+
+.input-wrapper .form-control{
+    padding-left:38px;
+}
+
+.form-control:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(201,154,22,.12);
+}
+
+.reset-button{
+    min-height:46px;
+    padding:11px 18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border:none;
+    border-radius:11px;
+    color:var(--white);
+    background:var(--dark-green);
+    font-size:12px;
+    font-weight:800;
+}
+
+.reset-button:hover{
+    background:var(--gold-dark);
+}
+
+/* =========================
+   SCHEDULE PANEL / CARDS
+========================= */
+
+.schedule-panel{
+    overflow:hidden;
+    border:1px solid var(--border);
+    border-radius:21px;
+    background:var(--white);
+    box-shadow:0 11px 32px rgba(21,61,41,.07);
+}
+
+.panel-header{
+    min-height:70px;
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    border-bottom:1px solid var(--border);
+}
+
+.panel-header h2{
+    margin-bottom:4px;
+    color:var(--dark-green);
+    font-size:19px;
+}
+
+.panel-header p{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.result-count{
+    padding:8px 12px;
+    border-radius:20px;
+    color:var(--dark-green);
+    background:var(--green-light);
+    font-size:11px;
+    font-weight:800;
+}
+
+.schedule-list{
+    padding:20px;
+    display:grid;
+    gap:14px;
+}
+
+.schedule-card{
+    padding:18px;
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:17px;
+    align-items:center;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:#fbfcfa;
+    transition:.2s;
+}
+
+.schedule-card:hover{
+    border-color:#ccd9cf;
+    box-shadow:0 8px 20px rgba(21,61,41,.07);
+    transform:translateY(-1px);
+}
+
+.date-box{
+    width:72px;
+    min-height:72px;
+    padding:9px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border-radius:14px;
+    color:var(--dark-green);
+    background:var(--green-light);
+    text-align:center;
+}
+
+.date-box .day{
+    font-size:24px;
+    line-height:1;
+    font-weight:900;
+}
+
+.date-box .month{
+    margin-top:5px;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.schedule-main{
+    min-width:0;
+}
+
+.schedule-top{
+    margin-bottom:7px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.schedule-top h3{
+    color:var(--dark-green);
+    font-size:15px;
+}
+
+.type-badge,
+.status-badge,
+.payment-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:6px 9px;
+    border-radius:20px;
+    font-size:9px;
+    font-weight:800;
+}
+
+.type-offline{
+    color:var(--success);
+    background:var(--success-light);
+}
+
+.type-online{
+    color:var(--info);
+    background:var(--info-light);
+}
+
+.status-success{
+    color:var(--success);
+    background:var(--success-light);
+}
+
+.status-warning{
+    color:#946300;
+    background:var(--warning-light);
+}
+
+.status-info{
+    color:var(--info);
+    background:var(--info-light);
+}
+
+.status-danger{
+    color:var(--danger);
+    background:var(--danger-light);
+}
+
+.payment-badge{
+    color:var(--purple);
+    background:var(--purple-light);
+}
+
+.schedule-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 18px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.schedule-meta span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.schedule-meta i{
+    color:var(--gold-dark);
+}
+
+.schedule-symptoms{
+    max-width:850px;
+    margin-top:9px;
+    color:#566159;
+    font-size:11px;
+    line-height:1.55;
+}
+
+.card-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.view-button{
+    min-height:39px;
+    padding:9px 13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    border:none;
+    border-radius:10px;
+    color:var(--dark-green);
+    background:var(--green-light);
+    font-size:10px;
+    font-weight:800;
+    transition:.2s;
+}
+
+.view-button:hover{
+    color:var(--white);
+    background:var(--dark-green);
+}
+
+.empty-state{
+    padding:60px 20px;
+    text-align:center;
+    color:var(--muted);
+}
+
+.empty-state i{
+    display:block;
+    margin-bottom:12px;
+    color:var(--gold);
+    font-size:32px;
+}
+
+.empty-state h3{
+    margin-bottom:7px;
+    color:var(--dark-green);
+    font-size:17px;
+}
+
+.empty-state p{
+    font-size:12px;
+    line-height:1.6;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    z-index:4000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(13,36,24,.67);
+    backdrop-filter:blur(5px);
+}
+
+.modal-overlay.show{
+    display:flex;
+}
+
+.modal-box{
+    width:100%;
+    max-width:700px;
+    max-height:92vh;
+    overflow-y:auto;
+    border-radius:21px;
+    background:var(--white);
+    box-shadow:0 25px 75px rgba(0,0,0,.27);
+}
+
+.modal-header{
+    padding:20px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.modal-header h2{
+    color:var(--dark-green);
+    font-size:20px;
+}
+
+.modal-close{
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:50%;
+    color:var(--dark-green);
+    background:var(--green-light);
+}
+
+.modal-content{
+    padding:22px;
+}
+
+.modal-patient-card{
+    margin-bottom:18px;
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border-radius:14px;
+    background:var(--green-light);
+}
+
+.modal-avatar{
+    width:46px;
+    height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    border-radius:50%;
+    color:var(--white);
+    background:var(--dark-green);
+    font-size:15px;
+    font-weight:800;
+}
+
+.modal-patient-card h3{
+    margin-bottom:4px;
+    color:var(--dark-green);
+    font-size:16px;
+}
+
+.modal-patient-card p{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.details-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+
+.detail-box{
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:11px;
+    background:#fbfcfa;
+}
+
+.detail-box.full{
+    grid-column:1/-1;
+}
+
+.detail-box span{
+    display:block;
+    margin-bottom:5px;
+    color:var(--muted);
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.detail-box strong,
+.detail-box p{
+    color:var(--dark-green);
+    font-size:11px;
+    line-height:1.6;
+}
+
+.modal-actions{
+    padding:18px 22px;
+    display:flex;
+    justify-content:flex-end;
+    border-top:1px solid var(--border);
+}
+
+.modal-button{
+    min-height:42px;
+    padding:10px 17px;
+    border:none;
+    border-radius:10px;
+    color:var(--white);
+    background:var(--dark-green);
+    font-size:11px;
+    font-weight:800;
+}
+
+/* =========================
+   ALERT
+========================= */
+
+.page-alert{
+    width:min(390px,calc(100% - 35px));
+    padding:15px 17px;
+    position:fixed;
+    top:102px;
+    right:22px;
+    z-index:5000;
+    display:none;
+    align-items:flex-start;
+    gap:11px;
+    border-radius:13px;
+    color:var(--white);
+    box-shadow:0 14px 35px rgba(0,0,0,.20);
+}
+
+.page-alert.show{
+    display:flex;
+}
+
+.page-alert.error{
+    background:var(--danger);
+}
+
+.page-alert.info{
+    background:var(--info);
+}
+
+.page-alert.success{
+    background:var(--success);
+}
+
+.alert-message{
+    flex:1;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.sidebar-overlay{
+    position:fixed;
+    inset:0;
+    z-index:950;
+    display:none;
+    background:rgba(13,36,24,.58);
+}
+
+.sidebar-overlay.show{
+    display:block;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1200px){
+    .summary-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .filter-panel{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .reset-button{
+        width:100%;
+    }
+}
+
+@media(max-width:900px){
+    .doctor-sidebar{
+        transform:translateX(-100%);
+    }
+
+    .doctor-sidebar.open{
+        transform:translateX(0);
+    }
+
+    .doctor-main{
+        width:100%;
+        margin-left:0;
+    }
+
+    .sidebar-toggle{
+        display:flex;
+    }
+}
+
+@media(max-width:700px){
+    .doctor-topbar{
+        padding:13px 16px;
+    }
+
+    .doctor-content{
+        padding:20px 14px;
+    }
+
+    .page-title h1{
+        font-size:21px;
+    }
+
+    .page-title p,
+    .doctor-profile-text{
+        display:none;
+    }
+
+    .page-banner{
+        align-items:flex-start;
+        flex-direction:column-reverse;
+    }
+
+    .summary-grid,
+    .filter-panel{
+        grid-template-columns:1fr;
+    }
+
+    .panel-header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .schedule-card{
+        grid-template-columns:1fr;
+    }
+
+    .date-box{
+        width:100%;
+        min-height:64px;
+        flex-direction:row;
+        gap:7px;
+    }
+
+    .date-box .month{
+        margin-top:0;
+    }
+
+    .card-actions{
+        width:100%;
+    }
+
+    .view-button{
+        width:100%;
+    }
+
+    .details-grid{
+        grid-template-columns:1fr;
+    }
+
+    .detail-box.full{
+        grid-column:auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page-alert" id="pageAlert">
+    <i class="fa-solid fa-circle-info" id="alertIcon"></i>
+    <div class="alert-message" id="alertMessage"></div>
+</div>
+
+<div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+    onclick="closeSidebar()"
+></div>
+
+<div class="doctor-layout">
+
+    <aside class="doctor-sidebar" id="doctorSidebar">
+
+        <div class="doctor-brand">
+            <img src="../assets/main_logo.jpeg" alt="Neolife Logo">
+            <div>
+                <h2>Neolife</h2>
+                <span>Doctor Portal</span>
+            </div>
+        </div>
+
+        <nav class="doctor-menu">
+
+            <span class="menu-label">Main</span>
+
+            <a href="doctor-dashboard.html">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </a>
+
+            <a href="patients.html">
+                <i class="fa-solid fa-users"></i>
+                Patient Dashboard
+            </a>
+
+            <a href="appointment-calendar.html">
+                <i class="fa-solid fa-calendar-days"></i>
+                Appointment Calendar
+            </a>
+
+            <a href="upcoming-schedule.html" class="active">
+                <i class="fa-solid fa-calendar-check"></i>
+                Upcoming Schedule
+            </a>
+
+            <a href="doctor-availability.html">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                Manage Availability
+            </a>
+
+            <span class="menu-label">Clinical</span>
+
+            <a
+                href="doctor-appointments.html"
+                id="appointmentDetailsMenu"
+            >
+                <i class="fa-solid fa-clipboard-list"></i>
+                Appointment Details
+            </a>
+
+            <a
+                href="online-consultation.html"
+                id="consultationDetailsMenu"
+            >
+                <i class="fa-solid fa-video"></i>
+                Consultation Details
+            </a>
+
+            <a
+                href="video-recordings.html"
+                id="videoRecordingsMenu"
+            >
+                <i class="fa-solid fa-circle-play"></i>
+                Video Recordings
+            </a>
+
+            <span class="menu-label">Finance</span>
+
+            <a href="transactions.html">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+                Transactions
+            </a>
+
+            <a href="doctor-profile.html">
+                <i class="fa-solid fa-user-doctor"></i>
+                My Profile
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <button
+                type="button"
+                class="sidebar-logout"
+                onclick="doctorLogout()"
+            >
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </button>
+        </div>
+
+    </aside>
+
+    <main class="doctor-main">
+
+        <header class="doctor-topbar">
+
+            <div class="topbar-left">
+
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    onclick="toggleSidebar()"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div class="page-title">
+                    <h1>Upcoming Schedule</h1>
+                    <p>View your upcoming offline appointments and online consultations.</p>
+                </div>
+
+            </div>
+
+            <div class="doctor-profile-box">
+
+                <span
+                    class="doctor-avatar"
+                    id="doctorInitial"
+                >
+                    D
+                </span>
+
+                <div class="doctor-profile-text">
+                    <strong id="doctorTopbarName">Doctor</strong>
+                    <span>Medical Consultant</span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <section class="doctor-content">
+
+            <section class="page-banner">
+
+                <div class="page-banner-content">
+                    <h2>Your Upcoming Patient Schedule</h2>
+                    <p>
+                        View future appointments and consultations in one place,
+                        including patient details, scheduled date and time, status,
+                        symptoms and payment information.
+                    </p>
+                </div>
+
+                <div class="page-banner-icon">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+
+            </section>
+
+            <section class="summary-grid">
+
+                <article class="summary-card">
+                    <div class="summary-icon total">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <p>Total Upcoming</p>
+                        <h3 id="totalUpcoming">0</h3>
+                    </div>
+                </article>
+
+                <article class="summary-card">
+                    <div class="summary-icon offline">
+                        <i class="fa-solid fa-hospital-user"></i>
+                    </div>
+                    <div>
+                        <p>Offline Appointments</p>
+                        <h3 id="offlineUpcoming">0</h3>
+                    </div>
+                </article>
+
+                <article class="summary-card">
+                    <div class="summary-icon online">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <div>
+                        <p>Online Consultations</p>
+                        <h3 id="onlineUpcoming">0</h3>
+                    </div>
+                </article>
+
+                <article class="summary-card">
+                    <div class="summary-icon next">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <p>Next Scheduled</p>
+                        <h3 id="nextScheduled">—</h3>
+                    </div>
+                </article>
+
+            </section>
+
+            <section class="filter-panel">
+
+                <div class="form-group">
+                    <label for="searchInput">Search</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            class="form-control"
+                            placeholder="Patient name, phone or ID"
+                            oninput="applyFilters()"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="typeFilter">Schedule Type</label>
+                    <select
+                        id="typeFilter"
+                        class="form-control"
+                        onchange="applyFilters()"
+                    >
+                        <option value="">All Types</option>
+                        <option value="OFFLINE">Offline Appointment</option>
+                        <option value="ONLINE">Online Consultation</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="statusFilter">Status</label>
+                    <select
+                        id="statusFilter"
+                        class="form-control"
+                        onchange="applyFilters()"
+                    >
+                        <option value="">All Statuses</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateFilter">Date</label>
+                    <input
+                        type="date"
+                        id="dateFilter"
+                        class="form-control"
+                        onchange="applyFilters()"
+                    >
+                </div>
+
+                <button
+                    type="button"
+                    class="reset-button"
+                    onclick="resetFilters()"
+                >
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Reset
+                </button>
+
+            </section>
+
+            <section class="schedule-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h2>Upcoming Visits</h2>
+                        <p>
+                            Offline appointments and online consultations returned by the doctor dashboard.
+                        </p>
+                    </div>
+
+                    <span
+                        class="result-count"
+                        id="resultCount"
+                    >
+                        0 Scheduled
+                    </span>
+
+                </div>
+
+                <div
+                    class="schedule-list"
+                    id="scheduleList"
+                >
+                    <div class="empty-state">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <h3>Loading upcoming schedule...</h3>
+                        <p>Please wait while your upcoming appointments and consultations are loaded.</p>
+                    </div>
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- DETAILS MODAL -->
+<div
+    class="modal-overlay"
+    id="detailsModal"
+    onclick="handleModalOutside(event)"
+>
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <h2>Schedule Details</h2>
+
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeDetailsModal()"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div
+            class="modal-content"
+            id="detailsModalContent"
+        ></div>
+
+        <div class="modal-actions">
+            <button
+                type="button"
+                class="modal-button"
+                onclick="closeDetailsModal()"
+            >
+                Close
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const API_BASE_URL =
+    "http://localhost:8085";
+
+let allUpcoming = [];
+let filteredUpcoming = [];
+let doctorId = null;
+
+/* =========================
+   PAGE LOAD
+========================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+
+        if (!requireDoctorLogin()) {
+            return;
+        }
+
+        await loadDoctorProfile();
+        await loadDoctorConsultationModes();
+        await loadUpcomingSchedule();
+    }
+);
+
+/* =========================
+   AUTH
+========================= */
+
+function getDoctorToken() {
+    return (
+        localStorage.getItem("doctorToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    ).trim();
+}
+
+
+function requireDoctorLogin() {
+    const token =
+        getDoctorToken();
+
+    const role =
+        String(
+            localStorage.getItem("role") ||
+            ""
+        )
+            .replace(/^ROLE_/i, "")
+            .toUpperCase();
+
+    if (!token) {
+        window.location.href =
+            "../patient/login.html";
+
+        return false;
+    }
+
+    if (
+        role &&
+        role !== "DOCTOR"
+    ) {
+        window.location.href =
+            "../patient/login.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+async function doctorApiRequest(
+    endpoint,
+    options = {}
+) {
+    const token =
+        getDoctorToken();
+
+    if (!token) {
+        throw new Error(
+            "Doctor login required."
+        );
+    }
+
+    const headers = {
+        "Accept": "application/json",
+        ...(options.headers || {}),
+        "Authorization":
+            "Bearer " + token
+    };
+
+    if (
+        options.body &&
+        !(options.body instanceof FormData)
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response =
+        await fetch(
+            API_BASE_URL + endpoint,
+            {
+                ...options,
+                headers
+            }
+        );
+
+    const responseText =
+        await response.text();
+
+    let result = {};
+
+    try {
+        result =
+            responseText
+                ? JSON.parse(responseText)
+                : {};
+
+    } catch (error) {
+        result = {
+            success: false,
+            message:
+                responseText ||
+                `Invalid server response (${response.status}).`
+        };
+    }
+
+    if (
+        response.status === 401
+    ) {
+        clearDoctorSession();
+
+        window.location.href =
+            "../patient/login.html";
+
+        throw new Error(
+            result.message ||
+            "Doctor session expired."
+        );
+    }
+
+    if (
+        !response.ok ||
+        result.success === false
+    ) {
+        const error =
+            new Error(
+                result.message ||
+                `Request failed (${response.status}).`
+            );
+
+        error.status =
+            response.status;
+
+        throw error;
+    }
+
+    return result;
+}
+
+
+function clearDoctorSession() {
+    [
+        "doctorToken",
+        "doctorRefreshToken",
+        "token",
+        "refreshToken",
+        "accessToken",
+        "role",
+        "doctorId",
+        "doctorName",
+        "doctorHasOnline",
+        "doctorHasOffline",
+        "userId"
+    ].forEach(
+        key =>
+            localStorage.removeItem(key)
+    );
+}
+
+
+function doctorLogout() {
+    clearDoctorSession();
+
+    window.location.href =
+        "../patient/login.html";
+}
+
+/* =========================
+   DOCTOR PROFILE
+========================= */
+
+async function loadDoctorProfile() {
+    const storedName =
+        localStorage.getItem(
+            "doctorName"
+        ) ||
+        localStorage.getItem(
+            "name"
+        ) ||
+        "Doctor";
+
+    setDoctorHeader(
+        storedName
+    );
+
+    try {
+        const result =
+            await doctorApiRequest(
+                "/api/doctors/my-profile"
+            );
+
+        const doctor =
+            result.data || {};
+
+        doctorId =
+            doctor.id ??
+            null;
+
+        const name =
+            doctor.name ||
+            doctor.doctorName ||
+            storedName;
+
+        setDoctorHeader(
+            name
+        );
+
+        if (
+            doctorId !== null &&
+            doctorId !== undefined
+        ) {
+            localStorage.setItem(
+                "doctorId",
+                String(doctorId)
+            );
+        }
+
+        localStorage.setItem(
+            "doctorName",
+            name
+        );
+
+        localStorage.setItem(
+            "doctor",
+            JSON.stringify(doctor)
+        );
+
+    } catch (error) {
+        doctorId =
+            Number(
+                localStorage.getItem(
+                    "doctorId"
+                )
+            ) ||
+            null;
+
+        console.warn(
+            "Doctor profile loading failed:",
+            error.message
+        );
+    }
+}
+
+
+function setDoctorHeader(name) {
+    const cleanName =
+        String(
+            name ||
+            "Doctor"
+        ).trim();
+
+    const firstLetter =
+        cleanName
+            .replace(
+                /^Dr\.?\s*/i,
+                ""
+            )
+            .trim()
+            .charAt(0)
+            .toUpperCase() ||
+        "D";
+
+    document.getElementById(
+        "doctorTopbarName"
+    ).textContent =
+        cleanName;
+
+    document.getElementById(
+        "doctorInitial"
+    ).textContent =
+        firstLetter;
+}
+
+/* =========================
+   ONLINE / OFFLINE MODE
+========================= */
+
+async function loadDoctorConsultationModes() {
+    const id =
+        doctorId ||
+        Number(
+            localStorage.getItem(
+                "doctorId"
+            )
+        ) ||
+        null;
+
+    if (!id) {
+        applyDoctorConsultationMode(
+            null,
+            null
+        );
+
+        return;
+    }
+
+    try {
+        const result =
+            await doctorApiRequest(
+                `/api/doctor-availability/doctor/${encodeURIComponent(
+                    id
+                )}`
+            );
+
+        const slots =
+            extractFlexibleArray(
+                result
+            );
+
+        const activeSlots =
+            slots.filter(
+                slot =>
+                    slot &&
+                    slot.active !== false
+            );
+
+        const hasOnline =
+            activeSlots.some(
+                slot =>
+                    String(
+                        slot.appointmentMode ||
+                        ""
+                    )
+                        .toUpperCase() ===
+                    "ONLINE"
+            );
+
+        const hasOffline =
+            activeSlots.some(
+                slot =>
+                    String(
+                        slot.appointmentMode ||
+                        ""
+                    )
+                        .toUpperCase() ===
+                    "OFFLINE"
+            );
+
+        if (
+            !hasOnline &&
+            !hasOffline
+        ) {
+            applyDoctorConsultationMode(
+                null,
+                null
+            );
+
+            return;
+        }
+
+        localStorage.setItem(
+            "doctorHasOnline",
+            String(hasOnline)
+        );
+
+        localStorage.setItem(
+            "doctorHasOffline",
+            String(hasOffline)
+        );
+
+        applyDoctorConsultationMode(
+            hasOnline,
+            hasOffline
+        );
+
+    } catch (error) {
+        console.warn(
+            "Doctor availability mode could not be loaded:",
+            error.message
+        );
+
+        const storedOnline =
+            localStorage.getItem(
+                "doctorHasOnline"
+            );
+
+        const storedOffline =
+            localStorage.getItem(
+                "doctorHasOffline"
+            );
+
+        if (
+            storedOnline !== null ||
+            storedOffline !== null
+        ) {
+            applyDoctorConsultationMode(
+                storedOnline === "true",
+                storedOffline === "true"
+            );
+
+        } else {
+            applyDoctorConsultationMode(
+                null,
+                null
+            );
+        }
+    }
+}
+
+
+function applyDoctorConsultationMode(
+    hasOnline,
+    hasOffline
+) {
+    const appointmentMenu =
+        document.getElementById(
+            "appointmentDetailsMenu"
+        );
+
+    const consultationMenu =
+        document.getElementById(
+            "consultationDetailsMenu"
+        );
+
+    const videoMenu =
+        document.getElementById(
+            "videoRecordingsMenu"
+        );
+
+    if (
+        hasOnline === null ||
+        hasOffline === null
+    ) {
+        if (appointmentMenu) {
+            appointmentMenu.style.display =
+                "flex";
+        }
+
+        if (consultationMenu) {
+            consultationMenu.style.display =
+                "flex";
+        }
+
+        if (videoMenu) {
+            videoMenu.style.display =
+                "flex";
+        }
+
+        return;
+    }
+
+    if (appointmentMenu) {
+        appointmentMenu.style.display =
+            hasOffline
+                ? "flex"
+                : "none";
+    }
+
+    if (consultationMenu) {
+        consultationMenu.style.display =
+            hasOnline
+                ? "flex"
+                : "none";
+    }
+
+    if (videoMenu) {
+        videoMenu.style.display =
+            hasOnline
+                ? "flex"
+                : "none";
+    }
+}
+
+/* =========================
+   UPCOMING API
+========================= */
+
+async function loadUpcomingSchedule() {
+    showLoading();
+
+    try {
+        const result =
+            await doctorApiRequest(
+                "/api/doctor-dashboard/upcoming"
+            );
+
+        const appointments =
+            Array.isArray(
+                result.data?.appointments
+            )
+                ? result.data.appointments
+                : [];
+
+        const consultations =
+            Array.isArray(
+                result.data?.consultations
+            )
+                ? result.data.consultations
+                : [];
+
+        const normalizedAppointments =
+            appointments.map(
+                normalizeAppointment
+            );
+
+        const normalizedConsultations =
+            consultations.map(
+                normalizeConsultation
+            );
+
+        allUpcoming = [
+            ...normalizedAppointments,
+            ...normalizedConsultations
+        ].sort(
+            (first, second) =>
+                getScheduleDate(
+                    first
+                ) -
+                getScheduleDate(
+                    second
+                )
+        );
+
+        populateStatusFilter();
+        updateSummary();
+        applyFilters();
+
+    } catch (error) {
+        allUpcoming = [];
+        filteredUpcoming = [];
+
+        updateSummary();
+        renderUpcoming();
+
+        showAlert(
+            error.message ||
+            "Unable to load upcoming schedule.",
+            "error"
+        );
+    }
+}
+
+
+function normalizeAppointment(item) {
+    return {
+        sourceType:
+            "OFFLINE",
+
+        id:
+            item.id ??
+            item.appointmentId ??
+            null,
+
+        patientId:
+            item.patientId ??
+            item.patient?.id ??
+            null,
+
+        patientName:
+            firstNonEmpty(
+                item.patientName,
+                item.patient?.name,
+                item.userName,
+                "Patient"
+            ),
+
+        phoneNumber:
+            firstNonEmpty(
+                item.phoneNumber,
+                item.patientPhone,
+                item.patient?.phoneNumber,
+                "-"
+            ),
+
+        age:
+            firstNonEmpty(
+                item.age,
+                item.patientAge,
+                item.patient?.age,
+                "-"
+            ),
+
+        gender:
+            firstNonEmpty(
+                item.gender,
+                item.patientGender,
+                item.patient?.gender,
+                "-"
+            ),
+
+        doctorName:
+            firstNonEmpty(
+                item.doctorName,
+                item.doctor?.name,
+                localStorage.getItem(
+                    "doctorName"
+                ),
+                "Doctor"
+            ),
+
+        specialization:
+            firstNonEmpty(
+                item.doctorSpecialization,
+                item.specialization,
+                "-"
+            ),
+
+        date:
+            firstNonEmpty(
+                item.appointmentDate,
+                item.date,
+                ""
+            ),
+
+        startTime:
+            item.startTime || "",
+
+        endTime:
+            item.endTime || "",
+
+        status:
+            String(
+                item.status ||
+                "SCHEDULED"
+            ).toUpperCase(),
+
+        paymentStatus:
+            String(
+                item.paymentStatus ||
+                "-"
+            ).toUpperCase(),
+
+        symptoms:
+            firstNonEmpty(
+                item.symptoms,
+                "-"
+            ),
+
+        pastMedicalHistory:
+            firstNonEmpty(
+                item.pastMedicalHistory,
+                "-"
+            ),
+
+        fee:
+            firstNonEmpty(
+                item.bookingFee,
+                item.amount,
+                null
+            ),
+
+        rescheduleReason:
+            item.rescheduleReason ||
+            null,
+
+        cancellationReason:
+            item.cancellationReason ||
+            null
+    };
+}
+
+
+function normalizeConsultation(item) {
+    return {
+        sourceType:
+            "ONLINE",
+
+        id:
+            item.id ??
+            item.consultationId ??
+            null,
+
+        patientId:
+            item.patientId ??
+            item.patient?.id ??
+            null,
+
+        patientName:
+            firstNonEmpty(
+                item.patientName,
+                item.patient?.name,
+                item.userName,
+                "Patient"
+            ),
+
+        phoneNumber:
+            firstNonEmpty(
+                item.phoneNumber,
+                item.patientPhone,
+                item.patient?.phoneNumber,
+                "-"
+            ),
+
+        age:
+            firstNonEmpty(
+                item.age,
+                item.patientAge,
+                item.patient?.age,
+                "-"
+            ),
+
+        gender:
+            firstNonEmpty(
+                item.gender,
+                item.patientGender,
+                item.patient?.gender,
+                "-"
+            ),
+
+        doctorName:
+            firstNonEmpty(
+                item.doctorName,
+                item.doctor?.name,
+                localStorage.getItem(
+                    "doctorName"
+                ),
+                "Doctor"
+            ),
+
+        specialization:
+            firstNonEmpty(
+                item.doctorSpecialization,
+                item.specialization,
+                "-"
+            ),
+
+        date:
+            firstNonEmpty(
+                item.consultationDate,
+                item.appointmentDate,
+                item.date,
+                ""
+            ),
+
+        startTime:
+            item.startTime || "",
+
+        endTime:
+            item.endTime || "",
+
+        status:
+            String(
+                item.status ||
+                "SCHEDULED"
+            ).toUpperCase(),
+
+        paymentStatus:
+            String(
+                item.paymentStatus ||
+                "-"
+            ).toUpperCase(),
+
+        symptoms:
+            firstNonEmpty(
+                item.symptoms,
+                "-"
+            ),
+
+        pastMedicalHistory:
+            firstNonEmpty(
+                item.pastMedicalHistory,
+                "-"
+            ),
+
+        fee:
+            firstNonEmpty(
+                item.consultationFee,
+                item.amount,
+                null
+            ),
+
+        rescheduleReason:
+            item.rescheduleReason ||
+            null,
+
+        cancellationReason:
+            item.cancellationReason ||
+            null
+    };
+}
+
+
+/* =========================
+   SUMMARY
+========================= */
+
+function updateSummary() {
+    const offline =
+        allUpcoming.filter(
+            item =>
+                item.sourceType ===
+                "OFFLINE"
+        );
+
+    const online =
+        allUpcoming.filter(
+            item =>
+                item.sourceType ===
+                "ONLINE"
+        );
+
+    setText(
+        "totalUpcoming",
+        allUpcoming.length
+    );
+
+    setText(
+        "offlineUpcoming",
+        offline.length
+    );
+
+    setText(
+        "onlineUpcoming",
+        online.length
+    );
+
+    const next =
+        allUpcoming[0];
+
+    setText(
+        "nextScheduled",
+        next
+            ? formatShortDate(
+                next.date
+              )
+            : "—"
+    );
+}
+
+/* =========================
+   FILTERS
+========================= */
+
+function populateStatusFilter() {
+    const select =
+        document.getElementById(
+            "statusFilter"
+        );
+
+    const statuses = [
+        ...new Set(
+            allUpcoming
+                .map(
+                    item =>
+                        item.status
+                )
+                .filter(Boolean)
+        )
+    ].sort();
+
+    select.innerHTML =
+        '<option value="">All Statuses</option>';
+
+    statuses.forEach(
+        status => {
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                status;
+
+            option.textContent =
+                formatStatus(
+                    status
+                );
+
+            select.appendChild(
+                option
+            );
+        }
+    );
+}
+
+
+function applyFilters() {
+    const search =
+        document.getElementById(
+            "searchInput"
+        ).value
+            .trim()
+            .toLowerCase();
+
+    const type =
+        document.getElementById(
+            "typeFilter"
+        ).value;
+
+    const status =
+        document.getElementById(
+            "statusFilter"
+        ).value;
+
+    const date =
+        document.getElementById(
+            "dateFilter"
+        ).value;
+
+    filteredUpcoming =
+        allUpcoming.filter(
+            item => {
+                const matchesSearch =
+                    !search ||
+                    String(
+                        item.patientName
+                    )
+                        .toLowerCase()
+                        .includes(search) ||
+                    String(
+                        item.phoneNumber
+                    )
+                        .toLowerCase()
+                        .includes(search) ||
+                    String(
+                        item.id
+                    ).includes(search);
+
+                const matchesType =
+                    !type ||
+                    item.sourceType ===
+                        type;
+
+                const matchesStatus =
+                    !status ||
+                    item.status ===
+                        status;
+
+                const matchesDate =
+                    !date ||
+                    String(
+                        item.date
+                    ).substring(
+                        0,
+                        10
+                    ) === date;
+
+                return (
+                    matchesSearch &&
+                    matchesType &&
+                    matchesStatus &&
+                    matchesDate
+                );
+            }
+        );
+
+    renderUpcoming();
+}
+
+
+function resetFilters() {
+    document.getElementById(
+        "searchInput"
+    ).value = "";
+
+    document.getElementById(
+        "typeFilter"
+    ).value = "";
+
+    document.getElementById(
+        "statusFilter"
+    ).value = "";
+
+    document.getElementById(
+        "dateFilter"
+    ).value = "";
+
+    applyFilters();
+}
+
+/* =========================
+   RENDER
+========================= */
+
+function showLoading() {
+    document.getElementById(
+        "scheduleList"
+    ).innerHTML = `
+        <div class="empty-state">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <h3>Loading upcoming schedule...</h3>
+            <p>Please wait while your appointments and consultations are loaded.</p>
+        </div>
+    `;
+}
+
+
+function renderUpcoming() {
+    const container =
+        document.getElementById(
+            "scheduleList"
+        );
+
+    setText(
+        "resultCount",
+        `${filteredUpcoming.length} Scheduled`
+    );
+
+    if (!filteredUpcoming.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                <h3>No upcoming schedule found</h3>
+                <p>No upcoming appointment or consultation matches the selected filters.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        filteredUpcoming
+            .map(
+                item =>
+                    createScheduleCard(
+                        item
+                    )
+            )
+            .join("");
+}
+
+
+function createScheduleCard(item) {
+    const date =
+        parseLocalDate(
+            item.date
+        );
+
+    const day =
+        date
+            ? String(
+                date.getDate()
+              ).padStart(2,"0")
+            : "--";
+
+    const month =
+        date
+            ? date.toLocaleDateString(
+                "en-IN",
+                {
+                    month:"short"
+                }
+              )
+            : "---";
+
+    return `
+        <article class="schedule-card">
+
+            <div class="date-box">
+                <span class="day">
+                    ${escapeHtml(day)}
+                </span>
+                <span class="month">
+                    ${escapeHtml(month)}
+                </span>
+            </div>
+
+            <div class="schedule-main">
+
+                <div class="schedule-top">
+
+                    <h3>
+                        ${escapeHtml(
+                            item.patientName
+                        )}
+                    </h3>
+
+                    ${createTypeBadge(
+                        item.sourceType
+                    )}
+
+                    ${createStatusBadge(
+                        item.status
+                    )}
+
+                    ${
+                        !isMissingValue(
+                            item.paymentStatus
+                        )
+                            ? `
+                                <span class="payment-badge">
+                                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                                    ${escapeHtml(
+                                        formatStatus(
+                                            item.paymentStatus
+                                        )
+                                    )}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                </div>
+
+                <div class="schedule-meta">
+
+                    <span>
+                        <i class="fa-regular fa-calendar"></i>
+                        ${escapeHtml(
+                            formatDate(
+                                item.date
+                            )
+                        )}
+                    </span>
+
+                    <span>
+                        <i class="fa-regular fa-clock"></i>
+                        ${escapeHtml(
+                            formatTimeRange(
+                                item.startTime,
+                                item.endTime
+                            )
+                        )}
+                    </span>
+
+                    <span>
+                        <i class="fa-solid fa-phone"></i>
+                        ${escapeHtml(
+                            item.phoneNumber
+                        )}
+                    </span>
+
+                    <span>
+                        <i class="fa-solid fa-id-badge"></i>
+                        ${
+                            item.sourceType ===
+                            "ONLINE"
+                                ? "Consultation"
+                                : "Appointment"
+                        }
+                        #${escapeHtml(
+                            item.id ??
+                            "-"
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="schedule-symptoms">
+                    <strong>Symptoms:</strong>
+                    ${escapeHtml(
+                        item.symptoms ||
+                        "-"
+                    )}
+                </div>
+
+            </div>
+
+            <div class="card-actions">
+                <button
+                    type="button"
+                    class="view-button"
+                    onclick="openDetails('${escapeJs(
+                        item.sourceType
+                    )}','${escapeJs(
+                        item.id
+                    )}')"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                    View Details
+                </button>
+            </div>
+
+        </article>
+    `;
+}
+
+
+function createTypeBadge(type) {
+    if (
+        type ===
+        "ONLINE"
+    ) {
+        return `
+            <span class="type-badge type-online">
+                <i class="fa-solid fa-video"></i>
+                Online Consultation
+            </span>
+        `;
+    }
+
+    return `
+        <span class="type-badge type-offline">
+            <i class="fa-solid fa-hospital-user"></i>
+            Offline Appointment
+        </span>
+    `;
+}
+
+
+function createStatusBadge(status) {
+    const normalized =
+        String(
+            status ||
+            "SCHEDULED"
+        ).toUpperCase();
+
+    let className =
+        "status-info";
+
+    if (
+        [
+            "CONFIRMED",
+            "PAID",
+            "COMPLETED"
+        ].includes(
+            normalized
+        )
+    ) {
+        className =
+            "status-success";
+
+    } else if (
+        [
+            "PAYMENT_PENDING",
+            "PENDING",
+            "PENDING_DOCTOR_CONFIRMATION",
+            "RESCHEDULED",
+            "SCHEDULED"
+        ].includes(
+            normalized
+        )
+    ) {
+        className =
+            "status-warning";
+
+    } else if (
+        [
+            "CANCELLED",
+            "REJECTED",
+            "FAILED"
+        ].includes(
+            normalized
+        )
+    ) {
+        className =
+            "status-danger";
+    }
+
+    return `
+        <span class="status-badge ${className}">
+            ${escapeHtml(
+                formatStatus(
+                    normalized
+                )
+            )}
+        </span>
+    `;
+}
+
+/* =========================
+   DETAILS
+========================= */
+
+function openDetails(
+    sourceType,
+    id
+) {
+    const item =
+        allUpcoming.find(
+            row =>
+                row.sourceType ===
+                    sourceType &&
+                String(
+                    row.id
+                ) ===
+                    String(id)
+        );
+
+    if (!item) {
+        return;
+    }
+
+    document.getElementById(
+        "detailsModalContent"
+    ).innerHTML = `
+        <div class="modal-patient-card">
+
+            <span class="modal-avatar">
+                ${escapeHtml(
+                    String(
+                        item.patientName ||
+                        "P"
+                    )
+                        .charAt(0)
+                        .toUpperCase()
+                )}
+            </span>
+
+            <div>
+                <h3>
+                    ${escapeHtml(
+                        item.patientName
+                    )}
+                </h3>
+
+                <p>
+                    ${
+                        item.sourceType ===
+                        "ONLINE"
+                            ? "Online Consultation"
+                            : "Offline Appointment"
+                    }
+                    #${escapeHtml(
+                        item.id ??
+                        "-"
+                    )}
+                </p>
+            </div>
+
+        </div>
+
+        <div class="details-grid">
+
+            <div class="detail-box">
+                <span>Type</span>
+                <strong>
+                    ${
+                        item.sourceType ===
+                        "ONLINE"
+                            ? "Online Consultation"
+                            : "Offline Appointment"
+                    }
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Status</span>
+                <strong>
+                    ${escapeHtml(
+                        formatStatus(
+                            item.status
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Date</span>
+                <strong>
+                    ${escapeHtml(
+                        formatDate(
+                            item.date
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Time</span>
+                <strong>
+                    ${escapeHtml(
+                        formatTimeRange(
+                            item.startTime,
+                            item.endTime
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Phone Number</span>
+                <strong>
+                    ${displayValue(
+                        item.phoneNumber
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Age / Gender</span>
+                <strong>
+                    ${escapeHtml(
+                        `${item.age ?? "-"} / ${formatStatus(
+                            item.gender
+                        )}`
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Doctor</span>
+                <strong>
+                    ${displayValue(
+                        item.doctorName
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Specialization</span>
+                <strong>
+                    ${displayValue(
+                        item.specialization
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Payment Status</span>
+                <strong>
+                    ${escapeHtml(
+                        formatStatus(
+                            item.paymentStatus
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <div class="detail-box">
+                <span>Fee</span>
+                <strong>
+                    ${
+                        item.fee !== null &&
+                        item.fee !== undefined
+                            ? `₹${escapeHtml(
+                                Number(
+                                    item.fee
+                                ).toLocaleString(
+                                    "en-IN"
+                                )
+                              )}`
+                            : "—"
+                    }
+                </strong>
+            </div>
+
+            <div class="detail-box full">
+                <span>Symptoms</span>
+                <p>
+                    ${escapeHtml(
+                        item.symptoms ||
+                        "-"
+                    )}
+                </p>
+            </div>
+
+            <div class="detail-box full">
+                <span>Past Medical History</span>
+                <p>
+                    ${escapeHtml(
+                        item.pastMedicalHistory ||
+                        "-"
+                    )}
+                </p>
+            </div>
+
+            ${
+                item.rescheduleReason
+                    ? `
+                        <div class="detail-box full">
+                            <span>Reschedule Reason</span>
+                            <p>${escapeHtml(item.rescheduleReason)}</p>
+                        </div>
+                      `
+                    : ""
+            }
+
+        </div>
+    `;
+
+    document.getElementById(
+        "detailsModal"
+    ).classList.add(
+        "show"
+    );
+}
+
+
+function closeDetailsModal() {
+    document.getElementById(
+        "detailsModal"
+    ).classList.remove(
+        "show"
+    );
+}
+
+
+function handleModalOutside(event) {
+    if (
+        event.target.id ===
+        "detailsModal"
+    ) {
+        closeDetailsModal();
+    }
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function extractFlexibleArray(result) {
+    if (Array.isArray(result)) {
+        return result;
+    }
+
+    if (
+        Array.isArray(
+            result?.data
+        )
+    ) {
+        return result.data;
+    }
+
+    if (
+        Array.isArray(
+            result?.data?.content
+        )
+    ) {
+        return result.data.content;
+    }
+
+    if (
+        Array.isArray(
+            result?.content
+        )
+    ) {
+        return result.content;
+    }
+
+    return [];
+}
+
+
+function firstNonEmpty(...values) {
+    for (
+        const value
+        of values
+    ) {
+        if (
+            value !== null &&
+            value !== undefined &&
+            String(
+                value
+            ).trim() !== ""
+        ) {
+            return value;
+        }
+    }
+
+    return null;
+}
+
+
+function isMissingValue(value) {
+    return (
+        value === null ||
+        value === undefined ||
+        String(value).trim() === "" ||
+        String(value).trim() === "-"
+    );
+}
+
+
+function getScheduleDate(item) {
+    const date =
+        item.date ||
+        "2999-12-31";
+
+    const time =
+        item.startTime ||
+        "23:59:59";
+
+    const parsed =
+        new Date(
+            `${String(date).substring(0,10)}T${String(time).substring(0,8)}`
+        );
+
+    return Number.isNaN(
+        parsed.getTime()
+    )
+        ? new Date(
+            "2999-12-31T23:59:59"
+          )
+        : parsed;
+}
+
+
+function parseLocalDate(value) {
+    if (!value) {
+        return null;
+    }
+
+    const parts =
+        String(value)
+            .substring(0,10)
+            .split("-")
+            .map(Number);
+
+    if (
+        parts.length !== 3 ||
+        parts.some(
+            Number.isNaN
+        )
+    ) {
+        return null;
+    }
+
+    return new Date(
+        parts[0],
+        parts[1] - 1,
+        parts[2]
+    );
+}
+
+
+function formatDate(value) {
+    const date =
+        parseLocalDate(
+            value
+        );
+
+    if (!date) {
+        return value || "-";
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
+}
+
+
+function formatShortDate(value) {
+    const date =
+        parseLocalDate(
+            value
+        );
+
+    if (!date) {
+        return "—";
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short"
+        }
+    );
+}
+
+
+function formatTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const clean =
+        String(value)
+            .substring(
+                0,
+                5
+            );
+
+    const parts =
+        clean.split(":");
+
+    if (
+        parts.length < 2
+    ) {
+        return clean;
+    }
+
+    let hour =
+        Number(
+            parts[0]
+        );
+
+    const minute =
+        parts[1];
+
+    const period =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+    hour =
+        hour % 12 ||
+        12;
+
+    return `${hour}:${minute} ${period}`;
+}
+
+
+function formatTimeRange(
+    start,
+    end
+) {
+    if (
+        start &&
+        end
+    ) {
+        return `${formatTime(start)} - ${formatTime(end)}`;
+    }
+
+    return formatTime(
+        start ||
+        end
+    );
+}
+
+
+function formatStatus(value) {
+    return String(
+        value ||
+        "-"
+    )
+        .replaceAll(
+            "_",
+            " "
+        )
+        .toLowerCase()
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+}
+
+
+function displayValue(value) {
+    return isMissingValue(
+        value
+    )
+        ? "—"
+        : escapeHtml(
+            String(value)
+          );
+}
+
+
+function toggleSidebar() {
+    document.getElementById(
+        "doctorSidebar"
+    ).classList.toggle(
+        "open"
+    );
+
+    document.getElementById(
+        "sidebarOverlay"
+    ).classList.toggle(
+        "show"
+    );
+}
+
+
+function closeSidebar() {
+    document.getElementById(
+        "doctorSidebar"
+    ).classList.remove(
+        "open"
+    );
+
+    document.getElementById(
+        "sidebarOverlay"
+    ).classList.remove(
+        "show"
+    );
+}
+
+
+function showAlert(
+    message,
+    type = "info"
+) {
+    const box =
+        document.getElementById(
+            "pageAlert"
+        );
+
+    const icon =
+        document.getElementById(
+            "alertIcon"
+        );
+
+    document.getElementById(
+        "alertMessage"
+    ).textContent =
+        message;
+
+    box.className =
+        `page-alert show ${type}`;
+
+    if (
+        type ===
+        "error"
+    ) {
+        icon.className =
+            "fa-solid fa-circle-exclamation";
+
+    } else if (
+        type ===
+        "success"
+    ) {
+        icon.className =
+            "fa-solid fa-circle-check";
+
+    } else {
+        icon.className =
+            "fa-solid fa-circle-info";
+    }
+
+    clearTimeout(
+        window.upcomingAlertTimer
+    );
+
+    window.upcomingAlertTimer =
+        setTimeout(
+            () => {
+                box.classList.remove(
+                    "show"
+                );
+            },
+            4500
+        );
+}
+
+
+function setText(
+    id,
+    value
+) {
+    const element =
+        document.getElementById(
+            id
+        );
+
+    if (element) {
+        element.textContent =
+            value;
+    }
+}
+
+
+function escapeHtml(value) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+function escapeJs(value) {
+    return String(
+        value ??
+        ""
+    )
+        .replaceAll("\\","\\\\")
+        .replaceAll("'","\\'")
+        .replaceAll("\n","\\n")
+        .replaceAll("\r","\\r");
+}
+</script>
+
+</body>
+</html>

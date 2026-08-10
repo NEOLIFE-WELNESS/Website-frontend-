@@ -447,7 +447,7 @@ a{
     margin-bottom:22px;
     padding:20px;
     display:grid;
-    grid-template-columns:minmax(260px,1fr) minmax(180px,.4fr) minmax(180px,.4fr) auto;
+    grid-template-columns:minmax(260px,1fr) minmax(180px,.4fr) minmax(180px,.4fr) minmax(170px,.4fr) auto;
     gap:13px;
     align-items:end;
     border:1px solid var(--border);
@@ -1336,6 +1336,21 @@ tbody tr:hover{
 
                 </div>
 
+                <div class="form-group">
+
+                    <label for="dateFilter">
+                        Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="dateFilter"
+                        class="form-control"
+                        onchange="applyFilters()"
+                    >
+
+                </div>
+
                 <button
                     type="button"
                     class="reset-btn"
@@ -1944,6 +1959,11 @@ function applyFilters() {
             "doctorFilter"
         ).value;
 
+    const selectedDate =
+        document.getElementById(
+            "dateFilter"
+        ).value;
+
     filteredConsultations =
         consultations.filter(
             function (consultation) {
@@ -1980,10 +2000,19 @@ function applyFilters() {
                     consultation.doctor ===
                         selectedDoctor;
 
+                const matchesDate =
+                    !selectedDate ||
+                    String(
+                        consultation.date ||
+                        ""
+                    ).substring(0, 10) ===
+                        selectedDate;
+
                 return (
                     matchesSearch &&
                     matchesStatus &&
-                    matchesDoctor
+                    matchesDoctor &&
+                    matchesDate
                 );
             }
         );
@@ -2002,6 +2031,10 @@ function resetFilters() {
 
     document.getElementById(
         "doctorFilter"
+    ).value = "";
+
+    document.getElementById(
+        "dateFilter"
     ).value = "";
 
     applyFilters();

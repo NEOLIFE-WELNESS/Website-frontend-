@@ -563,7 +563,7 @@ a{
 
 table{
     width:100%;
-    min-width:1450px;
+    min-width:800px;
     border-collapse:collapse;
 }
 
@@ -1309,13 +1309,9 @@ tbody tr:hover{
                             <tr>
                                 <th>ID</th>
                                 <th>Patient</th>
-                                <th>Age</th>
-                                <th>Appointment For</th>
                                 <th>Type</th>
-                                <th>Date</th>
-                                <th>Time</th>
+                                <th>Date & Time</th>
                                 <th>Status</th>
-                                <th>Change Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -1511,7 +1507,7 @@ async function loadAppointments(){
         body.innerHTML = `
             <tr>
                 <td
-                    colspan="10"
+                    colspan="6"
                     class="table-message"
                 >
                     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -1799,7 +1795,7 @@ function showTableLoading(){
     body.innerHTML = `
         <tr>
             <td
-                colspan="10"
+                colspan="6"
                 class="table-message"
             >
                 <i class="fa-solid fa-spinner fa-spin"></i>
@@ -1830,7 +1826,7 @@ function renderAppointments(){
         body.innerHTML = `
             <tr>
                 <td
-                    colspan="10"
+                    colspan="6"
                     class="table-message"
                 >
                     <i class="fa-solid fa-calendar-xmark"></i>
@@ -1894,35 +1890,22 @@ function renderAppointments(){
                         </div>
                     </td>
 
-                    <td>
-                        ${escapeHtml(
-                            appointment.age
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            appointment.appointmentFor
-                        )}
-                    </td>
 
                     <td>
                         ${escapeHtml(
                             appointment.type
                         )}
                     </td>
-
                     <td>
-                        ${escapeHtml(
-                            appointment.date
-                        )}
+                        <strong>
+                            ${escapeHtml(appointment.date)}
+                        </strong>
+                        <br>
+                        <small>
+                            ${escapeHtml(appointment.time)}
+                        </small>
                     </td>
 
-                    <td>
-                        ${escapeHtml(
-                            appointment.time
-                        )}
-                    </td>
 
                     <td>
                         <span
@@ -1936,32 +1919,6 @@ function renderAppointments(){
                         </span>
                     </td>
 
-                    <td>
-                        ${
-                            canConfirm
-                                ? `
-                                    <button
-                                        type="button"
-                                        class="reset-btn"
-                                        onclick="confirmAppointment('${appointment.id}')"
-                                    >
-                                        <i class="fa-solid fa-check"></i>
-                                        Confirm
-                                    </button>
-                                `
-                                : `
-                                    <span
-                                        class="status ${getStatusClass(
-                                            appointment.rawStatus
-                                        )}"
-                                    >
-                                        ${escapeHtml(
-                                            appointment.status
-                                        )}
-                                    </span>
-                                `
-                        }
-                    </td>
 
                     <td>
                         <button
@@ -1978,57 +1935,6 @@ function renderAppointments(){
             );
         }
     );
-}
-
-async function confirmAppointment(
-    appointmentId
-){
-    const appointment =
-        appointments.find(
-            item =>
-                String(item.id) ===
-                String(appointmentId)
-        );
-
-    if(!appointment){
-        return;
-    }
-
-    const confirmed =
-        window.confirm(
-            `Confirm appointment #${appointmentId} for ${appointment.patient}?`
-        );
-
-    if(!confirmed){
-        return;
-    }
-
-    try{
-        const result = await apiRequest(
-            `/api/appointments/${appointmentId}/confirm`,
-            {
-                method: "PUT"
-            }
-        );
-
-        window.alert(
-            result.message ||
-            "Appointment confirmed successfully."
-        );
-
-        await loadAppointments();
-
-    }catch(error){
-        console.error(
-            "Appointment confirmation failed:",
-            error
-        );
-
-        window.alert(
-            error.message ||
-            "Appointment could not be confirmed."
-        );
-    }
 }
 
 function viewAppointment(

@@ -1227,6 +1227,10 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
                 <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
                     Manage Availability
@@ -1238,16 +1242,16 @@
 
                 
 
-                <a href="doctor-appointments.html">
+                <a href="doctor-appointments.html" id="appointmentDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" id="consultationDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
 
-                <a href="video-recordings.html">
+                <a href="video-recordings.html" id="videoRecordingsMenu">
                     <i class="fa-solid fa-video"></i>
                     Video Recordings
                 </a>
@@ -1690,10 +1694,18 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
+            async function () {
                 requireDoctorLogin();
-                loadDoctorProfile();
-                loadTransactions();
+
+                /*
+                 * Load the doctor profile first so doctorId is available,
+                 * then apply ONLINE / OFFLINE / BOTH sidebar visibility.
+                 * Existing transaction functionality remains unchanged.
+                 */
+                await loadDoctorProfile();
+                await loadDoctorConsultationModes();
+
+                await loadTransactions();
             }
         );
 
@@ -1785,6 +1797,8 @@
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
             localStorage.removeItem("doctorId");
+            localStorage.removeItem("doctorHasOnline");
+            localStorage.removeItem("doctorHasOffline");
             localStorage.removeItem("userId");
 
             window.location.href =
@@ -1792,16 +1806,25 @@
         }
 
         async function loadDoctorProfile() {
+            const storedName =
+                localStorage.getItem("doctorName") ||
+                localStorage.getItem("name") ||
+                localStorage.getItem("userName") ||
+                "Doctor";
+
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/users/getProfile"
+                        "/api/doctors/my-profile"
                     );
 
+                const doctor =
+                    result.data || {};
+
                 const name =
-                    result.data?.name ||
-                    result.data?.doctorName ||
-                    "Doctor";
+                    doctor.name ||
+                    doctor.doctorName ||
+                    storedName;
 
                 document.getElementById(
                     "doctorTopbarName"
@@ -1810,15 +1833,326 @@
                 document.getElementById(
                     "doctorInitial"
                 ).textContent =
-                    name.charAt(0).toUpperCase();
+                    String(name)
+                        .replace(/^Dr\.?\s*/i, "")
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase() || "D";
+
+                if (
+                    doctor.id !== null &&
+                    doctor.id !== undefined
+                ) {
+                    localStorage.setItem(
+                        "doctorId",
+                        String(doctor.id)
+                    );
+                }
+
+                localStorage.setItem(
+                    "doctorName",
+                    name
+                );
+
+                localStorage.setItem(
+                    "doctor",
+                    JSON.stringify(doctor)
+                );
 
             } catch (error) {
                 console.error(
                     "Doctor profile failed:",
                     error
                 );
+
+                document.getElementById(
+                    "doctorTopbarName"
+                ).textContent =
+                    storedName;
+
+                document.getElementById(
+                    "doctorInitial"
+                ).textContent =
+                    String(storedName)
+                        .replace(/^Dr\.?\s*/i, "")
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase() || "D";
             }
         }
+
+
+        function getStoredDoctorId() {
+            const value =
+                localStorage.getItem(
+                    "doctorId"
+                );
+
+            if (
+                value === null ||
+                value === undefined ||
+                String(value).trim() === ""
+            ) {
+                return null;
+            }
+
+            const parsed =
+                Number(value);
+
+            return Number.isFinite(parsed)
+                ? parsed
+                : null;
+        }
+
+
+        async function loadDoctorConsultationModes() {
+            const doctorId =
+                getStoredDoctorId();
+
+            /*
+             * If the professional doctor ID is unavailable,
+             * preserve the existing sidebar.
+             */
+            if (!doctorId) {
+                console.warn(
+                    "Doctor ID is not available. Sidebar consultation mode was not filtered."
+                );
+
+                applyDoctorConsultationMode(
+                    null,
+                    null
+                );
+
+                return;
+            }
+
+            try {
+                const result =
+                    await doctorApiRequest(
+                        `/api/doctor-availability/doctor/${encodeURIComponent(
+                            doctorId
+                        )}`
+                    );
+
+                const availability =
+                    extractDoctorAvailability(
+                        result
+                    );
+
+                const activeAvailability =
+                    availability.filter(
+                        slot =>
+                            slot &&
+                            slot.active !== false
+                    );
+
+                const hasOnline =
+                    activeAvailability.some(
+                        slot =>
+                            String(
+                                slot.appointmentMode ||
+                                ""
+                            )
+                                .trim()
+                                .toUpperCase() ===
+                            "ONLINE"
+                    );
+
+                const hasOffline =
+                    activeAvailability.some(
+                        slot =>
+                            String(
+                                slot.appointmentMode ||
+                                ""
+                            )
+                                .trim()
+                                .toUpperCase() ===
+                            "OFFLINE"
+                    );
+
+                /*
+                 * No active availability yet:
+                 * keep the current sidebar unchanged.
+                 */
+                if (
+                    !hasOnline &&
+                    !hasOffline
+                ) {
+                    localStorage.removeItem(
+                        "doctorHasOnline"
+                    );
+
+                    localStorage.removeItem(
+                        "doctorHasOffline"
+                    );
+
+                    applyDoctorConsultationMode(
+                        null,
+                        null
+                    );
+
+                    return;
+                }
+
+                localStorage.setItem(
+                    "doctorHasOnline",
+                    String(hasOnline)
+                );
+
+                localStorage.setItem(
+                    "doctorHasOffline",
+                    String(hasOffline)
+                );
+
+                applyDoctorConsultationMode(
+                    hasOnline,
+                    hasOffline
+                );
+
+                console.log(
+                    "Doctor consultation modes:",
+                    {
+                        doctorId,
+                        hasOnline,
+                        hasOffline
+                    }
+                );
+
+            } catch (error) {
+                console.error(
+                    "Doctor availability mode loading failed:",
+                    error
+                );
+
+                const storedOnline =
+                    localStorage.getItem(
+                        "doctorHasOnline"
+                    );
+
+                const storedOffline =
+                    localStorage.getItem(
+                        "doctorHasOffline"
+                    );
+
+                if (
+                    storedOnline !== null ||
+                    storedOffline !== null
+                ) {
+                    applyDoctorConsultationMode(
+                        storedOnline === "true",
+                        storedOffline === "true"
+                    );
+
+                } else {
+                    applyDoctorConsultationMode(
+                        null,
+                        null
+                    );
+                }
+            }
+        }
+
+
+        function extractDoctorAvailability(result) {
+            if (Array.isArray(result)) {
+                return result;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data
+                )
+            ) {
+                return result.data;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data?.content
+                )
+            ) {
+                return result.data.content;
+            }
+
+            if (
+                Array.isArray(
+                    result?.content
+                )
+            ) {
+                return result.content;
+            }
+
+            return [];
+        }
+
+
+        function applyDoctorConsultationMode(
+            hasOnline,
+            hasOffline
+        ) {
+            const appointmentMenu =
+                document.getElementById(
+                    "appointmentDetailsMenu"
+                );
+
+            const consultationMenu =
+                document.getElementById(
+                    "consultationDetailsMenu"
+                );
+
+            const videoMenu =
+                document.getElementById(
+                    "videoRecordingsMenu"
+                );
+
+            /*
+             * null means the doctor's mode could not be determined.
+             * Preserve the original sidebar in that case.
+             */
+            if (
+                hasOnline === null ||
+                hasOffline === null
+            ) {
+                if (appointmentMenu) {
+                    appointmentMenu.style.display =
+                        "flex";
+                }
+
+                if (consultationMenu) {
+                    consultationMenu.style.display =
+                        "flex";
+                }
+
+                if (videoMenu) {
+                    videoMenu.style.display =
+                        "flex";
+                }
+
+                return;
+            }
+
+            if (appointmentMenu) {
+                appointmentMenu.style.display =
+                    hasOffline
+                        ? "flex"
+                        : "none";
+            }
+
+            if (consultationMenu) {
+                consultationMenu.style.display =
+                    hasOnline
+                        ? "flex"
+                        : "none";
+            }
+
+            if (videoMenu) {
+                videoMenu.style.display =
+                    hasOnline
+                        ? "flex"
+                        : "none";
+            }
+        }
+
 
         async function loadTransactions() {
             showLoading();

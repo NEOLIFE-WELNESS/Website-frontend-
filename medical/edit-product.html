@@ -1088,9 +1088,9 @@
                 </a>
 
                 <a href="daily-treatment.html">
-                    <i class="fa-solid fa-spa"></i>
-                    Daily Treatments
-                </a>
+                <i class="fa-solid fa-spa"></i>
+                Therapy Bookings
+            </a>
 
                 <a href="prescriptions.html">
                     <i class="fa-solid fa-file-prescription"></i>
@@ -2329,7 +2329,7 @@
 
             const result =
                 await staffApiRequest(
-                    `/api/products/getById/${encodeURIComponent(productId)}`
+                    `/api/products/${encodeURIComponent(productId)}`
                 );
 
             currentProduct =
@@ -2763,21 +2763,28 @@
             };
 
             try {
-                const result =
-                    await staffApiRequest(
-                        `/api/products/update/${encodeURIComponent(productId)}`,
-                        {
-                            method: "PUT",
+                const result = await fetch(
+                    `http://localhost:8085/api/products/update/${encodeURIComponent(productId)}`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + getAccessToken()
+                        },
+                        body: JSON.stringify(requestBody)
+                    }
+                );
 
-                            body:
-                                JSON.stringify(
-                                    requestBody
-                                )
-                        }
+                const updateResult = await result.json();
+
+                if (!result.ok || updateResult.success === false) {
+                    throw new Error(
+                        updateResult.message || "Product could not be updated."
                     );
+                }
 
                 showAlert(
-                    result.message ||
+                    updateResult.message ||
                     "Product updated successfully.",
                     "success"
                 );

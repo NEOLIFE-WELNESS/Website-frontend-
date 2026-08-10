@@ -814,6 +814,10 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
                 <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
                     Manage Availability
@@ -825,16 +829,16 @@
 
                 
 
-                <a href="doctor-appointments.html" class="active">
+                <a href="doctor-appointments.html" id="appointmentDetailsMenu" class="active">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" id="consultationDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
 
-                <a href="video-recordings.html">
+                <a href="video-recordings.html" id="videoRecordingsMenu">
                     <i class="fa-solid fa-video"></i>
                     Video Recordings
                 </a>
@@ -1181,8 +1185,20 @@ document.addEventListener("DOMContentLoaded",async()=>{
 if(!guard())return;
 bindFilters();
 setTreatmentDateLimits();
+
+/*
+ * Load the profile first because doctorId is needed by the
+ * doctor-availability API used for sidebar mode filtering.
+ */
+await loadProfile();
+
+/*
+ * Apply ONLINE / OFFLINE / BOTH visibility to the Clinical menu.
+ * All existing Appointment Details functionality remains unchanged.
+ */
+await loadDoctorConsultationModes();
+
 await Promise.all([
-loadProfile(),
 loadAppointments(),
 loadTherapists()
 ]);
@@ -1281,6 +1297,279 @@ function updateDoctorHeader(name){
     cleanName
   );
 }
+
+function getStoredDoctorId(){
+const value=localStorage.getItem("doctorId");
+
+if(
+value===null||
+value===undefined||
+String(value).trim()===""
+){
+return null;
+}
+
+const parsed=Number(value);
+
+return Number.isFinite(parsed)
+?parsed
+:null;
+}
+
+
+async function loadDoctorConsultationModes(){
+const doctorId=getStoredDoctorId();
+
+/*
+ * If doctor ID is unavailable, preserve the existing sidebar rather
+ * than incorrectly hiding options.
+ */
+if(!doctorId){
+console.warn(
+"Doctor ID is not available. Sidebar consultation mode was not filtered."
+);
+
+applyDoctorConsultationMode(
+null,
+null
+);
+
+return;
+}
+
+try{
+const result=await api(
+`/api/doctor-availability/doctor/${encodeURIComponent(
+doctorId
+)}`
+);
+
+const slots=extractAvailabilityArray(result);
+
+const activeSlots=slots.filter(
+slot=>
+slot&&
+slot.active!==false
+);
+
+const hasOnline=activeSlots.some(
+slot=>
+String(
+slot.appointmentMode||
+""
+)
+.trim()
+.toUpperCase()==="ONLINE"
+);
+
+const hasOffline=activeSlots.some(
+slot=>
+String(
+slot.appointmentMode||
+""
+)
+.trim()
+.toUpperCase()==="OFFLINE"
+);
+
+/*
+ * If there are no active availability records yet, keep all current
+ * Clinical links visible. This prevents accidental lock-out while
+ * the doctor is still configuring availability.
+ */
+if(
+!hasOnline&&
+!hasOffline
+){
+localStorage.removeItem(
+"doctorHasOnline"
+);
+
+localStorage.removeItem(
+"doctorHasOffline"
+);
+
+applyDoctorConsultationMode(
+null,
+null
+);
+
+return;
+}
+
+localStorage.setItem(
+"doctorHasOnline",
+String(hasOnline)
+);
+
+localStorage.setItem(
+"doctorHasOffline",
+String(hasOffline)
+);
+
+applyDoctorConsultationMode(
+hasOnline,
+hasOffline
+);
+
+console.log(
+"Doctor consultation modes:",
+{
+doctorId,
+hasOnline,
+hasOffline
+}
+);
+
+}catch(error){
+console.error(
+"Doctor availability mode loading failed:",
+error
+);
+
+/*
+ * Use the latest cached mode if the availability request fails.
+ * If nothing is cached, keep the current sidebar unchanged.
+ */
+const storedOnline=
+localStorage.getItem(
+"doctorHasOnline"
+);
+
+const storedOffline=
+localStorage.getItem(
+"doctorHasOffline"
+);
+
+if(
+storedOnline!==null||
+storedOffline!==null
+){
+applyDoctorConsultationMode(
+storedOnline==="true",
+storedOffline==="true"
+);
+
+}else{
+applyDoctorConsultationMode(
+null,
+null
+);
+}
+}
+}
+
+
+function extractAvailabilityArray(result){
+if(Array.isArray(result)){
+return result;
+}
+
+if(Array.isArray(result?.data)){
+return result.data;
+}
+
+if(Array.isArray(result?.data?.content)){
+return result.data.content;
+}
+
+if(Array.isArray(result?.content)){
+return result.content;
+}
+
+return [];
+}
+
+
+function applyDoctorConsultationMode(
+hasOnline,
+hasOffline
+){
+const appointmentMenu=
+document.getElementById(
+"appointmentDetailsMenu"
+);
+
+const consultationMenu=
+document.getElementById(
+"consultationDetailsMenu"
+);
+
+const videoMenu=
+document.getElementById(
+"videoRecordingsMenu"
+);
+
+/*
+ * null means the doctor's mode could not be determined.
+ * Preserve the original sidebar in that case.
+ */
+if(
+hasOnline===null||
+hasOffline===null
+){
+if(appointmentMenu){
+appointmentMenu.style.display="flex";
+}
+
+if(consultationMenu){
+consultationMenu.style.display="flex";
+}
+
+if(videoMenu){
+videoMenu.style.display="flex";
+}
+
+return;
+}
+
+/*
+ * OFFLINE only:
+ *   Appointment Details shown.
+ *
+ * ONLINE only:
+ *   Consultation Details + Video Recordings shown.
+ *
+ * BOTH:
+ *   All three shown.
+ */
+if(appointmentMenu){
+appointmentMenu.style.display=
+hasOffline
+?"flex"
+:"none";
+}
+
+if(consultationMenu){
+consultationMenu.style.display=
+hasOnline
+?"flex"
+:"none";
+}
+
+if(videoMenu){
+videoMenu.style.display=
+hasOnline
+?"flex"
+:"none";
+}
+
+/*
+ * Appointment Details is an offline-only page.
+ * If this doctor has ONLINE availability but no OFFLINE availability,
+ * do not leave them on an unavailable page.
+ */
+if(
+hasOnline===true&&
+hasOffline===false
+){
+window.location.replace(
+"online-consultation.html"
+);
+}
+}
+
+
 async function loadAppointments(){showLoading();try{const r=await api("/api/appointments/doctor/my-appointments");const data=Array.isArray(r.data)?r.data:Array.isArray(r.data?.content)?r.data.content:[];appointments=data.map(normalize);applyFilters()}catch(e){appointments=[];applyFilters();showAlert(e.message||"Could not load appointments","error")}}
 function normalize(a){return{id:a.id,patientId:a.patientId,patientName:a.patientName||a.name||"Patient",phoneNumber:a.phoneNumber||"—",age:a.age??"—",gender:a.gender||"—",doctorName:a.doctorName||"—",specialization:a.doctorSpecialization||"—",date:a.appointmentDate||a.date||"",startTime:a.startTime||a.time||"",endTime:a.endTime||"",mode:String(a.appointmentMode||"OFFLINE").toUpperCase(),status:String(a.status||"PENDING").toUpperCase(),symptoms:a.symptoms||"—",history:a.pastMedicalHistory||"—",bookingFee:a.bookingFee??0,paymentStatus:String(a.paymentStatus||"PENDING").toUpperCase(),cancellationReason:a.cancellationReason||"",rescheduleReason:a.rescheduleReason||"",createdAt:a.createdAt||""}}
 function bindFilters(){[searchInput,dateFilter,statusFilter,modeFilter].forEach(el=>el.addEventListener(el.tagName==="INPUT"?"input":"change",()=>{page=1;applyFilters()}))}

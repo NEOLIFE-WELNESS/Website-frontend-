@@ -1609,6 +1609,10 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
                 <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
                     Manage Availability
@@ -1620,16 +1624,16 @@
 
                 
 
-                <a href="doctor-appointments.html">
+                <a href="doctor-appointments.html" id="appointmentDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" id="consultationDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
 
-                <a href="video-recordings.html">
+                <a href="video-recordings.html" id="videoRecordingsMenu">
                     <i class="fa-solid fa-video"></i>
                     Video Recordings
                 </a>
@@ -2251,6 +2255,14 @@
                 setMinimumRescheduleDate();
 
                 await loadDoctorProfile();
+
+                /*
+                 * Load the doctor's active ONLINE/OFFLINE availability modes.
+                 * This controls only the relevant Clinical sidebar links.
+                 * All existing dashboard content and APIs remain unchanged.
+                 */
+                await loadDoctorConsultationModes();
+
                 await refreshDoctorDashboard();
             }
         );
@@ -2365,6 +2377,8 @@
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("doctorId");
             localStorage.removeItem("doctorName");
+            localStorage.removeItem("doctorHasOnline");
+            localStorage.removeItem("doctorHasOffline");
             localStorage.removeItem("role");
             localStorage.removeItem("userId");
             localStorage.removeItem("email");
@@ -2373,6 +2387,317 @@
 
             window.location.href = "../patient/login.html";
         }
+
+
+        /* =========================
+           DOCTOR CONSULTATION MODE
+        ========================== */
+
+        function getStoredDoctorId() {
+            const value =
+                localStorage.getItem("doctorId");
+
+            if (
+                value === null ||
+                value === undefined ||
+                String(value).trim() === ""
+            ) {
+                return null;
+            }
+
+            const parsed =
+                Number(value);
+
+            return Number.isFinite(parsed)
+                ? parsed
+                : null;
+        }
+
+
+        async function loadDoctorConsultationModes() {
+
+            const doctorId =
+                getStoredDoctorId();
+
+            /*
+             * If the profile API has not supplied a doctor ID, do not hide
+             * anything. Keeping both links visible is a safer fallback.
+             */
+            if (!doctorId) {
+
+                console.warn(
+                    "Doctor ID is not available. Consultation mode menu was not filtered."
+                );
+
+                applyDoctorConsultationMode(
+                    null,
+                    null
+                );
+
+                return;
+            }
+
+            try {
+
+                const result =
+                    await doctorApiRequest(
+                        `/api/doctor-availability/doctor/${encodeURIComponent(
+                            doctorId
+                        )}`
+                    );
+
+                const slots =
+                    extractAvailabilityArray(
+                        result
+                    );
+
+                const activeSlots =
+                    slots.filter(
+                        slot =>
+                            slot &&
+                            slot.active !== false
+                    );
+
+                /*
+                 * appointmentMode is returned by the existing
+                 * doctor-availability API as ONLINE or OFFLINE.
+                 */
+                const hasOnline =
+                    activeSlots.some(
+                        slot =>
+                            String(
+                                slot.appointmentMode ||
+                                ""
+                            )
+                                .trim()
+                                .toUpperCase() ===
+                            "ONLINE"
+                    );
+
+                const hasOffline =
+                    activeSlots.some(
+                        slot =>
+                            String(
+                                slot.appointmentMode ||
+                                ""
+                            )
+                                .trim()
+                                .toUpperCase() ===
+                            "OFFLINE"
+                    );
+
+                /*
+                 * If there are no active availability records yet, keep the
+                 * existing menu unchanged instead of hiding both options.
+                 */
+                if (
+                    !hasOnline &&
+                    !hasOffline
+                ) {
+
+                    localStorage.removeItem(
+                        "doctorHasOnline"
+                    );
+
+                    localStorage.removeItem(
+                        "doctorHasOffline"
+                    );
+
+                    applyDoctorConsultationMode(
+                        null,
+                        null
+                    );
+
+                    return;
+                }
+
+                localStorage.setItem(
+                    "doctorHasOnline",
+                    String(hasOnline)
+                );
+
+                localStorage.setItem(
+                    "doctorHasOffline",
+                    String(hasOffline)
+                );
+
+                applyDoctorConsultationMode(
+                    hasOnline,
+                    hasOffline
+                );
+
+                console.log(
+                    "Doctor consultation modes:",
+                    {
+                        doctorId,
+                        hasOnline,
+                        hasOffline
+                    }
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Doctor availability mode loading failed:",
+                    error
+                );
+
+                /*
+                 * Do not break the whole dashboard if this optional menu
+                 * filtering request fails. Use the most recently stored mode
+                 * when available; otherwise preserve the existing menu.
+                 */
+                const storedOnline =
+                    localStorage.getItem(
+                        "doctorHasOnline"
+                    );
+
+                const storedOffline =
+                    localStorage.getItem(
+                        "doctorHasOffline"
+                    );
+
+                if (
+                    storedOnline !== null ||
+                    storedOffline !== null
+                ) {
+
+                    applyDoctorConsultationMode(
+                        storedOnline === "true",
+                        storedOffline === "true"
+                    );
+
+                } else {
+
+                    applyDoctorConsultationMode(
+                        null,
+                        null
+                    );
+                }
+            }
+        }
+
+
+        function extractAvailabilityArray(
+            result
+        ) {
+
+            if (
+                Array.isArray(
+                    result
+                )
+            ) {
+                return result;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data
+                )
+            ) {
+                return result.data;
+            }
+
+            if (
+                Array.isArray(
+                    result?.data?.content
+                )
+            ) {
+                return result.data.content;
+            }
+
+            if (
+                Array.isArray(
+                    result?.content
+                )
+            ) {
+                return result.content;
+            }
+
+            return [];
+        }
+
+
+        function applyDoctorConsultationMode(
+            hasOnline,
+            hasOffline
+        ) {
+
+            const appointmentMenu =
+                document.getElementById(
+                    "appointmentDetailsMenu"
+                );
+
+            const consultationMenu =
+                document.getElementById(
+                    "consultationDetailsMenu"
+                );
+
+            const videoMenu =
+                document.getElementById(
+                    "videoRecordingsMenu"
+                );
+
+            /*
+             * null means mode could not be determined.
+             * Preserve the existing dashboard/sidebar in that case.
+             */
+            if (
+                hasOnline === null ||
+                hasOffline === null
+            ) {
+
+                if (appointmentMenu) {
+                    appointmentMenu.style.display =
+                        "flex";
+                }
+
+                if (consultationMenu) {
+                    consultationMenu.style.display =
+                        "flex";
+                }
+
+                if (videoMenu) {
+                    videoMenu.style.display =
+                        "flex";
+                }
+
+                return;
+            }
+
+            /*
+             * OFFLINE availability:
+             * Appointment Details is available.
+             */
+            if (appointmentMenu) {
+
+                appointmentMenu.style.display =
+                    hasOffline
+                        ? "flex"
+                        : "none";
+            }
+
+            /*
+             * ONLINE availability:
+             * Consultation Details and Video Recordings are available.
+             */
+            if (consultationMenu) {
+
+                consultationMenu.style.display =
+                    hasOnline
+                        ? "flex"
+                        : "none";
+            }
+
+            if (videoMenu) {
+
+                videoMenu.style.display =
+                    hasOnline
+                        ? "flex"
+                        : "none";
+            }
+        }
+
 
         /* =========================
            DOCTOR PROFILE

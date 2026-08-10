@@ -904,6 +904,11 @@ textarea.control{min-height:112px;}
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
                 <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
                     Manage Availability
@@ -915,11 +920,11 @@ textarea.control{min-height:112px;}
 
                 
 
-                <a href="doctor-appointments.html">
+                <a href="doctor-appointments.html" id="appointmentDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" id="consultationDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
@@ -929,7 +934,7 @@ textarea.control{min-height:112px;}
                     Prescription Pad
                 </a>
 
-                <a href="video-recordings.html">
+                <a href="video-recordings.html" id="videoRecordingsMenu">
                     <i class="fa-solid fa-video"></i>
                     Video Recordings
                 </a>
@@ -1154,10 +1159,21 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
   addMedicineRow();
 
-  await Promise.all([
-    loadDoctorProfile(),
-    loadProducts()
-  ]);
+  /*
+   * Load the doctor profile first because the availability API
+   * needs the logged-in doctor's professional doctor ID.
+   */
+  await loadDoctorProfile();
+
+  /*
+   * Apply ONLINE / OFFLINE / BOTH visibility only to the
+   * Clinical sidebar links. Prescription Pad itself remains
+   * available because it is used by appointment, consultation
+   * and walk-in prescription workflows.
+   */
+  await loadDoctorConsultationModes();
+
+  await loadProducts();
 
   if(
     prescriptionMode==="WALK_IN"
@@ -1315,6 +1331,289 @@ function updateDoctorHeader(name){
     cleanName
   );
 }
+
+
+function getStoredDoctorId(){
+  const value=
+    localStorage.getItem(
+      "doctorId"
+    );
+
+  if(
+    value===null||
+    value===undefined||
+    String(value).trim()===""
+  ){
+    return null;
+  }
+
+  const parsed=
+    Number(value);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : null;
+}
+
+
+async function loadDoctorConsultationModes(){
+  const doctorId=
+    getStoredDoctorId();
+
+  /*
+   * If the doctor ID cannot be determined, do not hide any
+   * existing navigation. This avoids incorrectly locking the
+   * doctor out because of a profile/API problem.
+   */
+  if(!doctorId){
+    console.warn(
+      "Doctor ID is not available. Sidebar consultation mode was not filtered."
+    );
+
+    applyDoctorConsultationMode(
+      null,
+      null
+    );
+
+    return;
+  }
+
+  try{
+    const result=
+      await api(
+        `/api/doctor-availability/doctor/${encodeURIComponent(
+          doctorId
+        )}`
+      );
+
+    const availability=
+      extractDoctorAvailability(
+        result
+      );
+
+    const activeAvailability=
+      availability.filter(
+        slot=>
+          slot&&
+          slot.active!==false
+      );
+
+    const hasOnline=
+      activeAvailability.some(
+        slot=>
+          String(
+            slot.appointmentMode||
+            ""
+          )
+            .trim()
+            .toUpperCase()==="ONLINE"
+      );
+
+    const hasOffline=
+      activeAvailability.some(
+        slot=>
+          String(
+            slot.appointmentMode||
+            ""
+          )
+            .trim()
+            .toUpperCase()==="OFFLINE"
+      );
+
+    /*
+     * If no active availability is configured yet, preserve
+     * the current sidebar instead of hiding both options.
+     */
+    if(
+      !hasOnline&&
+      !hasOffline
+    ){
+      localStorage.removeItem(
+        "doctorHasOnline"
+      );
+
+      localStorage.removeItem(
+        "doctorHasOffline"
+      );
+
+      applyDoctorConsultationMode(
+        null,
+        null
+      );
+
+      return;
+    }
+
+    localStorage.setItem(
+      "doctorHasOnline",
+      String(hasOnline)
+    );
+
+    localStorage.setItem(
+      "doctorHasOffline",
+      String(hasOffline)
+    );
+
+    applyDoctorConsultationMode(
+      hasOnline,
+      hasOffline
+    );
+
+    console.log(
+      "Doctor consultation modes:",
+      {
+        doctorId,
+        hasOnline,
+        hasOffline
+      }
+    );
+
+  }catch(error){
+    console.error(
+      "Doctor availability mode loading failed:",
+      error
+    );
+
+    /*
+     * Fall back to the last successfully determined mode.
+     * If nothing was cached, keep the original sidebar.
+     */
+    const storedOnline=
+      localStorage.getItem(
+        "doctorHasOnline"
+      );
+
+    const storedOffline=
+      localStorage.getItem(
+        "doctorHasOffline"
+      );
+
+    if(
+      storedOnline!==null||
+      storedOffline!==null
+    ){
+      applyDoctorConsultationMode(
+        storedOnline==="true",
+        storedOffline==="true"
+      );
+
+    }else{
+      applyDoctorConsultationMode(
+        null,
+        null
+      );
+    }
+  }
+}
+
+
+function extractDoctorAvailability(result){
+  if(Array.isArray(result)){
+    return result;
+  }
+
+  if(
+    Array.isArray(
+      result?.data
+    )
+  ){
+    return result.data;
+  }
+
+  if(
+    Array.isArray(
+      result?.data?.content
+    )
+  ){
+    return result.data.content;
+  }
+
+  if(
+    Array.isArray(
+      result?.content
+    )
+  ){
+    return result.content;
+  }
+
+  return [];
+}
+
+
+function applyDoctorConsultationMode(
+  hasOnline,
+  hasOffline
+){
+  const appointmentDetails=
+    document.getElementById(
+      "appointmentDetailsMenu"
+    );
+
+  const consultationDetails=
+    document.getElementById(
+      "consultationDetailsMenu"
+    );
+
+  const videoRecordings=
+    document.getElementById(
+      "videoRecordingsMenu"
+    );
+
+  /*
+   * null means the mode could not be determined safely.
+   * Preserve the original sidebar in that situation.
+   */
+  if(
+    hasOnline===null||
+    hasOffline===null
+  ){
+    if(appointmentDetails){
+      appointmentDetails.style.display=
+        "flex";
+    }
+
+    if(consultationDetails){
+      consultationDetails.style.display=
+        "flex";
+    }
+
+    if(videoRecordings){
+      videoRecordings.style.display=
+        "flex";
+    }
+
+    return;
+  }
+
+  /*
+   * OFFLINE availability controls Appointment Details.
+   */
+  if(appointmentDetails){
+    appointmentDetails.style.display=
+      hasOffline
+        ? "flex"
+        : "none";
+  }
+
+  /*
+   * ONLINE availability controls Consultation Details and
+   * Video Recordings.
+   */
+  if(consultationDetails){
+    consultationDetails.style.display=
+      hasOnline
+        ? "flex"
+        : "none";
+  }
+
+  if(videoRecordings){
+    videoRecordings.style.display=
+      hasOnline
+        ? "flex"
+        : "none";
+  }
+}
+
 
 async function loadProducts(){
   try{

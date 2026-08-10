@@ -1523,6 +1523,12 @@ a{
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
+
                 <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
                     Manage Availability
@@ -1534,16 +1540,16 @@ a{
 
                 
 
-                <a href="doctor-appointments.html">
+                <a href="doctor-appointments.html" id="appointmentDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Appointment Details
                 </a>
-                <a href="online-consultation.html">
+                <a href="online-consultation.html" id="consultationDetailsMenu">
                     <i class="fa-solid fa-clipboard-list"></i>
                     Consultation Details
                 </a>
 
-                <a href="video-recordings.html">
+                <a href="video-recordings.html" id="videoRecordingsMenu">
                     <i class="fa-solid fa-video"></i>
                     Video Recordings
                 </a>
@@ -1731,6 +1737,14 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   setActivePatientSidebar();
   await loadDoctorProfile();
+
+  /*
+   * Detect the doctor's active ONLINE / OFFLINE availability.
+   * This only controls the Clinical sidebar links.
+   * Existing patient functionality remains unchanged.
+   */
+  await loadDoctorConsultationModes();
+
   await loadPatients();
   applyInitialPatientView();
 });
@@ -1910,6 +1924,271 @@ function updateDoctorHeader(name){
     cleanName
   );
 }
+
+
+function getStoredDoctorId(){
+  const value=
+    localStorage.getItem("doctorId");
+
+  if(
+    value===null||
+    value===undefined||
+    String(value).trim()===""
+  ){
+    return null;
+  }
+
+  const parsed=
+    Number(value);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : null;
+}
+
+
+async function loadDoctorConsultationModes(){
+  const doctorId=
+    getStoredDoctorId();
+
+  if(!doctorId){
+    console.warn(
+      "Doctor ID is not available. Sidebar mode was not filtered."
+    );
+
+    applyDoctorConsultationMode(
+      null,
+      null
+    );
+
+    return;
+  }
+
+  try{
+    const result=
+      await apiRequest(
+        `/api/doctor-availability/doctor/${encodeURIComponent(
+          doctorId
+        )}`
+      );
+
+    const slots=
+      extractAvailabilityArray(
+        result
+      );
+
+    const activeSlots=
+      slots.filter(
+        slot=>
+          slot&&
+          slot.active!==false
+      );
+
+    const hasOnline=
+      activeSlots.some(
+        slot=>
+          String(
+            slot.appointmentMode||
+            ""
+          )
+            .trim()
+            .toUpperCase()==="ONLINE"
+      );
+
+    const hasOffline=
+      activeSlots.some(
+        slot=>
+          String(
+            slot.appointmentMode||
+            ""
+          )
+            .trim()
+            .toUpperCase()==="OFFLINE"
+      );
+
+    /*
+     * No active availability yet:
+     * leave the existing menu visible instead of hiding both.
+     */
+    if(
+      !hasOnline&&
+      !hasOffline
+    ){
+      localStorage.removeItem(
+        "doctorHasOnline"
+      );
+
+      localStorage.removeItem(
+        "doctorHasOffline"
+      );
+
+      applyDoctorConsultationMode(
+        null,
+        null
+      );
+
+      return;
+    }
+
+    localStorage.setItem(
+      "doctorHasOnline",
+      String(hasOnline)
+    );
+
+    localStorage.setItem(
+      "doctorHasOffline",
+      String(hasOffline)
+    );
+
+    applyDoctorConsultationMode(
+      hasOnline,
+      hasOffline
+    );
+
+    console.log(
+      "Doctor consultation modes:",
+      {
+        doctorId,
+        hasOnline,
+        hasOffline
+      }
+    );
+
+  }catch(error){
+    console.error(
+      "Doctor availability mode loading failed:",
+      error
+    );
+
+    const storedOnline=
+      localStorage.getItem(
+        "doctorHasOnline"
+      );
+
+    const storedOffline=
+      localStorage.getItem(
+        "doctorHasOffline"
+      );
+
+    if(
+      storedOnline!==null||
+      storedOffline!==null
+    ){
+      applyDoctorConsultationMode(
+        storedOnline==="true",
+        storedOffline==="true"
+      );
+
+    }else{
+      applyDoctorConsultationMode(
+        null,
+        null
+      );
+    }
+  }
+}
+
+
+function extractAvailabilityArray(result){
+  if(Array.isArray(result)){
+    return result;
+  }
+
+  if(
+    Array.isArray(
+      result?.data
+    )
+  ){
+    return result.data;
+  }
+
+  if(
+    Array.isArray(
+      result?.data?.content
+    )
+  ){
+    return result.data.content;
+  }
+
+  if(
+    Array.isArray(
+      result?.content
+    )
+  ){
+    return result.content;
+  }
+
+  return [];
+}
+
+
+function applyDoctorConsultationMode(
+  hasOnline,
+  hasOffline
+){
+  const appointmentMenu=
+    document.getElementById(
+      "appointmentDetailsMenu"
+    );
+
+  const consultationMenu=
+    document.getElementById(
+      "consultationDetailsMenu"
+    );
+
+  const videoMenu=
+    document.getElementById(
+      "videoRecordingsMenu"
+    );
+
+  /*
+   * null = the mode could not be determined.
+   * Preserve the current sidebar in that case.
+   */
+  if(
+    hasOnline===null||
+    hasOffline===null
+  ){
+    if(appointmentMenu){
+      appointmentMenu.style.display=
+        "flex";
+    }
+
+    if(consultationMenu){
+      consultationMenu.style.display=
+        "flex";
+    }
+
+    if(videoMenu){
+      videoMenu.style.display=
+        "flex";
+    }
+
+    return;
+  }
+
+  if(appointmentMenu){
+    appointmentMenu.style.display=
+      hasOffline
+        ? "flex"
+        : "none";
+  }
+
+  if(consultationMenu){
+    consultationMenu.style.display=
+      hasOnline
+        ? "flex"
+        : "none";
+  }
+
+  if(videoMenu){
+    videoMenu.style.display=
+      hasOnline
+        ? "flex"
+        : "none";
+  }
+}
+
 
 async function loadPatients(){
   showLoading();

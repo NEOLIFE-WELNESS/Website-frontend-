@@ -1335,6 +1335,10 @@ textarea.control{
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
+                <a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
                 <a href="doctor-availability.html">
                     <i class="fa-solid fa-users"></i>
                     Manage Availability
@@ -2281,7 +2285,7 @@ async function loadConsultations() {
                 ),
 
                 api(
-                    "/api/consultations/doctor/upcoming"
+                    "/api/consultations/doctor/my-consultations"
                 )
             ]);
 

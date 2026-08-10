@@ -715,109 +715,74 @@
         }
 
         /* =========================
-           IMAGE SELECTION
+           IMAGE UPLOAD
         ========================== */
 
-        .images-loading,
-        .images-message {
-            grid-column: 1 / -1;
+        .upload-zone {
+            position: relative;
 
-            padding: 30px 20px;
+            padding: 30px 22px;
+
+            border: 2px dashed #cbd8cf;
+            border-radius: 16px;
 
             text-align: center;
 
-            border: 1px dashed var(--border);
-            border-radius: 14px;
-
-            color: var(--muted);
             background: #fbfcfa;
 
-            font-size: 11px;
-            line-height: 1.6;
+            transition: 0.25s;
         }
 
-        .images-loading i,
-        .images-message i {
-            display: block;
-
-            margin-bottom: 9px;
-
-            color: var(--gold);
-            font-size: 22px;
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--gold);
+            background: #fffdf5;
         }
 
-        .uploaded-images-box {
-            display: grid;
-            grid-template-columns:
-                repeat(
-                    auto-fill,
-                    minmax(145px, 1fr)
-                );
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
 
-            gap: 15px;
-        }
+            width: 100%;
+            height: 100%;
 
-        .image-select-card {
-            overflow: hidden;
-
-            position: relative;
-
-            display: block;
-
-            border: 2px solid transparent;
-            border-radius: 14px;
-
-            background: #f8faf7;
+            opacity: 0;
 
             cursor: pointer;
-
-            transition: 0.22s;
         }
 
-        .image-select-card:hover {
-            border-color:
-                rgba(201, 154, 22, 0.45);
+        .upload-icon {
+            width: 54px;
+            height: 54px;
 
-            transform: translateY(-3px);
-        }
-
-        .image-select-card.selected {
-            border-color: var(--gold);
-
-            box-shadow:
-                0 0 0 3px
-                rgba(201, 154, 22, 0.13);
-        }
-
-        .image-select-card img {
-            width: 100%;
-            height: 125px;
-
-            display: block;
-
-            object-fit: cover;
-        }
-
-        .image-select-footer {
-            padding: 10px;
+            margin: 0 auto 12px;
 
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+
+            border-radius: 15px;
+
+            color: var(--gold-dark);
+            background: #fff7dc;
+
+            font-size: 23px;
+        }
+
+        .upload-zone h3 {
+            margin-bottom: 6px;
 
             color: var(--dark-green);
 
-            font-size: 10px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 800;
         }
 
-        .image-select-footer input {
-            width: 16px;
-            height: 16px;
+        .upload-zone p {
+            color: var(--muted);
 
-            flex-shrink: 0;
-
-            accent-color: var(--dark-green);
+            font-size: 10px;
+            line-height: 1.6;
         }
 
         .selected-images-title {
@@ -838,10 +803,10 @@
             grid-template-columns:
                 repeat(
                     auto-fill,
-                    minmax(125px, 1fr)
+                    minmax(145px, 1fr)
                 );
 
-            gap: 13px;
+            gap: 14px;
         }
 
         .preview-card {
@@ -850,18 +815,44 @@
             position: relative;
 
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 13px;
 
             background: var(--white);
         }
 
         .preview-card img {
             width: 100%;
-            height: 110px;
+            height: 125px;
 
             display: block;
 
             object-fit: cover;
+        }
+
+        .preview-info {
+            padding: 9px 10px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .preview-name {
+            overflow: hidden;
+
+            color: var(--dark-green);
+
+            font-size: 10px;
+            font-weight: 800;
+
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-size {
+            color: var(--muted);
+
+            font-size: 9px;
         }
 
         .preview-remove {
@@ -880,14 +871,13 @@
             border-radius: 50%;
 
             color: var(--white);
-            background:
-                rgba(199, 71, 71, 0.92);
+            background: rgba(199, 71, 71, 0.92);
 
             font-size: 11px;
         }
 
         .no-selected-images {
-            padding: 20px;
+            padding: 22px;
 
             grid-column: 1 / -1;
 
@@ -900,6 +890,27 @@
             background: #fbfcfa;
 
             font-size: 10px;
+        }
+
+        .upload-progress {
+            margin-top: 14px;
+            padding: 12px 14px;
+
+            display: none;
+            align-items: center;
+            gap: 10px;
+
+            border-radius: 11px;
+
+            color: var(--info);
+            background: var(--info-light);
+
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .upload-progress.show {
+            display: flex;
         }
 
         /* =========================
@@ -1147,11 +1158,6 @@
         }
 
         @media (max-width: 480px) {
-            .uploaded-images-box {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
             .image-preview-box {
                 grid-template-columns:
                     repeat(2, minmax(0, 1fr));
@@ -1376,7 +1382,7 @@
 
                         <p>
                             Enter product information, pricing, stock,
-                            manufacturer, expiry details and select one primary product image already uploaded to the system.
+                            manufacturer, expiry details and upload product images directly from your device.
                         </p>
 
                     </div>
@@ -1700,47 +1706,72 @@
 
                             </section>
 
-                            <!-- IMAGE SELECTION -->
+                            <!-- PRODUCT IMAGE UPLOAD -->
 
                             <section class="form-section">
 
                                 <div class="section-title">
                                     <i class="fa-solid fa-images"></i>
-                                    Primary Product Image
+                                    Product Images
                                 </div>
 
-                                <div
-                                    class="uploaded-images-box"
-                                    id="uploadedImagesBox"
-                                >
+                                <div class="form-group full-width">
 
-                                    <div class="images-loading">
+                                    <label for="productImages">
+                                        Upload Product Images
+                                        <span class="required">*</span>
+                                    </label>
 
-                                        <i class="fa-solid fa-spinner fa-spin"></i>
+                                    <div
+                                        class="upload-zone"
+                                        id="uploadZone"
+                                    >
 
-                                        Loading uploaded product images...
+                                        <input
+                                            type="file"
+                                            id="productImages"
+                                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                                            multiple
+                                            onchange="handleImageSelection(event)"
+                                        >
+
+                                        <div class="upload-icon">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        </div>
+
+                                        <h3>
+                                            Click to upload or drag & drop images here
+                                        </h3>
+
+                                        <p>
+                                            JPG, JPEG, PNG or WEBP · Maximum 10 images · Maximum 5 MB per image.
+                                            The first image will be used as the primary product image.
+                                        </p>
 
                                     </div>
 
-                                </div>
+                                    <div class="selected-images-title">
+                                        Selected Images:
+                                        <span id="selectedImageCount">0 Images</span>
+                                    </div>
 
-                                <div class="selected-images-title">
+                                    <div
+                                        class="image-preview-box"
+                                        id="imagePreviewBox"
+                                    >
+                                        <div class="no-selected-images">
+                                            No product images selected.
+                                        </div>
+                                    </div>
 
-                                    Selected Image:
-
-                                    <span id="selectedImageCount">
-                                        0
-                                    </span>
-
-                                </div>
-
-                                <div
-                                    class="image-preview-box"
-                                    id="imagePreviewBox"
-                                >
-
-                                    <div class="no-selected-images">
-                                        No product image selected.
+                                    <div
+                                        class="upload-progress"
+                                        id="uploadProgress"
+                                    >
+                                        <i class="fa-solid fa-spinner fa-spin"></i>
+                                        <span id="uploadProgressText">
+                                            Uploading product images...
+                                        </span>
                                     </div>
 
                                 </div>
@@ -1785,8 +1816,11 @@
     <script>
 const API_BASE_URL = "http://localhost:8085";
 
-let selectedImageUrl = "";
-let availableImages = [];
+const MAX_IMAGES = 10;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+let selectedImageFiles = [];
+let selectedImageUrls = [];
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -1797,10 +1831,12 @@ document.addEventListener(
 
         setDateLimits();
 
+        setupDragAndDrop();
+        renderImagePreviews();
+
         await Promise.allSettled([
             loadStaffProfile(),
-            loadManufacturers(),
-            loadProductImages()
+            loadManufacturers()
         ]);
 
         document
@@ -2150,263 +2186,464 @@ async function loadManufacturers() {
 }
 
 /* =========================
-   PRODUCT IMAGES
+   PRODUCT IMAGE UPLOAD
 ========================= */
 
-async function loadProductImages() {
-    const box =
-        document.getElementById(
-            "uploadedImagesBox"
+function handleImageSelection(event) {
+    const files =
+        Array.from(
+            event.target.files || []
         );
 
-    try {
-        const result =
-            await staffApiRequest(
-                "/api/images/module/PRODUCT"
-            );
+    addSelectedFiles(files);
 
-        availableImages =
-            extractArray(
-                result.data
-            ).filter(
-                image =>
-                    String(
-                        image.contentType || ""
-                    ).startsWith("image/")
-            );
-
-        renderAvailableImages();
-
-    } catch (error) {
-        console.error(
-            "Product image loading failed:",
-            error
-        );
-
-        box.innerHTML = `
-            <div class="images-message">
-                <i class="fa-solid fa-image"></i>
-                ${escapeHtml(
-                    error.message ||
-                    "Product images could not be loaded."
-                )}
-            </div>
-        `;
-
-        showAlert(
-            error.message ||
-            "Product images could not be loaded.",
-            "error"
-        );
-    }
+    /*
+     * Reset the native input so the same image can be
+     * selected again later after removing it.
+     */
+    event.target.value = "";
 }
 
-function renderAvailableImages() {
-    const box =
-        document.getElementById(
-            "uploadedImagesBox"
+
+function addSelectedFiles(files) {
+    const validFiles = [];
+
+    for (const file of files) {
+        if (
+            !String(
+                file.type || ""
+            ).startsWith("image/")
+        ) {
+            showAlert(
+                `${file.name} is not a valid image file.`,
+                "error"
+            );
+
+            continue;
+        }
+
+        if (
+            file.size >
+            MAX_IMAGE_SIZE
+        ) {
+            showAlert(
+                `${file.name} is larger than 5 MB.`,
+                "error"
+            );
+
+            continue;
+        }
+
+        const duplicate =
+            selectedImageFiles.some(
+                existing =>
+                    existing.name === file.name &&
+                    existing.size === file.size &&
+                    existing.lastModified ===
+                        file.lastModified
+            );
+
+        if (!duplicate) {
+            validFiles.push(file);
+        }
+    }
+
+    const remainingSlots =
+        MAX_IMAGES -
+        selectedImageFiles.length;
+
+    if (
+        remainingSlots <= 0
+    ) {
+        showAlert(
+            `You can upload a maximum of ${MAX_IMAGES} images.`,
+            "error"
         );
 
-    if (!availableImages.length) {
-        box.innerHTML = `
-            <div class="images-message">
-                <i class="fa-solid fa-images"></i>
-                No product images have been uploaded.
-            </div>
-        `;
-
-        renderSelectedImage();
         return;
     }
 
-    box.innerHTML =
-        availableImages
-            .map(
-                image => {
-                    const fileUrl =
-                        image.fileUrl ||
-                        image.imageUrl ||
-                        "";
+    if (
+        validFiles.length >
+        remainingSlots
+    ) {
+        showAlert(
+            `Only ${remainingSlots} more image${
+                remainingSlots === 1
+                    ? ""
+                    : "s"
+            } can be added.`,
+            "info"
+        );
+    }
 
-                    const fullUrl =
-                        getImageUrl(
-                            fileUrl
-                        );
+    selectedImageFiles.push(
+        ...validFiles.slice(
+            0,
+            remainingSlots
+        )
+    );
 
-                    return `
-                        <label
-                            class="image-select-card ${
-                                selectedImageUrl === fileUrl
-                                    ? "selected"
-                                    : ""
-                            }"
-                        >
-                            <img
-                                src="${escapeHtml(
-                                    fullUrl
-                                )}"
-                                alt="${escapeHtml(
-                                    image.fileName ||
-                                    "Product image"
-                                )}"
-                                onerror="handleImageError(this)"
-                            >
-
-                            <div class="image-select-footer">
-
-                                <input
-                                    type="radio"
-                                    name="primaryProductImage"
-                                    value="${escapeHtml(
-                                        fileUrl
-                                    )}"
-                                    ${
-                                        selectedImageUrl === fileUrl
-                                            ? "checked"
-                                            : ""
-                                    }
-                                    onchange="selectProductImage(this)"
-                                >
-
-                                <span>Select Image</span>
-
-                            </div>
-                        </label>
-                    `;
-                }
-            )
-            .join("");
+    renderImagePreviews();
 }
 
-function selectProductImage(radio) {
-    selectedImageUrl =
-        radio.value;
 
-    document
-        .querySelectorAll(
-            ".image-select-card"
-        )
-        .forEach(
-            card =>
-                card.classList.remove(
-                    "selected"
-                )
-        );
-
-    radio
-        .closest(
-            ".image-select-card"
-        )
-        ?.classList.add(
-            "selected"
-        );
-
-    renderSelectedImage();
-}
-
-function removeSelectedImage() {
-    selectedImageUrl = "";
-
-    document
-        .querySelectorAll(
-            'input[name="primaryProductImage"]'
-        )
-        .forEach(
-            radio => {
-                radio.checked = false;
-
-                radio
-                    .closest(
-                        ".image-select-card"
-                    )
-                    ?.classList.remove(
-                        "selected"
-                    );
-            }
-        );
-
-    renderSelectedImage();
-}
-
-function renderSelectedImage() {
+function renderImagePreviews() {
     const previewBox =
         document.getElementById(
             "imagePreviewBox"
         );
 
-    setText(
-        "selectedImageCount",
-        selectedImageUrl
-            ? 1
-            : 0
-    );
+    const count =
+        document.getElementById(
+            "selectedImageCount"
+        );
 
-    if (!selectedImageUrl) {
+    count.textContent =
+        `${selectedImageFiles.length} Image${
+            selectedImageFiles.length === 1
+                ? ""
+                : "s"
+        }`;
+
+    if (
+        !selectedImageFiles.length
+    ) {
         previewBox.innerHTML = `
             <div class="no-selected-images">
-                No product image selected.
+                No product images selected.
             </div>
         `;
 
         return;
     }
 
-    previewBox.innerHTML = `
-        <div class="preview-card">
+    previewBox.innerHTML = "";
 
-            <img
-                src="${escapeHtml(
-                    getImageUrl(
-                        selectedImageUrl
-                    )
-                )}"
-                alt="Selected product image"
-                onerror="handleImageError(this)"
-            >
+    selectedImageFiles.forEach(
+        (file, index) => {
+            const card =
+                document.createElement(
+                    "div"
+                );
 
-            <button
-                type="button"
-                class="preview-remove"
-                title="Remove image"
-                onclick="removeSelectedImage()"
-            >
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            card.className =
+                "preview-card";
 
-        </div>
-    `;
+            const objectUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+            card.innerHTML = `
+                <img
+                    src="${objectUrl}"
+                    alt="${escapeHtml(
+                        file.name
+                    )}"
+                >
+
+                <button
+                    type="button"
+                    class="preview-remove"
+                    onclick="removeSelectedImage(${index})"
+                    title="Remove image"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <div class="preview-info">
+
+                    <span class="preview-name">
+                        ${
+                            index === 0
+                                ? "Primary: "
+                                : ""
+                        }${escapeHtml(
+                            file.name
+                        )}
+                    </span>
+
+                    <span class="preview-size">
+                        ${formatFileSize(
+                            file.size
+                        )}
+                    </span>
+
+                </div>
+            `;
+
+            const image =
+                card.querySelector(
+                    "img"
+                );
+
+            image.addEventListener(
+                "load",
+                () =>
+                    URL.revokeObjectURL(
+                        objectUrl
+                    ),
+                {
+                    once: true
+                }
+            );
+
+            previewBox.appendChild(
+                card
+            );
+        }
+    );
 }
 
-function getImageUrl(imageUrl) {
-    if (!imageUrl) {
+
+function removeSelectedImage(index) {
+    selectedImageFiles.splice(
+        index,
+        1
+    );
+
+    renderImagePreviews();
+}
+
+
+function setupDragAndDrop() {
+    const zone =
+        document.getElementById(
+            "uploadZone"
+        );
+
+    if (!zone) {
+        return;
+    }
+
+    [
+        "dragenter",
+        "dragover"
+    ].forEach(
+        eventName => {
+            zone.addEventListener(
+                eventName,
+                event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    zone.classList.add(
+                        "dragover"
+                    );
+                }
+            );
+        }
+    );
+
+    [
+        "dragleave",
+        "drop"
+    ].forEach(
+        eventName => {
+            zone.addEventListener(
+                eventName,
+                event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    zone.classList.remove(
+                        "dragover"
+                    );
+                }
+            );
+        }
+    );
+
+    zone.addEventListener(
+        "drop",
+        event => {
+            const files =
+                Array.from(
+                    event.dataTransfer
+                        ?.files ||
+                    []
+                );
+
+            addSelectedFiles(
+                files
+            );
+        }
+    );
+}
+
+
+async function uploadSingleImage(
+    file,
+    token
+) {
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    formData.append(
+        "module",
+        "PRODUCT"
+    );
+
+    const response =
+        await fetch(
+            `${API_BASE_URL}/api/images/upload`,
+            {
+                method: "POST",
+
+                headers: {
+                    Authorization:
+                        "Bearer " +
+                        token
+                },
+
+                body:
+                    formData
+            }
+        );
+
+    const responseText =
+        await response.text();
+
+    let result = {};
+
+    if (responseText) {
+        try {
+            result =
+                JSON.parse(
+                    responseText
+                );
+
+        } catch (error) {
+            throw new Error(
+                `Invalid upload response for ${file.name}.`
+            );
+        }
+    }
+
+    if (
+        !response.ok ||
+        result.success !== true
+    ) {
+        throw new Error(
+            result.message ||
+            `Failed to upload ${file.name}.`
+        );
+    }
+
+    const fileUrl =
+        result.data?.fileUrl;
+
+    if (!fileUrl) {
+        throw new Error(
+            `The server did not return a URL for ${file.name}.`
+        );
+    }
+
+    return fileUrl;
+}
+
+
+async function uploadSelectedImages(
+    token
+) {
+    const progress =
+        document.getElementById(
+            "uploadProgress"
+        );
+
+    const progressText =
+        document.getElementById(
+            "uploadProgressText"
+        );
+
+    progress.classList.add(
+        "show"
+    );
+
+    selectedImageUrls = [];
+
+    try {
+        for (
+            let index = 0;
+            index <
+            selectedImageFiles.length;
+            index++
+        ) {
+            const file =
+                selectedImageFiles[
+                    index
+                ];
+
+            progressText.textContent =
+                `Uploading image ${
+                    index + 1
+                } of ${
+                    selectedImageFiles.length
+                }: ${file.name}`;
+
+            const uploadedUrl =
+                await uploadSingleImage(
+                    file,
+                    token
+                );
+
+            selectedImageUrls.push(
+                uploadedUrl
+            );
+        }
+
+        return selectedImageUrls;
+
+    } finally {
+        progress.classList.remove(
+            "show"
+        );
+    }
+}
+
+
+function formatFileSize(bytes) {
+    if (
+        !Number.isFinite(bytes)
+    ) {
         return "";
     }
 
-    const value =
-        String(imageUrl).trim();
+    if (
+        bytes < 1024
+    ) {
+        return `${bytes} B`;
+    }
 
     if (
-        value.startsWith("http://") ||
-        value.startsWith("https://") ||
-        value.startsWith("data:") ||
-        value.startsWith("blob:") ||
-        value.startsWith("../") ||
-        value.startsWith("./")
+        bytes <
+        1024 * 1024
     ) {
-        return value;
+        return `${
+            (
+                bytes /
+                1024
+            ).toFixed(1)
+        } KB`;
     }
 
-    if (value.startsWith("/")) {
-        return API_BASE_URL + value;
-    }
-
-    return `${API_BASE_URL}/${value}`;
+    return `${
+        (
+            bytes /
+            (
+                1024 *
+                1024
+            )
+        ).toFixed(1)
+    } MB`;
 }
 
-function handleImageError(image) {
-    image.style.display =
-        "none";
-}
 
 /* =========================
    FORM VALIDATION
@@ -2557,15 +2794,17 @@ function validateProductForm() {
         return false;
     }
 
-    if (!selectedImageUrl) {
+    if (
+        !selectedImageFiles.length
+    ) {
         showAlert(
-            "Please select one primary product image.",
+            "Please upload at least one product image.",
             "error"
         );
 
         document
             .getElementById(
-                "uploadedImagesBox"
+                "uploadZone"
             )
             .scrollIntoView({
                 behavior: "smooth",
@@ -2604,55 +2843,82 @@ async function submitProduct(event) {
         Saving Product...
     `;
 
-    /*
-     * This payload exactly follows the documented
-     * POST /api/products/add request.
-     */
-    const payload = {
-        productName:
-            getValue("productName"),
+    const token =
+        getStaffToken();
 
-        category:
-            getValue("category"),
+    if (!token) {
+        showAlert(
+            "Medical staff login required.",
+            "error"
+        );
 
-        productCode:
-            getValue("productNo"),
+        button.disabled = false;
+        button.innerHTML =
+            originalHtml;
 
-        description:
-            getValue("description"),
-
-        price:
-            Number(
-                getValue("price")
-            ),
-
-        stock:
-            Number(
-                getValue("stock")
-            ),
-
-        netQty:
-            getValue("netQty"),
-
-        indication:
-            getValue("indication"),
-
-        manufacturerName:
-            getValue("manufacturer"),
-
-        manufacturingDate:
-            getValue(
-                "manufacturingDate"
-            ),
-
-        expiryDate:
-            getValue("expiryDate"),
-
-        imageUrl:
-            selectedImageUrl
-    };
+        return;
+    }
 
     try {
+        const uploadedImageUrls =
+            await uploadSelectedImages(
+                token
+            );
+
+        const payload = {
+            productName:
+                getValue("productName"),
+
+            category:
+                getValue("category"),
+
+            productCode:
+                getValue("productNo"),
+
+            description:
+                getValue("description"),
+
+            price:
+                Number(
+                    getValue("price")
+                ),
+
+            stock:
+                Number(
+                    getValue("stock")
+                ),
+
+            netQty:
+                getValue("netQty"),
+
+            indication:
+                getValue("indication"),
+
+            manufacturerName:
+                getValue("manufacturer"),
+
+            manufacturingDate:
+                getValue(
+                    "manufacturingDate"
+                ),
+
+            expiryDate:
+                getValue(
+                    "expiryDate"
+                ),
+
+            /*
+             * Keep both because your product API versions have used
+             * imageUrl for the primary image and imageUrls for
+             * multiple images.
+             */
+            imageUrls:
+                uploadedImageUrls,
+
+            imageUrl:
+                uploadedImageUrls[0]
+        };
+
         const result =
             await staffApiRequest(
                 "/api/products/add",

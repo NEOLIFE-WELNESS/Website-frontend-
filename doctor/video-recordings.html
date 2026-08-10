@@ -30,11 +30,15 @@
 <a href="doctor-dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
 <a href="patients.html"><i class="fa-solid fa-users"></i>Patient Dashboard</a>
 <a href="appointment-calendar.html"><i class="fa-solid fa-calendar-days"></i>Appointment Calendar</a>
+<a href="upcoming-schedule.html" class="active">
+    <i class="fa-solid fa-calendar-check"></i>
+    Upcoming Schedule
+</a>
 <a href="doctor-availability.html"><i class="fa-solid fa-users"></i>Manage Availability</a>
 <span class="menu-label">Clinical</span>
-<a href="doctor-appointments.html"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
-<a href="online-consultation.html"><i class="fa-solid fa-clipboard-list"></i>Consultation Details</a>
-<a href="video-recordings.html" class="active"><i class="fa-solid fa-video"></i>Video Recordings</a>
+<a href="doctor-appointments.html" id="appointmentDetailsMenu"><i class="fa-solid fa-clipboard-list"></i>Appointment Details</a>
+<a href="online-consultation.html" id="consultationDetailsMenu"><i class="fa-solid fa-clipboard-list"></i>Consultation Details</a>
+<a href="video-recordings.html" id="videoRecordingsMenu" class="active"><i class="fa-solid fa-video"></i>Video Recordings</a>
 <span class="menu-label">Finance</span>
 <a href="transactions.html"><i class="fa-solid fa-indian-rupee-sign"></i>Transactions</a>
 <a href="doctor-profile.html"><i class="fa-solid fa-user-doctor"></i>My Profile</a>
@@ -64,12 +68,278 @@
 <div class="overlay" id="detailsModal" onclick="if(event.target.id==='detailsModal')closeDetailsModal()"><div class="modal"><div class="modal-head"><h2>Recording Details</h2><button class="close" onclick="closeDetailsModal()"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body" id="detailsBody"></div><div class="modal-actions"><button class="modal-btn secondary" onclick="closeDetailsModal()">Close</button></div></div></div>
 <script>
 const API_BASE_URL="http://localhost:8085";let doctorId=null,allConsultations=[],allRecordings=[],filteredRecordings=[];
-window.addEventListener("DOMContentLoaded",async()=>{if(!guardDoctor())return;await loadDoctorProfile();await Promise.allSettled([loadDashboardSummary(),loadRecordings()])});
+window.addEventListener("DOMContentLoaded",async()=>{
+  if(!guardDoctor())return;
+
+  await loadDoctorProfile();
+
+  /*
+   * Apply ONLINE / OFFLINE / BOTH sidebar visibility.
+   * Existing recordings functionality remains unchanged.
+   */
+  await loadDoctorConsultationModes();
+
+  await Promise.allSettled([
+    loadDashboardSummary(),
+    loadRecordings()
+  ]);
+});
 function getToken(){return localStorage.getItem("doctorToken")||localStorage.getItem("token")||""}function guardDoctor(){const t=getToken(),r=String(localStorage.getItem("role")||"").toUpperCase();if(!t){location.href="../patient/login.html";return false}if(r&&r!=="DOCTOR"){alert("Only doctors can access this page.");location.href="../patient/login.html";return false}return true}
 async function api(path,options={}){const h={Accept:"application/json",...(options.headers||{}),Authorization:`Bearer ${getToken()}`};if(options.body&&!(options.body instanceof FormData))h["Content-Type"]="application/json";const response=await fetch(API_BASE_URL+path,{...options,headers:h});const text=await response.text();let result={};try{result=text?JSON.parse(text):{}}catch{result={success:false,message:text||"Invalid server response."}}if(response.status===401){clearSession();location.href="../patient/login.html";throw new Error(result.message||"Doctor session expired.")}if(!response.ok||result.success===false){const e=new Error(result.message||`Request failed (${response.status})`);e.status=response.status;throw e}return result}
-function clearSession(){["doctorToken","doctorRefreshToken","token","refreshToken","role","doctorId","userId"].forEach(k=>localStorage.removeItem(k))}function doctorLogout(){clearSession();location.href="../patient/login.html"}
+function clearSession(){["doctorToken","doctorRefreshToken","token","refreshToken","role","doctorId","doctorHasOnline","doctorHasOffline","userId"].forEach(k=>localStorage.removeItem(k))}function doctorLogout(){clearSession();location.href="../patient/login.html"}
 async function loadDoctorProfile(){const saved=localStorage.getItem("doctorName")||localStorage.getItem("name")||"Doctor";updateDoctorHeader(saved);try{const r=await api("/api/doctors/my-profile"),d=r.data||{};doctorId=d.id??null;if(doctorId!=null)localStorage.setItem("doctorId",String(doctorId));updateDoctorHeader(d.name||saved)}catch(e){doctorId=Number(localStorage.getItem("doctorId"))||null;showAlert(e.message||"Unable to load doctor profile.","error")}}
 function updateDoctorHeader(name){const n=String(name||"Doctor").trim(),i=n.replace(/^Dr\.?\s*/i,"").trim().charAt(0).toUpperCase()||"D";document.getElementById("doctorName").textContent=n;document.getElementById("doctorInitial").textContent=i;localStorage.setItem("doctorName",n)}
+
+async function loadDoctorConsultationModes(){
+  const id=
+    doctorId||
+    Number(
+      localStorage.getItem("doctorId")
+    )||
+    null;
+
+  /*
+   * If the professional doctor ID cannot be determined,
+   * keep the original sidebar instead of hiding valid links.
+   */
+  if(!id){
+    console.warn(
+      "Doctor ID is not available. Sidebar consultation mode was not filtered."
+    );
+
+    applyDoctorConsultationMode(
+      null,
+      null
+    );
+
+    return;
+  }
+
+  try{
+    const result=
+      await api(
+        `/api/doctor-availability/doctor/${encodeURIComponent(
+          id
+        )}`
+      );
+
+    const slots=
+      extractDoctorAvailability(
+        result
+      );
+
+    const activeSlots=
+      slots.filter(
+        slot=>
+          slot&&
+          slot.active!==false
+      );
+
+    const hasOnline=
+      activeSlots.some(
+        slot=>
+          String(
+            slot.appointmentMode||
+            ""
+          )
+            .trim()
+            .toUpperCase()==="ONLINE"
+      );
+
+    const hasOffline=
+      activeSlots.some(
+        slot=>
+          String(
+            slot.appointmentMode||
+            ""
+          )
+            .trim()
+            .toUpperCase()==="OFFLINE"
+      );
+
+    /*
+     * No active availability yet:
+     * keep the current sidebar unchanged.
+     */
+    if(
+      !hasOnline&&
+      !hasOffline
+    ){
+      localStorage.removeItem(
+        "doctorHasOnline"
+      );
+
+      localStorage.removeItem(
+        "doctorHasOffline"
+      );
+
+      applyDoctorConsultationMode(
+        null,
+        null
+      );
+
+      return;
+    }
+
+    localStorage.setItem(
+      "doctorHasOnline",
+      String(hasOnline)
+    );
+
+    localStorage.setItem(
+      "doctorHasOffline",
+      String(hasOffline)
+    );
+
+    applyDoctorConsultationMode(
+      hasOnline,
+      hasOffline
+    );
+
+    console.log(
+      "Doctor consultation modes:",
+      {
+        doctorId:id,
+        hasOnline,
+        hasOffline
+      }
+    );
+
+  }catch(error){
+    console.error(
+      "Doctor availability mode loading failed:",
+      error
+    );
+
+    const storedOnline=
+      localStorage.getItem(
+        "doctorHasOnline"
+      );
+
+    const storedOffline=
+      localStorage.getItem(
+        "doctorHasOffline"
+      );
+
+    if(
+      storedOnline!==null||
+      storedOffline!==null
+    ){
+      applyDoctorConsultationMode(
+        storedOnline==="true",
+        storedOffline==="true"
+      );
+
+    }else{
+      applyDoctorConsultationMode(
+        null,
+        null
+      );
+    }
+  }
+}
+
+
+function extractDoctorAvailability(result){
+  if(Array.isArray(result)){
+    return result;
+  }
+
+  if(Array.isArray(result?.data)){
+    return result.data;
+  }
+
+  if(Array.isArray(result?.data?.content)){
+    return result.data.content;
+  }
+
+  if(Array.isArray(result?.content)){
+    return result.content;
+  }
+
+  return [];
+}
+
+
+function applyDoctorConsultationMode(
+  hasOnline,
+  hasOffline
+){
+  const appointmentMenu=
+    document.getElementById(
+      "appointmentDetailsMenu"
+    );
+
+  const consultationMenu=
+    document.getElementById(
+      "consultationDetailsMenu"
+    );
+
+  const videoMenu=
+    document.getElementById(
+      "videoRecordingsMenu"
+    );
+
+  /*
+   * null means the mode could not be determined safely.
+   * Preserve the original sidebar.
+   */
+  if(
+    hasOnline===null||
+    hasOffline===null
+  ){
+    if(appointmentMenu){
+      appointmentMenu.style.display="flex";
+    }
+
+    if(consultationMenu){
+      consultationMenu.style.display="flex";
+    }
+
+    if(videoMenu){
+      videoMenu.style.display="flex";
+    }
+
+    return;
+  }
+
+  if(appointmentMenu){
+    appointmentMenu.style.display=
+      hasOffline
+        ?"flex"
+        :"none";
+  }
+
+  if(consultationMenu){
+    consultationMenu.style.display=
+      hasOnline
+        ?"flex"
+        :"none";
+  }
+
+  if(videoMenu){
+    videoMenu.style.display=
+      hasOnline
+        ?"flex"
+        :"none";
+  }
+
+  /*
+   * Video Recordings belongs to ONLINE consultations.
+   * If the doctor is OFFLINE-only and manually opens this page,
+   * redirect to Appointment Details.
+   */
+  if(
+    hasOnline===false&&
+    hasOffline===true
+  ){
+    window.location.replace(
+      "doctor-appointments.html"
+    );
+  }
+}
+
+
 async function loadDashboardSummary(){try{const r=await api("/api/doctor-dashboard/summary"),d=r.data||{};if(d.availableRecordings!==undefined)document.getElementById("availableCount").textContent=d.availableRecordings;if(d.completedConsultations!==undefined)document.getElementById("completedCount").textContent=d.completedConsultations}catch(e){console.warn(e.message)}}
 async function loadRecordings(){showLoading();try{const cr=await api("/api/consultations/admin/getAll"),rows=extractArray(cr);allConsultations=rows.map(normalizeConsultation).filter(x=>!doctorId||Number(x.doctorId)===Number(doctorId));document.getElementById("completedCount").textContent=allConsultations.filter(x=>x.status==="COMPLETED").length;const candidates=allConsultations.filter(x=>x.id!=null);const results=await mapWithConcurrency(candidates,5,async c=>{try{const r=await api(`/api/video-meetings/${encodeURIComponent(c.id)}`);return normalizeRecording(r.data||{},c)}catch(e){if(e.status!==404)console.warn(`Video meeting ${c.id}:`,e.message);return null}});allRecordings=results.filter(Boolean).sort((a,b)=>new Date(b.scheduledStartAt||0)-new Date(a.scheduledStartAt||0));document.getElementById("meetingCount").textContent=allRecordings.length;document.getElementById("waitingCount").textContent=allRecordings.filter(x=>["PROCESSING","WAITING"].includes(x.recordingGroup)).length;document.getElementById("availableCount").textContent=allRecordings.filter(x=>x.recordingAvailable).length;applyFilters()}catch(e){allRecordings=[];filteredRecordings=[];renderRecordings();showAlert(e.status===403?"Backend blocks /api/consultations/admin/getAll for DOCTOR. A doctor-specific completed-consultations/recordings list endpoint is needed.":(e.message||"Unable to load recordings."),"error")}}
 function extractArray(r){if(Array.isArray(r))return r;if(Array.isArray(r?.data))return r.data;if(Array.isArray(r?.data?.content))return r.data.content;if(Array.isArray(r?.data?.consultations))return r.data.consultations;return[]}
