@@ -1985,8 +1985,12 @@
                                 All Statuses
                             </option>
 
-                            <option value="ORDER_PLACED">
-                                Order Placed
+                            <option value="PENDING_PAYMENT">
+                                Pending Payment
+                            </option>
+
+                            <option value="SUCCESS">
+                                Paid / Success
                             </option>
 
                             <option value="CONFIRMED">
@@ -1999,6 +2003,10 @@
 
                             <option value="PACKED">
                                 Packed
+                            </option>
+
+                            <option value="SHIPMENT_CREATED">
+                                Shipment Created
                             </option>
 
                             <option value="SHIPPED">
@@ -3209,6 +3217,10 @@
                         )
                     ).toUpperCase(),
 
+                shiprocketOrderId:
+                    item.shiprocketOrderId ||
+                    null,
+
                 shipmentId:
                     item.shipmentId ||
                     item.shiprocketShipmentId ||
@@ -3245,44 +3257,21 @@
         }
 
         function normalizePaymentStatus(value) {
-            const status =
-                String(
-                    value ||
-                    "PENDING"
-                ).toUpperCase();
-
-            if (
-                status === "SUCCESS"
-            ) {
-                return "PAID";
-            }
-
-            return status;
+            return String(
+                value ||
+                "PENDING"
+            )
+                .trim()
+                .toUpperCase();
         }
 
         function normalizeOrderStatus(value) {
-            const status =
-                String(
-                    value ||
-                    "ORDER_PLACED"
-                ).toUpperCase();
-
-            const mapping = {
-                PENDING_PAYMENT:
-                    "ORDER_PLACED",
-
-                PAID:
-                    "CONFIRMED",
-
-                SHIPMENT_CREATED:
-                    "SHIPPED",
-
-                SHIPMENT_PENDING:
-                    "PACKED"
-            };
-
-            return mapping[status] ||
-                status;
+            return String(
+                value ||
+                "PENDING_PAYMENT"
+            )
+                .trim()
+                .toUpperCase();
         }
 
         function getDemoOrders() {
@@ -3775,14 +3764,40 @@
                             )
                             .join(", ");
 
-                    const canProcess = false;
+                    const orderStatus =
+                        normalizeOrderStatus(
+                            order.status
+                        );
 
-                    const canCreateShipment = false;
+                    const paymentStatus =
+                        normalizePaymentStatus(
+                            order.paymentStatus
+                        );
+
+                    const canProcess =
+                        (
+                            orderStatus === "PAID" &&
+                            paymentStatus === "SUCCESS"
+                        ) ||
+                        orderStatus === "CONFIRMED" ||
+                        orderStatus === "PROCESSING";
+
+                    const canCreateShipment =
+                        orderStatus === "PACKED" &&
+                        paymentStatus === "SUCCESS";
 
                     const canTrack =
                         Boolean(
                             order.awbCode ||
                             order.shipmentId
+                        ) ||
+                        [
+                            "SHIPMENT_CREATED",
+                            "SHIPPED",
+                            "OUT_FOR_DELIVERY",
+                            "DELIVERED"
+                        ].includes(
+                            orderStatus
                         );
 
                     body.insertAdjacentHTML(
@@ -3967,6 +3982,31 @@
                                                 title="Track shipment"
                                             >
                                                 <i class="fa-solid fa-location-dot"></i>
+                                            </button>
+                                            `
+                                            : ""
+                                    }
+
+                                    ${
+                                        paymentStatus === "SUCCESS" ||
+                                        [
+                                            "PAID",
+                                            "CONFIRMED",
+                                            "PROCESSING",
+                                            "PACKED",
+                                            "SHIPMENT_CREATED",
+                                            "SHIPPED",
+                                            "OUT_FOR_DELIVERY",
+                                            "DELIVERED"
+                                        ].includes(orderStatus)
+                                            ? `
+                                            <button
+                                                type="button"
+                                                class="action-button view-button"
+                                                onclick="downloadInvoice('${order.id}')"
+                                                title="Download invoice"
+                                            >
+                                                <i class="fa-solid fa-file-pdf"></i>
                                             </button>
                                             `
                                             : ""
@@ -4346,6 +4386,13 @@
                                 <span>Shipment Details</span>
 
                                 <p>
+                                    Shiprocket Order:
+                                    ${escapeHtml(
+                                        selectedOrder.shiprocketOrderId ||
+                                        "-"
+                                    )}
+                                    <br>
+
                                     Shipment:
                                     ${escapeHtml(
                                         selectedOrder.shipmentId ||
@@ -4430,7 +4477,24 @@
                 `;
             }
 
-            if (false) {
+            const detailsOrderStatus =
+                normalizeOrderStatus(
+                    selectedOrder.status
+                );
+
+            const detailsPaymentStatus =
+                normalizePaymentStatus(
+                    selectedOrder.paymentStatus
+                );
+
+            if (
+                (
+                    detailsOrderStatus === "PAID" &&
+                    detailsPaymentStatus === "SUCCESS"
+                ) ||
+                detailsOrderStatus === "CONFIRMED" ||
+                detailsOrderStatus === "PROCESSING"
+            ) {
                 actions += `
                     <button
                         type="button"
@@ -4438,12 +4502,15 @@
                         onclick="openProcessFromDetails()"
                     >
                         <i class="fa-solid fa-box-open"></i>
-                        Process Order
+                        Fulfillment Action
                     </button>
                 `;
             }
 
-            if (false) {
+            if (
+                detailsOrderStatus === "PACKED" &&
+                detailsPaymentStatus === "SUCCESS"
+            ) {
                 actions += `
                     <button
                         type="button"
@@ -4468,6 +4535,33 @@
                     >
                         <i class="fa-solid fa-location-dot"></i>
                         Track Shipment
+                    </button>
+                `;
+            }
+
+            if (
+                detailsPaymentStatus === "SUCCESS" ||
+                [
+                    "PAID",
+                    "CONFIRMED",
+                    "PROCESSING",
+                    "PACKED",
+                    "SHIPMENT_CREATED",
+                    "SHIPPED",
+                    "OUT_FOR_DELIVERY",
+                    "DELIVERED"
+                ].includes(
+                    detailsOrderStatus
+                )
+            ) {
+                actions += `
+                    <button
+                        type="button"
+                        class="modal-button modal-submit-button"
+                        onclick="downloadInvoice('${selectedOrder.id}')"
+                    >
+                        <i class="fa-solid fa-file-pdf"></i>
+                        Download Invoice
                     </button>
                 `;
             }
@@ -4551,9 +4645,34 @@
                     selectedOrder
                 );
 
-            document.getElementById(
-                "processStatus"
-            ).value =
+            const statusSelect =
+                document.getElementById(
+                    "processStatus"
+                );
+
+            const allowedStatuses =
+                getAllowedProcessStatuses(
+                    selectedOrder
+                );
+
+            statusSelect.innerHTML =
+                allowedStatuses.length
+                    ? allowedStatuses
+                        .map(
+                            item => `
+                                <option value="${item.value}">
+                                    ${item.label}
+                                </option>
+                            `
+                        )
+                        .join("")
+                    : `
+                        <option value="">
+                            No action available
+                        </option>
+                    `;
+
+            statusSelect.value =
                 getNextStatus(
                     selectedOrder.status
                 );
@@ -4585,22 +4704,72 @@
         }
 
         function getNextStatus(currentStatus) {
+            const status =
+                normalizeOrderStatus(
+                    currentStatus
+                );
+
             const mapping = {
-                ORDER_PLACED:
+                PAID:
                     "CONFIRMED",
 
                 CONFIRMED:
                     "PROCESSING",
 
                 PROCESSING:
-                    "PACKED",
-
-                PACKED:
                     "PACKED"
             };
 
-            return mapping[currentStatus] ||
+            return mapping[status] ||
                 "";
+        }
+
+        function getAllowedProcessStatuses(order) {
+            const status =
+                normalizeOrderStatus(
+                    order?.status
+                );
+
+            const paymentStatus =
+                normalizePaymentStatus(
+                    order?.paymentStatus
+                );
+
+            if (
+                status === "PAID" &&
+                paymentStatus === "SUCCESS"
+            ) {
+                return [
+                    {
+                        value:"CONFIRMED",
+                        label:"Confirm Order"
+                    }
+                ];
+            }
+
+            if (status === "CONFIRMED") {
+                return [
+                    {
+                        value:"PROCESSING",
+                        label:"Start Processing"
+                    },
+                    {
+                        value:"PACKED",
+                        label:"Mark Packed"
+                    }
+                ];
+            }
+
+            if (status === "PROCESSING") {
+                return [
+                    {
+                        value:"PACKED",
+                        label:"Mark Packed"
+                    }
+                ];
+            }
+
+            return [];
         }
 
         async function submitOrderStatus() {
@@ -4608,19 +4777,43 @@
                 return;
             }
 
-            const status =
+            const targetStatus =
                 document.getElementById(
                     "processStatus"
                 ).value;
 
-            const notes =
-                document.getElementById(
-                    "processNotes"
-                ).value.trim();
-
-            if (!status) {
+            if (!targetStatus) {
                 showAlert(
-                    "Please select an order status.",
+                    "No fulfillment action is available for this order.",
+                    "error"
+                );
+
+                return;
+            }
+
+            const endpointMap = {
+                CONFIRMED:
+                    `/api/orders/${encodeURIComponent(
+                        selectedOrder.id
+                    )}/confirm`,
+
+                PROCESSING:
+                    `/api/orders/${encodeURIComponent(
+                        selectedOrder.id
+                    )}/process`,
+
+                PACKED:
+                    `/api/orders/${encodeURIComponent(
+                        selectedOrder.id
+                    )}/pack`
+            };
+
+            const endpoint =
+                endpointMap[targetStatus];
+
+            if (!endpoint) {
+                showAlert(
+                    "This order status cannot be changed from the Medical Staff portal.",
                     "error"
                 );
 
@@ -4643,46 +4836,40 @@
             `;
 
             try {
-                await staffApiRequest(
-                    `/api/orders/update-status/${encodeURIComponent(
-                        selectedOrder.id
-                    )}`,
-                    {
-                        method: "PUT",
+                const result =
+                    await staffApiRequest(
+                        endpoint,
+                        {
+                            method:"PUT"
+                        }
+                    );
 
-                        body:
-                            JSON.stringify({
-                                status:
-                                    status,
-
-                                notes:
-                                    notes
-                            })
-                    }
+                showAlert(
+                    result.message ||
+                    "Order updated successfully.",
+                    "success"
                 );
-
-                selectedOrder.status =
-                    status;
-
-                if (notes) {
-                    selectedOrder.notes =
-                        notes;
-                }
 
                 closeProcessModal();
 
-                updateSummary();
-                applyFilters();
+                await loadOrders();
 
-                showAlert(
-                    "Order status updated successfully.",
-                    "success"
-                );
+                if (
+                    document.getElementById(
+                        "detailsModal"
+                    ).classList.contains(
+                        "show"
+                    )
+                ) {
+                    await openDetailsModal(
+                        selectedOrder.id
+                    );
+                }
 
             } catch (error) {
                 showAlert(
                     error.message ||
-                    "Order status could not be updated.",
+                    "Order could not be updated.",
                     "error"
                 );
 
@@ -4692,6 +4879,7 @@
                     originalHtml;
             }
         }
+
 
         /* =========================
            CREATE SHIPMENT
@@ -4764,61 +4952,22 @@
                 return;
             }
 
-            const weight =
-                Number(
-                    document.getElementById(
-                        "packageWeight"
-                    ).value
+            const orderStatus =
+                normalizeOrderStatus(
+                    selectedOrder.status
                 );
 
-            const length =
-                Number(
-                    document.getElementById(
-                        "packageLength"
-                    ).value
+            const paymentStatus =
+                normalizePaymentStatus(
+                    selectedOrder.paymentStatus
                 );
-
-            const breadth =
-                Number(
-                    document.getElementById(
-                        "packageBreadth"
-                    ).value
-                );
-
-            const height =
-                Number(
-                    document.getElementById(
-                        "packageHeight"
-                    ).value
-                );
-
-            const pickupLocation =
-                document.getElementById(
-                    "pickupLocation"
-                ).value.trim();
-
-            const notes =
-                document.getElementById(
-                    "shippingNotes"
-                ).value.trim();
 
             if (
-                weight <= 0 ||
-                length <= 0 ||
-                breadth <= 0 ||
-                height <= 0
+                orderStatus !== "PACKED" ||
+                paymentStatus !== "SUCCESS"
             ) {
                 showAlert(
-                    "Enter valid package dimensions and weight.",
-                    "error"
-                );
-
-                return;
-            }
-
-            if (!pickupLocation) {
-                showAlert(
-                    "Pickup location is required.",
+                    "Shipment can be created only for a packed and successfully paid order.",
                     "error"
                 );
 
@@ -4843,78 +4992,45 @@
             try {
                 const result =
                     await staffApiRequest(
-                        `/api/shipping/create-order/${encodeURIComponent(
+                        `/api/shipping/create/${encodeURIComponent(
                             selectedOrder.id
                         )}`,
                         {
-                            method: "POST",
-
-                            body:
-                                JSON.stringify({
-                                    weight:
-                                        weight,
-
-                                    length:
-                                        length,
-
-                                    breadth:
-                                        breadth,
-
-                                    height:
-                                        height,
-
-                                    pickupLocation:
-                                        pickupLocation,
-
-                                    notes:
-                                        notes
-                                })
+                            method:"POST"
                         }
                     );
 
                 const shipment =
                     result.data || {};
 
-                selectedOrder.shippingStatus =
-                    "CREATED";
+                selectedOrder.shiprocketOrderId =
+                    shipment.shiprocketOrderId ||
+                    selectedOrder.shiprocketOrderId ||
+                    null;
 
                 selectedOrder.shipmentId =
                     shipment.shipmentId ||
-                    shipment.shiprocketShipmentId ||
                     selectedOrder.shipmentId ||
-                    "CREATED";
-
-                selectedOrder.awbCode =
-                    shipment.awbCode ||
-                    shipment.awb ||
-                    selectedOrder.awbCode;
-
-                selectedOrder.courierName =
-                    shipment.courierName ||
-                    shipment.courierCompany ||
-                    selectedOrder.courierName;
-
-                selectedOrder.trackingUrl =
-                    shipment.trackingUrl ||
-                    selectedOrder.trackingUrl;
+                    null;
 
                 selectedOrder.status =
-                    shipment.orderStatus ||
-                    (
-                        selectedOrder.awbCode
-                            ? "SHIPPED"
-                            : "PACKED"
+                    normalizeOrderStatus(
+                        shipment.status ||
+                        "SHIPMENT_CREATED"
                     );
+
+                selectedOrder.shippingStatus =
+                    "CREATED";
 
                 closeShippingModal();
 
-                updateSummary();
-                applyFilters();
-
                 showAlert(
-                    "Shiprocket shipment created successfully.",
+                    result.message ||
+                    "Shiprocket order created successfully.",
                     "success"
                 );
+
+                await loadOrders();
 
             } catch (error) {
                 showAlert(
@@ -4930,12 +5046,14 @@
             }
         }
 
+
         /* =========================
            TRACKING
         ========================== */
 
         async function openTrackingModal(id) {
-            selectedOrder = findOrder(id);
+            selectedOrder =
+                findOrder(id);
 
             if (!selectedOrder) {
                 return;
@@ -4945,15 +5063,126 @@
                 "trackingModal"
             ).classList.add("show");
 
-            renderTracking({
-                awbCode: selectedOrder.awbCode,
-                courierName: selectedOrder.courierName,
-                currentStatus: selectedOrder.status,
-                expectedDeliveryDate: selectedOrder.expectedDeliveryDate,
-                trackingUrl: selectedOrder.trackingUrl,
-                activities: selectedOrder.timeline
-            });
+            document.getElementById(
+                "trackingModalContent"
+            ).innerHTML = `
+                <div class="table-message">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Loading tracking details...
+                </div>
+            `;
+
+            try {
+                const result =
+                    await staffApiRequest(
+                        `/api/orders/${encodeURIComponent(
+                            selectedOrder.id
+                        )}/track`,
+                        {
+                            method:"GET"
+                        }
+                    );
+
+                let tracking =
+                    result.data;
+
+                if (
+                    typeof tracking ===
+                    "string"
+                ) {
+                    try {
+                        tracking =
+                            JSON.parse(
+                                tracking
+                            );
+                    } catch (error) {
+                        tracking = {
+                            raw:
+                                result.data
+                        };
+                    }
+                }
+
+                const trackingData =
+                    tracking?.tracking_data ||
+                    tracking ||
+                    {};
+
+                const shipmentTrack =
+                    Array.isArray(
+                        trackingData.shipment_track
+                    )
+                        ? trackingData.shipment_track
+                        : [];
+
+                const latest =
+                    shipmentTrack.length
+                        ? shipmentTrack[
+                            shipmentTrack.length - 1
+                          ]
+                        : {};
+
+                renderTracking({
+                    awbCode:
+                        latest.awb_code ||
+                        trackingData.awb_code ||
+                        selectedOrder.awbCode,
+
+                    courierName:
+                        latest.courier_name ||
+                        trackingData.courier_name ||
+                        selectedOrder.courierName,
+
+                    currentStatus:
+                        latest.current_status ||
+                        trackingData.current_status ||
+                        selectedOrder.status,
+
+                    expectedDeliveryDate:
+                        latest.edd ||
+                        trackingData.edd ||
+                        selectedOrder.expectedDeliveryDate,
+
+                    trackingUrl:
+                        trackingData.track_url ||
+                        selectedOrder.trackingUrl,
+
+                    activities:
+                        shipmentTrack,
+
+                    raw:
+                        tracking
+                });
+
+            } catch (error) {
+                renderTracking({
+                    awbCode:
+                        selectedOrder.awbCode,
+
+                    courierName:
+                        selectedOrder.courierName,
+
+                    currentStatus:
+                        selectedOrder.status,
+
+                    expectedDeliveryDate:
+                        selectedOrder.expectedDeliveryDate,
+
+                    trackingUrl:
+                        selectedOrder.trackingUrl,
+
+                    activities:
+                        selectedOrder.timeline
+                });
+
+                showAlert(
+                    error.message ||
+                    "Tracking information could not be loaded.",
+                    "error"
+                );
+            }
         }
+
 
         function renderTracking(data) {
             const activities =
@@ -5131,6 +5360,99 @@
                 closeTrackingModal();
             }
         }
+
+        /* =========================
+           DOWNLOAD INVOICE
+           GET /api/orders/{orderId}/invoice
+        ========================== */
+
+        async function downloadInvoice(id) {
+            const token =
+                getStaffToken();
+
+            if (!token) {
+                showAlert(
+                    "Medical staff login required.",
+                    "error"
+                );
+
+                return;
+            }
+
+            try {
+                const response =
+                    await fetch(
+                        `${API_BASE_URL}/api/orders/${encodeURIComponent(
+                            id
+                        )}/invoice`,
+                        {
+                            method:"GET",
+
+                            headers:{
+                                "Authorization":
+                                    "Bearer " + token
+                            }
+                        }
+                    );
+
+                if (!response.ok) {
+                    let message =
+                        "Unable to download invoice.";
+
+                    try {
+                        const result =
+                            await response.json();
+
+                        message =
+                            result.message ||
+                            message;
+                    } catch (error) {}
+
+                    throw new Error(
+                        message
+                    );
+                }
+
+                const blob =
+                    await response.blob();
+
+                const url =
+                    URL.createObjectURL(
+                        blob
+                    );
+
+                const link =
+                    document.createElement(
+                        "a"
+                    );
+
+                link.href =
+                    url;
+
+                link.download =
+                    `Neolife-Invoice-${id}.pdf`;
+
+                document.body.appendChild(
+                    link
+                );
+
+                link.click();
+
+                link.remove();
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+            } catch (error) {
+                showAlert(
+                    error.message ||
+                    "Invoice could not be downloaded.",
+                    "error"
+                );
+            }
+        }
+
 
         /* =========================
            PAGINATION

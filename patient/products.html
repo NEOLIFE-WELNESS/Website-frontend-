@@ -498,6 +498,51 @@ button{
   margin-bottom:22px;
 }
 
+
+/* ===== REAL-TIME PRODUCT STOCK STATUS ===== */
+.product-stock-status{
+  width:max-content;
+  max-width:100%;
+  margin:-8px 0 20px;
+  padding:7px 12px;
+
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+
+  border-radius:20px;
+
+  font-size:12px;
+  font-weight:800;
+}
+
+.product-stock-status.in-stock{
+  color:#17623a;
+  background:#e7f6eb;
+}
+
+.product-stock-status.low-stock{
+  color:#946300;
+  background:#fff3d9;
+}
+
+.product-stock-status.out-of-stock{
+  color:#a33b3b;
+  background:#fde9e9;
+}
+
+.product-stock-status i{
+  font-size:11px;
+}
+
+.details-cart-btn:disabled,
+.details-buy-btn:disabled,
+.details-qty button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
 .qty-label{
   display:block;
   color:var(--green-dark);
@@ -1749,15 +1794,21 @@ button{
       <h2 id="modalPrice" class="details-price"></h2>
       <p class="tax-text">Taxes included. Shipping calculated at checkout.</p>
 
+      <div
+        id="modalStockStatus"
+        class="product-stock-status in-stock"
+        aria-live="polite"
+      ></div>
+
       <label class="qty-label">Quantity</label>
       <div class="details-qty">
-        <button onclick="modalDecreaseQty()">−</button>
+        <button id="modalDecreaseButton" onclick="modalDecreaseQty()">−</button>
         <span id="modalQty">1</span>
-        <button onclick="modalIncreaseQty()">+</button>
+        <button id="modalIncreaseButton" onclick="modalIncreaseQty()">+</button>
       </div>
 
-      <button class="details-cart-btn" onclick="addModalProduct()">Add to Cart</button>
-      <button class="details-buy-btn" onclick="buyNow()">Buy It Now</button>
+      <button id="modalAddToCartButton" class="details-cart-btn" onclick="addModalProduct()">Add to Cart</button>
+      <button id="modalBuyNowButton" class="details-buy-btn" onclick="buyNow()">Buy It Now</button>
 
       <p id="modalDesc" class="details-desc"></p>
 
@@ -3346,7 +3397,8 @@ function viewDetails(index){
   name: productName,
   img: product._images[0],
   price,
-  desc: description
+  desc: description,
+  stock: Math.max(0, Number(product.stock ?? 0))
 };
 
   productImages = product._images;
@@ -3360,6 +3412,8 @@ function viewDetails(index){
 document.getElementById("modalNetQty").innerText = product.netQty || "-";
 document.getElementById("modalExpiryDate").innerText = formatExpiryDate(product.expiryDate);
   document.getElementById("modalQty").innerText = modalQty;
+
+  updateModalStockStatus();
 
   loadThumbnails();
   showProductImage();
@@ -3807,27 +3861,194 @@ function closeModal(){
   document.getElementById("detailsModal").style.display = "none";
 }
 
-function modalIncreaseQty(){
-  modalQty++;
-  document.getElementById("modalQty").innerText = modalQty;
+function updateModalStockStatus(){
+  const stock =
+    Math.max(
+      0,
+      Number(
+        selectedProduct.stock ?? 0
+      )
+    );
+
+  const stockBox =
+    document.getElementById(
+      "modalStockStatus"
+    );
+
+  const addButton =
+    document.getElementById(
+      "modalAddToCartButton"
+    );
+
+  const buyButton =
+    document.getElementById(
+      "modalBuyNowButton"
+    );
+
+  const decreaseButton =
+    document.getElementById(
+      "modalDecreaseButton"
+    );
+
+  const increaseButton =
+    document.getElementById(
+      "modalIncreaseButton"
+    );
+
+  if(stock <= 0){
+    stockBox.className =
+      "product-stock-status out-of-stock";
+
+    stockBox.innerHTML = `
+      <i class="fa-solid fa-circle-xmark"></i>
+      No Stock
+    `;
+
+    modalQty = 1;
+    document.getElementById("modalQty").innerText = modalQty;
+
+    addButton.disabled = true;
+    buyButton.disabled = true;
+    decreaseButton.disabled = true;
+    increaseButton.disabled = true;
+
+    addButton.innerHTML = `
+      <i class="fa-solid fa-ban"></i>
+      Out of Stock
+    `;
+
+    buyButton.textContent =
+      "Out of Stock";
+
+    return;
+  }
+
+  /*
+   * Low stock is considered 5 units or fewer.
+   * The displayed number comes directly from product.stock
+   * returned by /api/products/getAll.
+   */
+  if(stock <= 5){
+    stockBox.className =
+      "product-stock-status low-stock";
+
+    stockBox.innerHTML = `
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      Only ${stock} left
+    `;
+
+  }else{
+    stockBox.className =
+      "product-stock-status in-stock";
+
+    stockBox.innerHTML = `
+      <i class="fa-solid fa-circle-check"></i>
+      In Stock
+    `;
+  }
+
+  if(modalQty > stock){
+    modalQty = stock;
+    document.getElementById("modalQty").innerText = modalQty;
+  }
+
+  addButton.disabled = false;
+  buyButton.disabled = false;
+  decreaseButton.disabled = modalQty <= 1;
+  increaseButton.disabled = modalQty >= stock;
+
+  addButton.innerHTML = `
+    <i class="fa-solid fa-cart-plus"></i>
+    Add to Cart
+  `;
+
+  buyButton.textContent =
+    "Buy It Now";
 }
+
+
+function modalIncreaseQty(){
+  const stock =
+    Math.max(
+      0,
+      Number(
+        selectedProduct.stock ?? 0
+      )
+    );
+
+  if(stock <= 0){
+    return;
+  }
+
+  if(modalQty < stock){
+    modalQty++;
+    document.getElementById("modalQty").innerText = modalQty;
+  }
+
+  updateModalStockStatus();
+}
+
 
 function modalDecreaseQty(){
   if(modalQty > 1){
     modalQty--;
     document.getElementById("modalQty").innerText = modalQty;
   }
+
+  updateModalStockStatus();
 }
 
 
 
 async function addModalProduct(){
+  const stock =
+    Math.max(
+      0,
+      Number(
+        selectedProduct.stock ?? 0
+      )
+    );
+
+  if(stock <= 0){
+    alert("This product is currently out of stock.");
+    return;
+  }
+
+  if(modalQty > stock){
+    alert(`Only ${stock} item${stock === 1 ? "" : "s"} available.`);
+    modalQty = stock;
+    document.getElementById("modalQty").innerText = modalQty;
+    updateModalStockStatus();
+    return;
+  }
+
   await addToCart(selectedProduct.id, modalQty, false);
   closeModal();
   openCart();
 }
 
 async function buyNow(){
+  const stock =
+    Math.max(
+      0,
+      Number(
+        selectedProduct.stock ?? 0
+      )
+    );
+
+  if(stock <= 0){
+    alert("This product is currently out of stock.");
+    return;
+  }
+
+  if(modalQty > stock){
+    alert(`Only ${stock} item${stock === 1 ? "" : "s"} available.`);
+    modalQty = stock;
+    document.getElementById("modalQty").innerText = modalQty;
+    updateModalStockStatus();
+    return;
+  }
+
   await addToCart(selectedProduct.id, modalQty, false);
   closeModal();
   await placeOrder();

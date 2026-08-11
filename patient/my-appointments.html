@@ -399,6 +399,15 @@ button{
   color:#a45a00;
 }
 
+/* ===== REFUND STATUS ===== */
+.refund-info{margin-top:10px;padding:10px 12px;border-radius:13px;background:#f8faf6;border:1px solid rgba(18,53,36,.09);color:#555;font-size:12px;line-height:1.6;}
+.refund-info strong{color:var(--green-dark);}
+.refund-status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:800;}
+.refund-status-badge.refund-success{color:var(--success);background:#e6f7ec;}
+.refund-status-badge.refund-pending{color:var(--warning);background:#fff4d9;}
+.refund-status-badge.refund-failed{color:var(--danger);background:#fde7e7;}
+.refund-status-badge.refund-default{color:var(--info);background:#e7f1f8;}
+
 .actions{
   display:flex;
   flex-direction:column;
@@ -1051,6 +1060,11 @@ button{
         <span id="modalLocation">Neolife Wellness Center, Udupi</span>
       </div>
 
+      <div class="detail-item full-width" id="modalRefundDetails" style="display:none;">
+        <strong>Refund Details</strong>
+        <span id="modalRefundContent">-</span>
+      </div>
+
     </div>
 
     <button class="close-btn" onclick="closeModal()">
@@ -1180,6 +1194,7 @@ async function loadMyAppointments() {
     ];
 
     await loadPatientMeetingStates();
+    await loadRefundStatuses();
 
     renderAppointments();
 
@@ -1339,8 +1354,17 @@ function normalizeAppointment(item) {
       "PENDING",
 
     paymentStatus:
-      item.paymentStatus ||
-      "PENDING",
+      normalizePaymentStatus(
+        item.paymentStatus || "PENDING"
+      ),
+
+    paymentId:
+      item.paymentId ??
+      item.payment?.id ??
+      null,
+
+    refundData:
+      null,
 
     symptoms:
       item.symptoms || "",
@@ -1444,8 +1468,17 @@ function normalizeConsultation(item) {
       "PENDING_DOCTOR_CONFIRMATION",
 
     paymentStatus:
-      item.paymentStatus ||
-      "NOT_REQUIRED_YET",
+      normalizePaymentStatus(
+        item.paymentStatus || "NOT_REQUIRED_YET"
+      ),
+
+    paymentId:
+      item.paymentId ??
+      item.payment?.id ??
+      null,
+
+    refundData:
+      null,
 
     symptoms:
       item.symptoms || "",
@@ -1484,9 +1517,7 @@ function normalizeConsultation(item) {
       item.updatedAt,
 
     location:
-      ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(
-        normalize(item.paymentStatus)
-      )
+      isPaymentSuccessful(item.paymentStatus)
         ? "Secure online consultation room"
         : "Consultation room will be available after payment",
 
@@ -1528,9 +1559,7 @@ async function loadPatientMeetingStates() {
     allAppointments.filter(
       item =>
         item.recordType === "CONSULTATION" &&
-        ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(
-          normalize(item.paymentStatus)
-        )
+        isPaymentSuccessful(item.paymentStatus)
     );
 
   await Promise.allSettled(
@@ -1604,6 +1633,115 @@ async function loadPatientMeetingStates() {
   );
 }
 
+/* =====================================================
+   REFUND STATUS
+   GET /api/payments/{paymentId}/refund-status
+===================================================== */
+
+async function loadRefundStatuses() {
+  const recordsWithPaymentId = allAppointments.filter(
+    item => item.paymentId !== null && item.paymentId !== undefined && String(item.paymentId).trim() !== ""
+  );
+
+  if (!recordsWithPaymentId.length) return;
+
+  await Promise.allSettled(
+    recordsWithPaymentId.map(async item => {
+      item.refundData = await fetchRefundStatus(item.paymentId);
+    })
+  );
+}
+
+async function fetchRefundStatus(paymentId) {
+  if (paymentId === null || paymentId === undefined || String(paymentId).trim() === "") return null;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/payments/${encodeURIComponent(paymentId)}/refund-status`,
+      { method:"GET", headers:authHeaders() }
+    );
+
+    const result = await safelyReadResponse(response);
+
+    if (response.status === 404) return null;
+
+    if (response.status === 401) {
+      clearAuthentication();
+      throw new Error(result?.message || "Your session has expired.");
+    }
+
+    if (response.status === 403) {
+      throw new Error(result?.message || "You are not allowed to view this refund status.");
+    }
+
+    if (!response.ok || result?.success === false) {
+      console.warn(`Refund status could not be loaded for payment ${paymentId}:`, result?.message || response.status);
+      return null;
+    }
+
+    return result?.data || null;
+  } catch (error) {
+    console.warn(`Refund status check failed for payment ${paymentId}:`, error);
+    return null;
+  }
+}
+
+function hasMeaningfulRefund(refund) {
+  if (!refund) return false;
+  const status = normalize(refund.refundStatus);
+  return Boolean(status && status !== "NOT_REQUESTED") || Number(refund.refundedAmount || 0) > 0 || Boolean(refund.refundRequestedAt || refund.refundedAt || refund.refundReason);
+}
+
+function getRefundBadgeClass(status) {
+  const normalized = normalize(status);
+  if (["REFUNDED","COMPLETED","FULLY_REFUNDED"].includes(normalized)) return "refund-success";
+  if (["REQUESTED","PENDING","PROCESSING","REFUND_PENDING"].includes(normalized)) return "refund-pending";
+  if (["FAILED","REJECTED"].includes(normalized)) return "refund-failed";
+  return "refund-default";
+}
+
+function createRefundCardInfo(item) {
+  const refund = item.refundData;
+  if (!hasMeaningfulRefund(refund)) return "";
+
+  const refundStatus = refund.refundStatus || "PENDING";
+  const refundedAmount = Number(refund.refundedAmount || 0);
+
+  return `
+    <div class="refund-info">
+      <strong>Refund:</strong>
+      <span class="refund-status-badge ${getRefundBadgeClass(refundStatus)}">
+        <i class="fa-solid fa-rotate-left"></i>
+        ${escapeHtml(formatStatus(refundStatus))}
+      </span>
+      ${refundedAmount > 0 ? `<div style="margin-top:6px;"><strong>Refunded Amount:</strong> ₹${escapeHtml(formatMoney(refundedAmount))}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderRefundDetailsInModal(item) {
+  const wrapper = document.getElementById("modalRefundDetails");
+  const content = document.getElementById("modalRefundContent");
+  if (!wrapper || !content) return;
+
+  const refund = item.refundData;
+  if (!hasMeaningfulRefund(refund)) {
+    wrapper.style.display = "none";
+    content.innerHTML = "-";
+    return;
+  }
+
+  wrapper.style.display = "block";
+  const rows = [];
+  if (refund.refundStatus) rows.push(`<b>Refund Status:</b> ${escapeHtml(formatStatus(refund.refundStatus))}`);
+  if (refund.paymentStatus) rows.push(`<b>Payment Status:</b> ${escapeHtml(formatStatus(refund.paymentStatus))}`);
+  if (refund.refundedAmount !== null && refund.refundedAmount !== undefined) rows.push(`<b>Refunded Amount:</b> ₹${escapeHtml(formatMoney(refund.refundedAmount))}`);
+  if (refund.refundReason) rows.push(`<b>Refund Reason:</b> ${escapeHtml(refund.refundReason)}`);
+  if (refund.refundRequestedAt) rows.push(`<b>Refund Requested:</b> ${escapeHtml(formatDateTime(refund.refundRequestedAt))}`);
+  if (refund.refundedAt) rows.push(`<b>Refunded On:</b> ${escapeHtml(formatDateTime(refund.refundedAt))}`);
+  content.innerHTML = rows.join("<br>");
+}
+
 function filterAppointments(filter, button) {
   activeFilter = filter;
 
@@ -1641,7 +1779,7 @@ function renderAppointments() {
 
   if (activeFilter === "CANCELLED") {
     filtered = filtered.filter(item =>
-      ["CANCELLED", "REJECTED"].includes(
+      ["CANCELLED", "CANCELED", "REJECTED"].includes(
         normalize(item.status)
       )
     );
@@ -1654,6 +1792,7 @@ function renderAppointments() {
       return ![
         "COMPLETED",
         "CANCELLED",
+        "CANCELED",
         "REJECTED",
         "NO_SHOW"
       ].includes(status);
@@ -1769,7 +1908,7 @@ function createAppointmentCard(item) {
           <p>
             <strong>Payment:</strong>
             ${escapeHtml(
-              formatStatus(paymentStatus)
+              displayPaymentStatus(paymentStatus)
             )}
           </p>
 
@@ -1778,6 +1917,8 @@ function createAppointmentCard(item) {
         <span class="badge ${getBadgeClass(status)}">
           ${escapeHtml(formatStatus(status))}
         </span>
+
+        ${createRefundCardInfo(item)}
 
       </div>
 
@@ -1799,12 +1940,106 @@ function createAppointmentCard(item) {
   `;
 }
 
+
+/* =====================================================
+   PAYMENT STATUS ENUM HELPERS
+   Backend PaymentStatus is now an enum.
+   Jackson normally returns enum values as strings such as:
+   INITIATED, PENDING, SUCCESS, FAILED, REFUNDED.
+===================================================== */
+
+function normalizePaymentStatus(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  // Normal Spring/Jackson enum response: "SUCCESS"
+  if (typeof value === "string") {
+    return normalize(value);
+  }
+
+  // Defensive support if backend wraps enum in an object.
+  if (typeof value === "object") {
+    const enumValue =
+      value.name ??
+      value.value ??
+      value.status ??
+      value.code ??
+      "";
+
+    return normalize(enumValue);
+  }
+
+  return normalize(String(value));
+}
+
+function isPaymentSuccessful(value) {
+  return [
+    "SUCCESS",
+    "PAID",
+    "PAYMENT_SUCCESS"
+  ].includes(normalizePaymentStatus(value));
+}
+
+function isPaymentPending(value) {
+  return [
+    "PENDING",
+    "INITIATED",
+    "PAYMENT_PENDING",
+    "NOT_REQUIRED_YET"
+  ].includes(normalizePaymentStatus(value));
+}
+
+function isPaymentFailed(value) {
+  return [
+    "FAILED",
+    "PAYMENT_FAILED"
+  ].includes(normalizePaymentStatus(value));
+}
+
+function displayPaymentStatus(value) {
+  const status = normalizePaymentStatus(value);
+
+  if (!status) return "Pending";
+
+  if (status === "SUCCESS" || status === "PAID" || status === "PAYMENT_SUCCESS") {
+    return "Payment Success";
+  }
+
+  if (status === "INITIATED") {
+    return "Payment Initiated";
+  }
+
+  if (status === "PENDING" || status === "PAYMENT_PENDING") {
+    return "Payment Pending";
+  }
+
+  if (status === "NOT_REQUIRED_YET") {
+    return "Not Required Yet";
+  }
+
+  if (status === "FAILED" || status === "PAYMENT_FAILED") {
+    return "Payment Failed";
+  }
+
+  if (status === "REFUNDED") {
+    return "Refunded";
+  }
+
+  if (status === "PARTIALLY_REFUNDED") {
+    return "Partially Refunded";
+  }
+
+  return formatStatus(status);
+}
+
+
 function createStatusActions(item) {
   const status =
     normalize(item.status);
 
   const paymentStatus =
-    normalize(
+    normalizePaymentStatus(
       item.paymentStatus
     );
 
@@ -1812,15 +2047,29 @@ function createStatusActions(item) {
     item.recordType ===
     "CONSULTATION";
 
+  /*
+   * Once an appointment/consultation is cancelled, rejected,
+   * completed or marked no-show, no Pay / Reschedule / Cancel /
+   * meeting action should be offered.
+   */
+  const isClosedRecord =
+    [
+      "CANCELLED",
+      "CANCELED",
+      "REJECTED",
+      "COMPLETED",
+      "NO_SHOW"
+    ].includes(status);
+
   let html = "";
 
   if (
+    !isClosedRecord &&
     isConsultation &&
     (
       status ===
         "PAYMENT_PENDING" ||
-      paymentStatus ===
-        "PENDING"
+      isPaymentPending(paymentStatus)
     )
   ) {
     html += `
@@ -1839,12 +2088,12 @@ function createStatusActions(item) {
   }
 
   if (
+    !isClosedRecord &&
     !isConsultation &&
     (
       status ===
         "PAYMENT_PENDING" ||
-      paymentStatus ===
-        "PENDING"
+      isPaymentPending(paymentStatus)
     )
   ) {
     html += `
@@ -1862,8 +2111,9 @@ function createStatusActions(item) {
     `;
   }
 if (
+    !isClosedRecord &&
     isConsultation &&
-    ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(paymentStatus) &&
+    isPaymentSuccessful(paymentStatus) &&
     item.meetingCreated &&
     !["ENDED", "EXPIRED", "CANCELLED"].includes(
       item.meetingStatus
@@ -1883,8 +2133,9 @@ if (
 
 
   if (
+    !isClosedRecord &&
     isConsultation &&
-    ["SUCCESS", "PAID", "PAYMENT_SUCCESS"].includes(paymentStatus) &&
+    isPaymentSuccessful(paymentStatus) &&
     !item.meetingCreated
   ) {
     html += `
@@ -1921,6 +2172,7 @@ if (
     ![
       "COMPLETED",
       "CANCELLED",
+      "CANCELED",
       "REJECTED",
       "NO_SHOW"
     ].includes(status)
@@ -2022,7 +2274,7 @@ function viewDetails(id) {
 
   setText(
     "modalPaymentStatus",
-    formatStatus(item.paymentStatus)
+    displayPaymentStatus(item.paymentStatus)
   );
 
   const notes = [
@@ -2060,6 +2312,8 @@ function viewDetails(id) {
         )
       : item.location
   );
+
+  renderRefundDetailsInModal(item);
 
   document
     .getElementById("detailsModal")
@@ -2817,6 +3071,13 @@ function formatTimeRange(startTime, endTime) {
   }
 
   return formatTime(startTime || endTime);
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("en-IN", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 
 function formatMoney(value) {

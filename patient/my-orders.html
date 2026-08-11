@@ -587,6 +587,53 @@ a{
   background:var(--danger-light);
 }
 
+.return-btn{
+  color:#76548f;
+  border:1px solid #dbcbea !important;
+  background:#f5effb;
+}
+
+.refund-order-box{
+  margin-top:14px;
+  padding:12px 14px;
+  border:1px solid #dce8de;
+  border-radius:12px;
+  background:#f8faf7;
+  color:#4e5b53;
+  font-size:11px;
+  line-height:1.7;
+}
+
+.refund-order-box strong{
+  color:var(--dark-green);
+}
+
+.refund-order-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-left:5px;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:800;
+}
+
+.refund-order-badge.refunded{
+  color:var(--success);
+  background:var(--success-light);
+}
+
+.refund-order-badge.pending{
+  color:var(--warning);
+  background:var(--warning-light);
+}
+
+.refund-order-badge.failed{
+  color:var(--danger);
+  background:var(--danger-light);
+}
+
 .btn:hover{
   transform:translateY(-1px);
 }
@@ -1280,6 +1327,11 @@ a{
         <strong id="modalAmount">-</strong>
       </div>
 
+      <div class="detail-card">
+        <span>Payment Status</span>
+        <strong id="modalPaymentStatus">-</strong>
+      </div>
+
       <div class="detail-card full">
         <span>Shipping Address</span>
         <strong id="modalAddress">-</strong>
@@ -1288,6 +1340,15 @@ a{
       <div class="detail-card full">
         <span>Products</span>
         <strong id="modalItems">-</strong>
+      </div>
+
+      <div
+        class="detail-card full"
+        id="modalRefundCard"
+        style="display:none;"
+      >
+        <span>Refund Details</span>
+        <strong id="modalRefundDetails">-</strong>
       </div>
 
     </div>
@@ -1419,11 +1480,11 @@ async function loadMyOrders(){
 
   try{
     /*
-      For patient order history, use your user-specific endpoint
-      when available, for example:
-      GET /api/orders/getMyOrders
+      My Orders needs a LIST endpoint.
+      Current working list endpoint:
+      GET /api/orders/getAll
 
-      The current code keeps your existing endpoint.
+      GET /api/orders/{id} is used only when a specific order ID is already known.
     */
     const response =
       await fetch(
@@ -1433,7 +1494,9 @@ async function loadMyOrders(){
 
           headers:{
             "Authorization":
-              "Bearer " + token
+              "Bearer " + token,
+            "Accept":
+              "application/json"
           }
         }
       );
@@ -1441,30 +1504,50 @@ async function loadMyOrders(){
     const text =
       await response.text();
 
-    if(!response.ok){
-      throw new Error(
-        text ||
-        `Failed to load orders. Status: ${response.status}`
-      );
+    let result = null;
+
+    try{
+      result =
+        text
+          ? JSON.parse(text)
+          : null;
+    }catch(parseError){
+      result = null;
     }
 
-    const result =
-      text
-        ? JSON.parse(text)
-        : null;
+    if(!response.ok){
+      const backendMessage =
+        result?.message ||
+        result?.error ||
+        text ||
+        `Failed to load orders. Status: ${response.status}`;
+
+      throw new Error(
+        backendMessage
+      );
+    }
 
     if(
       result &&
       result.success
     ){
-      orders =
+      const orderData =
         Array.isArray(result.data)
-          ? result.data.sort(
-              (a,b) =>
-                Number(b.id) -
-                Number(a.id)
-            )
-          : [];
+          ? result.data
+          : Array.isArray(result.data?.content)
+            ? result.data.content
+            : [];
+
+      orders =
+        orderData
+          .map(normalizeOrderPaymentStatus)
+          .sort(
+            (a,b) =>
+              Number(b.id) -
+              Number(a.id)
+          );
+
+      await loadOrderRefundStatuses();
 
       displayOrders();
 
@@ -1508,6 +1591,277 @@ async function loadMyOrders(){
     );
   }
 }
+
+
+/* =====================================================
+   USER REFUND STATUS
+   GET /api/payments/{paymentId}/refund-status
+===================================================== */
+
+async function loadOrderRefundStatuses(){
+  const ordersWithPayment =
+    orders.filter(
+      order =>
+        order.paymentId !== null &&
+        order.paymentId !== undefined &&
+        String(order.paymentId).trim() !== ""
+    );
+
+  if(!ordersWithPayment.length){
+    return;
+  }
+
+  await Promise.allSettled(
+    ordersWithPayment.map(
+      async order => {
+        order.refundData =
+          await fetchOrderRefundStatus(
+            order.paymentId
+          );
+      }
+    )
+  );
+}
+
+
+async function fetchOrderRefundStatus(paymentId){
+  const token =
+    localStorage.getItem("token");
+
+  if(
+    !token ||
+    paymentId === null ||
+    paymentId === undefined ||
+    String(paymentId).trim() === ""
+  ){
+    return null;
+  }
+
+  try{
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/payments/${encodeURIComponent(
+          paymentId
+        )}/refund-status`,
+        {
+          method:"GET",
+          headers:{
+            "Authorization":"Bearer " + token,
+            "Accept":"application/json"
+          }
+        }
+      );
+
+    const responseText =
+      await response.text();
+
+    let result = null;
+
+    try{
+      result =
+        responseText
+          ? JSON.parse(responseText)
+          : null;
+    }catch(parseError){
+      result = null;
+    }
+
+    /*
+     * No refund record yet is not a page error.
+     */
+    if(response.status === 404){
+      return null;
+    }
+
+    if(response.status === 401){
+      throw new Error(
+        result?.message ||
+        "Your session has expired."
+      );
+    }
+
+    if(
+      !response.ok ||
+      result?.success === false
+    ){
+      console.warn(
+        `Refund status could not be loaded for payment ${paymentId}:`,
+        result?.message || response.status
+      );
+
+      return null;
+    }
+
+    return result?.data || null;
+
+  }catch(error){
+    console.warn(
+      `Refund status check failed for payment ${paymentId}:`,
+      error
+    );
+
+    return null;
+  }
+}
+
+
+function hasOrderRefund(order){
+  const refund =
+    order?.refundData;
+
+  if(!refund){
+    return false;
+  }
+
+  const status =
+    String(
+      refund.refundStatus || ""
+    )
+      .trim()
+      .toUpperCase();
+
+  return (
+    Boolean(
+      status &&
+      status !== "NOT_REQUESTED"
+    ) ||
+    Number(
+      refund.refundedAmount || 0
+    ) > 0 ||
+    Boolean(
+      refund.refundRequestedAt ||
+      refund.refundedAt ||
+      refund.refundReason
+    )
+  );
+}
+
+
+function getOrderRefundBadgeClass(status){
+  const value =
+    String(status || "")
+      .trim()
+      .toUpperCase();
+
+  if(
+    [
+      "REFUNDED",
+      "COMPLETED",
+      "FULLY_REFUNDED"
+    ].includes(value)
+  ){
+    return "refunded";
+  }
+
+  if(
+    [
+      "REQUESTED",
+      "PENDING",
+      "PROCESSING",
+      "REFUND_PENDING"
+    ].includes(value)
+  ){
+    return "pending";
+  }
+
+  return "failed";
+}
+
+
+function createOrderRefundInfo(order){
+  if(!hasOrderRefund(order)){
+    return "";
+  }
+
+  const refund =
+    order.refundData;
+
+  const refundStatus =
+    refund.refundStatus ||
+    "PENDING";
+
+  return `
+    <div class="refund-order-box">
+
+      <div>
+        <strong>Refund Status:</strong>
+
+        <span
+          class="refund-order-badge ${getOrderRefundBadgeClass(
+            refundStatus
+          )}"
+        >
+          <i class="fa-solid fa-rotate-left"></i>
+          ${escapeHtml(
+            formatStatus(
+              refundStatus
+            )
+          )}
+        </span>
+      </div>
+
+      ${
+        refund.refundedAmount !== null &&
+        refund.refundedAmount !== undefined
+          ? `
+              <div>
+                <strong>Refunded Amount:</strong>
+                ${formatCurrency(
+                  refund.refundedAmount
+                )}
+              </div>
+            `
+          : ""
+      }
+
+      ${
+        refund.refundReason
+          ? `
+              <div>
+                <strong>Reason:</strong>
+                ${escapeHtml(
+                  refund.refundReason
+                )}
+              </div>
+            `
+          : ""
+      }
+
+      ${
+        refund.refundedAt
+          ? `
+              <div>
+                <strong>Refunded On:</strong>
+                ${escapeHtml(
+                  formatDateTimeValue(
+                    refund.refundedAt
+                  )
+                )}
+              </div>
+            `
+          : ""
+      }
+
+    </div>
+  `;
+}
+
+
+function isRefundCompleted(order){
+  const status =
+    String(
+      order?.refundData?.refundStatus || ""
+    )
+      .trim()
+      .toUpperCase();
+
+  return [
+    "REFUNDED",
+    "COMPLETED",
+    "FULLY_REFUNDED"
+  ].includes(status);
+}
+
 
 function displayOrders(){
   const container =
@@ -1716,6 +2070,17 @@ function displayOrders(){
                   </strong>
                 </div>
 
+                <div class="meta-box">
+                  <span>Payment Status</span>
+                  <strong>
+                    ${escapeHtml(
+                      displayPaymentStatus(
+                        order.paymentStatus
+                      )
+                    )}
+                  </strong>
+                </div>
+
               </div>
 
               <div class="address-box">
@@ -1737,6 +2102,8 @@ function displayOrders(){
                 ${itemsHtml}
 
               </div>
+
+              ${createOrderRefundInfo(order)}
 
             </div>
 
@@ -1765,7 +2132,7 @@ function displayOrders(){
               </button>
 
               ${
-                canCancelOrder(status)
+                canCancelOrder(order)
                   ? `
                     <button
                       type="button"
@@ -1776,6 +2143,25 @@ function displayOrders(){
                     >
                       <i class="fa-solid fa-xmark"></i>
                       Cancel Order
+                    </button>
+                  `
+                  : ""
+              }
+
+              ${
+                isDeliveredOrder(status) &&
+                !isReturnAlreadyRequested(order) &&
+                !hasOrderRefund(order)
+                  ? `
+                    <button
+                      type="button"
+                      class="btn return-btn"
+                      onclick="returnOrder(${Number(
+                        order.id
+                      )})"
+                    >
+                      <i class="fa-solid fa-rotate-left"></i>
+                      Return Order
                     </button>
                   `
                   : ""
@@ -1851,6 +2237,13 @@ function viewOrder(id){
   );
 
   setText(
+    "modalPaymentStatus",
+    displayPaymentStatus(
+      order.paymentStatus
+    )
+  );
+
+  setText(
     "modalAddress",
     order.shippingAddress ||
     "-"
@@ -1861,11 +2254,143 @@ function viewOrder(id){
     itemText
   );
 
+  renderOrderRefundModal(
+    order
+  );
+
   document.getElementById(
     "orderModal"
   ).style.display =
     "flex";
 }
+
+
+function renderOrderRefundModal(order){
+  const card =
+    document.getElementById(
+      "modalRefundCard"
+    );
+
+  const content =
+    document.getElementById(
+      "modalRefundDetails"
+    );
+
+  if(!card || !content){
+    return;
+  }
+
+  if(!hasOrderRefund(order)){
+    card.style.display =
+      "none";
+
+    content.innerHTML =
+      "-";
+
+    return;
+  }
+
+  const refund =
+    order.refundData;
+
+  const rows = [];
+
+  if(refund.paymentId !== null && refund.paymentId !== undefined){
+    rows.push(
+      `Payment ID: ${escapeHtml(refund.paymentId)}`
+    );
+  }
+
+  if(refund.refundStatus){
+    rows.push(
+      `Refund Status: ${escapeHtml(
+        formatStatus(refund.refundStatus)
+      )}`
+    );
+  }
+
+  if(refund.paymentStatus){
+    rows.push(
+      `Payment Status: ${escapeHtml(
+        displayPaymentStatus(
+          refund.paymentStatus
+        )
+      )}`
+    );
+  }
+
+  if(refund.refundedAmount !== null && refund.refundedAmount !== undefined){
+    rows.push(
+      `Refunded Amount: ${formatCurrency(
+        refund.refundedAmount
+      )}`
+    );
+  }
+
+  if(refund.refundReason){
+    rows.push(
+      `Refund Reason: ${escapeHtml(
+        refund.refundReason
+      )}`
+    );
+  }
+
+  if(refund.refundRequestedAt){
+    rows.push(
+      `Refund Requested: ${escapeHtml(
+        formatDateTimeValue(
+          refund.refundRequestedAt
+        )
+      )}`
+    );
+  }
+
+  if(refund.refundedAt){
+    rows.push(
+      `Refunded On: ${escapeHtml(
+        formatDateTimeValue(
+          refund.refundedAt
+        )
+      )}`
+    );
+  }
+
+  card.style.display =
+    "block";
+
+  content.innerHTML =
+    rows.join("<br>");
+}
+
+
+function formatDateTimeValue(value){
+  if(!value){
+    return "-";
+  }
+
+  const date =
+    new Date(value);
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  ){
+    return String(value);
+  }
+
+  return date.toLocaleString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"short",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit"
+    }
+  );
+}
+
 
 function closeOrderModal(){
   document.getElementById(
@@ -2253,17 +2778,296 @@ async function loadProfileIcon(){
   }
 }
 
-function canCancelOrder(status){
-  const normalized =
-    String(status || "")
+
+/* =====================================================
+   PAYMENT STATUS ENUM
+===================================================== */
+
+function normalizePaymentStatus(value){
+  if(value === null || value === undefined){
+    return "";
+  }
+
+  if(typeof value === "string"){
+    return value.trim().toUpperCase();
+  }
+
+  if(typeof value === "object"){
+    return String(
+      value.name ??
+      value.value ??
+      value.status ??
+      value.code ??
+      ""
+    ).trim().toUpperCase();
+  }
+
+  return String(value).trim().toUpperCase();
+}
+
+function normalizeOrderPaymentStatus(order){
+  return {
+    ...order,
+
+    paymentStatus:normalizePaymentStatus(
+      order?.paymentStatus ??
+      order?.payment?.status ??
+      "PENDING"
+    ),
+
+    paymentId:
+      order?.paymentId ??
+      order?.payment?.id ??
+      null,
+
+    refundData:
+      null
+  };
+}
+
+function displayPaymentStatus(value){
+  const status =
+    normalizePaymentStatus(value);
+
+  if(!status){
+    return "Pending";
+  }
+
+  /*
+   * Current backend enum values.
+   */
+  if(status === "SUCCESS"){
+    return "Payment Success";
+  }
+
+  if(status === "INITIATED"){
+    return "Payment Initiated";
+  }
+
+  if(status === "PENDING"){
+    return "Payment Pending";
+  }
+
+  if(status === "FAILED"){
+    return "Payment Failed";
+  }
+
+  if(status === "REFUNDED"){
+    return "Refunded";
+  }
+
+  if(status === "PARTIALLY_REFUNDED"){
+    return "Partially Refunded";
+  }
+
+  /*
+   * Read-only compatibility for old records/API responses.
+   * These values are never sent to the backend.
+   */
+  if(status === "PAID" || status === "PAYMENT_SUCCESS"){
+    return "Payment Success";
+  }
+
+  if(status === "PAYMENT_PENDING"){
+    return "Payment Pending";
+  }
+
+  if(status === "PAYMENT_FAILED"){
+    return "Payment Failed";
+  }
+
+  return formatStatus(status);
+}
+
+
+/* =====================================================
+   RETURN ORDER
+   POST /api/returns/create
+
+   After the return is accepted/processed, the backend
+   should process the related payment refund.
+===================================================== */
+
+function isReturnAlreadyRequested(order){
+  const value = String(
+    order?.returnStatus ??
+    order?.orderReturnStatus ??
+    order?.returnRequest?.status ??
+    ""
+  ).trim().toUpperCase();
+
+  return [
+    "REQUESTED",
+    "PENDING",
+    "APPROVED",
+    "PROCESSING",
+    "RETURNED",
+    "COMPLETED",
+    "REFUNDED"
+  ].includes(value);
+}
+
+async function returnOrder(orderId){
+  const order = orders.find(
+    currentOrder =>
+      Number(currentOrder.id) ===
+      Number(orderId)
+  );
+
+  if(!order){
+    showAlert(
+      "Order not found.",
+      "error"
+    );
+    return;
+  }
+
+  if(!isDeliveredOrder(order.status)){
+    showAlert(
+      "Return is available only after the order is delivered.",
+      "info"
+    );
+    return;
+  }
+
+  if(isReturnAlreadyRequested(order)){
+    showAlert(
+      "A return request already exists for this order.",
+      "info"
+    );
+    return;
+  }
+
+  const reason = prompt(
+    "Enter the reason for returning this order:"
+  );
+
+  if(!reason || !reason.trim()){
+    return;
+  }
+
+  if(
+    !confirm(
+      "Submit return request for this delivered order?"
+    )
+  ){
+    return;
+  }
+
+  const token =
+    localStorage.getItem("token");
+
+  if(!token){
+    showAlert(
+      "Please login to return this order.",
+      "error"
+    );
+    return;
+  }
+
+  try{
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/returns/create`,
+        {
+          method:"POST",
+          headers:{
+            "Authorization":"Bearer " + token,
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          },
+          body:JSON.stringify({
+            orderId:Number(orderId),
+            reason:reason.trim()
+          })
+        }
+      );
+
+    const responseText =
+      await response.text();
+
+    let result = null;
+
+    try{
+      result =
+        responseText
+          ? JSON.parse(responseText)
+          : null;
+    }catch(parseError){
+      result = null;
+    }
+
+    if(
+      !response.ok ||
+      result?.success === false
+    ){
+      throw new Error(
+        result?.message ||
+        responseText ||
+        "Unable to create return request."
+      );
+    }
+
+    showAlert(
+      result?.message ||
+      "Return request submitted successfully. Refund will be processed according to the return status.",
+      "success"
+    );
+
+    await loadMyOrders();
+
+  }catch(error){
+    console.error(
+      "Return order failed:",
+      error
+    );
+
+    showAlert(
+      error.message ||
+      "Unable to return this order.",
+      "error"
+    );
+  }
+}
+
+
+function canCancelOrder(order){
+  const status =
+    String(
+      order?.status || ""
+    )
+      .trim()
       .toUpperCase();
 
-  return ![
-    "CANCELLED",
-    "DELIVERED",
-    "SHIPPED",
-    "OUT_FOR_DELIVERY"
-  ].includes(normalized);
+  /*
+   * Cancel is only for orders that have not moved into
+   * shipping/delivery/return/refund flow.
+   */
+  if(
+    [
+      "CANCELLED",
+      "DELIVERED",
+      "SHIPPED",
+      "OUT_FOR_DELIVERY",
+      "RETURN_REQUESTED",
+      "RETURN_PENDING",
+      "RETURN_APPROVED",
+      "RETURN_PROCESSING",
+      "RETURNED",
+      "REFUNDED"
+    ].includes(status)
+  ){
+    return false;
+  }
+
+  if(
+    isReturnAlreadyRequested(order) ||
+    hasOrderRefund(order)
+  ){
+    return false;
+  }
+
+  return true;
 }
 
 function getTotalQuantity(items){

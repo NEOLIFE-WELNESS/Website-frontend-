@@ -1184,6 +1184,25 @@ textarea.form-control{
 
                         <div class="form-group">
 
+                            <label for="weight">
+                                Weight (kg)
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="number"
+                                id="weight"
+                                class="form-control"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="Example: 0.50"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
                             <label for="expiryDate">
                                 Expiry Date
                                 <span class="required">*</span>
@@ -1607,6 +1626,7 @@ document.getElementById("productForm").addEventListener("submit", async function
             price: Number(document.getElementById("price").value),
             stock: Number(document.getElementById("stock").value),
             netQty: document.getElementById("netQty").value.trim(),
+            weight: Number(document.getElementById("weight").value),
             indication: document.getElementById("indication").value.trim(),
             manufacturerName: document.getElementById("manufacturer").value,
             manufacturingDate: new Date().toISOString().split("T")[0],

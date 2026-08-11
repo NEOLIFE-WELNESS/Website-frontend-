@@ -398,7 +398,7 @@ a{
 
 table{
   width:100%;
-  min-width:1250px;
+  min-width:1450px;
   border-collapse:collapse;
 }
 
@@ -486,6 +486,18 @@ select{
   color:var(--white);
   background:var(--dark-green);
 }
+
+
+.action-wrap{display:flex;flex-wrap:wrap;gap:6px;min-width:230px}
+.order-action-btn{padding:7px 9px;border:none;border-radius:8px;font-size:9px;font-weight:800;white-space:nowrap}
+.action-confirm{color:#287146;background:#ebf7ef}
+.action-process{color:#946300;background:#fff6e8}
+.action-pack{color:#31708f;background:#edf6fb}
+.action-ship{color:#76548f;background:#f5effb}
+.action-track{color:#153d29;background:#edf5ef}
+.action-cancel{color:#c74747;background:#fff0f0}
+.action-invoice{color:#fff;background:#153d29}
+.order-action-btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* MODAL */
 
@@ -879,7 +891,7 @@ select{
               <th>Total</th>
               <th>Payment</th>
               <th>Status</th>
-              <th>Change Status</th>
+              <th>Fulfillment Actions</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -957,6 +969,26 @@ select{
         <strong id="mStatus">-</strong>
       </div>
 
+      <div class="detail-card">
+        <span>Shiprocket Order ID</span>
+        <strong id="mShiprocketOrderId">-</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Shipment ID</span>
+        <strong id="mShipmentId">-</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>AWB Code</span>
+        <strong id="mAwbCode">-</strong>
+      </div>
+
+      <div class="detail-card full-width">
+        <span>Order Actions</span>
+        <div id="mOrderActions" class="action-wrap">-</div>
+      </div>
+
       <div class="detail-card full-width">
         <span>Products</span>
         <strong id="mProduct">-</strong>
@@ -979,197 +1011,304 @@ let allOrders = [];
 
 window.onload = loadOrders;
 
-async function loadOrders(){
-  const token = localStorage.getItem("token");
+function getToken(){ return localStorage.getItem("token"); }
+function normalize(value){ return String(value || "").trim().toUpperCase(); }
+function money(value){ return "₹" + Number(value || 0).toFixed(2); }
 
-  if(!token){
+async function apiRequest(path, options = {}){
+  const token = getToken();
+  const headers = { "Accept":"application/json", ...(options.headers || {}) };
+  if(token) headers.Authorization = "Bearer " + token;
+  const response = await fetch(API_BASE_URL + path, { ...options, headers });
+  const contentType = response.headers.get("content-type") || "";
+  if(contentType.includes("application/pdf")) return { response, pdf:true };
+  const text = await response.text();
+  let result = null;
+  try { result = text ? JSON.parse(text) : {}; } catch { result = { success:false, message:text || "Invalid server response" }; }
+  if(!response.ok || result.success === false) throw new Error(result.message || `Request failed (${response.status})`);
+  return { response, result };
+}
+
+async function loadOrders(){
+  if(!getToken()){
     alert("Please login as admin first");
-    window.location.href = "login.html";
+    window.location.href = "../patient/login.html";
     return;
   }
-
   try{
-    const response = await fetch(`${API_BASE_URL}/api/orders/getAll`, {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    });
-
-    const text = await response.text();
-    console.log("ORDERS RAW RESPONSE:", text);
-
-    if(!response.ok){
-      alert("Failed to load orders. Status: " + response.status);
-      return;
-    }
-
-    const result = JSON.parse(text);
-    console.log("ADMIN ORDERS RESPONSE:", result);
-
-    if(result.success){
-      allOrders = (result.data || []).sort((a, b) => b.id - a.id);
-      displayOrders(allOrders);
-    }else{
-      alert(result.message || "Failed to load orders");
-    }
-
+    const { result } = await apiRequest("/api/orders/getAll", { method:"GET" });
+    allOrders = (result.data || []).sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
+    displayOrders(allOrders);
   }catch(error){
-    console.log(error);
-    alert("Backend not connected or token issue");
+    console.error(error);
+    document.getElementById("ordersTable").innerHTML = `<tr><td colspan="10">${escapeHtml(error.message)}</td></tr>`;
+    alert(error.message);
   }
 }
 
 function displayOrders(orders){
   const table = document.getElementById("ordersTable");
-  table.innerHTML = "";
-
   if(!orders || orders.length === 0){
-    table.innerHTML = `
+    table.innerHTML = `<tr><td colspan="10">No orders found</td></tr>`;
+    return;
+  }
+  table.innerHTML = orders.map(order => {
+    const items = order.items || [];
+    const productName = items.length ? items.map(i => i.productName || "-").join(", ") : "-";
+    const qty = items.length ? items.reduce((sum,i) => sum + Number(i.quantity || 0), 0) : "-";
+    const statusText = normalize(order.status) || "PENDING_PAYMENT";
+    const paymentText = normalize(order.paymentStatus) || "PENDING";
+    return `
       <tr>
-        <td colspan="10">No orders found</td>
-      </tr>
-    `;
+        <td>#${escapeHtml(order.orderNumber || order.id)}</td>
+        <td>${escapeHtml(order.userName || order.customerName || order.name || ("User " + (order.userId || "-")))}</td>
+        <td>${escapeHtml(order.phoneNumber || order.customerPhone || order.phone || "-")}</td>
+        <td>${escapeHtml(productName)}</td>
+        <td>${escapeHtml(qty)}</td>
+        <td>${money(order.totalAmount)}</td>
+        <td><span class="status ${getPaymentClass(paymentText)}">${escapeHtml(paymentText)}</span></td>
+        <td><span class="status ${getStatusClass(statusText)}">${escapeHtml(statusText)}</span></td>
+        <td>${buildActions(order)}</td>
+        <td><button class="view-btn" title="View details" onclick="viewOrder(${Number(order.id)})"><i class="fa-solid fa-eye"></i></button></td>
+      </tr>`;
+  }).join("");
+}
+
+function buildActions(order){
+  const id = Number(order.id);
+  const status = normalize(order.status);
+  const payment = normalize(order.paymentStatus);
+  let buttons = [];
+
+  // PUT /api/orders/{id}/confirm : only PAID + SUCCESS
+  if(status === "PAID" && payment === "SUCCESS")
+    buttons.push(actionButton("Confirm", "fa-check", "action-confirm", `confirmOrder(${id})`));
+
+  // PUT /api/orders/{id}/process : only CONFIRMED
+  if(status === "CONFIRMED")
+    buttons.push(actionButton("Process", "fa-gears", "action-process", `processOrder(${id})`));
+
+  // PUT /api/orders/{id}/pack : CONFIRMED or PROCESSING
+  if(["CONFIRMED","PROCESSING"].includes(status))
+    buttons.push(actionButton("Pack", "fa-box", "action-pack", `packOrder(${id})`));
+
+  // POST /api/shipping/create/{id} : PACKED + SUCCESS
+  if(status === "PACKED" && payment === "SUCCESS")
+    buttons.push(actionButton("Create Shipment", "fa-truck-fast", "action-ship", `createShipment(${id})`));
+
+  // GET tracking APIs require a shipment
+  if(order.shipmentId || ["SHIPMENT_CREATED","SHIPPED","OUT_FOR_DELIVERY","DELIVERED"].includes(status))
+    buttons.push(actionButton("Track", "fa-location-dot", "action-track", `trackOrder(${id})`));
+
+  // GET /api/orders/{id}/invoice is available to ADMIN
+  if(payment === "SUCCESS" || ["PAID","CONFIRMED","PROCESSING","PACKED","SHIPMENT_CREATED","SHIPPED","OUT_FOR_DELIVERY","DELIVERED"].includes(status))
+    buttons.push(actionButton("Invoice", "fa-file-pdf", "action-invoice", `downloadInvoice(${id})`));
+
+  // PUT /api/orders/{id}/cancel : admin allowed, but not after shipment/delivery
+  if(!["CANCELLED","SHIPMENT_CREATED","SHIPPED","OUT_FOR_DELIVERY","DELIVERED"].includes(status))
+    buttons.push(actionButton("Cancel", "fa-xmark", "action-cancel", `cancelOrder(${id})`));
+
+  return `<div class="action-wrap">${buttons.length ? buttons.join("") : "-"}</div>`;
+}
+
+function actionButton(label, icon, cls, onclick){
+  return `<button type="button" class="order-action-btn ${cls}" onclick="${onclick}"><i class="fa-solid ${icon}"></i> ${label}</button>`;
+}
+
+async function runOrderAction(id, action, confirmText){
+  if(confirmText && !confirm(confirmText)) return;
+  try{
+    const { result } = await apiRequest(`/api/orders/${id}/${action}`, { method:"PUT" });
+    alert(result.message || "Order updated successfully");
+    await loadOrders();
+  }catch(error){ alert(error.message); }
+}
+function confirmOrder(id){ return runOrderAction(id,"confirm","Confirm this paid order?"); }
+function processOrder(id){ return runOrderAction(id,"process","Start processing this order?"); }
+function packOrder(id){ return runOrderAction(id,"pack","Mark this order as packed?"); }
+function cancelOrder(id){ return runOrderAction(id,"cancel","Cancel this order? For a paid order, refund may also be required."); }
+
+async function createShipment(id){
+  if(
+    !confirm(
+      "Create the Shiprocket shipment for this packed order?"
+    )
+  ){
     return;
   }
 
-  orders.forEach(order => {
-    const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
+  try{
+    const { result } =
+      await apiRequest(
+        `/api/shipping/create/${id}`,
+        {
+          method:"POST"
+        }
+      );
 
-    const productName = firstItem
-      ? firstItem.productName
-      : "-";
+    const shipment =
+      result?.data || {};
 
-    const qty = firstItem
-      ? firstItem.quantity
-      : "-";
+    /*
+     * Expected response:
+     * {
+     *   success:true,
+     *   message:"Shiprocket order created successfully",
+     *   data:{
+     *     shiprocketOrderId:"842176543",
+     *     shipmentId:"842987654",
+     *     status:"SHIPMENT_CREATED"
+     *   }
+     * }
+     */
 
-    const statusText = order.status || "PENDING";
-    const statusClass = getStatusClass(statusText);
+    const existingOrder =
+      allOrders.find(
+        order =>
+          Number(order.id) ===
+          Number(id)
+      );
 
-    table.innerHTML += `
-      <tr>
-        <td>#${order.orderNumber || order.id}</td>
-        <td>
-  ${order.userName || order.customerName || order.name || ("User " + (order.userId || "-"))}
-</td>
+    if(existingOrder){
+      if(shipment.shiprocketOrderId){
+        existingOrder.shiprocketOrderId =
+          shipment.shiprocketOrderId;
+      }
 
-<td>
-  ${order.phoneNumber || order.customerPhone || order.phone || "-"}
-</td>
-        <td>${productName}</td>
-        <td>${qty}</td>
-        <td>₹${order.totalAmount || 0}</td>
-        <td>COD / Pending</td>
+      if(shipment.shipmentId){
+        existingOrder.shipmentId =
+          shipment.shipmentId;
+      }
 
-        <td>
-          <span class="status ${statusClass}">
-            ${statusText}
-          </span>
-        </td>
+      if(shipment.status){
+        existingOrder.status =
+          shipment.status;
+      }
+    }
 
-        <td>
-          <select onchange="changeStatus(this)" disabled>
-            <option selected>${statusText}</option>
-          </select>
-        </td>
+    alert(
+      `${result.message || "Shiprocket order created successfully"}
 
-        <td>
-          <button class="view-btn" onclick="viewOrder(${order.id})">View</button>
-        </td>
-      </tr>
-    `;
-  });
+` +
+      `Shiprocket Order ID: ${shipment.shiprocketOrderId || "-"}
+` +
+      `Shipment ID: ${shipment.shipmentId || "-"}
+` +
+      `Status: ${shipment.status || "SHIPMENT_CREATED"}`
+    );
+
+    /*
+     * Reload orders so the table immediately reflects:
+     * SHIPMENT_CREATED + shipmentId + shiprocketOrderId.
+     */
+    await loadOrders();
+
+  }catch(error){
+    console.error(
+      "Create shipment failed:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Unable to create Shiprocket shipment."
+    );
+  }
+}
+
+async function trackOrder(id){
+  try{
+    // Order-level tracking API from the supplied order flow.
+    const { result } = await apiRequest(`/api/orders/${id}/track`, { method:"GET" });
+    let data = result.data;
+    if(typeof data === "string"){
+      try { data = JSON.parse(data); } catch {}
+    }
+    alert("Tracking Details\n\n" + (typeof data === "string" ? data : JSON.stringify(data, null, 2)));
+  }catch(error){ alert(error.message); }
+}
+
+async function trackShipmentById(shipmentId){
+  if(!shipmentId) return alert("Shipment ID is not available for this order.");
+  try{
+    const { result } = await apiRequest(`/api/shipping/track/${encodeURIComponent(shipmentId)}`, { method:"GET" });
+    let data = result.data;
+    if(typeof data === "string"){
+      try { data = JSON.parse(data); } catch {}
+    }
+    alert("Shiprocket Tracking\n\n" + (typeof data === "string" ? data : JSON.stringify(data, null, 2)));
+  }catch(error){ alert(error.message); }
+}
+
+async function downloadInvoice(id){
+  try{
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/api/orders/${id}/invoice`, { headers:{ "Authorization":"Bearer " + token } });
+    if(!response.ok){
+      let message = "Unable to download invoice";
+      try { const e = await response.json(); message = e.message || message; } catch {}
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `Neolife-Invoice-${id}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }catch(error){ alert(error.message); }
 }
 
 function getStatusClass(status){
-  status = String(status || "").toLowerCase();
-
-  if(status.includes("pending")) return "pending";
-  if(status.includes("confirmed")) return "confirmed";
-  if(status.includes("shipped")) return "shipped";
-  if(status.includes("delivered")) return "delivered";
-  if(status.includes("cancelled")) return "cancelled";
-
+  status = normalize(status);
+  if(["CANCELLED","PAYMENT_FAILED"].includes(status)) return "cancelled";
+  if(["DELIVERED"].includes(status)) return "delivered";
+  if(["SHIPMENT_CREATED","SHIPPED","OUT_FOR_DELIVERY"].includes(status)) return "shipped";
+  if(["PAID","CONFIRMED","PROCESSING","PACKED"].includes(status)) return "confirmed";
+  return "pending";
+}
+function getPaymentClass(status){
+  status = normalize(status);
+  if(["SUCCESS","REFUNDED","PARTIALLY_REFUNDED"].includes(status)) return "confirmed";
+  if(["FAILED"].includes(status)) return "cancelled";
   return "pending";
 }
 
-function viewOrder(id){
-  const order = allOrders.find(o => o.id === id);
+async function viewOrder(id){
+  try{
+    // GET /api/orders/{id}: fetch fresh full details instead of relying only on table data.
+    const { result } = await apiRequest(`/api/orders/${id}`, { method:"GET" });
+    const order = result.data || {};
+    const items = order.items || [];
+    const productText = items.length ? items.map(item => `${item.productName || "-"} (Qty: ${item.quantity || 0}, ${money(item.subtotal)})`).join(", ") : "-";
+    const qtyText = items.length ? items.reduce((sum,item) => sum + Number(item.quantity || 0),0) : "-";
 
-  if(!order){
-    alert("Order not found");
-    return;
-  }
-
-  const items = order.items || [];
-
-  const productText = items.length > 0
-    ? items.map(item =>
-        `${item.productName} (Qty: ${item.quantity}, ₹${item.subtotal})`
-      ).join(", ")
-    : "-";
-
-  const qtyText = items.length > 0
-    ? items.map(item => item.quantity).join(", ")
-    : "-";
-
-  document.getElementById("mOrderId").innerText = order.orderNumber || order.id;
-  document.getElementById("mCustomer").innerText =
-  order.userName ||
-  order.customerName ||
-  order.name ||
-  ("User " + (order.userId || "-"));
-
-document.getElementById("mPhone").innerText =
-  order.phoneNumber ||
-  order.customerPhone ||
-  order.phone ||
-  "-";
-  document.getElementById("mProduct").innerText = productText;
-  document.getElementById("mQty").innerText = qtyText;
-  document.getElementById("mTotal").innerText = "₹" + (order.totalAmount || 0);
-  document.getElementById("mPayment").innerText = order.status || "PENDING_PAYMENT";
-  document.getElementById("mStatus").innerText = order.status || "-";
-
-  document.getElementById("mAddress").innerText =
-    order.shippingAddress || "-";
-
-  document.getElementById("orderModal").style.display = "flex";
+    document.getElementById("mOrderId").innerText = order.orderNumber || order.id || "-";
+    document.getElementById("mCustomer").innerText = order.userName || order.customerName || order.name || ("User " + (order.userId || "-"));
+    document.getElementById("mPhone").innerText = order.phoneNumber || order.customerPhone || order.phone || "-";
+    document.getElementById("mProduct").innerText = productText;
+    document.getElementById("mQty").innerText = qtyText;
+    document.getElementById("mTotal").innerText = money(order.totalAmount);
+    document.getElementById("mPayment").innerText = normalize(order.paymentStatus) || "-";
+    document.getElementById("mStatus").innerText = normalize(order.status) || "-";
+    document.getElementById("mShiprocketOrderId").innerText = order.shiprocketOrderId || "-";
+    document.getElementById("mShipmentId").innerText = order.shipmentId || "-";
+    document.getElementById("mAwbCode").innerText = order.awbCode || "-";
+    document.getElementById("mAddress").innerText = order.shippingAddress || "-";
+    document.getElementById("mOrderActions").innerHTML = buildActions(order);
+    if(order.shipmentId){
+      document.getElementById("mOrderActions").innerHTML += actionButton("Shiprocket Track","fa-truck","action-track",`trackShipmentById('${String(order.shipmentId).replace(/'/g,"\\'")}')`);
+    }
+    document.getElementById("orderModal").style.display = "flex";
+  }catch(error){ alert(error.message); }
 }
 
-function changeStatus(selectElement){
-  alert("Status update API is not available yet.");
+function escapeHtml(value){
+  return String(value ?? "-").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 }
-
-function closeModal(){
-  document.getElementById("orderModal").style.display = "none";
-}
-
-function toggleSidebar(){
-  document.getElementById("adminSidebar").classList.toggle("open");
-  document.getElementById("sidebarOverlay").classList.toggle("show");
-}
-
-function closeSidebar(){
-  document.getElementById("adminSidebar").classList.remove("open");
-  document.getElementById("sidebarOverlay").classList.remove("show");
-}
-
-function logoutAdmin(){
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("role");
-  localStorage.removeItem("userId");
-  window.location.href = "../patient/login.html";
-}
-
-window.addEventListener("click", function(event){
-  const modal = document.getElementById("orderModal");
-  if(event.target === modal){
-    closeModal();
-  }
-});
+function closeModal(){ document.getElementById("orderModal").style.display = "none"; }
+function toggleSidebar(){ document.getElementById("adminSidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
+function closeSidebar(){ document.getElementById("adminSidebar").classList.remove("open"); document.getElementById("sidebarOverlay").classList.remove("show"); }
+function logoutAdmin(){ ["token","refreshToken","role","userId"].forEach(k => localStorage.removeItem(k)); window.location.href = "../patient/login.html"; }
+window.addEventListener("click", event => { const modal = document.getElementById("orderModal"); if(event.target === modal) closeModal(); });
 </script>
 
 </body>

@@ -1096,6 +1096,25 @@ textarea.form-control{
 
           <div class="form-group">
 
+            <label for="weightInKg">
+              Weight (kg)
+              <span class="required">*</span>
+            </label>
+
+            <input
+              type="number"
+              id="weightInKg"
+              class="form-control"
+              min="0.01"
+              step="0.01"
+              placeholder="Example: 0.50"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
             <label for="expiryDate">
               Expiry Date
               <span class="required">*</span>
@@ -1437,6 +1456,19 @@ async function loadProduct(){
 
     document.getElementById("netQty").value =
       product.netQty || "";
+
+    // Backend field is weightInKg (Java Double).
+    // Keep a fallback to "weight" temporarily in case an older API
+    // response is still being returned during migration.
+    const loadedWeight =
+      product.weightInKg ??
+      product.weight ??
+      "";
+
+    document.getElementById("weightInKg").value =
+      loadedWeight !== ""
+        ? Number(loadedWeight)
+        : "";
 
     document.getElementById("indication").value =
       product.indication || "";
@@ -1830,6 +1862,22 @@ document
             "expiryDate"
           ).value;
 
+        const weightInKgValue =
+          Number(
+            document.getElementById(
+              "weightInKg"
+            ).value
+          );
+
+        if(
+          !Number.isFinite(weightInKgValue) ||
+          weightInKgValue <= 0
+        ){
+          throw new Error(
+            "Please enter a valid product weight in kg."
+          );
+        }
+
         const updatedProduct = {
           productName:
             document.getElementById(
@@ -1869,6 +1917,9 @@ document
             document.getElementById(
               "netQty"
             ).value.trim(),
+
+          // Must match ProductRequest.weightInKg exactly.
+          weightInKg:weightInKgValue,
 
           indication:
             document.getElementById(

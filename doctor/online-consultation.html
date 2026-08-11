@@ -1335,7 +1335,7 @@ textarea.control{
                     <i class="fa-solid fa-calendar-days"></i>
                     Appointment Calendar
                 </a>
-                <a href="upcoming-schedule.html" class="active">
+                <a href="upcoming-schedule.html">
     <i class="fa-solid fa-calendar-check"></i>
     Upcoming Schedule
 </a>
@@ -2059,8 +2059,7 @@ async function api(
     }
 
     if (
-        response.status === 401 ||
-        response.status === 403
+        response.status === 401
     ) {
         clearSession();
 
@@ -2070,6 +2069,15 @@ async function api(
         throw new Error(
             result.message ||
             "Doctor session expired."
+        );
+    }
+
+    if (
+        response.status === 403
+    ) {
+        throw new Error(
+            result.message ||
+            "You do not have permission to access this resource."
         );
     }
 
@@ -2193,90 +2201,14 @@ async function loadConsultations() {
 
     try {
         /*
-         * Fetch every consultation and then keep only records
-         * assigned to the currently logged-in doctor.
+         * DOCTOR-SIDE CONSULTATION APIs ONLY.
          *
-         * Documented endpoint:
-         * GET /api/consultations/admin/getAll
+         * Do not call:
+         * /api/consultations/admin/getAll
          *
-         * The backend must allow DOCTOR users to read this endpoint,
-         * or preferably provide:
-         * GET /api/consultations/doctor/all
-         */
-        const result =
-            await api(
-                "/api/consultations/admin/getAll"
-            );
-
-        const records =
-            extractArray(result);
-
-        consultations =
-            records
-                .map(
-                    normalizeConsultation
-                )
-                .filter(
-                    item => {
-                        if (!doctorId) {
-                            return true;
-                        }
-
-                        return (
-                            Number(item.doctorId) ===
-                            doctorId
-                        );
-                    }
-                );
-
-        /*
-         * Some backend "upcoming" queries stop returning a consultation
-         * as soon as its start time is reached. Merge the last fetched
-         * consultation from local storage and retain it until its scheduled
-         * end time has passed.
-         */
-        consultations =
-            mergeConsultationsWithActiveCache(
-                consultations,
-                doctorId
-            );
-
-        saveConsultationCache(
-            consultations
-        );
-
-        consultations.sort(
-            function (
-                first,
-                second
-            ) {
-                const firstDate =
-                    new Date(
-                        `${first.date || "1970-01-01"}T${first.startTime || "00:00:00"}`
-                    );
-
-                const secondDate =
-                    new Date(
-                        `${second.date || "1970-01-01"}T${second.startTime || "00:00:00"}`
-                    );
-
-                return secondDate - firstDate;
-            }
-        );
-
-        await loadMeetingStates();
-
-        applyFilters();
-
-    } catch (allError) {
-        console.warn(
-            "All-consultations API failed. Falling back to pending and upcoming endpoints:",
-            allError
-        );
-
-        /*
-         * Fallback keeps the page usable if the backend currently
-         * restricts /admin/getAll to ADMIN users.
+         * The doctor page loads:
+         * 1. Pending doctor requests
+         * 2. Doctor's own consultations
          */
         const results =
             await Promise.allSettled([
@@ -2289,9 +2221,10 @@ async function loadConsultations() {
                 )
             ]);
 
-        const errors = [];
         const consultationMap =
             new Map();
+
+        const errors = [];
 
         results.forEach(
             function (
@@ -2305,13 +2238,16 @@ async function loadConsultations() {
                     extractArray(
                         result.value
                     ).forEach(
-                        function (item) {
+                        function (record) {
                             const normalized =
                                 normalizeConsultation(
-                                    item
+                                    record
                                 );
 
-                            if (normalized.id) {
+                            if (
+                                normalized.id !== null &&
+                                normalized.id !== undefined
+                            ) {
                                 consultationMap.set(
                                     String(
                                         normalized.id
@@ -2327,8 +2263,8 @@ async function loadConsultations() {
                         result.reason?.message ||
                         (
                             index === 0
-                                ? "Pending requests could not be loaded."
-                                : "Upcoming consultations could not be loaded."
+                                ? "Pending consultation requests could not be loaded."
+                                : "Doctor consultations could not be loaded."
                         )
                     );
                 }
@@ -2340,6 +2276,32 @@ async function loadConsultations() {
                 consultationMap.values()
             );
 
+        /*
+         * Keep only consultations belonging to the logged-in doctor
+         * when doctorId is available.
+         */
+        if (doctorId) {
+            consultations =
+                consultations.filter(
+                    function (item) {
+                        return (
+                            !item.doctorId ||
+                            Number(
+                                item.doctorId
+                            ) ===
+                            Number(
+                                doctorId
+                            )
+                        );
+                    }
+                );
+        }
+
+        /*
+         * Keep the existing active-cache behavior so a consultation
+         * does not disappear at the exact start time before its
+         * scheduled end time.
+         */
         consultations =
             mergeConsultationsWithActiveCache(
                 consultations,
@@ -2365,23 +2327,93 @@ async function loadConsultations() {
                         `${second.date || "1970-01-01"}T${second.startTime || "00:00:00"}`
                     );
 
-                return secondDate - firstDate;
+                return (
+                    secondDate -
+                    firstDate
+                );
             }
         );
 
+        /*
+         * Meeting state is checked only for consultations whose
+         * payment status is successful.
+         */
         await loadMeetingStates();
 
         applyFilters();
 
-        if (errors.length) {
+        /*
+         * If one doctor endpoint failed but the other returned data,
+         * keep the page usable and only show an informational message.
+         */
+        if (
+            errors.length &&
+            consultations.length
+        ) {
+            console.warn(
+                "One doctor consultation endpoint failed:",
+                errors
+            );
+
             showAlert(
-                "The backend did not allow the all-consultations API, so only pending and upcoming consultations are currently shown.",
+                "Some consultation records could not be refreshed, but available records are shown.",
                 "info"
             );
         }
+
+        /*
+         * If both doctor endpoints failed and there is no cached data,
+         * show the real backend error.
+         */
+        if (
+            errors.length &&
+            !consultations.length
+        ) {
+            throw new Error(
+                errors.join(" ")
+            );
+        }
+
+    } catch (error) {
+        console.error(
+            "Consultation loading failed:",
+            error
+        );
+
+        /*
+         * Preserve still-valid cached consultation records when possible.
+         */
+        const cachedConsultations =
+            getConsultationCache()
+                .filter(
+                    function (item) {
+                        if (
+                            doctorId &&
+                            item.doctorId &&
+                            Number(item.doctorId) !==
+                            Number(doctorId)
+                        ) {
+                            return false;
+                        }
+
+                        return shouldDisplayConsultation(
+                            item
+                        );
+                    }
+                );
+
+        consultations =
+            cachedConsultations;
+
+        applyFilters();
+
+        showAlert(
+            error.message ||
+            "Unable to load online consultations.",
+            "error"
+        );
     }
 }
-
 
 
 function startConsultationAutoRefresh() {
@@ -3336,12 +3368,45 @@ async function createVideoRoom(consultationId, button) {
 }
 
 function startConsultation(consultationId) {
-    const consultation = consultations.find(item => Number(item.id) === Number(consultationId));
-    if (!consultation || !consultation.meetingCreated) {
-        showAlert("Create the video room before starting the consultation.", "error");
+    const consultation =
+        consultations.find(
+            item =>
+                Number(item.id) ===
+                Number(consultationId)
+        );
+
+    if (!consultation) {
+        showAlert(
+            "Consultation could not be found.",
+            "error"
+        );
         return;
     }
-    window.location.href = `${CONSULTATION_ROOM_URL}?consultationId=${encodeURIComponent(consultationId)}`;
+
+    if (
+        !isPaymentSuccessful(
+            consultation.paymentStatus
+        )
+    ) {
+        showAlert(
+            "The patient must complete payment before starting the consultation.",
+            "error"
+        );
+        return;
+    }
+
+    if (!consultation.meetingCreated) {
+        showAlert(
+            "Create the video room before starting the consultation.",
+            "error"
+        );
+        return;
+    }
+
+    window.location.href =
+        `${CONSULTATION_ROOM_URL}?consultationId=${encodeURIComponent(
+            consultationId
+        )}`;
 }
 
 /* =========================
