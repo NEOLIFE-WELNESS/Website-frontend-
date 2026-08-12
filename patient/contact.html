@@ -593,6 +593,88 @@
       .contact-page,.map-section{padding:65px 0;}
       .contact-info-box,.contact-form-box{padding:26px 20px;border-radius:22px;}
     }
+  
+    /* ===== DESKTOP + MOBILE RESPONSIVE FIX ===== */
+    .contact-grid > *,
+    .quick-contact-grid > *,
+    .footer-container > *{min-width:0;}
+
+    .contact-item > div:last-child{
+      min-width:0;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+
+    .map-box iframe{width:100%;}
+
+    @media (min-width:1101px){
+      .contact-grid{
+        grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);
+      }
+    }
+
+    @media (max-width:1100px){
+      .contact-grid{grid-template-columns:1fr;}
+      .contact-info-box,.contact-form-box{width:100%;}
+    }
+
+    @media (max-width:900px){
+      .contact-page,.map-section{padding:65px 0;}
+      .contact-grid,.quick-contact-grid,.footer-container,
+      .map-box,.section-heading{width:min(94%,720px);}
+      .quick-contact-grid,.footer-container{grid-template-columns:1fr;}
+    }
+
+    @media (max-width:520px){
+      html,body{max-width:100%;overflow-x:hidden;}
+      .glass-header{width:100%;}
+      .logo-container{min-width:0;gap:8px;}
+      .logo-img{width:44px;height:44px;min-width:44px;}
+      .logo-text{max-width:150px;font-size:13px;white-space:normal;}
+      .header-right{flex-shrink:0;gap:8px;}
+      .profile-icon{width:38px;height:38px;min-width:38px;}
+      .mobile-menu-button{width:40px;height:40px;}
+
+      .contact-hero{
+        min-height:390px;
+        padding:105px 18px 55px;
+      }
+      .contact-hero-content{width:100%;}
+      .contact-hero h1{font-size:32px;overflow-wrap:anywhere;}
+      .contact-hero p{font-size:15px;}
+
+      .quick-contact{padding:22px 0;}
+      .quick-contact-grid,.contact-grid,.section-heading,
+      .map-box,.footer-container,.footer-bottom{width:92%;}
+
+      .contact-page,.map-section{padding:52px 0;}
+      .section-heading{margin-bottom:28px;}
+      .section-heading h2{font-size:28px;}
+
+      .contact-info-box,.contact-form-box{
+        padding:24px 18px;
+        border-radius:20px;
+      }
+      .contact-info-box h3,.contact-form-box h3{font-size:22px;}
+      .contact-item{gap:12px;padding:14px 0;}
+      .contact-icon{
+        width:42px;height:42px;min-width:42px;border-radius:12px;
+      }
+      .contact-item p,.contact-item a{font-size:13px;}
+      .form-row{grid-template-columns:1fr;}
+
+      .map-box{border-radius:20px;}
+      .map-box iframe{height:330px;min-height:330px;}
+
+      .footer{padding:42px 0 20px;}
+      .footer-container{gap:28px;}
+
+      .whatsapp{
+        width:52px;height:52px;
+        right:16px;bottom:16px;font-size:24px;
+      }
+    }
+
   </style>
 </head>
 
@@ -700,7 +782,7 @@
       <i class="fa-solid fa-clock"></i>
       <div>
         <strong>Business Hours</strong>
-        <span>Mon–Sat, 9:00 AM–7:00 PM</span>
+        <span>Mon–Sat, 9:00 AM–6:00 PM</span>
       </div>
     </div>
 
@@ -797,7 +879,9 @@
 
     </div>
 
-    
+  </div>
+
+</section>
 
 <section class="map-section">
 
@@ -954,19 +1038,17 @@ async function loadProfileIcon(){
   }
 }
 
-document.getElementById("contactForm").addEventListener(
-  "submit",
-  function(event){
+const contactForm = document.getElementById("contactForm");
+if(contactForm){
+  contactForm.addEventListener("submit", function(event){
     event.preventDefault();
-
     alert(
       "Thank you for contacting Neolife Wellness Center. " +
       "Our team will contact you shortly."
     );
-
     this.reset();
-  }
-);
+  });
+}
 
 
 function toggleMobileMenu(){
