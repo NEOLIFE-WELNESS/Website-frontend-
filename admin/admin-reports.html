@@ -1238,7 +1238,7 @@ tbody tr:hover{
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let revenueChart = null;
 let revenueDistributionChart = null;
@@ -1357,11 +1357,11 @@ async function loadReports() {
      * No /api/admin/reports/overview API is required.
      */
     const results = await Promise.allSettled([
-      adminApiRequest("/api/orders/getAll"),
-      adminApiRequest("/api/payments/admin/getAll"),
-      adminApiRequest("/api/appointments/admin/getAll"),
-      adminApiRequest("/api/consultations/admin/getAll"),
-      adminApiRequest("/api/daily-treatments/admin/getAll")
+      adminApiRequest("/orders/getAll"),
+      adminApiRequest("/payments/admin/getAll"),
+      adminApiRequest("/appointments/admin/getAll"),
+      adminApiRequest("/consultations/admin/getAll"),
+      adminApiRequest("/daily-treatments/admin/getAll")
     ]);
 
     const names = [

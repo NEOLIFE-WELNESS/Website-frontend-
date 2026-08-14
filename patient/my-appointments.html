@@ -1082,10 +1082,10 @@ button{
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 const CONSULTATION_ROOM_URL =
-  "http://127.0.0.1:5500/consultation-room.html";
+  "consultation-room.html";
 
 let allAppointments = [];
 let activeFilter = "ALL";
@@ -1135,11 +1135,11 @@ async function loadMyAppointments() {
       consultationResult
     ] = await Promise.allSettled([
       fetchPatientRecords(
-        "/api/appointments/my-appointments"
+        "/appointments/my-appointments"
       ),
 
       fetchPatientRecords(
-        "/api/consultations/my-consultations"
+        "/consultations/my-consultations"
       )
     ]);
 
@@ -1567,7 +1567,7 @@ async function loadPatientMeetingStates() {
       async item => {
         try {
           const response = await fetch(
-            `${API_BASE_URL}/api/video-meetings/${encodeURIComponent(
+            `${API_BASE_URL}/video-meetings/${encodeURIComponent(
               item.id
             )}`,
             {
@@ -1657,7 +1657,7 @@ async function fetchRefundStatus(paymentId) {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/payments/${encodeURIComponent(paymentId)}/refund-status`,
+      `${API_BASE_URL}/payments/${encodeURIComponent(paymentId)}/refund-status`,
       { method:"GET", headers:authHeaders() }
     );
 
@@ -2343,7 +2343,7 @@ async function payAppointment(id) {
     id,
     paymentType:"APPOINTMENT",
     endpoint:
-      `/api/payments/appointment/${encodeURIComponent(id)}/initiate`
+      `/payments/appointment/${encodeURIComponent(id)}/initiate`
   });
 }
 
@@ -2360,7 +2360,7 @@ async function payConsultation(id) {
     id,
     paymentType:"CONSULTATION",
     endpoint:
-      `/api/payments/consultation/${encodeURIComponent(id)}/initiate`
+      `/payments/consultation/${encodeURIComponent(id)}/initiate`
   });
 }
 
@@ -2600,7 +2600,7 @@ async function verifyRazorpayPayment(
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/payments/razorpay/verify`,
+      `${API_BASE_URL}/payments/razorpay/verify`,
       {
         method:"POST",
         headers:{
@@ -2799,7 +2799,7 @@ async function requestReschedule(id) {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/appointments/${id}/reschedule`,
+      `${API_BASE_URL}/appointments/${id}/reschedule`,
       {
         method: "PUT",
 
@@ -2854,7 +2854,7 @@ async function cancelAppointment(id) {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/appointments/${id}/cancel`,
+      `${API_BASE_URL}/appointments/${id}/cancel`,
       {
         method: "PUT",
 
@@ -2906,7 +2906,7 @@ async function cancelConsultation(id) {
   try {
     const response =
       await fetch(
-        `${API_BASE_URL}/api/consultations/${encodeURIComponent(id)}/cancel`,
+        `${API_BASE_URL}/consultations/${encodeURIComponent(id)}/cancel`,
         {
           method: "PUT",
           headers:
@@ -3177,7 +3177,7 @@ async function loadProfileIcon() {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/users/getProfile`,
+      `${API_BASE_URL}/users/getProfile`,
       {
         headers: authHeaders()
       }

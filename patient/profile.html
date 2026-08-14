@@ -740,6 +740,9 @@ textarea{
         <button onclick="showTab('clinicReviews', this)">
           Clinic Reviews
         </button>
+        <button onclick="window.location.href='my-transactions.html'">
+          My Transactions
+        </button>
       </div>
 
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -806,7 +809,7 @@ textarea{
 </footer>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 async function loadProfile(){
   const token = localStorage.getItem("token");
@@ -818,7 +821,7 @@ async function loadProfile(){
   }
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/users/getProfile`, {
+    const response = await fetch(`${API_BASE_URL}/users/getProfile`, {
       method: "GET",
       headers: {
         "Authorization": "Bearer " + token
@@ -918,7 +921,7 @@ async function saveProfile(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/users/updateProfile`,
+      `${API_BASE_URL}/users/updateProfile`,
       {
         method:"PUT",
         headers:{
@@ -1124,7 +1127,7 @@ async function loadAddresses(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/address/get`,
+      `${API_BASE_URL}/address/get`,
       {
         method:"GET",
         headers:{
@@ -1216,8 +1219,8 @@ async function saveAddress(){
   };
 
   const url = addressId
-    ? `${API_BASE_URL}/api/address/update/${addressId}`
-    : `${API_BASE_URL}/api/address/add`;
+    ? `${API_BASE_URL}/address/update/${addressId}`
+    : `${API_BASE_URL}/address/add`;
 
   const method = addressId ? "PUT" : "POST";
 
@@ -1322,7 +1325,7 @@ async function setDefaultAddress(id){
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${API_BASE_URL}/api/address/${id}/default`,
+    `${API_BASE_URL}/address/${id}/default`,
     {
       method:"PUT",
       headers:{
@@ -1372,7 +1375,7 @@ async function loadMyReviews(){
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${API_BASE_URL}/api/clinic-reviews/my-reviews`,
+    `${API_BASE_URL}/clinic-reviews/my-reviews`,
     {
       method:"GET",
       headers:{
@@ -1501,7 +1504,7 @@ async function loadProfileIcon(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/users/getProfile`,
+      `${API_BASE_URL}/users/getProfile`,
       {
         headers:{
           "Authorization":"Bearer " + token

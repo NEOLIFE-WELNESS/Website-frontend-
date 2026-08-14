@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Shipping Policy | Neolife Wellness Center</title>
+
+<meta
+  name="description"
+  content="Shipping Policy of Neolife Wellness Center."
+>
+
+<link
+  rel="icon"
+  type="image/jpeg"
+  href="../assets/main_logo.jpeg"
+>
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+>
+
+<style>
+:root{
+  --dark-green:#153d29;
+  --green:#2f6b43;
+  --light-green:#edf5ef;
+  --gold:#c99b16;
+  --gold-dark:#9d7500;
+  --cream:#f7f8f3;
+  --white:#ffffff;
+  --text:#173c29;
+  --muted:#69736c;
+  --border:#dfe7e1;
+  --shadow:0 14px 34px rgba(21,61,41,.09);
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+  scroll-padding-top:100px;
+}
+
+body{
+  min-height:100vh;
+  padding-top:82px;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(201,155,22,.08),
+      transparent 28%
+    ),
+    var(--cream);
+  line-height:1.7;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  font:inherit;
+  cursor:pointer;
+}
+
+/* HEADER */
+
+.site-header{
+  width:100%;
+  height:82px;
+  min-height:82px;
+  padding:0 28px;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  background:rgba(255,255,255,.97);
+  border-bottom:1px solid rgba(201,155,22,.22);
+  box-shadow:0 5px 18px rgba(21,61,41,.08);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+.logo-container{
+  min-width:250px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  flex-shrink:0;
+}
+
+.logo-img{
+  width:50px;
+  height:50px;
+  min-width:50px;
+  object-fit:cover;
+  border-radius:50%;
+  border:2px solid var(--gold);
+}
+
+.logo-details{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.logo-text{
+  color:var(--dark-green);
+  font-size:17px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.logo-subtitle{
+  margin-top:3px;
+  color:#a87800;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.desktop-nav{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.desktop-nav a{
+  color:var(--dark-green);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active{
+  color:var(--gold-dark);
+}
+
+.profile-icon{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:#ffffff;
+  background:linear-gradient(
+    145deg,
+    var(--gold),
+    var(--gold-dark)
+  );
+  box-shadow:0 6px 16px rgba(157,117,0,.22);
+}
+
+.menu-button{
+  display:none;
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:10px;
+  color:#ffffff;
+  background:var(--dark-green);
+}
+
+/* MOBILE MENU */
+
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1998;
+  display:none;
+  background:rgba(8,29,18,.60);
+}
+
+.menu-overlay.show{
+  display:block;
+}
+
+.mobile-menu{
+  width:min(310px,86vw);
+  height:100vh;
+  padding:22px;
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:1999;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  overflow-y:auto;
+  background:linear-gradient(
+    180deg,
+    #123824,
+    #1e5134
+  );
+  transform:translateX(105%);
+  transition:.3s;
+}
+
+.mobile-menu.open{
+  transform:translateX(0);
+}
+
+.mobile-menu-header{
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#ffffff;
+}
+
+.mobile-menu-close{
+  width:36px;
+  height:36px;
+  border:none;
+  border-radius:9px;
+  color:var(--dark-green);
+  background:#ffffff;
+}
+
+.mobile-menu a{
+  padding:12px 13px;
+  border-radius:9px;
+  color:rgba(255,255,255,.90);
+  font-size:14px;
+  font-weight:700;
+}
+
+.mobile-menu a:hover,
+.mobile-menu a.active{
+  color:var(--dark-green);
+  background:#ffffff;
+}
+
+/* HERO */
+
+.policy-hero{
+  padding:72px 24px 64px;
+  position:relative;
+  overflow:hidden;
+  color:#ffffff;
+  background:linear-gradient(
+    120deg,
+    #143c28,
+    #347650
+  );
+}
+
+.policy-hero::after{
+  content:"";
+  width:340px;
+  height:340px;
+  position:absolute;
+  top:-150px;
+  right:-80px;
+  border-radius:50%;
+  background:rgba(201,155,22,.15);
+}
+
+.hero-inner{
+  width:min(1120px,100%);
+  margin:auto;
+  position:relative;
+  z-index:1;
+}
+
+.hero-kicker{
+  margin-bottom:13px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#f3d87e;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+
+.policy-hero h1{
+  margin-bottom:13px;
+  font-family:Georgia,serif;
+  font-size:clamp(38px,6vw,52px);
+  line-height:1.1;
+}
+
+.policy-hero p{
+  max-width:780px;
+  color:rgba(255,255,255,.84);
+  font-size:15px;
+  line-height:1.75;
+}
+
+.policy-date{
+  margin-top:20px;
+  padding:8px 13px;
+  display:inline-flex;
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:30px;
+  color:#ffffff;
+  background:rgba(255,255,255,.08);
+  font-size:11px;
+}
+
+/* CONTENT */
+
+.page-wrap{
+  width:min(1160px,92%);
+  margin:38px auto 72px;
+  display:grid;
+  grid-template-columns:245px minmax(0,1fr);
+  gap:26px;
+  align-items:start;
+}
+
+.toc{
+  padding:18px;
+  position:sticky;
+  top:102px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#ffffff;
+  box-shadow:var(--shadow);
+}
+
+.toc h2{
+  margin-bottom:12px;
+  color:var(--dark-green);
+  font-size:14px;
+}
+
+.toc a{
+  padding:9px 9px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border-radius:9px;
+  color:#59665e;
+  font-size:11px;
+  font-weight:700;
+}
+
+.toc a i{
+  width:20px;
+  color:var(--gold-dark);
+}
+
+.toc a:hover{
+  color:var(--dark-green);
+  background:#f2f7f3;
+}
+
+.policy-content{
+  min-width:0;
+}
+
+.intro-card{
+  margin-bottom:18px;
+  padding:24px 26px;
+  border:1px solid #eadfbf;
+  border-radius:18px;
+  background:#fffdf7;
+  box-shadow:var(--shadow);
+}
+
+.intro-card p{
+  color:#4c5b52;
+  font-size:13px;
+}
+
+.policy-section{
+  margin-bottom:17px;
+  padding:26px 28px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#ffffff;
+  box-shadow:var(--shadow);
+}
+
+.section-icon{
+  width:42px;
+  height:42px;
+  margin-bottom:13px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  color:var(--gold-dark);
+  background:#fff7df;
+  font-size:17px;
+}
+
+.policy-section h2{
+  margin-bottom:12px;
+  color:var(--dark-green);
+  font-family:Georgia,serif;
+  font-size:22px;
+}
+
+.policy-section p{
+  margin:9px 0;
+  color:#4d5b52;
+  font-size:13px;
+}
+
+.policy-section ul{
+  margin-top:10px;
+  padding-left:20px;
+  display:grid;
+  gap:8px;
+}
+
+.policy-section li{
+  color:#4d5b52;
+  font-size:13px;
+}
+
+.policy-section li::marker{
+  color:var(--gold);
+}
+
+.notice-box{
+  margin-top:14px;
+  padding:15px 17px;
+  border-left:4px solid var(--gold);
+  border-radius:10px;
+  color:#425249;
+  background:#f7faf7;
+  font-size:12.5px;
+}
+
+/* SHIPPING TABLE */
+
+.delivery-table-wrap{
+  margin-top:14px;
+  overflow-x:auto;
+  border:1px solid var(--border);
+  border-radius:14px;
+}
+
+.delivery-table{
+  width:100%;
+  min-width:520px;
+  border-collapse:collapse;
+}
+
+.delivery-table th,
+.delivery-table td{
+  padding:13px 15px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size:12.5px;
+}
+
+.delivery-table th{
+  color:var(--dark-green);
+  background:#f4f8f4;
+  font-weight:800;
+}
+
+.delivery-table tr:last-child td{
+  border-bottom:none;
+}
+
+.delivery-table td{
+  color:#4d5b52;
+}
+
+.delivery-table td:last-child{
+  color:var(--green);
+  font-weight:800;
+}
+
+/* CONTACT */
+
+.contact-box{
+  padding:20px;
+  border:1px solid rgba(201,155,22,.35);
+  border-radius:16px;
+  background:linear-gradient(
+    145deg,
+    #fffdf7,
+    #f8faf7
+  );
+}
+
+.contact-box strong{
+  color:var(--dark-green);
+}
+
+.contact-row{
+  margin-top:10px;
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  color:#4d5b52;
+  font-size:13px;
+}
+
+.contact-row i{
+  width:20px;
+  margin-top:4px;
+  color:var(--gold-dark);
+}
+
+.contact-row a{
+  color:var(--green);
+  font-weight:800;
+}
+
+.priority-message{
+  margin-top:18px;
+  padding:16px;
+  text-align:center;
+  border-radius:12px;
+  color:var(--dark-green);
+  background:var(--light-green);
+  font-family:Georgia,serif;
+  font-size:15px;
+  font-style:italic;
+  font-weight:700;
+}
+
+/* FOOTER */
+
+.site-footer{
+  padding:34px 20px 24px;
+  text-align:center;
+  color:#dce8df;
+  background:#0f2d1e;
+}
+
+.footer-links{
+  margin-bottom:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+.footer-links a{
+  color:#efd475;
+  font-size:11px;
+  font-weight:700;
+}
+
+.site-footer p{
+  font-size:11px;
+}
+
+.back-top{
+  width:44px;
+  height:44px;
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:500;
+  display:grid;
+  place-items:center;
+  border:none;
+  border-radius:50%;
+  color:#ffffff;
+  background:var(--gold-dark);
+  box-shadow:0 8px 20px rgba(0,0,0,.18);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+
+  .desktop-nav{
+    gap:13px;
+  }
+
+  .desktop-nav a{
+    font-size:11px;
+  }
+
+  .logo-container{
+    min-width:225px;
+  }
+}
+
+@media(max-width:1000px){
+
+  body{
+    padding-top:76px;
+  }
+
+  .site-header{
+    height:76px;
+    min-height:76px;
+    padding:0 18px;
+  }
+
+  .desktop-nav{
+    display:none;
+  }
+
+  .logo-container{
+    min-width:0;
+    margin-right:auto;
+  }
+
+  .profile-icon{
+    margin-left:auto;
+  }
+
+  .menu-button{
+    display:grid;
+    place-items:center;
+  }
+}
+
+@media(max-width:850px){
+
+  .page-wrap{
+    grid-template-columns:1fr;
+  }
+
+  .toc{
+    position:static;
+  }
+
+  .toc-links{
+    display:grid;
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:600px){
+
+  body{
+    padding-top:70px;
+  }
+
+  .site-header{
+    height:70px;
+    min-height:70px;
+    padding:0 12px;
+    gap:8px;
+  }
+
+  .logo-container{
+    max-width:calc(100% - 100px);
+    gap:8px;
+  }
+
+  .logo-img{
+    width:43px;
+    height:43px;
+    min-width:43px;
+  }
+
+  .logo-text{
+    max-width:180px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:13px;
+    white-space:nowrap;
+  }
+
+  .logo-subtitle{
+    max-width:180px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:8px;
+    white-space:nowrap;
+  }
+
+  .profile-icon,
+  .menu-button{
+    width:38px;
+    height:38px;
+    min-width:38px;
+  }
+
+  .policy-hero{
+    padding:50px 18px 45px;
+  }
+
+  .policy-hero h1{
+    font-size:35px;
+  }
+
+  .page-wrap{
+    width:94%;
+    margin-top:24px;
+  }
+
+  .toc-links{
+    grid-template-columns:1fr;
+  }
+
+  .intro-card,
+  .policy-section{
+    padding:21px 18px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="site-header">
+
+  <a
+    href="homepage.html"
+    class="logo-container"
+  >
+
+    <img
+      class="logo-img"
+      src="../assets/main_logo.jpeg"
+      alt="Neolife Wellness Center"
+    >
+
+    <div class="logo-details">
+
+      <span class="logo-text">
+        Neolife Wellness Center
+      </span>
+
+      <span class="logo-subtitle">
+        Ayush Digital Care
+      </span>
+
+    </div>
+
+  </a>
+
+  <nav class="desktop-nav">
+    <a href="homepage.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Therapies</a>
+    <a href="beauty-cosmetics.html">
+      Beauty &amp; Cosmetics
+    </a>
+    <a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a>
+    <a href="blog.html">Blogs</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <a
+    href="profile.html"
+    class="profile-icon"
+    title="Profile"
+  >
+    <i class="fa-solid fa-user"></i>
+  </a>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openMenu()"
+    aria-label="Open menu"
+  >
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+</header>
+
+<div
+  class="menu-overlay"
+  id="menuOverlay"
+  onclick="closeMenu()"
+></div>
+
+<nav
+  class="mobile-menu"
+  id="mobileMenu"
+>
+
+  <div class="mobile-menu-header">
+
+    <strong>Neolife Menu</strong>
+
+    <button
+      type="button"
+      class="mobile-menu-close"
+      onclick="closeMenu()"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+  <a href="homepage.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Therapies</a>
+  <a href="beauty-cosmetics.html">
+    Beauty &amp; Cosmetics
+  </a>
+  <a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a>
+  <a href="blog.html">Blogs</a>
+  <a href="contact.html">Contact</a>
+  <a
+    href="shipping-policy.html"
+    class="active"
+  >
+    Shipping Policy
+  </a>
+
+</nav>
+
+<section class="policy-hero">
+
+  <div class="hero-inner">
+
+    <span class="hero-kicker">
+      <i class="fa-solid fa-truck-fast"></i>
+      NEOLIFEAYUSH Policy
+    </span>
+
+    <h1>
+      Shipping Policy
+    </h1>
+
+    <p>
+      At Neolife Wellness Center, we strive to deliver your orders safely,
+      securely, and on time. Please read our Shipping Policy carefully
+      before placing an order.
+    </p>
+
+    <span class="policy-date">
+      <strong>Last Updated:</strong>&nbsp;
+      15 June 2026
+    </span>
+
+  </div>
+
+</section>
+
+<div class="page-wrap">
+
+  <aside class="toc">
+
+    <h2>Policy Contents</h2>
+
+    <div class="toc-links">
+
+      <a href="#processing">
+        <i class="fa-solid fa-box"></i>
+        Order Processing
+      </a>
+
+      <a href="#charges">
+        <i class="fa-solid fa-truck"></i>
+        Shipping Charges
+      </a>
+
+      <a href="#delivery">
+        <i class="fa-solid fa-clock"></i>
+        Estimated Delivery Time
+      </a>
+
+      <a href="#tracking">
+        <i class="fa-solid fa-location-dot"></i>
+        Order Tracking
+      </a>
+
+      <a href="#address">
+        <i class="fa-solid fa-house"></i>
+        Incorrect Shipping Address
+      </a>
+
+      <a href="#contact">
+        <i class="fa-solid fa-headset"></i>
+        Contact Us
+      </a>
+
+    </div>
+
+  </aside>
+
+  <main class="policy-content">
+
+    <div class="intro-card">
+
+      <p>
+        At Neolife Wellness Center, we strive to deliver your orders safely,
+        securely, and on time. Please read our Shipping Policy carefully
+        before placing an order.
+      </p>
+
+    </div>
+
+    <!-- ORDER PROCESSING -->
+
+    <section
+      class="policy-section"
+      id="processing"
+    >
+
+      <div class="section-icon">
+        <i class="fa-solid fa-box"></i>
+      </div>
+
+      <h2>Order Processing</h2>
+
+      <ul>
+        <li>
+          Orders are processed within 1–2 business days.
+        </li>
+
+        <li>
+          Orders placed on Sundays or public holidays will be processed on
+          the next working day.
+        </li>
+      </ul>
+
+    </section>
+
+    <!-- SHIPPING CHARGES -->
+
+    <section
+      class="policy-section"
+      id="charges"
+    >
+
+      <div class="section-icon">
+        <i class="fa-solid fa-truck"></i>
+      </div>
+
+      <h2>Shipping Charges</h2>
+
+      <ul>
+        <li>
+          Free Shipping across Karnataka.
+        </li>
+
+        <li>
+          Standard shipping charges apply for deliveries to other states
+          in India.
+        </li>
+
+        <li>
+          Shipping charges are calculated and displayed during checkout.
+        </li>
+      </ul>
+
+    </section>
+
+    <!-- DELIVERY TIME -->
+
+    <section
+      class="policy-section"
+      id="delivery"
+    >
+
+      <div class="section-icon">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+
+      <h2>Estimated Delivery Time</h2>
+
+      <div class="delivery-table-wrap">
+
+        <table class="delivery-table">
+
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Estimated Delivery</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>Karnataka</td>
+              <td>3–5 Business Days</td>
+            </tr>
+
+            <tr>
+              <td>South India</td>
+              <td>5–8 Business Days</td>
+            </tr>
+
+            <tr>
+              <td>Rest of India</td>
+              <td>5–8 Business Days</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="notice-box">
+        Delivery timelines are estimates and may vary due to courier delays,
+        weather conditions, natural disasters, public holidays, or other
+        unforeseen circumstances.
+      </div>
+
+    </section>
+
+    <!-- TRACKING -->
+
+    <section
+      class="policy-section"
+      id="tracking"
+    >
+
+      <div class="section-icon">
+        <i class="fa-solid fa-location-dot"></i>
+      </div>
+
+      <h2>Order Tracking</h2>
+
+      <p>
+        Once your order has been shipped, you will receive a tracking number
+        via SMS and/or email. You can use this tracking number to monitor your
+        shipment's progress.
+      </p>
+
+    </section>
+
+    <!-- INCORRECT ADDRESS -->
+
+    <section
+      class="policy-section"
+      id="address"
+    >
+
+      <div class="section-icon">
+        <i class="fa-solid fa-house"></i>
+      </div>
+
+      <h2>Incorrect Shipping Address</h2>
+
+      <p>
+        Customers are responsible for providing accurate shipping information.
+        Neolife Wellness Center is not responsible for delivery delays or
+        failed deliveries caused by incorrect or incomplete addresses.
+      </p>
+
+    </section>
+
+    <!-- CONTACT -->
+
+    <section
+      class="policy-section"
+      id="contact"
+    >
+
+      <div class="section-icon">
+        <i class="fa-solid fa-headset"></i>
+      </div>
+
+      <h2>Contact Us</h2>
+
+      <p>
+        For any shipping-related questions, please contact us:
+      </p>
+
+      <div class="contact-box">
+
+        <strong>
+          Neolife Wellness Center
+        </strong>
+
+        <div class="contact-row">
+
+          <i class="fa-solid fa-location-dot"></i>
+
+          <div>
+            4-1-38, Behind Lions Bhavan Road,<br>
+            Nairkere 1st Cross,<br>
+            Brahmagiri,<br>
+            Ambalapady Post,<br>
+            Udupi – 576103,<br>
+            Karnataka, India
+          </div>
+
+        </div>
+
+        <div class="contact-row">
+
+          <i class="fa-solid fa-phone"></i>
+
+          <a href="tel:+919481489866">
+            +91 94814 89866
+          </a>
+
+        </div>
+
+        <div class="contact-row">
+
+          <i class="fa-solid fa-envelope"></i>
+
+          <a href="mailto:neelavar.murli@gmail.com">
+            neelavar.murli@gmail.com
+          </a>
+
+        </div>
+
+      </div>
+
+      <div class="priority-message">
+        "We are committed to delivering your wellness products safely and on time."
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<footer class="site-footer">
+
+  <div class="footer-links">
+
+    <a href="privacy-policy.html">
+      Privacy Policy
+    </a>
+
+    <a href="return-refund-policy.html">
+      Return &amp; Refund Policy
+    </a>
+
+    <a href="shipping-policy.html">
+      Shipping Policy
+    </a>
+
+    <a href="contact.html">
+      Contact
+    </a>
+
+    <a href="homepage.html">
+      Home
+    </a>
+
+  </div>
+
+  <p>
+    © 2026 Neolife Wellness Center.
+    All Rights Reserved.
+  </p>
+
+</footer>
+
+<button
+  type="button"
+  class="back-top"
+  onclick="window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  })"
+  aria-label="Back to top"
+>
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<script>
+function openMenu(){
+
+  document
+    .getElementById(
+      "mobileMenu"
+    )
+    .classList
+    .add("open");
+
+  document
+    .getElementById(
+      "menuOverlay"
+    )
+    .classList
+    .add("show");
+
+  document.body.style.overflow =
+    "hidden";
+}
+
+function closeMenu(){
+
+  document
+    .getElementById(
+      "mobileMenu"
+    )
+    .classList
+    .remove("open");
+
+  document
+    .getElementById(
+      "menuOverlay"
+    )
+    .classList
+    .remove("show");
+
+  document.body.style.overflow =
+    "";
+}
+</script>
+
+</body>
+</html>

@@ -1654,9 +1654,9 @@
     </div>
 
     <script>
-        const API_BASE_URL = "http://localhost:8085";
+        const API_BASE_URL = "/api";
         const DASHBOARD_SUMMARY_ENDPOINT =
-            `${API_BASE_URL}/api/admin/dashboard/summary`;
+            `${API_BASE_URL}/admin/dashboard/summary`;
 
         document.addEventListener("DOMContentLoaded", function () {
             const allowed = requireAdminLogin();
@@ -1794,47 +1794,47 @@
             productReviewsResult
         ] = await Promise.allSettled([
             fetchJson(
-                `${API_BASE_URL}/api/users/getAll`,
+                `${API_BASE_URL}/users/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/doctors/getAll`,
+                `${API_BASE_URL}/doctors/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/medical-staff/getAll`,
+                `${API_BASE_URL}/medical-staff/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/therapists/getAll`,
+                `${API_BASE_URL}/therapists/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/appointments/admin/getAll`,
+                `${API_BASE_URL}/appointments/admin/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/orders/admin/getAll`,
+                `${API_BASE_URL}/orders/admin/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/products/getAll`,
+                `${API_BASE_URL}/products/getAll`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/clinic-reviews/getAllAdmin`,
+                `${API_BASE_URL}/clinic-reviews/getAllAdmin`,
                 headers
             ),
 
             fetchJson(
-                `${API_BASE_URL}/api/product-reviews/getAllAdmin`,
+                `${API_BASE_URL}/product-reviews/getAllAdmin`,
                 headers
             )
         ]);

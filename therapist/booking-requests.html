@@ -2167,7 +2167,7 @@
     </div>
 
     <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allBookings = [];
 let filteredBookings = [];
@@ -2359,7 +2359,7 @@ async function loadTherapistProfile() {
     try {
         const result =
             await therapistApiRequest(
-                "/api/therapists/me"
+                "/therapists/me"
             );
 
         const therapist = result.data || {};
@@ -2445,7 +2445,7 @@ async function loadBookings() {
     try {
         const result =
             await therapistApiRequest(
-                "/api/daily-treatments/therapist/my-sessions"
+                "/daily-treatments/therapist/my-sessions"
             );
 
         allBookings =
@@ -3473,7 +3473,7 @@ async function approveBooking(id) {
     try {
         const result =
             await therapistApiRequest(
-                `/api/daily-treatments/${encodeURIComponent(
+                `/daily-treatments/${encodeURIComponent(
                     booking.id
                 )}/approve`,
                 {
@@ -3622,7 +3622,7 @@ async function submitReschedule() {
 
         const result =
             await therapistApiRequest(
-                `/api/daily-treatments/${encodeURIComponent(
+                `/daily-treatments/${encodeURIComponent(
                     selectedBooking.id
                 )}/reschedule`,
                 {

@@ -552,8 +552,7 @@
 </main>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
-
+const API_BASE_URL = "/api";
 document.addEventListener(
   "DOMContentLoaded",
   function () {
@@ -916,7 +915,7 @@ async function registerUser(event) {
   try {
     const response =
       await fetch(
-        `${API_BASE_URL}/api/auth/register`,
+        `${API_BASE_URL}/auth/register`,
         {
           method: "POST",
           headers: {

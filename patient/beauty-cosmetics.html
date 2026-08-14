@@ -2075,7 +2075,7 @@ async function loadProfileIcon(){
 
     const icon = document.getElementById("profileIcon");
     const token = localStorage.getItem("token");
-
+const API_BASE_URL = "/api";
     if(!token){
         icon.innerHTML = '<i class="fa-solid fa-user"></i>';
         return;
@@ -2083,7 +2083,7 @@ async function loadProfileIcon(){
 
     try{
 
-        const response = await fetch("http://localhost:8085/api/users/getProfile",{
+        const response = await fetch(`${API_BASE_URL}/users/getProfile`,{
             headers:{
                 "Authorization":"Bearer " + token
             }

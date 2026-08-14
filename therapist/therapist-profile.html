@@ -1184,7 +1184,7 @@
     </div>
 
     <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let therapistProfile = null;
 let profileMode = "LOADING";
@@ -1377,7 +1377,7 @@ async function loadTherapistProfile() {
     try {
         const response =
             await therapistApiRequest(
-                "/api/therapists/me",
+                "/therapists/me",
                 {},
                 {
                     allowNotFound: true
@@ -1887,7 +1887,7 @@ async function saveTherapistProfile(
         ) {
             result =
                 await therapistApiRequest(
-                    `/api/therapists/update/${encodeURIComponent(
+                    `/therapists/update/${encodeURIComponent(
                         therapistProfile.id
                     )}`,
                     {
@@ -1902,7 +1902,7 @@ async function saveTherapistProfile(
         } else {
             result =
                 await therapistApiRequest(
-                    "/api/therapists/complete-profile",
+                    "/therapists/complete-profile",
                     {
                         method: "POST",
                         body:

@@ -471,8 +471,8 @@ button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}
 </main>
 
 <script>
-const API_BASE_URL="http://localhost:8085";
-const CONSULTATION_ROOM_URL="http://127.0.0.1:5500/consultation-room.html";
+const API_BASE_URL = "/api";
+const CONSULTATION_ROOM_URL="/consultation-room.html";
 const params=new URLSearchParams(location.search);
 const consultationId=params.get("consultationId")||params.get("id");
 let consultation=null;
@@ -528,7 +528,7 @@ async function loadDoctorProfileForMode(){
   try{
     const result=
       await api(
-        "/api/doctors/my-profile"
+        "/doctors/my-profile"
       );
 
     const doctor=
@@ -626,7 +626,7 @@ async function loadDoctorConsultationModes(){
   try{
     const result=
       await api(
-        `/api/doctor-availability/doctor/${encodeURIComponent(
+        `/doctor-availability/doctor/${encodeURIComponent(
           doctorId
         )}`
       );
@@ -865,7 +865,7 @@ function applyDoctorConsultationMode(
 
 async function loadConsultationDetails(){
   try{
-    const result=await api(`/api/consultations/${encodeURIComponent(consultationId)}/get`);
+    const result=await api(`/consultations/${encodeURIComponent(consultationId)}/get`);
     consultation=normalizeConsultation(result.data||{});
     await loadMeetingDetails();
     renderPage();
@@ -874,7 +874,7 @@ async function loadConsultationDetails(){
 async function loadMeetingDetails(){
   if(!isPaid(consultation.paymentStatus)){meeting=null;return;}
   try{
-    const response=await fetch(`${API_BASE_URL}/api/video-meetings/${encodeURIComponent(consultationId)}`,{headers:authHeaders()});
+    const response=await fetch(`${API_BASE_URL}/video-meetings/${encodeURIComponent(consultationId)}`,{headers:authHeaders()});
     const result=await safelyReadResponse(response);
     if(response.status===404||String(result?.message||"").toLowerCase().includes("not found")){meeting=null;return;}
     if(!response.ok||result?.success===false)throw new Error(result?.message||"Unable to check video room.");
@@ -937,13 +937,13 @@ function buildActions(){
   return h||`<button class="action-btn secondary" disabled>No actions available</button>`;
 }
 
-async function acceptConsultation(){if(!confirm("Accept this consultation request?"))return;try{const r=await api(`/api/consultations/${consultationId}/accept`,{method:"PUT"});showAlert(r.message||"Consultation accepted.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
-async function rejectConsultation(){const reason=prompt("Enter rejection reason:");if(!reason)return;try{const r=await api(`/api/consultations/${consultationId}/reject`,{method:"PUT",body:JSON.stringify({reason})});showAlert(r.message||"Consultation rejected.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
-async function createVideoRoom(button){if(!confirm("Create the secure video consultation room?"))return;const old=button.innerHTML;try{button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating...';const r=await api(`/api/video-meetings/create/${consultationId}`,{method:"POST"});meeting=r.data||null;showAlert(r.message||"Video room created.","success");renderPage();}catch(e){button.disabled=false;button.innerHTML=old;showAlert(e.message,"error");}}
+async function acceptConsultation(){if(!confirm("Accept this consultation request?"))return;try{const r=await api(`/consultations/${consultationId}/accept`,{method:"PUT"});showAlert(r.message||"Consultation accepted.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
+async function rejectConsultation(){const reason=prompt("Enter rejection reason:");if(!reason)return;try{const r=await api(`/consultations/${consultationId}/reject`,{method:"PUT",body:JSON.stringify({reason})});showAlert(r.message||"Consultation rejected.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
+async function createVideoRoom(button){if(!confirm("Create the secure video consultation room?"))return;const old=button.innerHTML;try{button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating...';const r=await api(`/video-meetings/create/${consultationId}`,{method:"POST"});meeting=r.data||null;showAlert(r.message||"Video room created.","success");renderPage();}catch(e){button.disabled=false;button.innerHTML=old;showAlert(e.message,"error");}}
 function startConsultation(){location.href=`${CONSULTATION_ROOM_URL}?consultationId=${encodeURIComponent(consultationId)}`;}
 function openPrescription(){location.href=`prescription-pad.html?consultationId=${encodeURIComponent(consultationId)}&patientId=${encodeURIComponent(consultation.patientId||"")}`;}
 function openReschedule(){location.href=`doctor-online-consultations.html?openReschedule=${encodeURIComponent(consultationId)}`;}
-async function completeConsultation(){if(!confirm("Mark this consultation as completed?"))return;try{const r=await api(`/api/consultations/${consultationId}/complete`,{method:"PUT"});showAlert(r.message||"Consultation completed.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
+async function completeConsultation(){if(!confirm("Mark this consultation as completed?"))return;try{const r=await api(`/consultations/${consultationId}/complete`,{method:"PUT"});showAlert(r.message||"Consultation completed.","success");await loadConsultationDetails();}catch(e){showAlert(e.message,"error");}}
 
 function isPaid(s){return["SUCCESS","PAID","PAYMENT_SUCCESS","PAYMENT_SUCCESSFUL","COMPLETED"].includes(String(s||"").toUpperCase());}
 function statusClass(s){s=String(s||"").toUpperCase();if(["SUCCESS","PAID","CONFIRMED","COMPLETED","ACTIVE","CREATED"].includes(s))return"status-success";if(["PENDING","PAYMENT_PENDING","PENDING_DOCTOR_CONFIRMATION","NOT_REQUIRED_YET"].includes(s))return"status-warning";if(["REJECTED","CANCELLED","EXPIRED","ENDED"].includes(s))return"status-danger";if(["IN_PROGRESS","RESCHEDULED"].includes(s))return"status-info";return"status-default";}

@@ -1006,7 +1006,7 @@ select{
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 let allOrders = [];
 
 window.onload = loadOrders;
@@ -1036,7 +1036,7 @@ async function loadOrders(){
     return;
   }
   try{
-    const { result } = await apiRequest("/api/orders/getAll", { method:"GET" });
+    const { result } = await apiRequest("/orders/getAll", { method:"GET" });
     allOrders = (result.data || []).sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
     displayOrders(allOrders);
   }catch(error){
@@ -1118,7 +1118,7 @@ function actionButton(label, icon, cls, onclick){
 async function runOrderAction(id, action, confirmText){
   if(confirmText && !confirm(confirmText)) return;
   try{
-    const { result } = await apiRequest(`/api/orders/${id}/${action}`, { method:"PUT" });
+    const { result } = await apiRequest(`/orders/${id}/${action}`, { method:"PUT" });
     alert(result.message || "Order updated successfully");
     await loadOrders();
   }catch(error){ alert(error.message); }
@@ -1140,7 +1140,7 @@ async function createShipment(id){
   try{
     const { result } =
       await apiRequest(
-        `/api/shipping/create/${id}`,
+        `/shipping/create/${id}`,
         {
           method:"POST"
         }
@@ -1219,7 +1219,7 @@ async function createShipment(id){
 async function trackOrder(id){
   try{
     // Order-level tracking API from the supplied order flow.
-    const { result } = await apiRequest(`/api/orders/${id}/track`, { method:"GET" });
+    const { result } = await apiRequest(`/orders/${id}/track`, { method:"GET" });
     let data = result.data;
     if(typeof data === "string"){
       try { data = JSON.parse(data); } catch {}
@@ -1231,7 +1231,7 @@ async function trackOrder(id){
 async function trackShipmentById(shipmentId){
   if(!shipmentId) return alert("Shipment ID is not available for this order.");
   try{
-    const { result } = await apiRequest(`/api/shipping/track/${encodeURIComponent(shipmentId)}`, { method:"GET" });
+    const { result } = await apiRequest(`/shipping/track/${encodeURIComponent(shipmentId)}`, { method:"GET" });
     let data = result.data;
     if(typeof data === "string"){
       try { data = JSON.parse(data); } catch {}
@@ -1243,7 +1243,7 @@ async function trackShipmentById(shipmentId){
 async function downloadInvoice(id){
   try{
     const token = getToken();
-    const response = await fetch(`${API_BASE_URL}/api/orders/${id}/invoice`, { headers:{ "Authorization":"Bearer " + token } });
+    const response = await fetch(`${API_BASE_URL}/orders/${id}/invoice`, { headers:{ "Authorization":"Bearer " + token } });
     if(!response.ok){
       let message = "Unable to download invoice";
       try { const e = await response.json(); message = e.message || message; } catch {}
@@ -1274,8 +1274,8 @@ function getPaymentClass(status){
 
 async function viewOrder(id){
   try{
-    // GET /api/orders/{id}: fetch fresh full details instead of relying only on table data.
-    const { result } = await apiRequest(`/api/orders/${id}`, { method:"GET" });
+    // GET /orders/{id}: fetch fresh full details instead of relying only on table data.
+    const { result } = await apiRequest(`/orders/${id}`, { method:"GET" });
     const order = result.data || {};
     const items = order.items || [];
     const productText = items.length ? items.map(item => `${item.productName || "-"} (Qty: ${item.quantity || 0}, ${money(item.subtotal)})`).join(", ") : "-";

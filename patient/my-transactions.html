@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Transactions - Neolife Wellness Center</title>
+<link rel="icon" type="image/jpeg" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{
+  --dark-green:#143f2a;
+  --green:#245f3c;
+  --soft-green:#eef5ef;
+  --gold:#c89a12;
+  --gold-dark:#9d7400;
+  --cream:#fbf8ef;
+  --white:#ffffff;
+  --text:#183b2a;
+  --muted:#6d746f;
+  --border:#e8e2d4;
+  --danger:#c54343;
+  --danger-light:#fff0f0;
+  --success:#287146;
+  --success-light:#edf8f0;
+  --warning:#b97912;
+  --warning-light:#fff7e7;
+  --info:#356c8c;
+  --info-light:#edf6fb;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  min-height:100vh;
+  padding-top:79px;
+  overflow-x:hidden;
+  color:var(--text);
+  background:var(--cream);
+  font-family:"Segoe UI",Arial,sans-serif;
+}
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+/* HEADER */
+
+.site-header{
+  width:100%;
+  height:80px;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:2000;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:9px 25px 9px 18px;
+  background:rgba(255,255,255,.97);
+  border-bottom:2px solid var(--dark-green);
+  box-shadow:0 4px 16px rgba(20,63,42,.07);
+  backdrop-filter:blur(12px);
+}
+
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.logo-img{
+  width:52px;
+  height:52px;
+  object-fit:cover;
+  border-radius:50%;
+  border:2px solid #d4af37;
+}
+
+.logo-details{
+  display:flex;
+  flex-direction:column;
+}
+
+.logo-text{
+  color:var(--dark-green);
+  font-size:16px;
+  font-weight:800;
+  line-height:1.2;
+}
+
+.logo-subtitle{
+  margin-top:4px;
+  color:var(--gold-dark);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+}
+
+.desktop-nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  margin-left:auto;
+}
+
+.desktop-nav a{
+  position:relative;
+  color:#315342;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+  transition:.2s;
+}
+
+.desktop-nav a::after{
+  content:"";
+  width:0;
+  height:2px;
+  position:absolute;
+  left:0;
+  bottom:-8px;
+  background:var(--gold);
+  transition:.25s;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active{
+  color:var(--gold-dark);
+}
+
+.desktop-nav a:hover::after,
+.desktop-nav a.active::after{
+  width:100%;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+}
+
+.profile-icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--white);
+  background:linear-gradient(145deg,#d9b92d,#aa7d00);
+  box-shadow:0 4px 11px rgba(157,116,0,.24);
+  font-size:20px;
+  font-weight:800;
+}
+
+.menu-button{
+  width:42px;
+  height:42px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  border-radius:10px;
+  color:var(--white);
+  background:var(--dark-green);
+  font-size:20px;
+}
+
+.mobile-menu{
+  width:min(310px,86vw);
+  height:100vh;
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:3000;
+  padding:25px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  color:var(--white);
+  background:linear-gradient(180deg,#123824,#1e5134);
+  box-shadow:-12px 0 34px rgba(0,0,0,.22);
+  transform:translateX(105%);
+  transition:.3s ease;
+}
+
+.mobile-menu.open{
+  transform:translateX(0);
+}
+
+.mobile-menu-header{
+  margin-bottom:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.mobile-menu-header strong{
+  font-size:18px;
+}
+
+.mobile-menu-close{
+  width:38px;
+  height:38px;
+  border:none;
+  border-radius:9px;
+  color:var(--dark-green);
+  background:var(--white);
+}
+
+.mobile-menu a{
+  padding:12px 13px;
+  border-radius:10px;
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  font-weight:700;
+}
+
+.mobile-menu a:hover,
+.mobile-menu a.active{
+  color:var(--dark-green);
+  background:var(--white);
+}
+
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:2500;
+  display:none;
+  background:rgba(13,36,24,.55);
+}
+
+.menu-overlay.show{
+  display:block;
+}
+
+/* HERO */
+
+.orders-hero{
+  min-height:260px;
+  padding:48px 24px;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:var(--white);
+  background:
+    linear-gradient(rgba(13,45,28,.78),rgba(13,45,28,.78)),
+    url("../assets/services-hero.jpg") center/cover no-repeat;
+}
+
+.orders-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 30%,rgba(255,255,255,.08),transparent 28%),
+    radial-gradient(circle at 80% 70%,rgba(200,154,18,.14),transparent 30%);
+}
+
+.hero-content{
+  max-width:760px;
+  position:relative;
+  z-index:2;
+}
+
+.hero-kicker{
+  margin-bottom:10px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#f5d870;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+}
+
+.hero-content h1{
+  margin-bottom:12px;
+  font-size:46px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+.hero-content p{
+  color:rgba(255,255,255,.86);
+  font-size:14px;
+  line-height:1.7;
+}
+
+/* MAIN */
+
+.orders-section{
+  max-width:1180px;
+  margin:0 auto;
+  padding:55px 22px 70px;
+}
+
+.section-heading{
+  margin-bottom:26px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.section-heading h2{
+  margin-bottom:7px;
+  color:var(--dark-green);
+  font-size:31px;
+  font-weight:900;
+}
+
+.section-heading p{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.order-count{
+  padding:9px 14px;
+  border-radius:22px;
+  color:var(--dark-green);
+  background:var(--soft-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+.orders-list{
+  display:grid;
+  gap:20px;
+}
+
+.order-card{
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:var(--white);
+  box-shadow:0 12px 30px rgba(20,63,42,.08);
+}
+
+.order-card-header{
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  border-bottom:1px solid var(--border);
+  background:#fffdfa;
+}
+
+.order-number{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.order-icon{
+  width:43px;
+  height:43px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  color:var(--gold-dark);
+  background:#fff7df;
+  font-size:17px;
+}
+
+.order-number h3{
+  margin-bottom:4px;
+  color:var(--dark-green);
+  font-size:17px;
+}
+
+.order-number p{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  border-radius:22px;
+  font-size:10px;
+  font-weight:800;
+  text-transform:capitalize;
+}
+
+.status-pending{
+  color:#8a6200;
+  background:var(--warning-light);
+}
+
+.status-paid,
+.status-confirmed,
+.status-packed{
+  color:var(--info);
+  background:var(--info-light);
+}
+
+.status-shipped,
+.status-out-for-delivery{
+  color:#76548f;
+  background:#f5effb;
+}
+
+.status-delivered{
+  color:var(--success);
+  background:var(--success-light);
+}
+
+.status-cancelled,
+.status-failed{
+  color:var(--danger);
+  background:var(--danger-light);
+}
+
+.order-card-body{
+  padding:20px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 220px;
+  gap:22px;
+}
+
+.order-meta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.meta-box{
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fbfcfa;
+}
+
+.meta-box span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+
+.meta-box strong{
+  color:var(--dark-green);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.address-box{
+  margin-bottom:18px;
+  padding:14px;
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  border-radius:12px;
+  color:#4e5b53;
+  background:var(--soft-green);
+  font-size:11px;
+  line-height:1.6;
+}
+
+.address-box i{
+  margin-top:2px;
+  color:var(--gold-dark);
+}
+
+.items{
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:13px;
+}
+
+.items-title{
+  padding:11px 14px;
+  color:var(--dark-green);
+  background:#f8faf7;
+  border-bottom:1px solid var(--border);
+  font-size:11px;
+  font-weight:800;
+}
+
+.item-row{
+  padding:13px 14px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:15px;
+  border-bottom:1px solid #edf0ed;
+}
+
+.item-row:last-child{
+  border-bottom:none;
+}
+
+.item-row strong{
+  display:block;
+  margin-bottom:4px;
+  color:var(--dark-green);
+  font-size:12px;
+}
+
+.item-row small{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.item-subtotal{
+  color:var(--dark-green);
+  font-size:12px;
+  font-weight:800;
+}
+
+.order-actions{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.order-actions .btn{
+  min-height:44px;
+  padding:11px 15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:none;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.view-btn{
+  color:var(--white);
+  background:var(--dark-green);
+}
+
+.track-btn{
+  color:var(--gold-dark);
+  border:1px solid #ead695 !important;
+  background:#fff7df;
+}
+
+.cancel-btn{
+  color:var(--danger);
+  border:1px solid #f1caca !important;
+  background:var(--danger-light);
+}
+
+.return-btn{
+  color:#76548f;
+  border:1px solid #dbcbea !important;
+  background:#f5effb;
+}
+
+.refund-order-box{
+  margin-top:14px;
+  padding:12px 14px;
+  border:1px solid #dce8de;
+  border-radius:12px;
+  background:#f8faf7;
+  color:#4e5b53;
+  font-size:11px;
+  line-height:1.7;
+}
+
+.refund-order-box strong{
+  color:var(--dark-green);
+}
+
+.refund-order-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-left:5px;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:800;
+}
+
+.refund-order-badge.refunded{
+  color:var(--success);
+  background:var(--success-light);
+}
+
+.refund-order-badge.pending{
+  color:var(--warning);
+  background:var(--warning-light);
+}
+
+.refund-order-badge.failed{
+  color:var(--danger);
+  background:var(--danger-light);
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+}
+
+.empty,
+.loading-box{
+  padding:55px 25px;
+  text-align:center;
+  border:1px solid var(--border);
+  border-radius:20px;
+  color:var(--muted);
+  background:var(--white);
+  box-shadow:0 12px 30px rgba(20,63,42,.07);
+}
+
+.empty i,
+.loading-box i{
+  display:block;
+  margin-bottom:15px;
+  color:var(--gold);
+  font-size:36px;
+}
+
+.empty h3{
+  margin-bottom:7px;
+  color:var(--dark-green);
+  font-size:20px;
+}
+
+.shop-btn{
+  margin-top:18px;
+  padding:11px 17px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:11px;
+  color:var(--white);
+  background:var(--dark-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+
+/* PRODUCT REVIEW */
+
+.item-main{min-width:0}
+.item-review-row{margin-top:10px}
+
+.review-product-btn{
+  min-height:34px;
+  padding:7px 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:none;
+  border-radius:9px;
+  color:#fff;
+  background:var(--success);
+  font-size:10px;
+  font-weight:800;
+}
+
+.review-product-btn:hover{
+  transform:translateY(-1px);
+  background:#1f603a;
+}
+
+.review-modal-content{max-width:520px}
+.review-modal-body{padding:22px}
+
+.review-product-summary{
+  margin-bottom:18px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-radius:13px;
+  background:var(--soft-green);
+  border:1px solid #dce8de;
+}
+
+.review-product-icon{
+  width:43px;
+  height:43px;
+  min-width:43px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  color:var(--gold-dark);
+  background:#fff7df;
+  font-size:17px;
+}
+
+.review-product-summary strong{
+  display:block;
+  margin-bottom:3px;
+  color:var(--dark-green);
+  font-size:14px;
+}
+
+.review-product-summary span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.review-field{margin-bottom:17px}
+
+.review-field label{
+  display:block;
+  margin-bottom:8px;
+  color:var(--dark-green);
+  font-size:11px;
+  font-weight:800;
+}
+
+.review-stars-input{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.review-star{
+  padding:0;
+  border:none;
+  color:#d7ddd8;
+  background:transparent;
+  font-size:28px;
+  line-height:1;
+  transition:.18s ease;
+}
+
+.review-star.active,
+.review-star:hover{
+  color:#d1a300;
+  transform:scale(1.08);
+}
+
+.review-rating-text{
+  margin-left:6px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.review-field textarea{
+  width:100%;
+  min-height:120px;
+  resize:vertical;
+  padding:13px 14px;
+  border:1px solid #d8ded9;
+  border-radius:12px;
+  outline:none;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.review-field textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(36,95,60,.10);
+}
+
+.review-character-count{
+  margin-top:6px;
+  display:block;
+  text-align:right;
+  color:var(--muted);
+  font-size:9px;
+}
+
+.review-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.review-cancel-btn,
+.review-submit-btn{
+  min-height:42px;
+  padding:10px 17px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.review-cancel-btn{
+  color:var(--dark-green);
+  background:#fff;
+  border:1px solid #d7ded8;
+}
+
+.review-submit-btn{
+  color:#fff;
+  background:var(--dark-green);
+  border:none;
+}
+
+.review-submit-btn:disabled{
+  cursor:not-allowed;
+  opacity:.65;
+}
+
+@media(max-width:560px){
+  .review-modal-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .review-cancel-btn,
+  .review-submit-btn{
+    width:100%;
+  }
+}
+
+/* MODAL */
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(13,36,24,.65);
+  backdrop-filter:blur(5px);
+}
+
+.modal-content{
+  width:100%;
+  max-width:680px;
+  max-height:90vh;
+  overflow-y:auto;
+  border-radius:20px;
+  background:var(--white);
+  box-shadow:0 25px 70px rgba(0,0,0,.28);
+}
+
+.modal-header{
+  padding:19px 21px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+
+.modal-header h2{
+  color:var(--dark-green);
+  font-size:20px;
+}
+
+.modal-close{
+  width:36px;
+  height:36px;
+  border:none;
+  border-radius:50%;
+  color:var(--dark-green);
+  background:var(--soft-green);
+}
+
+.modal-body{
+  padding:21px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.detail-card{
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:#fbfcfa;
+}
+
+.detail-card.full{
+  grid-column:1/-1;
+}
+
+.detail-card span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.detail-card strong{
+  color:var(--dark-green);
+  font-size:11px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+
+/* FOOTER */
+
+.site-footer{
+  padding:24px 20px;
+  text-align:center;
+  color:rgba(255,255,255,.88);
+  background:var(--dark-green);
+  font-size:12px;
+}
+
+.whatsapp-float{
+  width:50px;
+  height:50px;
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:1800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--white);
+  background:#1fc75a;
+  box-shadow:0 7px 20px rgba(31,199,90,.34);
+  font-size:23px;
+}
+
+/* ALERT */
+
+.page-alert{
+  width:min(390px,calc(100% - 30px));
+  padding:14px 16px;
+  position:fixed;
+  top:94px;
+  right:18px;
+  z-index:6000;
+  display:none;
+  align-items:flex-start;
+  gap:10px;
+  border-radius:12px;
+  color:var(--white);
+  box-shadow:0 14px 35px rgba(0,0,0,.2);
+}
+
+.page-alert.show{
+  display:flex;
+}
+
+.page-alert.success{
+  background:var(--success);
+}
+
+.page-alert.error{
+  background:var(--danger);
+}
+
+.page-alert.info{
+  background:var(--info);
+}
+
+@media(max-width:1050px){
+  .desktop-nav{
+    gap:11px;
+  }
+
+  .desktop-nav a{
+    font-size:14px;
+  }
+}
+
+@media(max-width:900px){
+  body{
+    padding-top:78px;
+  }
+
+  .desktop-nav{
+    display:none;
+  }
+
+  .menu-button{
+    display:flex;
+  }
+
+  .order-card-body{
+    grid-template-columns:1fr;
+  }
+
+  .order-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:700px){
+  .site-header{
+    padding:9px 13px;
+  }
+
+  .logo-text{
+    font-size:14px;
+  }
+
+  .logo-subtitle{
+    font-size:8px;
+  }
+
+  .logo-img{
+    width:47px;
+    height:47px;
+  }
+
+  .orders-hero{
+    min-height:225px;
+    padding:38px 18px;
+  }
+
+  .hero-content h1{
+    font-size:36px;
+  }
+
+  .orders-section{
+    padding:42px 14px 58px;
+  }
+
+  .section-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .order-card-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .order-meta{
+    grid-template-columns:1fr;
+  }
+
+  .order-actions{
+    grid-template-columns:1fr;
+  }
+
+  .modal-body{
+    grid-template-columns:1fr;
+  }
+
+  .detail-card.full{
+    grid-column:auto;
+  }
+}
+@media(max-width:1100px) and (min-width:701px){
+
+  .home-glass-header{
+    padding:8px 18px !important;
+    column-gap:12px !important;
+  }
+
+  .home-logo-img{
+    width:46px !important;
+    height:46px !important;
+  }
+
+  .home-logo-text{
+    font-size:15px !important;
+  }
+
+  .home-logo-subtitle{
+    font-size:9px !important;
+  }
+
+  .home-header-right{
+    gap:9px !important;
+  }
+
+  .home-navbar{
+    gap:11px !important;
+  }
+
+  .home-navbar > a,
+  .home-category-btn{
+    font-size:11px !important;
+    padding:6px 0 !important;
+  }
+
+  .home-login-btn,
+  .home-register-btn,
+  .logout-btn{
+    min-height:37px !important;
+    padding:7px 11px !important;
+    font-size:11px !important;
+  }
+
+  .profile-icon{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+  }
+}
+
+.transactions-section{max-width:1180px;margin:0 auto;padding:55px 22px 70px}
+.transaction-summary{margin-bottom:24px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.transaction-summary-card{padding:17px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:16px;background:var(--white);box-shadow:0 10px 25px rgba(20,63,42,.06)}
+.transaction-summary-icon{width:44px;height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:var(--gold-dark);background:#fff7df}
+.transaction-summary-card span{display:block;margin-bottom:3px;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase}
+.transaction-summary-card strong{color:var(--dark-green);font-size:19px}
+.transaction-filter{margin-bottom:24px;padding:15px;display:grid;grid-template-columns:minmax(220px,1.5fr) repeat(3,minmax(140px,.75fr)) auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:16px;background:var(--white);box-shadow:0 10px 25px rgba(20,63,42,.05)}
+.transaction-filter input,.transaction-filter select{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--border);border-radius:10px;color:var(--text);background:#fff;outline:none}
+.transaction-filter input:focus,.transaction-filter select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,154,18,.10)}
+.transaction-reset{min-height:42px;padding:9px 14px;border:0;border-radius:10px;color:#fff;background:var(--dark-green);font-size:11px;font-weight:800}
+.transactions-list{display:grid;gap:18px}
+.transaction-card{overflow:hidden;border:1px solid var(--border);border-radius:20px;background:var(--white);box-shadow:0 12px 30px rgba(20,63,42,.08)}
+.transaction-card-header{padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--border);background:#fffdfa}
+.transaction-heading{min-width:0;display:flex;align-items:center;gap:12px}
+.transaction-icon{width:43px;height:43px;min-width:43px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:var(--gold-dark);background:#fff7df}
+.transaction-heading h3{max-width:620px;margin-bottom:4px;overflow:hidden;color:var(--dark-green);font-size:15px;text-overflow:ellipsis;white-space:nowrap}
+.transaction-heading p{color:var(--muted);font-size:10px}
+.transaction-card-body{padding:20px;display:grid;grid-template-columns:minmax(0,1fr) 165px;gap:20px;align-items:start}
+.transaction-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.transaction-actions{display:grid;gap:9px}
+.transaction-view-btn{min-height:42px;padding:10px 13px;display:flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;color:#fff;background:var(--dark-green);font-size:11px;font-weight:800}
+.transaction-empty{padding:55px 20px;border:1px dashed #d8d0bd;border-radius:18px;text-align:center;color:var(--muted);background:#fffdfa}
+.transaction-empty i{display:block;margin-bottom:12px;color:var(--gold);font-size:28px}
+.pagination-wrap{margin-top:24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pagination-info{color:var(--muted);font-size:11px}.pagination-controls{display:flex;align-items:center;gap:7px}
+.page-btn{min-width:36px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:9px;color:var(--dark-green);background:#fff;font-size:11px;font-weight:800}
+.page-btn.active{color:#fff;border-color:var(--dark-green);background:var(--dark-green)}.page-btn:disabled{opacity:.45;cursor:not-allowed}
+.transaction-details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.transaction-detail{padding:13px;border:1px solid var(--border);border-radius:11px;background:#fffdfa}
+.transaction-detail.full{grid-column:1/-1}.transaction-detail span{display:block;margin-bottom:5px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}
+.transaction-detail strong{display:block;color:var(--dark-green);font-size:12px;line-height:1.5;word-break:break-word}
+@media(max-width:1000px){.transaction-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.transaction-filter{grid-template-columns:repeat(2,minmax(0,1fr))}.transaction-reset{width:100%}.transaction-meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.transactions-section{padding:42px 15px 60px}.transaction-filter{grid-template-columns:1fr}.transaction-card-header{align-items:flex-start}.transaction-card-body{grid-template-columns:1fr}.transaction-heading h3{max-width:220px}}
+@media(max-width:520px){.transaction-summary{grid-template-columns:1fr 1fr;gap:10px}.transaction-summary-card{padding:13px}.transaction-summary-card strong{font-size:16px}.transaction-meta{grid-template-columns:1fr}.transaction-card-header{padding:15px}.transaction-card-body{padding:15px}.transaction-details-grid{grid-template-columns:1fr}.transaction-detail.full{grid-column:auto}.pagination-wrap{align-items:flex-start;flex-direction:column}}
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="homepage.html" class="logo-container">
+    <img class="logo-img" src="../assets/main_logo.jpeg" alt="Neolife Logo">
+    <div class="logo-details">
+      <span class="logo-text">Neolife Wellness Center</span>
+      <span class="logo-subtitle">Ayush Digital Care</span>
+    </div>
+  </a>
+  <nav class="desktop-nav">
+    <a href="homepage.html">Home</a><a href="about.html">About</a><a href="services.html">Therapies</a>
+    <a href="services.html#beauty">Beauty &amp; Cosmetics</a><a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a><a href="blog.html">Blogs</a><a href="contact.html">Contact</a>
+  </nav>
+  <div class="header-actions">
+    <a href="profile.html" class="profile-icon" id="profileIcon" title="Profile"><i class="fa-solid fa-user"></i></a>
+    <button type="button" class="menu-button" onclick="openMobileMenu()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+  </div>
+</header>
+
+<nav class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-header"><strong>Neolife Menu</strong><button type="button" class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fa-solid fa-xmark"></i></button></div>
+  <a href="homepage.html">Home</a><a href="about.html">About</a><a href="services.html">Therapies</a>
+  <a href="services.html#beauty">Beauty &amp; Cosmetics</a><a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a><a href="blog.html">Blogs</a><a href="contact.html">Contact</a>
+  <a href="my-orders.html">My Orders</a><a href="my-appointments.html">My Appointments</a>
+  <a href="my-transactions.html" class="active">My Transactions</a><a href="profile.html">Profile</a>
+</nav>
+<div class="menu-overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
+
+<section class="orders-hero">
+  <div class="hero-content">
+    <span class="hero-kicker"><i class="fa-solid fa-receipt"></i> Your Payment History</span>
+    <h1>My Transactions</h1>
+    <p>View payments made for product orders, offline appointments and online consultations, with their current payment status and transaction details.</p>
+  </div>
+</section>
+
+<main class="transactions-section">
+  <div class="section-heading">
+    <div><h2>Payment History</h2><p>All your Neolife payment transactions in one place.</p></div>
+    <span class="order-count" id="transactionCount">0 Transactions</span>
+  </div>
+
+  <section class="transaction-summary">
+    <article class="transaction-summary-card"><div class="transaction-summary-icon"><i class="fa-solid fa-receipt"></i></div><div><span>Total</span><strong id="totalTransactions">0</strong></div></article>
+    <article class="transaction-summary-card"><div class="transaction-summary-icon"><i class="fa-solid fa-circle-check"></i></div><div><span>Successful</span><strong id="successfulTransactions">0</strong></div></article>
+    <article class="transaction-summary-card"><div class="transaction-summary-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div><div><span>Total Paid</span><strong id="totalPaidAmount">₹0</strong></div></article>
+    <article class="transaction-summary-card"><div class="transaction-summary-icon"><i class="fa-solid fa-rotate-left"></i></div><div><span>Refunded</span><strong id="refundedTransactions">0</strong></div></article>
+  </section>
+
+  <section class="transaction-filter">
+    <input id="searchInput" type="text" placeholder="Search transaction ID..." oninput="applyFilters()">
+    <select id="typeFilter" onchange="applyFilters()"><option value="">All Types</option><option value="ORDER">Order</option><option value="APPOINTMENT">Appointment</option><option value="CONSULTATION">Consultation</option></select>
+    <select id="statusFilter" onchange="applyFilters()"><option value="">All Status</option><option value="SUCCESS">Success</option><option value="INITIATED">Initiated</option><option value="FAILED">Failed</option><option value="REFUNDED">Refunded</option></select>
+    <input id="dateFilter" type="date" onchange="applyFilters()">
+    <button class="transaction-reset" type="button" onclick="resetFilters()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+  </section>
+
+  <section id="transactionsContainer" class="transactions-list">
+    <div class="transaction-empty"><i class="fa-solid fa-spinner fa-spin"></i>Loading your transactions...</div>
+  </section>
+
+  <div class="pagination-wrap">
+    <div class="pagination-info" id="paginationInfo">Showing 0 transactions</div>
+    <div class="pagination-controls" id="paginationControls"></div>
+  </div>
+</main>
+
+<footer class="site-footer">© 2026 Neolife Wellness Center. All Rights Reserved.</footer>
+<a href="https://wa.me/919243351631" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+
+<div class="modal" id="transactionModal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Transaction Details</h2><button type="button" class="modal-close" onclick="closeTransactionModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body"><div id="transactionDetails" class="transaction-details-grid"></div></div>
+  </div>
+</div>
+
+
+<script>
+const API_BASE_URL="/api";
+const PAGE_SIZE=6;
+let allTransactions=[];
+let filteredTransactions=[];
+let currentPage=1;
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  if(!requireUserLogin()) return;
+  await loadProfileIcon();
+  await loadTransactions();
+});
+
+function getToken(){
+  return (localStorage.getItem("token")||localStorage.getItem("accessToken")||localStorage.getItem("jwtToken")||sessionStorage.getItem("token")||"").trim();
+}
+
+function requireUserLogin(){
+  if(!getToken()){
+    window.location.href="login.html";
+    return false;
+  }
+  return true;
+}
+
+async function apiRequest(endpoint,options={}){
+  const headers={Accept:"application/json",...(options.headers||{}),Authorization:`Bearer ${getToken()}`};
+  if(options.body&&!(options.body instanceof FormData))headers["Content-Type"]="application/json";
+  const response=await fetch(`${API_BASE_URL}${endpoint}`,{...options,headers});
+  const text=await response.text();
+  let result={};
+  try{result=text?JSON.parse(text):{};}catch(error){result={success:false,message:text||"Invalid server response."};}
+  if(response.status===401||response.status===403){
+    window.location.href="login.html";
+    throw new Error(result.message||"Your login session has expired.");
+  }
+  if(!response.ok||result.success===false)throw new Error(result.message||`Request failed (${response.status})`);
+  return result;
+}
+
+async function loadProfileIcon(){
+  try{
+    const result=await apiRequest("/users/getProfile",{method:"GET"});
+    const name=String(result?.data?.name||"User").trim();
+    document.getElementById("profileIcon").textContent=name.charAt(0).toUpperCase()||"U";
+  }catch(error){console.error("Profile loading failed:",error);}
+}
+
+async function loadTransactions(){
+  try{
+    const result=await apiRequest("/payments/my-transactions",{method:"GET"});
+    allTransactions=Array.isArray(result.data)?result.data:[];
+    updateSummary();
+    applyFilters();
+  }catch(error){
+    allTransactions=[];
+    updateSummary();
+    applyFilters();
+    document.getElementById("transactionsContainer").innerHTML=`<div class="transaction-empty"><i class="fa-solid fa-triangle-exclamation"></i>${escapeHtml(error.message||"Unable to load transactions.")}</div>`;
+  }
+}
+
+function updateSummary(){
+  const success=allTransactions.filter(x=>normalize(x.status)==="SUCCESS");
+  const refunded=allTransactions.filter(x=>normalize(x.status)==="REFUNDED"||normalize(x.refundStatus)==="REFUNDED");
+  const totalPaid=success.reduce((sum,x)=>sum+Number(x.amount||0),0);
+  document.getElementById("totalTransactions").textContent=allTransactions.length;
+  document.getElementById("successfulTransactions").textContent=success.length;
+  document.getElementById("refundedTransactions").textContent=refunded.length;
+  document.getElementById("totalPaidAmount").textContent=formatCurrency(totalPaid,"INR");
+}
+
+function applyFilters(){
+  const search=document.getElementById("searchInput").value.trim().toLowerCase();
+  const type=normalize(document.getElementById("typeFilter").value);
+  const status=normalize(document.getElementById("statusFilter").value);
+  const date=document.getElementById("dateFilter").value;
+
+  filteredTransactions=allTransactions.filter(t=>{
+    const haystack=[t.transactionId,t.providerPaymentId,t.providerOrderId,t.referenceId,t.paymentType,t.status].filter(Boolean).join(" ").toLowerCase();
+    return (!search||haystack.includes(search))
+      &&(!type||normalize(t.paymentType)===type)
+      &&(!status||normalize(t.status)===status)
+      &&(!date||extractDate(t.paidAt||t.createdAt)===date);
+  });
+
+  currentPage=1;
+  renderTransactions();
+}
+
+function resetFilters(){
+  document.getElementById("searchInput").value="";
+  document.getElementById("typeFilter").value="";
+  document.getElementById("statusFilter").value="";
+  document.getElementById("dateFilter").value="";
+  applyFilters();
+}
+
+function renderTransactions(){
+  const container=document.getElementById("transactionsContainer");
+  document.getElementById("transactionCount").textContent=`${filteredTransactions.length} Transaction${filteredTransactions.length===1?"":"s"}`;
+
+  if(!filteredTransactions.length){
+    container.innerHTML=`<div class="transaction-empty"><i class="fa-solid fa-receipt"></i>No transactions found.</div>`;
+    renderPagination();
+    return;
+  }
+
+  const totalPages=Math.max(1,Math.ceil(filteredTransactions.length/PAGE_SIZE));
+  if(currentPage>totalPages)currentPage=totalPages;
+  const start=(currentPage-1)*PAGE_SIZE;
+  const items=filteredTransactions.slice(start,start+PAGE_SIZE);
+
+  container.innerHTML=items.map(t=>`
+    <article class="transaction-card">
+      <div class="transaction-card-header">
+        <div class="transaction-heading">
+          <div class="transaction-icon">${paymentTypeIcon(t.paymentType)}</div>
+          <div>
+            <h3 title="${escapeHtml(t.transactionId||"-")}">${escapeHtml(t.transactionId||"-")}</h3>
+            <p>${escapeHtml(formatLabel(t.paymentType))} Payment</p>
+          </div>
+        </div>
+        ${statusBadge(t.status)}
+      </div>
+      <div class="transaction-card-body">
+        <div class="transaction-meta">
+          ${metaBox("Amount",formatCurrency(t.amount,t.currency))}
+          ${metaBox("Reference ID",t.referenceId??"-")}
+          ${metaBox("Gateway",formatLabel(t.gateway))}
+          ${metaBox("Paid On",formatDateTime(t.paidAt||t.createdAt))}
+        </div>
+        <div class="transaction-actions">
+          <button type="button" class="transaction-view-btn" onclick="viewTransaction('${escapeJs(t.transactionId||"")}')">
+            <i class="fa-regular fa-eye"></i> View Details
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join("");
+
+  renderPagination();
+}
+
+function metaBox(label,value){
+  return `<div class="meta-box"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value==null||value===""?"-":String(value))}</strong></div>`;
+}
+
+function paymentTypeIcon(type){
+  const v=normalize(type);
+  if(v==="ORDER")return '<i class="fa-solid fa-bag-shopping"></i>';
+  if(v==="APPOINTMENT")return '<i class="fa-solid fa-calendar-check"></i>';
+  if(v==="CONSULTATION")return '<i class="fa-solid fa-video"></i>';
+  return '<i class="fa-solid fa-receipt"></i>';
+}
+
+function statusBadge(status){
+  const v=normalize(status);
+  let cls="status-pending";
+  if(v==="SUCCESS")cls="status-delivered";
+  else if(v==="FAILED")cls="status-failed";
+  else if(v==="REFUNDED")cls="status-shipped";
+  else if(v==="INITIATED")cls="status-pending";
+  return `<span class="status-badge ${cls}">${escapeHtml(formatLabel(status))}</span>`;
+}
+
+async function viewTransaction(transactionId){
+  if(!transactionId)return;
+  const modal=document.getElementById("transactionModal");
+  const details=document.getElementById("transactionDetails");
+  modal.classList.add("show");
+  details.innerHTML=`<div class="transaction-detail full"><span>Loading</span><strong><i class="fa-solid fa-spinner fa-spin"></i> Loading transaction details...</strong></div>`;
+  try{
+    const result=await apiRequest(`/payments/${encodeURIComponent(transactionId)}`,{method:"GET"});
+    renderTransactionDetails(result.data||{});
+  }catch(error){
+    details.innerHTML=`<div class="transaction-detail full"><span>Error</span><strong>${escapeHtml(error.message||"Unable to load transaction details.")}</strong></div>`;
+  }
+}
+
+function renderTransactionDetails(t){
+  document.getElementById("transactionDetails").innerHTML=[
+    detail("Payment ID",t.id),
+    detail("Transaction ID",t.transactionId),
+    detail("Payment Type",formatLabel(t.paymentType)),
+    detail("Reference ID",t.referenceId),
+    detail("Amount",formatCurrency(t.amount,t.currency)),
+    detail("Gateway",formatLabel(t.gateway)),
+    detail("Status",formatLabel(t.status)),
+    detail("Provider Payment ID",t.providerPaymentId),
+    detail("Provider Order ID",t.providerOrderId),
+    detail("Refund Status",formatLabel(t.refundStatus)),
+    detail("Refunded Amount",t.refundedAmount!=null?formatCurrency(t.refundedAmount,t.currency):"-"),
+    detail("Paid At",formatDateTime(t.paidAt)),
+    detail("Failure Reason",t.failureReason,true),
+    detail("Refund Reason",t.refundReason,true)
+  ].join("");
+}
+
+function detail(label,value,full=false){
+  return `<div class="transaction-detail ${full?"full":""}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value==null||value===""?"-":String(value))}</strong></div>`;
+}
+
+function renderPagination(){
+  const total=filteredTransactions.length;
+  const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+  const start=total?((currentPage-1)*PAGE_SIZE)+1:0;
+  const end=Math.min(currentPage*PAGE_SIZE,total);
+  document.getElementById("paginationInfo").textContent=total?`Showing ${start}-${end} of ${total} transactions`:"Showing 0 transactions";
+  const controls=document.getElementById("paginationControls");
+  if(totalPages<=1){controls.innerHTML="";return;}
+  let html=`<button class="page-btn" onclick="changePage(${currentPage-1})" ${currentPage===1?"disabled":""}><i class="fa-solid fa-chevron-left"></i></button>`;
+  for(let p=1;p<=totalPages;p++)html+=`<button class="page-btn ${p===currentPage?"active":""}" onclick="changePage(${p})">${p}</button>`;
+  html+=`<button class="page-btn" onclick="changePage(${currentPage+1})" ${currentPage===totalPages?"disabled":""}><i class="fa-solid fa-chevron-right"></i></button>`;
+  controls.innerHTML=html;
+}
+
+function changePage(page){
+  const totalPages=Math.max(1,Math.ceil(filteredTransactions.length/PAGE_SIZE));
+  if(page<1||page>totalPages)return;
+  currentPage=page;
+  renderTransactions();
+  window.scrollTo({top:document.querySelector(".transactions-list").offsetTop-120,behavior:"smooth"});
+}
+
+function normalize(v){return String(v||"").trim().toUpperCase();}
+function formatLabel(v){const s=String(v||"").trim().replaceAll("_"," ").toLowerCase();return s?s.replace(/\b\w/g,c=>c.toUpperCase()):"-";}
+function formatCurrency(amount,currency="INR"){const n=Number(amount);if(!Number.isFinite(n))return "-";try{return new Intl.NumberFormat("en-IN",{style:"currency",currency:currency||"INR",maximumFractionDigits:2}).format(n);}catch(e){return `₹${n.toFixed(2)}`;}}
+function formatDateTime(value){if(!value)return "-";const d=new Date(value);if(Number.isNaN(d.getTime()))return String(value);return d.toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});}
+function extractDate(value){if(!value)return "";const d=new Date(value);if(Number.isNaN(d.getTime()))return String(value).slice(0,10);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function escapeHtml(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
+function escapeJs(v){return String(v??"").replaceAll("\\","\\\\").replaceAll("'","\\'");}
+function closeTransactionModal(){document.getElementById("transactionModal").classList.remove("show");}
+document.getElementById("transactionModal").addEventListener("click",function(event){if(event.target===this)closeTransactionModal();});
+
+function openMobileMenu(){document.getElementById("mobileMenu").classList.add("open");document.getElementById("menuOverlay").classList.add("show");document.body.style.overflow="hidden";}
+function closeMobileMenu(){document.getElementById("mobileMenu").classList.remove("open");document.getElementById("menuOverlay").classList.remove("show");document.body.style.overflow="";}
+</script>
+
+</body>
+</html>

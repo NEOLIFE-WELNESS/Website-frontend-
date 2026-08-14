@@ -1320,8 +1320,7 @@ tbody tr:hover{
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allProducts = [];
 let filteredProducts = [];
@@ -1352,7 +1351,7 @@ async function loadProducts(){
     try{
         const response =
             await fetch(
-                `${API_BASE_URL}/api/products/getAll`,
+                `${API_BASE_URL}/products/getAll`,
                 {
                     method:"GET"
                 }
@@ -1927,7 +1926,7 @@ async function deleteProduct(id) {
 
     try {
         const response = await fetch(
-            `${API_BASE_URL}/api/products/remove/${id}`,
+            `${API_BASE_URL}/products/remove/${id}`,
             {
                 method: "DELETE",
                 headers: {

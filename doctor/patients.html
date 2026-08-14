@@ -1722,7 +1722,7 @@ a{
 </div>
 
 <script>
-const API_BASE_URL="http://localhost:8085";
+const API_BASE_URL = "/api";
 let allPatients=[];
 let filteredPatients=[];
 let currentPage=1;
@@ -1841,7 +1841,7 @@ async function loadDoctorProfile(){
 
   try{
     const result=await apiRequest(
-      "/api/doctors/my-profile"
+      "/doctors/my-profile"
     );
 
     const doctor=result.data||{};
@@ -1967,7 +1967,7 @@ async function loadDoctorConsultationModes(){
   try{
     const result=
       await apiRequest(
-        `/api/doctor-availability/doctor/${encodeURIComponent(
+        `/doctor-availability/doctor/${encodeURIComponent(
           doctorId
         )}`
       );
@@ -2197,11 +2197,11 @@ async function loadPatients(){
     const results=
       await Promise.allSettled([
         apiRequest(
-          "/api/doctor-dashboard/patients"
+          "/doctor-dashboard/patients"
         ),
 
         apiRequest(
-          "/api/walk-in-patients/doctor/my-patients"
+          "/walk-in-patients/doctor/my-patients"
         )
       ]);
 
@@ -3159,7 +3159,7 @@ async function openPatientRecord(patientId){
     ()=>openPatientAppointments(patientId);
 
   try{
-    const result=await apiRequest(`/api/patient-records/patient/${encodeURIComponent(patientId)}`);
+    const result=await apiRequest(`/patient-records/patient/${encodeURIComponent(patientId)}`);
     renderPatientRecord(result.data||{});
   }catch(error){
     document.getElementById("recordModalBody").innerHTML=
@@ -3253,7 +3253,7 @@ async function openPatientAppointments(patientId){
 
   try{
     const result=await apiRequest(
-      `/api/patient-records/patient/${encodeURIComponent(patientId)}/appointments`
+      `/patient-records/patient/${encodeURIComponent(patientId)}/appointments`
     );
 
     const appointments=

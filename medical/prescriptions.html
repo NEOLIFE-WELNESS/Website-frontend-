@@ -2041,8 +2041,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let allPrescriptions = [];
         let filteredPrescriptions = [];
@@ -2161,7 +2160,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/medical-staff/me"
+                        "/medical-staff/me"
                     );
 
                 const name =
@@ -2191,7 +2190,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/medical-staff/prescriptions"
+                        "/medical-staff/prescriptions"
                     );
 
                 const data =
@@ -2260,7 +2259,7 @@
 
             try {
                 const result = await staffApiRequest(
-                    `/api/appointments/${encodeURIComponent(
+                    `/appointments/${encodeURIComponent(
                         prescription.appointmentId
                     )}/get`
                 );
@@ -3407,7 +3406,7 @@
 
                 const response =
                     await fetch(
-                        `${API_BASE_URL}/api/prescriptions/${encodeURIComponent(
+                        `${API_BASE_URL}/prescriptions/${encodeURIComponent(
                             selectedPrescription.id
                         )}/download`,
                         {
@@ -3832,7 +3831,7 @@
                  */
                 const result =
                     await staffApiRequest(
-                        `/api/medical-staff/prescriptions/${encodeURIComponent(
+                        `/medical-staff/prescriptions/${encodeURIComponent(
                             id
                         )}/mark-given`,
                         {

@@ -1352,7 +1352,7 @@ tbody tr:hover{
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let appointments = [];
 let filteredAppointments = [];
@@ -1445,7 +1445,7 @@ async function loadAppointments(){
 
     try{
         const result = await apiRequest(
-            "/api/appointments/admin/getAll"
+            "/appointments/admin/getAll"
         );
 
         const records =

@@ -1918,7 +1918,7 @@
     </div>
 
     <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -2124,7 +2124,7 @@ async function loadStaffProfile() {
     try {
         const result =
             await staffApiRequest(
-                "/api/medical-staff/me"
+                "/medical-staff/me"
             );
 
         const staff =
@@ -2231,7 +2231,7 @@ async function loadDashboardSummary() {
     try {
         const result =
             await staffApiRequest(
-                "/api/medical-staff/dashboard"
+                "/medical-staff/dashboard"
             );
 
         const summary =
@@ -2318,7 +2318,7 @@ async function loadRecentPrescriptions() {
     try {
         const result =
             await staffApiRequest(
-                "/api/medical-staff/prescriptions"
+                "/medical-staff/prescriptions"
             );
 
         const prescriptions =
@@ -2497,7 +2497,7 @@ async function loadLowStockProducts() {
     try {
         const result =
             await staffApiRequest(
-                "/api/inventory/low-stock"
+                "/inventory/low-stock"
             );
 
         const products =
@@ -2625,7 +2625,7 @@ async function loadTodayTreatments() {
     try {
         const result =
             await staffApiRequest(
-                "/api/daily-treatments/admin/getAll"
+                "/daily-treatments/admin/getAll"
             );
 
         const today =
@@ -2789,7 +2789,7 @@ async function loadActiveConsultations() {
     try {
         const result =
             await staffApiRequest(
-                "/api/consultations/admin/getAll"
+                "/consultations/admin/getAll"
             );
 
         const activeStatuses =

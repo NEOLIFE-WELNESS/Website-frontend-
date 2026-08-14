@@ -785,16 +785,158 @@ img{
     min-width:38px !important;
   }
 }
-.footer {
-      padding: 34px 20px;
-      text-align: center;
-      background: var(--green-dark);
-    }
+/* ===== FOOTER ===== */
 
-    .footer p {
-      color: rgba(255, 255, 255, 0.78);
-      font-size: 14px;
-    }
+.footer{
+  background:#0d281b;
+  color:#dfe9e2;
+  padding:55px 0 22px;
+}
+
+.footer-container{
+  width:min(1180px,90%);
+  margin:auto;
+
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1.2fr;
+  gap:35px;
+}
+
+.footer-box h3,
+.footer-box h4{
+  margin:0 0 16px;
+  color:white;
+}
+
+.footer-box h3{
+  font-size:20px;
+}
+
+.footer-box h4{
+  font-size:16px;
+}
+
+.footer-box p{
+  margin:0 0 10px;
+  color:#c7d5cc;
+  font-size:14px;
+  line-height:1.7;
+}
+
+.footer-box a{
+  display:block;
+  width:max-content;
+  max-width:100%;
+
+  margin-bottom:9px;
+
+  color:#c7d5cc;
+  font-size:14px;
+  text-decoration:none;
+
+  transition:.3s;
+}
+
+.footer-box a:hover{
+  color:var(--gold);
+  transform:translateX(3px);
+}
+
+
+/* SOCIAL ICONS */
+
+.social-links{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.social-links a{
+  width:40px;
+  height:40px;
+  margin:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+
+  background:rgba(255,255,255,.10);
+  color:white;
+
+  font-size:16px;
+}
+
+.social-links a:hover{
+  background:var(--gold);
+  color:var(--green-dark);
+  transform:translateY(-2px);
+}
+
+
+/* FOOTER BOTTOM */
+
+.footer-bottom{
+  width:min(1180px,90%);
+  margin:35px auto 0;
+  padding-top:20px;
+
+  border-top:1px solid rgba(255,255,255,.12);
+
+  text-align:center;
+}
+
+.footer-bottom p{
+  margin:0;
+  color:#c7d5cc;
+  font-size:14px;
+}
+
+
+/* TABLET */
+
+@media(max-width:900px){
+
+  .footer-container{
+    grid-template-columns:repeat(2,1fr);
+    gap:35px 25px;
+  }
+
+}
+
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+  .footer{
+    padding:45px 0 20px;
+  }
+
+  .footer-container{
+    grid-template-columns:1fr;
+    gap:30px;
+  }
+
+  .footer-box{
+    text-align:left;
+  }
+
+  .footer-box a{
+    width:auto;
+  }
+
+  .social-links{
+    justify-content:flex-start;
+  }
+
+  .footer-bottom{
+    margin-top:30px;
+  }
+
+}
 </style>
 
 </head>
@@ -986,6 +1128,7 @@ img{
     </p>
   </footer>
 <script>
+  const API_BASE_URL = "/api";
 const therapyDetails = {
   ayurveda: {
 title: "🌿 Ayurveda & Panchakarma",
@@ -1270,7 +1413,7 @@ async function loadProfileIcon(){
 
     try{
 
-        const response = await fetch("http://localhost:8085/api/users/getProfile",{
+        const response = await fetch(`${API_BASE_URL}/users/getProfile`, {
             headers:{
                 "Authorization":"Bearer " + token
             }

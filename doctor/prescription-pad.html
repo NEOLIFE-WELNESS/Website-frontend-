@@ -851,6 +851,254 @@ textarea.control{min-height:112px;}
   .med-table td:nth-child(7){grid-column:auto;}
 }
 
+
+/* =========================
+   MEDICINE SEARCH & FILTERS
+========================= */
+
+.medicine-selector{
+  margin-bottom:18px;
+  padding:17px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#fbfcfa;
+}
+
+.medicine-selector-title{
+  margin-bottom:13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.medicine-selector-title h3{
+  color:var(--dark);
+  font-size:14px;
+}
+
+.medicine-selector-title p{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.medicine-filter-grid{
+  display:grid;
+  grid-template-columns:minmax(190px,1.35fr) repeat(4,minmax(130px,1fr));
+  gap:10px;
+}
+
+.search-control-wrap{
+  position:relative;
+}
+
+.search-control-wrap i{
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+  font-size:12px;
+  pointer-events:none;
+}
+
+.search-control-wrap .control{
+  padding-left:35px;
+}
+
+.filter-actions{
+  margin-top:10px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.filter-reset-btn{
+  min-height:39px;
+  padding:8px 13px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  color:var(--dark);
+  background:#fff;
+  font-size:10px;
+  font-weight:800;
+}
+
+.medicine-results-header{
+  margin-top:14px;
+  padding-top:13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-top:1px solid var(--border);
+}
+
+.medicine-results-header strong{
+  color:var(--dark);
+  font-size:11px;
+}
+
+.medicine-result-count{
+  padding:5px 9px;
+  border-radius:20px;
+  color:var(--green);
+  background:var(--light);
+  font-size:9px;
+  font-weight:800;
+}
+
+.medicine-results{
+  max-height:330px;
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  overflow-y:auto;
+  padding-right:3px;
+}
+
+.medicine-option{
+  min-width:0;
+  padding:11px 12px;
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:#fff;
+  transition:.2s;
+}
+
+.medicine-option:hover{
+  border-color:#c9d9cd;
+  box-shadow:0 4px 12px rgba(21,61,41,.05);
+}
+
+.medicine-option.selected{
+  border-color:#9fc0aa;
+  background:#f1f8f3;
+}
+
+.medicine-option input[type="checkbox"]{
+  width:17px;
+  height:17px;
+  margin-top:2px;
+  accent-color:var(--dark);
+  flex-shrink:0;
+}
+
+.medicine-option-content{
+  min-width:0;
+  flex:1;
+}
+
+.medicine-option-name{
+  display:block;
+  margin-bottom:4px;
+  color:var(--dark);
+  font-size:11px;
+  font-weight:800;
+  overflow-wrap:anywhere;
+}
+
+.medicine-option-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+
+.medicine-meta-pill{
+  padding:3px 6px;
+  border-radius:12px;
+  color:var(--muted);
+  background:#f1f4f1;
+  font-size:8px;
+  font-weight:700;
+}
+
+.medicine-empty{
+  grid-column:1/-1;
+  padding:25px 14px;
+  border:1px dashed var(--border);
+  border-radius:11px;
+  color:var(--muted);
+  background:#fff;
+  text-align:center;
+  font-size:11px;
+}
+
+.medicine-name-cell{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.medicine-name-icon{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  color:var(--green);
+  background:var(--light);
+}
+
+.medicine-name-text{
+  min-width:0;
+}
+
+.medicine-name-text strong{
+  display:block;
+  color:var(--dark);
+  font-size:11px;
+  overflow-wrap:anywhere;
+}
+
+.medicine-name-text small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+}
+
+.custom-medicine-input{
+  margin-top:0;
+}
+
+@media(max-width:1250px){
+  .medicine-filter-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .search-control-wrap{
+    grid-column:1/-1;
+  }
+}
+
+@media(max-width:760px){
+  .medicine-filter-grid{
+    grid-template-columns:1fr;
+  }
+
+  .search-control-wrap{
+    grid-column:auto;
+  }
+
+  .medicine-results{
+    grid-template-columns:1fr;
+    max-height:390px;
+  }
+
+  .medicine-selector-title,
+  .medicine-results-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -905,7 +1153,7 @@ textarea.control{min-height:112px;}
                     Appointment Calendar
                 </a>
 
-                <a href="upcoming-schedule.html" class="active">
+                <a href="upcoming-schedule.html">
     <i class="fa-solid fa-calendar-check"></i>
     Upcoming Schedule
 </a>
@@ -1015,18 +1263,292 @@ textarea.control{min-height:112px;}
       </section>
 
       <section class="form-card">
-        <div class="card-header"><div><h2>Medicines</h2><p>Add one or more prescribed medicines.</p></div><button class="add-btn" type="button" onclick="addMedicineRow()"><i class="fa-solid fa-plus"></i>Add Medicine</button></div>
-        <div class="card-body med-table-wrap">
-          <table class="med-table">
-            <thead><tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Days</th><th>Qty</th><th>Instructions</th><th></th></tr></thead>
-            <tbody id="medicineBody"></tbody>
-          </table>
+
+        <div class="card-header">
+          <div>
+            <h2>Medicines</h2>
+            <p>Search and filter medicines, then tick the medicines you want to prescribe.</p>
+          </div>
+
+          <button
+            class="add-btn"
+            type="button"
+            onclick="addCustomMedicineRow()"
+          >
+            <i class="fa-solid fa-plus"></i>
+            Custom Medicine
+          </button>
         </div>
+
+        <div class="card-body">
+
+          <div class="medicine-selector">
+
+            <div class="medicine-selector-title">
+              <div>
+                <h3>Find Medicine</h3>
+                <p>All selected filters are applied together.</p>
+              </div>
+            </div>
+
+            <div class="medicine-filter-grid">
+
+              <div class="search-control-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                  type="search"
+                  id="medicineSearch"
+                  class="control"
+                  placeholder="Search medicine name..."
+                  oninput="applyMedicineFilters()"
+                >
+              </div>
+
+              <select
+                id="medicineTypeFilter"
+                class="control"
+                onchange="applyMedicineFilters()"
+              >
+                <option value="">All Types</option>
+                <option value="Classical Medicine">Classical</option>
+                <option value="Patented Product">Patented</option>
+                <option value="Folklore Medicine">Folklore</option>
+                <option value="Panchakavya">Panchakavya</option>
+              </select>
+
+              <select
+                id="medicineSectionFilter"
+                class="control"
+                onchange="applyMedicineFilters()"
+              >
+                <option value="">All Sections</option>
+
+                <optgroup label="Pain Care">
+                  <option value="Back Pain">Back Pain</option>
+                  <option value="Joint Pain">Joint Pain</option>
+                  <option value="Knee Pain">Knee Pain</option>
+                  <option value="Neck Pain">Neck Pain</option>
+                  <option value="Shoulder Pain">Shoulder Pain</option>
+                  <option value="Muscle Pain">Muscle Pain</option>
+                  <option value="Leg Pain">Leg Pain</option>
+                  <option value="Hip Pain">Hip Pain</option>
+                  <option value="Arthritis">Arthritis</option>
+                  <option value="Sciatica">Sciatica</option>
+                  <option value="Body Pain">Body Pain</option>
+                  <option value="Other Pain">Other Pain</option>
+                </optgroup>
+
+                <optgroup label="Diabetes Care">
+                  <option value="Diabetes">Diabetes</option>
+                  <option value="Blood Sugar Management">Blood Sugar Management</option>
+                </optgroup>
+
+                <optgroup label="Liver Care">
+                  <option value="Liver Care">Liver Care</option>
+                  <option value="Fatty Liver">Fatty Liver</option>
+                  <option value="Liver Wellness">Liver Wellness</option>
+                </optgroup>
+
+                <optgroup label="Heart Care">
+                  <option value="Heart Care">Heart Care</option>
+                  <option value="Cholesterol Management">Cholesterol Management</option>
+                  <option value="Cardiovascular Wellness">Cardiovascular Wellness</option>
+                </optgroup>
+
+                <optgroup label="Kidney Care">
+                  <option value="Kidney Care">Kidney Care</option>
+                  <option value="Urinary Health">Urinary Health</option>
+                </optgroup>
+
+                <optgroup label="Stress & Sleep">
+                  <option value="Stress">Stress</option>
+                  <option value="Sleep Support">Sleep Support</option>
+                  <option value="Mental Wellness">Mental Wellness</option>
+                </optgroup>
+
+                <optgroup label="Digestive Care">
+                  <option value="Digestive Care">Digestive Care</option>
+                  <option value="Acidity">Acidity</option>
+                  <option value="Gas and Bloating">Gas &amp; Bloating</option>
+                  <option value="Constipation">Constipation</option>
+                  <option value="Indigestion">Indigestion</option>
+                  <option value="Appetite Support">Appetite Support</option>
+                </optgroup>
+
+                <optgroup label="Respiratory Care">
+                  <option value="Respiratory Care">Respiratory Care</option>
+                  <option value="Cough">Cough</option>
+                  <option value="Cold">Cold</option>
+                  <option value="Breathing Wellness">Breathing Wellness</option>
+                </optgroup>
+
+                <optgroup label="Skin Care">
+                  <option value="Skin Care">Skin Care</option>
+                  <option value="Acne Care">Acne Care</option>
+                  <option value="Dry Skin">Dry Skin</option>
+                  <option value="Skin Wellness">Skin Wellness</option>
+                </optgroup>
+
+                <optgroup label="Hair Care">
+                  <option value="Hair Care">Hair Care</option>
+                  <option value="Hair Fall">Hair Fall</option>
+                  <option value="Dandruff">Dandruff</option>
+                  <option value="Hair Growth Support">Hair Growth Support</option>
+                </optgroup>
+
+                <optgroup label="Women's Wellness">
+                  <option value="Women's Wellness">Women's Wellness</option>
+                  <option value="Menstrual Wellness">Menstrual Wellness</option>
+                  <option value="PCOS Wellness">PCOS Wellness</option>
+                  <option value="Menopause Wellness">Menopause Wellness</option>
+                </optgroup>
+
+                <optgroup label="Men's Wellness">
+                  <option value="Men's Wellness">Men's Wellness</option>
+                  <option value="Prostate Wellness">Prostate Wellness</option>
+                </optgroup>
+
+                <optgroup label="Immunity & Wellness">
+                  <option value="Immunity">Immunity</option>
+                  <option value="General Wellness">General Wellness</option>
+                  <option value="Energy and Vitality">Energy &amp; Vitality</option>
+                  <option value="Weakness and Fatigue">Weakness &amp; Fatigue</option>
+                </optgroup>
+
+                <optgroup label="Weight Management">
+                  <option value="Weight Management">Weight Management</option>
+                  <option value="Metabolism Support">Metabolism Support</option>
+                </optgroup>
+
+                <optgroup label="Other">
+                  <option value="Eye Care">Eye Care</option>
+                  <option value="Bone Health">Bone Health</option>
+                  <option value="Nerve Health">Nerve Health</option>
+                  <option value="Oral Care">Oral Care</option>
+                  <option value="General Health">General Health</option>
+                  <option value="Other">Other</option>
+                </optgroup>
+              </select>
+
+              <select
+                id="medicineManufacturerFilter"
+                class="control"
+                onchange="applyMedicineFilters()"
+              >
+                <option value="">All Manufacturers</option>
+              </select>
+
+              <select
+                id="medicineDosageFormFilter"
+                class="control"
+                onchange="applyMedicineFilters()"
+              >
+                <option value="">All Dosage Forms</option>
+                <option value="Syrup">Syrup</option>
+                <option value="Kashayam">Kashayam</option>
+                <option value="Choorna">Choorna</option>
+                <option value="Tablet">Tablet</option>
+                <option value="Capsule">Capsule</option>
+                <option value="Oil">Oil</option>
+                <option value="Cream">Cream</option>
+                <option value="Gel">Gel</option>
+                <option value="Powder">Powder</option>
+                <option value="Drops">Drops</option>
+                <option value="Avaleha">Avaleha / Lehya</option>
+                <option value="Arishta">Arishta / Asava</option>
+                <option value="Other">Other</option>
+              </select>
+
+            </div>
+
+            <div class="filter-actions">
+              <button
+                type="button"
+                class="filter-reset-btn"
+                onclick="resetMedicineFilters()"
+              >
+                <i class="fa-solid fa-rotate-left"></i>
+                Reset Filters
+              </button>
+            </div>
+
+            <div class="medicine-results-header">
+              <strong>Select medicines to add to prescription</strong>
+              <span
+                class="medicine-result-count"
+                id="medicineResultCount"
+              >
+                0 medicines
+              </span>
+            </div>
+
+            <div
+              class="medicine-results"
+              id="medicineResults"
+            >
+              <div class="medicine-empty">
+                Loading medicines...
+              </div>
+            </div>
+
+          </div>
+
+          <div class="med-table-wrap">
+
+            <table class="med-table">
+
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Dosage</th>
+                  <th>Frequency</th>
+                  <th>Duration (Days)</th>
+                  <th>Quantity</th>
+                  <th>Instructions</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody id="medicineBody"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
         <div class="actions">
-          <button class="secondary-btn" type="button" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i>Back</button>
-          <button class="secondary-btn" id="saveDraftBtn" type="button" onclick="savePrescriptionDraft()"><i class="fa-solid fa-floppy-disk"></i>Save Draft</button>
-          <button class="primary-btn" id="finalizeBtn" type="button" onclick="finalizePrescription()"><i class="fa-solid fa-circle-check"></i>Finalize Prescription</button>
+          <button
+            class="secondary-btn"
+            type="button"
+            onclick="goBack()"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+            Back
+          </button>
+
+          <button
+            class="secondary-btn"
+            id="saveDraftBtn"
+            type="button"
+            onclick="savePrescriptionDraft()"
+          >
+            <i class="fa-solid fa-floppy-disk"></i>
+            Save Draft
+          </button>
+
+          <button
+            class="primary-btn"
+            id="finalizeBtn"
+            type="button"
+            onclick="finalizePrescription()"
+          >
+            <i class="fa-solid fa-circle-check"></i>
+            Finalize Prescription
+          </button>
         </div>
+
       </section>
     </div>
 
@@ -1055,7 +1577,7 @@ textarea.control{min-height:112px;}
 </div>
 
 <script>
-const API_BASE_URL="http://localhost:8085";
+const API_BASE_URL = "/api";
 
 const doctorSidebar =
   document.getElementById("doctorSidebar");
@@ -1157,8 +1679,6 @@ document.addEventListener("DOMContentLoaded",async()=>{
     }
   );
 
-  addMedicineRow();
-
   /*
    * Load the doctor profile first because the availability API
    * needs the logged-in doctor's professional doctor ID.
@@ -1254,7 +1774,7 @@ async function loadDoctorProfile(){
 
   try{
     const result=await api(
-      "/api/doctors/my-profile"
+      "/doctors/my-profile"
     );
 
     const doctor=
@@ -1381,7 +1901,7 @@ async function loadDoctorConsultationModes(){
   try{
     const result=
       await api(
-        `/api/doctor-availability/doctor/${encodeURIComponent(
+        `/doctor-availability/doctor/${encodeURIComponent(
           doctorId
         )}`
       );
@@ -1617,17 +2137,42 @@ function applyDoctorConsultationMode(
 
 async function loadProducts(){
   try{
-    const r=await fetch(API_BASE_URL+"/api/products/getAll");
+    const r=await fetch(
+      API_BASE_URL+"/products/getAll",
+      {
+        method:"GET",
+        headers:{
+          "Accept":"application/json"
+        }
+      }
+    );
+
     const j=await r.json();
-    products=Array.isArray(j.data)?j.data:[];
-    refreshProductOptions();
-  }catch(e){products=[]}
+
+    products=Array.isArray(j.data)
+      ? j.data
+      : [];
+
+    populateMedicineManufacturerFilter();
+    applyMedicineFilters();
+
+  }catch(e){
+    console.error(
+      "Unable to load medicines:",
+      e
+    );
+
+    products=[];
+
+    populateMedicineManufacturerFilter();
+    applyMedicineFilters();
+  }
 }
 async function loadWalkInPatient(){
   try{
     const result=
       await api(
-        "/api/walk-in-patients/doctor/my-patients"
+        "/walk-in-patients/doctor/my-patients"
       );
 
     const records=
@@ -1680,7 +2225,7 @@ async function loadWalkInPatient(){
       try{
         const prescriptionResult=
           await api(
-            `/api/prescriptions/walk-in/${encodeURIComponent(
+            `/prescriptions/walk-in/${encodeURIComponent(
               walkInPatientId
             )}`
           );
@@ -1845,7 +2390,7 @@ async function loadAppointment(){
      * belong to the authenticated doctor, so it is also safer.
      */
     const r = await api(
-      "/api/appointments/doctor/my-appointments"
+      "/appointments/doctor/my-appointments"
     );
 
     const records = extractAppointmentArray(r);
@@ -1921,75 +2466,809 @@ function renderAppointment(){
   symptoms.value=appointment.symptoms||"";
   history.value=appointment.pastMedicalHistory||"";
 }
-function addMedicineRow(){
-  const tr=document.createElement("tr");
-  tr.innerHTML=`
-    <td><select class="control product-select"><option value="">Custom medicine</option>${productOptions()}</select><input class="control custom-name" style="margin-top:6px" placeholder="Medicine name"></td>
-    <td><input class="control dosage" placeholder="e.g. 10 ml"></td>
-    <td><input class="control frequency" placeholder="e.g. Twice daily"></td>
-    <td><input class="control days" type="number" min="1" value="7"></td>
-    <td><input class="control qty" type="number" min="1" value="1"></td>
-    <td><input class="control instructions" placeholder="After food"></td>
-    <td><button class="icon-btn remove-btn" onclick="this.closest('tr').remove()"><i class="fa-solid fa-trash"></i></button></td>`;
-  tr.querySelector(".product-select").addEventListener("change",e=>{
-    const p=products.find(x=>String(x.id)===e.target.value);
-    if(p)tr.querySelector(".custom-name").value=p.productName||p.name||"";
-  });
-  medicineBody.appendChild(tr);
+function normalizeFilterValue(value){
+  return String(value??"")
+    .trim()
+    .toLowerCase();
 }
+
+function getProductName(product){
+  return String(
+    product?.productName ||
+    product?.name ||
+    "Product"
+  ).trim();
+}
+
+function getProductType(product){
+  return String(
+    product?.type ||
+    ""
+  ).trim();
+}
+
+function getProductSection(product){
+  return String(
+    product?.section ||
+    ""
+  ).trim();
+}
+
+function getProductManufacturer(product){
+  return String(
+    product?.manufacturerName ||
+    product?.manufacturer?.name ||
+    product?.manufacturer ||
+    ""
+  ).trim();
+}
+
+function getProductDosageForm(product){
+  return String(
+    product?.dosageForm ||
+    ""
+  ).trim();
+}
+
+function populateMedicineManufacturerFilter(){
+  const select=
+    document.getElementById(
+      "medicineManufacturerFilter"
+    );
+
+  if(!select){
+    return;
+  }
+
+  const currentValue=
+    select.value;
+
+  const manufacturers=[
+    ...new Set(
+      products
+        .map(getProductManufacturer)
+        .filter(Boolean)
+    )
+  ].sort(
+    (a,b)=>
+      a.localeCompare(b)
+  );
+
+  select.innerHTML=
+    '<option value="">All Manufacturers</option>';
+
+  manufacturers.forEach(name=>{
+    const option=
+      document.createElement(
+        "option"
+      );
+
+    option.value=name;
+    option.textContent=name;
+
+    select.appendChild(option);
+  });
+
+  if(
+    manufacturers.includes(
+      currentValue
+    )
+  ){
+    select.value=currentValue;
+  }
+}
+
+function getFilteredProducts(){
+  const search=
+    normalizeFilterValue(
+      document.getElementById(
+        "medicineSearch"
+      )?.value
+    );
+
+  const typeFilter=
+    normalizeFilterValue(
+      document.getElementById(
+        "medicineTypeFilter"
+      )?.value
+    );
+
+  const sectionFilter=
+    normalizeFilterValue(
+      document.getElementById(
+        "medicineSectionFilter"
+      )?.value
+    );
+
+  const manufacturerFilter=
+    normalizeFilterValue(
+      document.getElementById(
+        "medicineManufacturerFilter"
+      )?.value
+    );
+
+  const dosageFormFilter=
+    normalizeFilterValue(
+      document.getElementById(
+        "medicineDosageFormFilter"
+      )?.value
+    );
+
+  return products
+    .filter(product=>{
+      const name=
+        normalizeFilterValue(
+          getProductName(product)
+        );
+
+      const code=
+        normalizeFilterValue(
+          product?.productCode
+        );
+
+      const type=
+        normalizeFilterValue(
+          getProductType(product)
+        );
+
+      const section=
+        normalizeFilterValue(
+          getProductSection(product)
+        );
+
+      const manufacturer=
+        normalizeFilterValue(
+          getProductManufacturer(product)
+        );
+
+      const dosageForm=
+        normalizeFilterValue(
+          getProductDosageForm(product)
+        );
+
+      const matchesSearch=
+        !search ||
+        name.includes(search) ||
+        code.includes(search);
+
+      const matchesType=
+        !typeFilter ||
+        type===typeFilter;
+
+      const matchesSection=
+        !sectionFilter ||
+        section===sectionFilter;
+
+      const matchesManufacturer=
+        !manufacturerFilter ||
+        manufacturer===manufacturerFilter;
+
+      const matchesDosageForm=
+        !dosageFormFilter ||
+        dosageForm===dosageFormFilter;
+
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesSection &&
+        matchesManufacturer &&
+        matchesDosageForm
+      );
+    })
+    .sort(
+      (a,b)=>
+        getProductName(a)
+          .localeCompare(
+            getProductName(b)
+          )
+    );
+}
+
+function getSelectedProductIds(){
+  return new Set(
+    [...medicineBody.querySelectorAll(
+      'tr[data-product-id]'
+    )]
+      .map(row=>
+        String(
+          row.dataset.productId||
+          ""
+        )
+      )
+      .filter(Boolean)
+  );
+}
+
+function applyMedicineFilters(){
+  const results=
+    document.getElementById(
+      "medicineResults"
+    );
+
+  const count=
+    document.getElementById(
+      "medicineResultCount"
+    );
+
+  if(!results || !count){
+    return;
+  }
+
+  const filtered=
+    getFilteredProducts();
+
+  const selectedIds=
+    getSelectedProductIds();
+
+  count.textContent=
+    `${filtered.length} medicine${
+      filtered.length===1
+        ? ""
+        : "s"
+    }`;
+
+  if(!filtered.length){
+    results.innerHTML=`
+      <div class="medicine-empty">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        No medicines match the selected filters.
+      </div>
+    `;
+    return;
+  }
+
+  results.innerHTML=
+    filtered.map(product=>{
+      const id=
+        String(
+          product.id??
+          ""
+        );
+
+      const name=
+        getProductName(product);
+
+      const type=
+        getProductType(product);
+
+      const section=
+        getProductSection(product);
+
+      const manufacturer=
+        getProductManufacturer(product);
+
+      const dosageForm=
+        getProductDosageForm(product);
+
+      const checked=
+        selectedIds.has(id);
+
+      return `
+        <label
+          class="medicine-option ${
+            checked
+              ? "selected"
+              : ""
+          }"
+        >
+          <input
+            type="checkbox"
+            value="${escapeHtml(id)}"
+            ${checked ? "checked" : ""}
+            onchange="toggleProductMedicine(
+              this,
+              '${escapeJsForAttribute(id)}'
+            )"
+          >
+
+          <span class="medicine-option-content">
+
+            <span class="medicine-option-name">
+              ${escapeHtml(name)}
+            </span>
+
+            <span class="medicine-option-meta">
+
+              ${
+                type
+                  ? `<span class="medicine-meta-pill">${escapeHtml(type)}</span>`
+                  : ""
+              }
+
+              ${
+                section
+                  ? `<span class="medicine-meta-pill">${escapeHtml(section)}</span>`
+                  : ""
+              }
+
+              ${
+                manufacturer
+                  ? `<span class="medicine-meta-pill">${escapeHtml(manufacturer)}</span>`
+                  : ""
+              }
+
+              ${
+                dosageForm
+                  ? `<span class="medicine-meta-pill">${escapeHtml(dosageForm)}</span>`
+                  : ""
+              }
+
+            </span>
+
+          </span>
+        </label>
+      `;
+    }).join("");
+}
+
+function resetMedicineFilters(){
+  const ids=[
+    "medicineSearch",
+    "medicineTypeFilter",
+    "medicineSectionFilter",
+    "medicineManufacturerFilter",
+    "medicineDosageFormFilter"
+  ];
+
+  ids.forEach(id=>{
+    const element=
+      document.getElementById(id);
+
+    if(element){
+      element.value="";
+    }
+  });
+
+  applyMedicineFilters();
+}
+
+function toggleProductMedicine(
+  checkbox,
+  productId
+){
+  const product=
+    products.find(
+      item=>
+        String(item.id)===
+        String(productId)
+    );
+
+  if(!product){
+    checkbox.checked=false;
+
+    showAlert(
+      "Medicine information could not be found.",
+      "error"
+    );
+
+    return;
+  }
+
+  if(checkbox.checked){
+    addMedicineRow(
+      product
+    );
+  }else{
+    const row=
+      medicineBody.querySelector(
+        `tr[data-product-id="${CSS.escape(
+          String(productId)
+        )}"]`
+      );
+
+    if(
+      row &&
+      row.dataset.saved==="true"
+    ){
+      checkbox.checked=true;
+
+      showAlert(
+        "This medicine is already saved in the prescription draft. Keep it selected.",
+        "info"
+      );
+
+      return;
+    }
+
+    if(row){
+      row.remove();
+    }
+  }
+
+  applyMedicineFilters();
+}
+
+function addMedicineRow(
+  product=null,
+  values={},
+  saved=false
+){
+  const productId=
+    product?.id ??
+    values.productId ??
+    null;
+
+  if(productId!==null){
+    const existing=
+      medicineBody.querySelector(
+        `tr[data-product-id="${CSS.escape(
+          String(productId)
+        )}"]`
+      );
+
+    if(existing){
+      return existing;
+    }
+  }
+
+  const medicineName=
+    values.medicineName ||
+    getProductName(product) ||
+    "";
+
+  const tr=
+    document.createElement(
+      "tr"
+    );
+
+  if(productId!==null){
+    tr.dataset.productId=
+      String(productId);
+  }
+
+  tr.dataset.saved=
+    saved
+      ? "true"
+      : "false";
+
+  tr.innerHTML=`
+    <td>
+
+      <input
+        type="hidden"
+        class="product-id"
+        value="${
+          productId!==null
+            ? escapeHtml(productId)
+            : ""
+        }"
+      >
+
+      ${
+        productId!==null
+          ? `
+            <div class="medicine-name-cell">
+
+              <span class="medicine-name-icon">
+                <i class="fa-solid fa-capsules"></i>
+              </span>
+
+              <span class="medicine-name-text">
+                <strong>
+                  ${escapeHtml(medicineName)}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    getProductDosageForm(product) ||
+                    values.dosageForm ||
+                    "Medicine"
+                  )}
+                </small>
+              </span>
+
+              <input
+                type="hidden"
+                class="custom-name"
+                value="${escapeHtml(medicineName)}"
+              >
+
+            </div>
+          `
+          : `
+            <input
+              class="control custom-name custom-medicine-input"
+              placeholder="Medicine name"
+              value="${escapeHtml(medicineName)}"
+            >
+          `
+      }
+
+    </td>
+
+    <td>
+      <input
+        class="control dosage"
+        placeholder="e.g. 10 ml"
+        value="${escapeHtml(values.dosage||product?.dosage||"")}"
+      >
+    </td>
+
+    <td>
+      <input
+        class="control frequency"
+        placeholder="e.g. Twice daily"
+        value="${escapeHtml(values.frequency||"")}"
+      >
+    </td>
+
+    <td>
+      <input
+        class="control days"
+        type="number"
+        min="1"
+        value="${escapeHtml(
+          Number(values.durationDays||7)
+        )}"
+      >
+    </td>
+
+    <td>
+      <input
+        class="control qty"
+        type="number"
+        min="1"
+        value="${escapeHtml(
+          Number(values.quantity||1)
+        )}"
+      >
+    </td>
+
+    <td>
+      <input
+        class="control instructions"
+        placeholder="After food"
+        value="${escapeHtml(values.instructions||"")}"
+      >
+    </td>
+
+    <td>
+      <button
+        type="button"
+        class="icon-btn remove-btn"
+        onclick="removeMedicineRow(this)"
+        title="Remove medicine"
+      >
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </td>
+  `;
+
+  medicineBody.appendChild(tr);
+
+  return tr;
+}
+
+function addCustomMedicineRow(){
+  addMedicineRow(
+    null,
+    {
+      medicineName:"",
+      dosage:"",
+      frequency:"",
+      durationDays:7,
+      quantity:1,
+      instructions:""
+    },
+    false
+  );
+}
+
+function removeMedicineRow(button){
+  const row=
+    button.closest("tr");
+
+  if(!row){
+    return;
+  }
+
+  if(row.dataset.saved==="true"){
+    showAlert(
+      "This medicine is already saved in the draft and cannot be removed from this screen.",
+      "info"
+    );
+    return;
+  }
+
+  row.remove();
+  applyMedicineFilters();
+}
+
 function renderExistingMedicineItems(items){
-  if(!Array.isArray(items)||items.length===0){
+  if(
+    !Array.isArray(items) ||
+    items.length===0
+  ){
+    applyMedicineFilters();
     return;
   }
 
   medicineBody.innerHTML="";
-  savedMedicineKeys=new Set();
+  savedMedicineKeys=
+    new Set();
 
   items.forEach(item=>{
-    addMedicineRow();
-    const tr=medicineBody.lastElementChild;
-    if(!tr)return;
+    const productId=
+      item.productId ??
+      item.product?.id ??
+      null;
 
-    const productId=item.productId??item.product?.id??null;
-    const medicineName=item.medicineName||item.productName||item.product?.name||"";
+    const product=
+      productId!==null
+        ? products.find(
+            p=>
+              String(p.id)===
+              String(productId)
+          )
+        : null;
 
-    refreshProductOptions();
-    tr.querySelector(".product-select").value=productId!=null?String(productId):"";
-    tr.querySelector(".custom-name").value=medicineName;
-    tr.querySelector(".dosage").value=item.dosage||"";
-    tr.querySelector(".frequency").value=item.frequency||"";
-    tr.querySelector(".days").value=Number(item.durationDays||1);
-    tr.querySelector(".qty").value=Number(item.quantity||1);
-    tr.querySelector(".instructions").value=item.instructions||"";
+    const medicineName=
+      item.medicineName ||
+      item.productName ||
+      item.product?.name ||
+      getProductName(product) ||
+      "";
 
-    savedMedicineKeys.add(medicineKey({
-      productId:productId!=null?Number(productId):null,
-      medicineName,
-      dosage:item.dosage||"",
-      frequency:item.frequency??null,
-      durationDays:Number(item.durationDays||0),
-      quantity:Number(item.quantity||0),
-      instructions:item.instructions??null
-    }));
+    addMedicineRow(
+      product,
+      {
+        productId,
+        medicineName,
+        dosageForm:
+          product?.dosageForm ||
+          "",
+        dosage:
+          item.dosage ||
+          "",
+        frequency:
+          item.frequency ||
+          "",
+        durationDays:
+          Number(
+            item.durationDays ||
+            1
+          ),
+        quantity:
+          Number(
+            item.quantity ||
+            1
+          ),
+        instructions:
+          item.instructions ||
+          ""
+      },
+      true
+    );
+
+    savedMedicineKeys.add(
+      medicineKey({
+        productId:
+          productId!==null
+            ? Number(productId)
+            : null,
+        medicineName,
+        dosage:
+          item.dosage ||
+          "",
+        frequency:
+          item.frequency ??
+          null,
+        durationDays:
+          Number(
+            item.durationDays ||
+            0
+          ),
+        quantity:
+          Number(
+            item.quantity ||
+            0
+          ),
+        instructions:
+          item.instructions ??
+          null
+      })
+    );
   });
+
+  applyMedicineFilters();
 }
 
-function productOptions(){return products.map(p=>`<option value="${p.id}">${escapeHtml(p.productName||p.name||"Product")}</option>`).join("")}
-function refreshProductOptions(){document.querySelectorAll(".product-select").forEach(s=>{const v=s.value;s.innerHTML='<option value="">Custom medicine</option>'+productOptions();s.value=v})}
-function collectMedicines(){
-  return [...medicineBody.querySelectorAll("tr")].map(tr=>{
-    const productId=tr.querySelector(".product-select").value;
-    return {
-      productId:productId?Number(productId):null,
-      medicineName:tr.querySelector(".custom-name").value.trim(),
-      dosage:tr.querySelector(".dosage").value.trim(),
-      frequency:tr.querySelector(".frequency").value.trim()||null,
-      durationDays:Number(tr.querySelector(".days").value||0),
-      quantity:Number(tr.querySelector(".qty").value||0),
-      instructions:tr.querySelector(".instructions").value.trim()||null
-    }
-  }).filter(m=>m.medicineName||m.productId);
+/*
+ * Kept for compatibility with older calls in this page.
+ * The prescription now uses the searchable checkbox catalog instead
+ * of a product <select> inside every medicine row.
+ */
+function productOptions(){
+  return products
+    .map(
+      p=>
+        `<option value="${escapeHtml(
+          p.id
+        )}">${escapeHtml(
+          getProductName(p)
+        )}</option>`
+    )
+    .join("");
 }
+
+function refreshProductOptions(){
+  populateMedicineManufacturerFilter();
+  applyMedicineFilters();
+}
+
+function collectMedicines(){
+  return [
+    ...medicineBody.querySelectorAll(
+      "tr"
+    )
+  ]
+    .map(tr=>{
+      const productIdValue=
+        tr.querySelector(
+          ".product-id"
+        )?.value ||
+        "";
+
+      return {
+        productId:
+          productIdValue
+            ? Number(productIdValue)
+            : null,
+
+        medicineName:
+          tr.querySelector(
+            ".custom-name"
+          )?.value.trim() ||
+          "",
+
+        dosage:
+          tr.querySelector(
+            ".dosage"
+          )?.value.trim() ||
+          "",
+
+        frequency:
+          tr.querySelector(
+            ".frequency"
+          )?.value.trim() ||
+          null,
+
+        durationDays:
+          Number(
+            tr.querySelector(
+              ".days"
+            )?.value ||
+            0
+          ),
+
+        quantity:
+          Number(
+            tr.querySelector(
+              ".qty"
+            )?.value ||
+            0
+          ),
+
+        instructions:
+          tr.querySelector(
+            ".instructions"
+          )?.value.trim() ||
+          null
+      };
+    })
+    .filter(
+      medicine=>
+        medicine.medicineName ||
+        medicine.productId
+    );
+}
+
+function escapeJsForAttribute(value){
+  return String(value??"")
+    .replaceAll("\\","\\\\")
+    .replaceAll("'","\\'");
+}
+
 async function ensureDraft(){
   const diagnosisValue=diagnosis.value.trim();
   const adviceValue=advice.value.trim();
@@ -2056,8 +3335,8 @@ async function ensureDraft(){
 
   const createEndpoint=
     prescriptionMode==="WALK_IN"
-      ? "/api/prescriptions/walk-in/create"
-      : "/api/prescriptions/create";
+      ? "/prescriptions/walk-in/create"
+      : "/prescriptions/create";
 
   console.log(
     "Creating prescription using endpoint:",
@@ -2098,7 +3377,7 @@ async function updatePrescriptionDetails(){
   };
 
   const r=await api(
-    `/api/prescriptions/${prescriptionId}`,
+    `/prescriptions/${prescriptionId}`,
     {
       method:"PUT",
       body:JSON.stringify(requestBody)
@@ -2162,7 +3441,7 @@ async function saveMedicineItems(
     }
 
     const r=await api(
-      `/api/prescriptions/${prescriptionIdValue}/items`,
+      `/prescriptions/${prescriptionIdValue}/items`,
       {
         method:"POST",
         body:JSON.stringify(medicine)
@@ -2295,8 +3574,8 @@ async function finalizePrescription(){
 
     const finalizeEndpoint=
       prescriptionMode==="WALK_IN"
-        ? `/api/prescriptions/walk-in/${encodeURIComponent(id)}/finalize`
-        : `/api/prescriptions/${encodeURIComponent(id)}/finalize`;
+        ? `/prescriptions/walk-in/${encodeURIComponent(id)}/finalize`
+        : `/prescriptions/${encodeURIComponent(id)}/finalize`;
 
     console.log(
       "Finalizing prescription using endpoint:",
@@ -2414,6 +3693,14 @@ function setPrescriptionReadOnly(){
   if(addButton){
     addButton.disabled=true;
   }
+
+  document
+    .querySelectorAll(
+      "#medicineSearch, #medicineTypeFilter, #medicineSectionFilter, #medicineManufacturerFilter, #medicineDosageFormFilter, #medicineResults input[type='checkbox'], .filter-reset-btn"
+    )
+    .forEach(element=>{
+      element.disabled=true;
+    });
 }
 function showAlert(msg,type="info"){alertBox.textContent=msg;alertBox.className=`alert show ${type}`;scrollTo({top:0,behavior:"smooth"})}
 function format(v){return v?String(v).replaceAll("_"," ").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):"-"}

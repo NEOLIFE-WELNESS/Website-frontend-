@@ -1688,8 +1688,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let originalProfessionalData = {};
         let isProfileCompleted = false;
@@ -1814,7 +1813,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    "/api/medical-staff/me",
+                    "/medical-staff/me",
                     {
                         method: "GET",
                         headers:
@@ -2253,10 +2252,10 @@
 
                 const endpoint =
                     updating
-                        ? `/api/medical-staff/update/${encodeURIComponent(
+                        ? `/medical-staff/update/${encodeURIComponent(
                             currentMedicalStaffId
                           )}`
-                        : "/api/medical-staff/complete-profile";
+                        : "/medical-staff/complete-profile";
 
                 const method =
                     updating

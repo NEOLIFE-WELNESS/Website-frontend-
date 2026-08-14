@@ -2521,7 +2521,7 @@
 
     <script>
         const API_BASE_URL =
-            "http://localhost:8085";
+    "/api";
 
         const therapyBookingData = {
             therapyId: null,
@@ -3093,7 +3093,7 @@
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/api/doctor-availability/doctor/${therapyBookingData.doctorId}/date/${date}`
+                    `${API_BASE_URL}/doctor-availability/doctor/${therapyBookingData.doctorId}/date/${date}`
                 );
 
                 if (!response.ok) {
@@ -3598,7 +3598,7 @@
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/api/therapy-bookings/book`,
+                    `${API_BASE_URL}/therapy-bookings/book`,
                     {
                         method: "POST",
 
@@ -3772,7 +3772,7 @@
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/api/users/getProfile`,
+                    `${API_BASE_URL}/users/getProfile`,
                     {
                         headers: {
                             "Authorization":
@@ -3867,7 +3867,7 @@
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/api/users/getProfile`,
+                    `${API_BASE_URL}/users/getProfile`,
                     {
                         headers: {
                             "Authorization":

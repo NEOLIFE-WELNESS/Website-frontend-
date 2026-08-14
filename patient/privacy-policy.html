@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy | Neolife Wellness Center</title>
+<meta name="description" content="Privacy Policy of Neolife Wellness Center (NEOLIFEAYUSH).">
+<link rel="icon" href="../assets/main_logo.jpeg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+:root{--green:#173f2b;--green2:#2d6a46;--gold:#c99b18;--gold2:#9d7405;--cream:#f7f7f1;--white:#fff;--text:#26372e;--muted:#6f7972;--border:#e2e8e3;--shadow:0 12px 34px rgba(23,63,43,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{padding-top:80px;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:var(--cream);line-height:1.7}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+.site-header{height:80px;padding:0 30px;position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;gap:20px;background:rgba(255,255,255,.97);border-bottom:1px solid rgba(201,155,24,.2);box-shadow:0 5px 18px rgba(23,63,43,.07);backdrop-filter:blur(12px)}
+.logo-container{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-img{width:50px;height:50px;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}
+.logo-details{display:flex;flex-direction:column;line-height:1.2}
+.logo-text{color:var(--green);font-size:16px;font-weight:800;white-space:nowrap}
+.logo-subtitle{margin-top:4px;color:var(--gold2);font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
+.desktop-nav{margin-left:auto;display:flex;align-items:center;gap:20px}
+.desktop-nav a{color:var(--green);font-size:12px;font-weight:800;white-space:nowrap}
+.desktop-nav a:hover{color:var(--gold2)}
+.profile-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:50%;color:#fff;background:linear-gradient(145deg,var(--gold),var(--gold2))}
+.menu-button{display:none;width:40px;height:40px;border:0;border-radius:10px;color:#fff;background:var(--green)}
+.menu-overlay{display:none;position:fixed;inset:0;z-index:1998;background:rgba(10,30,20,.58)}
+.menu-overlay.show{display:block}
+.mobile-menu{width:min(310px,86vw);height:100vh;padding:22px;position:fixed;top:0;right:0;z-index:1999;display:flex;flex-direction:column;gap:7px;overflow:auto;background:linear-gradient(180deg,#143b28,#245a3b);transform:translateX(105%);transition:.3s}
+.mobile-menu.open{transform:translateX(0)}
+.mobile-menu-header{margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.mobile-menu-close{width:36px;height:36px;border:0;border-radius:9px;color:var(--green);background:#fff}
+.mobile-menu a{padding:11px 12px;border-radius:9px;color:#fff;font-size:13px;font-weight:700}
+.mobile-menu a:hover{color:var(--green);background:#fff}
+.policy-hero{padding:70px 24px 64px;position:relative;overflow:hidden;color:#fff;background:linear-gradient(120deg,#143c28,#2d6a46)}
+.policy-hero:after{content:"";width:330px;height:330px;position:absolute;right:-80px;top:-130px;border-radius:50%;background:rgba(201,155,24,.13)}
+.hero-inner{width:min(1100px,100%);margin:auto;position:relative;z-index:1}
+.hero-kicker{margin-bottom:12px;display:inline-flex;align-items:center;gap:8px;color:#f1d578;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
+.policy-hero h1{margin-bottom:12px;font-family:Georgia,serif;font-size:46px;line-height:1.1}
+.policy-hero p{max-width:780px;color:rgba(255,255,255,.82);font-size:14px}
+.policy-dates{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+.policy-date{padding:8px 12px;border:1px solid rgba(255,255,255,.18);border-radius:30px;background:rgba(255,255,255,.08);font-size:11px}
+.page-wrap{width:min(1180px,92%);margin:36px auto 70px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:26px;align-items:start}
+.toc{padding:18px;position:sticky;top:100px;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:var(--shadow)}
+.toc h2{margin-bottom:13px;color:var(--green);font-size:14px}
+.toc-links{max-height:calc(100vh - 160px);overflow:auto}
+.toc a{padding:8px 7px;display:flex;align-items:flex-start;gap:8px;border-radius:8px;color:#59665e;font-size:10px;line-height:1.35}
+.toc a:hover{color:var(--green);background:#f3f7f3}
+.toc a span{width:22px;min-width:22px;color:var(--gold2);font-weight:800}
+.policy-content{min-width:0}
+.intro-card{margin-bottom:18px;padding:24px 26px;border:1px solid #eadfbf;border-radius:18px;background:#fffdf7;box-shadow:var(--shadow)}
+.intro-card p{font-size:13px}
+.policy-section{margin-bottom:16px;padding:25px 28px;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:var(--shadow)}
+.policy-section h2{margin-bottom:13px;color:var(--green);font-family:Georgia,serif;font-size:20px;line-height:1.35}
+.policy-section h3{margin:18px 0 7px;color:var(--green2);font-size:13px}
+.policy-section p{margin:9px 0;color:#4d5b52;font-size:12.5px}
+.policy-section ul{padding-left:20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 28px}
+.policy-section li{padding-left:2px;color:#4d5b52;font-size:12px}
+.policy-section li::marker{color:var(--gold)}
+.entity-box,.contact-box{margin-top:13px;padding:17px 18px;border-left:4px solid var(--gold);border-radius:10px;background:#f7faf7;color:#425249;font-size:12.5px}
+.contact-box a{color:var(--green2);font-weight:800}
+.site-footer{padding:28px 20px;text-align:center;color:rgba(255,255,255,.8);background:#123824;font-size:11px}
+.footer-links{margin-bottom:8px;display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.footer-links a{color:#f0d575;font-weight:700}
+.back-top{width:42px;height:42px;position:fixed;right:20px;bottom:22px;z-index:500;display:grid;place-items:center;border:0;border-radius:50%;color:#fff;background:var(--gold2);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+@media(max-width:1050px){.desktop-nav{display:none}.menu-button{display:grid;place-items:center}.site-header{padding:0 18px}.profile-icon{margin-left:auto}}
+@media(max-width:850px){.page-wrap{grid-template-columns:1fr}.toc{position:static}.toc-links{max-height:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){body{padding-top:70px}.site-header{height:70px;padding:0 12px;gap:8px}.logo-img{width:43px;height:43px}.logo-text{max-width:180px;overflow:hidden;text-overflow:ellipsis;font-size:13px}.logo-subtitle{font-size:8px}.policy-hero{padding:48px 18px 44px}.policy-hero h1{font-size:35px}.page-wrap{width:94%;margin-top:22px}.toc-links{grid-template-columns:1fr}.policy-section,.intro-card{padding:20px 18px}.policy-section ul{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a href="homepage.html" class="logo-container">
+    <img class="logo-img" src="../assets/main_logo.jpeg" alt="Neolife Wellness Center">
+    <div class="logo-details"><span class="logo-text">Neolife Wellness Center</span><span class="logo-subtitle">Ayush Digital Care</span></div>
+  </a>
+  <nav class="desktop-nav">
+    <a href="homepage.html">Home</a><a href="about.html">About</a><a href="services.html">Therapies</a>
+    <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a><a href="products.html">Products</a>
+    <a href="consultation.html">Consultation</a><a href="blog.html">Blogs</a><a href="contact.html">Contact</a>
+  </nav>
+  <a href="profile.html" class="profile-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+  <button class="menu-button" onclick="openMenu()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+</header>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<nav class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-header"><strong>Neolife Menu</strong><button class="mobile-menu-close" onclick="closeMenu()"><i class="fa-solid fa-xmark"></i></button></div>
+  <a href="homepage.html">Home</a><a href="about.html">About</a><a href="services.html">Therapies</a>
+  <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a><a href="products.html">Products</a>
+  <a href="consultation.html">Consultation</a><a href="blog.html">Blogs</a><a href="contact.html">Contact</a>
+  <a href="privacy-policy.html">Privacy Policy</a>
+</nav>
+
+<section class="policy-hero">
+  <div class="hero-inner">
+    <span class="hero-kicker"><i class="fa-solid fa-shield-halved"></i> NEOLIFEAYUSH Legal</span>
+    <h1>Privacy Policy</h1>
+    <p>This Privacy Policy explains how Neolife Wellness Center, operating under the brand name NEOLIFEAYUSH, collects, uses, stores, protects, and discloses personal information when users access our website, mobile applications, consultation systems, e-commerce services, wellness portals, or related digital services.</p>
+    <div class="policy-dates"><span class="policy-date"><strong>Effective Date:</strong> 16/05/2026</span><span class="policy-date"><strong>Last Updated:</strong> 16/05/2026</span></div>
+  </div>
+</section>
+
+<div class="page-wrap">
+  <aside class="toc">
+    <h2>Privacy Policy Contents</h2>
+    <div class="toc-links"><a href="#section-1"><span>01</span>Introduction</a>
+<a href="#section-2"><span>02</span>Definitions</a>
+<a href="#section-3"><span>03</span>Entity Information</a>
+<a href="#section-4"><span>04</span>Information We Collect</a>
+<a href="#section-5"><span>05</span>Purpose of Collection and Processing</a>
+<a href="#section-6"><span>06</span>Video Consultation Policy</a>
+<a href="#section-7"><span>07</span>Ayurvedic Product Sales and E-Commerce Policy</a>
+<a href="#section-8"><span>08</span>Legal Basis for Processing</a>
+<a href="#section-9"><span>09</span>Data Sharing and Disclosure</a>
+<a href="#section-10"><span>10</span>Cross-Border Data Transfer</a>
+<a href="#section-11"><span>11</span>Data Retention Policy</a>
+<a href="#section-12"><span>12</span>User Rights</a>
+<a href="#section-13"><span>13</span>Security Practices</a>
+<a href="#section-14"><span>14</span>User Responsibilities</a>
+<a href="#section-15"><span>15</span>Third-Party Links and Services</a>
+<a href="#section-16"><span>16</span>Children’s Privacy</a>
+<a href="#section-17"><span>17</span>Limitation of Liability</a>
+<a href="#section-18"><span>18</span>Grievance Officer</a>
+<a href="#section-19"><span>19</span>Policy Updates</a>
+<a href="#section-20"><span>20</span>Consent and Acceptance</a>
+<a href="#section-21"><span>21</span>Contact Information</a></div>
+  </aside>
+  <main class="policy-content">
+    <div class="intro-card"><p>This Privacy Policy explains how Neolife Wellness Center, operating under the brand name NEOLIFEAYUSH, collects, uses, stores, protects, and discloses personal information when users access our website, mobile applications, consultation systems, e-commerce services, wellness portals, or related digital services.</p></div>
+    <section class="policy-section" id="section-1">
+<h2>1. Introduction</h2>
+<p>Neolife Wellness Center provides Ayurvedic consultation booking, doctor appointment booking, online and offline wellness consultation, video consultation, Ayurvedic therapy booking, sale of Ayurvedic medicines, herbal supplements, wellness products, wellness education, online payments, lifestyle guidance, and related wellness services.</p>
+<p>By accessing or using our platform, users consent to the collection, processing, storage, disclosure, and protection of their information in accordance with this Privacy Policy.</p>
+</section>
+<section class="policy-section" id="section-2">
+<h2>2. Definitions</h2>
+<p>User: Any visitor, customer, patient, buyer, subscriber, practitioner, consultant, or entity using the platform. Personal Information: Information that can identify a person directly or indirectly. Sensitive Personal Data: Health records, prescriptions, consultation records, medical documents, financial information, and similar sensitive data. Platform: Website, mobile app, consultation system, e-commerce system, communication tools, and related digital services. Services: Products, consultations, appointments, video consultations, wellness services, and e-commerce facilities.</p>
+</section>
+<section class="policy-section" id="section-3">
+<h2>3. Entity Information</h2>
+<p>The platform is operated by:</p>
+<div class="entity-box">NEOLIFE WELLNESS CENTER<br>A Proprietorship Firm<br>UDYAM Registration Number: UDYAM-KR-26-0031871<br>Registered Office: Door No: 4-1-38, Dr. Muraleedhara N G-Building, Udupi-Town, Amalapady Block, Behind Lions Bhavan Road, Udupi-City, Udupi District, Karnataka – 576103.</div>
+</section>
+<section class="policy-section" id="section-4">
+<h2>4. Information We Collect</h2>
+<h3>4.1 Personal Identification Information</h3>
+<ul><li>Full name</li><li>Date of birth, age, and gender</li><li>Residential and shipping address</li><li>Mobile number and email address</li><li>Emergency contact details</li><li>Username and password credentials</li><li>Identity verification details, where required</li><li>Profile photographs or uploaded images</li></ul>
+<h3>4.2 Health and Wellness Information</h3>
+<ul><li>Medical history</li><li>Lifestyle information</li><li>Existing diseases or disorders</li><li>Allergies and sensitivities</li><li>Consultation records</li><li>Prescriptions and treatment suggestions</li><li>Laboratory reports and diagnostic records</li><li>Symptoms and health declarations</li><li>Uploaded medical documents</li><li>Consultation notes and communication records</li></ul>
+<h3>4.3 Appointment and Consultation Information</h3>
+<ul><li>Appointment preferences</li><li>Consultation schedules</li><li>Doctor selection details</li><li>Video consultation records</li><li>Consultation duration</li><li>Follow-up history</li><li>Consultation feedback and ratings</li></ul>
+<h3>4.4 E-Commerce and Transaction Information</h3>
+<ul><li>Product purchase history</li><li>Order details</li><li>Delivery address</li><li>Shipping preferences</li><li>Billing information</li><li>GST details, where applicable</li><li>Transaction references</li><li>Invoice records</li><li>Refund and cancellation requests</li></ul>
+<h3>4.5 Technical and Device Information</h3>
+<ul><li>IP address</li><li>Browser type and version</li><li>Device identifiers</li><li>Operating system</li><li>Internet service provider details</li><li>Website usage behavior</li><li>Access dates and times</li><li>Device logs and crash reports</li></ul>
+<h3>4.6 Cookies and Tracking</h3>
+<p>We may use cookies, tracking pixels, analytics tools, and similar technologies to improve user experience, remember preferences, maintain login sessions, analyze traffic, monitor website performance, and deliver personalized content.</p>
+</section>
+<section class="policy-section" id="section-5">
+<h2>5. Purpose of Collection and Processing</h2>
+<ul><li>To provide Ayurvedic consultation services</li><li>To schedule appointments and wellness sessions</li><li>To conduct online video consultations</li><li>To process product purchases and deliveries</li><li>To verify user identity</li><li>To manage user accounts and subscriptions</li><li>To send reminders, updates, invoices, and notifications</li><li>To improve services and website performance</li><li>To prevent fraud, abuse, and unauthorized access</li><li>To comply with legal, taxation, healthcare, and regulatory obligations</li><li>To send marketing and promotional communication, subject to applicable law</li></ul>
+</section>
+<section class="policy-section" id="section-6">
+<h2>6. Video Consultation Policy</h2>
+<p>Video consultation services are intended for wellness guidance and non-emergency consultation purposes. Technical interruptions, delays, or internet disruptions may occur. Consultation advice is based on information voluntarily provided by users.</p>
+<p>Emergency medical conditions should not rely solely on online consultation. Users should seek immediate medical attention where necessary.</p>
+</section>
+<section class="policy-section" id="section-7">
+<h2>7. Ayurvedic Product Sales and E-Commerce Policy</h2>
+<p>The platform may sell Ayurvedic medicines, herbal products, supplements, oils, wellness products, skincare products, nutritional products, and related items. Product effectiveness may vary from person to person.</p>
+<p>Users should read labels, dosage instructions, allergy warnings, and product information carefully before use. The Company shall not be liable for misuse, overconsumption, allergic reactions, self-medication consequences, or improper storage of products.</p>
+</section>
+<section class="policy-section" id="section-8">
+<h2>8. Legal Basis for Processing</h2>
+<ul><li>User consent</li><li>Contractual necessity</li><li>Legitimate business interests</li><li>Legal and regulatory obligations</li><li>Voluntary health consultation requests</li><li>Compliance with healthcare, taxation, and consumer laws</li></ul>
+</section>
+<section class="policy-section" id="section-9">
+<h2>9. Data Sharing and Disclosure</h2>
+<p>We may share information with Ayurvedic doctors, wellness consultants, therapists, payment gateway providers, logistics partners, cloud hosting providers, analytics service providers, legal consultants, auditors, accountants, insurers, government authorities, regulators, courts, and law enforcement agencies where legally required.</p>
+<p>We do not sell personal information to unauthorized third parties for independent commercial exploitation.</p>
+</section>
+<section class="policy-section" id="section-10">
+<h2>10. Cross-Border Data Transfer</h2>
+<p>User data may be processed, stored, or transferred to servers located outside India where cloud service providers or technical vendors operate internationally, subject to applicable laws and reasonable data protection measures.</p>
+</section>
+<section class="policy-section" id="section-11">
+<h2>11. Data Retention Policy</h2>
+<p>We retain information only for as long as necessary for service fulfilment, consultation continuity, legal compliance, accounting, taxation, fraud prevention, dispute resolution, record maintenance, and operational requirements.</p>
+</section>
+<section class="policy-section" id="section-12">
+<h2>12. User Rights</h2>
+<ul><li>Access personal information</li><li>Correct inaccurate information</li><li>Update profile details</li><li>Request data deletion</li><li>Withdraw consent</li><li>Restrict specific processing activities</li><li>Lodge complaints regarding privacy concerns</li></ul>
+</section>
+<section class="policy-section" id="section-13">
+<h2>13. Security Practices</h2>
+<p>We implement reasonable security measures such as encrypted systems, password protection, secure server infrastructure, firewalls, access restrictions, confidentiality obligations, and periodic security reviews. However, no digital platform can guarantee absolute security.</p>
+</section>
+<section class="policy-section" id="section-14">
+<h2>14. User Responsibilities</h2>
+<ul><li>Provide accurate information</li><li>Maintain confidentiality of login credentials</li><li>Use the platform lawfully and responsibly</li><li>Not upload unlawful, false, defamatory, harmful, or infringing content</li><li>Not impersonate another person or entity</li></ul>
+</section>
+<section class="policy-section" id="section-15">
+<h2>15. Third-Party Links and Services</h2>
+<p>Our platform may contain links to third-party websites, payment gateways, pharmacies, communication platforms, or external services. We are not responsible for the privacy practices or operations of external platforms.</p>
+</section>
+<section class="policy-section" id="section-16">
+<h2>16. Children’s Privacy</h2>
+<p>The platform is not intended for persons below 18 years of age without parental or guardian supervision. If unauthorized minor data is identified, reasonable steps may be taken to remove such information.</p>
+</section>
+<section class="policy-section" id="section-17">
+<h2>17. Limitation of Liability</h2>
+<p>To the maximum extent permitted by law, Neolife Wellness Center shall not be liable for cyberattacks, hacking, malware, service interruptions, consultation misunderstandings, product misuse, third-party payment or logistics failures, or indirect and consequential damages.</p>
+</section>
+<section class="policy-section" id="section-18">
+<h2>18. Grievance Officer</h2>
+<p>Users may contact the designated Grievance Officer regarding privacy complaints, disputes, or data-related concerns. Grievances shall be addressed within timelines prescribed under applicable laws.</p>
+</section>
+<section class="policy-section" id="section-19">
+<h2>19. Policy Updates</h2>
+<p>Neolife Wellness Center reserves the right to amend, revise, modify, replace, or update this Privacy Policy at any time. Updated versions shall become effective immediately upon publication on the platform.</p>
+</section>
+<section class="policy-section" id="section-20">
+<h2>20. Consent and Acceptance</h2>
+<p>By accessing, browsing, registering, purchasing products, booking appointments, participating in video consultations, uploading documents, or using services on neolifeayush.com, users confirm that they have read, understood, and agreed to this Privacy Policy.</p>
+</section>
+<section class="policy-section" id="section-21">
+<h2>21. Contact Information</h2>
+<div class="contact-box">NEOLIFE WELLNESS CENTER<br>Door No: 4-1-38, Dr. Muraleedhara N G-Building,<br>Udupi-Town, Amalapady Block,<br>Behind Lions Bhavan Road,<br>Udupi-City, Udupi District,<br>Karnataka – 576103<br>Mobile: <a href="tel:+919481489866">9481489866</a><br>Email: <a href="mailto:neelavar.murali@gmail.com">neelavar.murali@gmail.com</a><br>Website: <a href="https://neolifeayush.com" target="_blank" rel="noopener">neolifeayush.com</a></div>
+</section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="contact.html">Contact</a><a href="homepage.html">Home</a></div>
+  © 2026 Neolife Wellness Center. All Rights Reserved.
+</footer>
+<button class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+<script>
+function openMenu(){document.getElementById('mobileMenu').classList.add('open');document.getElementById('menuOverlay').classList.add('show');document.body.style.overflow='hidden';}
+function closeMenu(){document.getElementById('mobileMenu').classList.remove('open');document.getElementById('menuOverlay').classList.remove('show');document.body.style.overflow='';}
+</script>
+</body>
+</html>

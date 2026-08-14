@@ -1404,13 +1404,12 @@
     }
 
     .footer-container{
-      width:min(1180px,90%);
-      margin:auto;
-      display:grid;
-      grid-template-columns:1.4fr 1fr 1.2fr;
-      gap:35px;
-    }
-
+  width:min(1180px,90%);
+  margin:auto;
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1.2fr;
+  gap:35px;
+}
     .footer h3,
     .footer h4{
       color:white;
@@ -1848,6 +1847,31 @@
     padding:22px 18px;
     min-height:205px;
   }
+}
+@media(max-width:900px){
+
+  .footer-container{
+    grid-template-columns:repeat(2, 1fr);
+    gap:35px 25px;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .footer-container{
+    grid-template-columns:1fr;
+    gap:30px;
+  }
+
+  .footer-box{
+    text-align:left;
+  }
+
+  .social-links{
+    justify-content:flex-start;
+  }
+
 }
 
 </style>
@@ -2586,76 +2610,154 @@
 
   <div class="footer-container">
 
+    <!-- About -->
     <div class="footer-box">
+
       <h3>Neolife Wellness Center</h3>
+
       <p>
         Natural healing, Ayurvedic care and trusted wellness products
         for a healthier life.
       </p>
+
     </div>
 
+
+    <!-- Quick Links -->
     <div class="footer-box">
+
       <h4>Quick Links</h4>
-      <a href="services.html">Therapies</a>
-      <a href="beauty-cosmetics.html">Beauty & Cosmetics</a>
-      <a href="products.html">Products</a>
-      <a href="blog.html">Blogs</a>
-      <a href="consultation.html">Consultation</a>
+
+      <a href="services.html">
+        Therapies
+      </a>
+
+      <a href="beauty-cosmetics.html">
+        Beauty &amp; Cosmetics
+      </a>
+
+      <a href="products.html">
+        Products
+      </a>
+
+      <a href="blog.html">
+        Blogs
+      </a>
+
+      <a href="consultation.html">
+        Consultation
+      </a>
+
     </div>
 
-    <div class="footer-box">
-      <h4>Contact</h4>
-      <p>📍 4-1-38 Nararkere 1st Cross Brahmagiri, Ambalpadi, Udupi, Karnataka 576101</p>
-      <p>📞 9036444282</p>
-      <p>📧 support@neolifeayush.com</p>
 
+    <!-- Policies -->
+    <div class="footer-box">
+
+      <h4>Policies</h4>
+
+      <a href="privacy-policy.html">
+        Privacy Policy
+      </a>
+
+      <a href="terms-conditions.html">
+        Terms &amp; Conditions
+      </a>
+
+      <a href="shipping-policy.html">
+        Shipping Policy
+      </a>
+
+      <a href="return-refund-policy.html">
+        Return &amp; Refund Policy
+      </a>
+
+    </div>
+
+
+    <!-- Contact -->
+    <div class="footer-box">
+
+      <h4>Contact</h4>
+
+      <p>
+        📍 4-1-38 Nararkere 1st Cross Brahmagiri,
+        Ambalpadi, Udupi, Karnataka 576101
+      </p>
+
+      <p>
+        📞 9036444282
+      </p>
+
+      <p>
+        📧 support@neolifeayush.com
+      </p>
+
+
+      <!-- Social Media -->
       <div class="social-links">
 
-    <!-- Facebook -->
-    <a href="https://www.facebook.com/profile.php?id=61575580360517"
-       target="_blank"
-       rel="noopener noreferrer"
-       aria-label="Facebook"
-       title="Facebook">
-        <i class="fa-brands fa-facebook-f"></i>
-    </a>
+        <!-- Facebook -->
+        <a
+          href="https://www.facebook.com/profile.php?id=61575580360517"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          title="Facebook"
+        >
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
 
-    <!-- Instagram -->
-    <a href="https://www.instagram.com/neolives_global?igsh=cWl3eThrbjU5em1y"
-       target="_blank"
-       rel="noopener noreferrer"
-       aria-label="Instagram"
-       title="Instagram">
-        <i class="fa-brands fa-instagram"></i>
-    </a>
 
-    <!-- YouTube -->
-    <a href="https://www.youtube.com/@NeolifeWellnessCenterUdupi-o7x"
-       target="_blank"
-       rel="noopener noreferrer"
-       aria-label="YouTube"
-       title="YouTube">
-        <i class="fa-brands fa-youtube"></i>
-    </a>
+        <!-- Instagram -->
+        <a
+          href="https://www.instagram.com/neolives_global?igsh=cWl3eThrbjU5em1y"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+          title="Instagram"
+        >
+          <i class="fa-brands fa-instagram"></i>
+        </a>
 
-    <!-- WhatsApp -->
-    <a href="https://wa.me/919036444282"
-       target="_blank"
-       rel="noopener noreferrer"
-       aria-label="WhatsApp"
-       title="WhatsApp">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
 
-   
+        <!-- YouTube -->
+        <a
+          href="https://www.youtube.com/@NeolifeWellnessCenterUdupi-o7x"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="YouTube"
+          title="YouTube"
+        >
+          <i class="fa-brands fa-youtube"></i>
+        </a>
 
-</div>
+
+        <!-- WhatsApp -->
+        <a
+          href="https://wa.me/919036444282"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+          title="WhatsApp"
+        >
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+
+      </div>
+
     </div>
 
   </div>
 
+
+  <!-- Bottom -->
   <div class="footer-bottom">
-    <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
+
+    <p>
+      © 2026 Neolife Wellness Center. All Rights Reserved.
+    </p>
+
   </div>
 
 </footer>
@@ -2668,7 +2770,7 @@
 </a>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 /* Hero slider */
 const slides = document.querySelectorAll(".slide");
@@ -2691,7 +2793,7 @@ let offerInterval;
 
 async function loadActiveOffer(){
   try{
-    const response = await fetch(`${API_BASE_URL}/api/offers/active/get`);
+    const response = await fetch(`${API_BASE_URL}/offers/active/get`);
     const result = await response.json();
 
     if(!result.success || !Array.isArray(result.data) || result.data.length === 0){
@@ -2781,7 +2883,7 @@ async function loadHomeProducts() {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/products/getAll`
+      `${API_BASE_URL}/products/getAll`
     );
 
     if (!response.ok) {
@@ -3030,7 +3132,7 @@ async function loadApprovedClinicReviews(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/clinic-reviews/getAll`,
+      `${API_BASE_URL}/clinic-reviews/getAll`,
       {
         method:"GET",
         headers:{
@@ -3162,7 +3264,7 @@ async function loadProfileIcon(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/users/getProfile`,
+      `${API_BASE_URL}/users/getProfile`,
       {
         headers:{
           "Authorization":"Bearer " + token

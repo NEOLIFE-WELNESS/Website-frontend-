@@ -1399,8 +1399,7 @@ a{
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allUpcoming = [];
 let filteredUpcoming = [];
@@ -1610,7 +1609,7 @@ async function loadDoctorProfile() {
     try {
         const result =
             await doctorApiRequest(
-                "/api/doctors/my-profile"
+                "/doctors/my-profile"
             );
 
         const doctor =
@@ -1721,7 +1720,7 @@ async function loadDoctorConsultationModes() {
     try {
         const result =
             await doctorApiRequest(
-                `/api/doctor-availability/doctor/${encodeURIComponent(
+                `/doctor-availability/doctor/${encodeURIComponent(
                     id
                 )}`
             );
@@ -1895,7 +1894,7 @@ async function loadUpcomingSchedule() {
     try {
         const result =
             await doctorApiRequest(
-                "/api/doctor-dashboard/upcoming"
+                "/doctor-dashboard/upcoming"
             );
 
         const appointments =

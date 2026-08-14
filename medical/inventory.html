@@ -1454,8 +1454,7 @@ a{
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allInventory = [];
 let filteredInventory = [];
@@ -1600,7 +1599,7 @@ async function loadStaffProfile() {
     try {
         const result =
             await staffApiRequest(
-                "/api/users/getProfile"
+                "/users/getProfile"
             );
 
         const name =
@@ -1633,7 +1632,7 @@ async function loadInventory() {
     try {
         const result =
             await staffApiRequest(
-                "/api/inventory/getAll",
+                "/inventory/getAll",
                 {
                     method: "GET"
                 }
@@ -2205,7 +2204,7 @@ async function submitAddStock() {
     try {
         const result =
             await staffApiRequest(
-                "/api/inventory/add-stock",
+                "/inventory/add-stock",
                 {
                     method: "POST",
                     body: JSON.stringify({
@@ -2338,7 +2337,7 @@ async function submitLowStockLimit() {
     try {
         const result =
             await staffApiRequest(
-                "/api/inventory/update-limit",
+                "/inventory/update-limit",
                 {
                     method: "PUT",
                     body: JSON.stringify({

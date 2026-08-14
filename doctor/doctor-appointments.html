@@ -1170,7 +1170,7 @@ Create Plan
 </div>
 
 <script>
-const API_BASE_URL="http://localhost:8085";
+const API_BASE_URL = "/api";
 let appointments=[];
 let filtered=[];
 let page=1;
@@ -1216,7 +1216,7 @@ async function loadProfile(){
 
   try{
     const r=await api(
-      "/api/doctors/my-profile"
+      "/doctors/my-profile"
     );
 
     const doctor=
@@ -1339,7 +1339,7 @@ return;
 
 try{
 const result=await api(
-`/api/doctor-availability/doctor/${encodeURIComponent(
+`/doctor-availability/doctor/${encodeURIComponent(
 doctorId
 )}`
 );
@@ -1570,7 +1570,7 @@ window.location.replace(
 }
 
 
-async function loadAppointments(){showLoading();try{const r=await api("/api/appointments/doctor/my-appointments");const data=Array.isArray(r.data)?r.data:Array.isArray(r.data?.content)?r.data.content:[];appointments=data.map(normalize);applyFilters()}catch(e){appointments=[];applyFilters();showAlert(e.message||"Could not load appointments","error")}}
+async function loadAppointments(){showLoading();try{const r=await api("/appointments/doctor/my-appointments");const data=Array.isArray(r.data)?r.data:Array.isArray(r.data?.content)?r.data.content:[];appointments=data.map(normalize);applyFilters()}catch(e){appointments=[];applyFilters();showAlert(e.message||"Could not load appointments","error")}}
 function normalize(a){return{id:a.id,patientId:a.patientId,patientName:a.patientName||a.name||"Patient",phoneNumber:a.phoneNumber||"—",age:a.age??"—",gender:a.gender||"—",doctorName:a.doctorName||"—",specialization:a.doctorSpecialization||"—",date:a.appointmentDate||a.date||"",startTime:a.startTime||a.time||"",endTime:a.endTime||"",mode:String(a.appointmentMode||"OFFLINE").toUpperCase(),status:String(a.status||"PENDING").toUpperCase(),symptoms:a.symptoms||"—",history:a.pastMedicalHistory||"—",bookingFee:a.bookingFee??0,paymentStatus:String(a.paymentStatus||"PENDING").toUpperCase(),cancellationReason:a.cancellationReason||"",rescheduleReason:a.rescheduleReason||"",createdAt:a.createdAt||""}}
 function bindFilters(){[searchInput,dateFilter,statusFilter,modeFilter].forEach(el=>el.addEventListener(el.tagName==="INPUT"?"input":"change",()=>{page=1;applyFilters()}))}
 function applyFilters(){const q=searchInput.value.trim().toLowerCase(),d=dateFilter.value,s=statusFilter.value,m=modeFilter.value;filtered=appointments.filter(a=>(!q||[a.patientName,a.phoneNumber,a.symptoms].some(v=>String(v).toLowerCase().includes(q)))&&(!d||a.date===d)&&(!s||a.status===s)&&(!m||a.mode===m));updateSummary();render()}
@@ -1855,7 +1855,7 @@ try{
  * Use PUT first.
  */
 result=await api(
-`/api/appointments/${encodeURIComponent(appointmentSnapshot.id)}/complete`,
+`/appointments/${encodeURIComponent(appointmentSnapshot.id)}/complete`,
 {method:"PUT"}
 );
 }catch(error){
@@ -1871,7 +1871,7 @@ message.includes("404")||
 message.toLowerCase().includes("method not allowed")
 ){
 result=await api(
-`/api/appointments/${encodeURIComponent(appointmentSnapshot.id)}/complete`
+`/appointments/${encodeURIComponent(appointmentSnapshot.id)}/complete`
 );
 }else{
 throw error;
@@ -1939,7 +1939,7 @@ openTreatmentPlanModal(appointment);
 
 async function loadTherapists(){
 try{
-const result=await api("/api/therapists/getAll");
+const result=await api("/therapists/getAll");
 therapists=Array.isArray(result.data)?result.data:[];
 renderTherapistOptions();
 }catch(error){
@@ -2139,7 +2139,7 @@ button.innerHTML=
 
 try{
 const result=await api(
-"/api/treatment-plans/create",
+"/treatment-plans/create",
 {
 method:"POST",
 body:JSON.stringify(payload)

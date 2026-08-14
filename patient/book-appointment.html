@@ -1977,7 +1977,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
-        const API_BASE_URL = "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let currentStep = 1;
         let doctors = [];
@@ -2088,7 +2088,7 @@
 
             try{
                 const response = await fetch(
-                    `${API_BASE_URL}/api/doctors/offline/getAll`,
+                   `${API_BASE_URL}/doctors/offline/getAll`,
                     { headers: authHeaders() }
                 );
 
@@ -2253,7 +2253,7 @@
 
             try{
                 const url =
-    `${API_BASE_URL}/api/appointment-slots/appointments/available` +
+    `${API_BASE_URL}/appointment-slots/appointments/available` +
     `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
     `&date=${encodeURIComponent(date)}`;
 
@@ -2433,7 +2433,7 @@
 
             try{
                 const url =
-                    `${API_BASE_URL}/api/appointment-slots/appointments/available` +
+                    `${API_BASE_URL}/appointment-slots/appointments/available` +
                     `?doctorId=${encodeURIComponent(bookingData.doctorId)}` +
                     `&date=${encodeURIComponent(bookingData.appointmentDate)}`;
 
@@ -2701,7 +2701,7 @@
                  * Step 1: Create the appointment.
                  */
                 const response = await fetch(
-                    `${API_BASE_URL}/api/appointments/book`,
+                    `${API_BASE_URL}/appointments/book`,
                     {
                         method:"POST",
                         headers:authHeaders(true),
@@ -2766,7 +2766,7 @@
                 );
 
                 const paymentResponse = await fetch(
-                    `${API_BASE_URL}/api/payments/appointment/${encodeURIComponent(
+                    `${API_BASE_URL}/payments/appointment/${encodeURIComponent(
                         appointmentId
                     )}/initiate`,
                     {
@@ -2971,7 +2971,7 @@
 
             try{
                 const response = await fetch(
-                    `${API_BASE_URL}/api/payments/razorpay/verify`,
+                    `${API_BASE_URL}/payments/razorpay/verify`,
                     {
                         method:"POST",
                         headers:authHeaders(true),
@@ -3119,7 +3119,7 @@
 
             try{
                 const response = await fetch(
-                    `${API_BASE_URL}/api/users/getProfile`,
+                    `${API_BASE_URL}/users/getProfile`,
                     { headers: authHeaders() }
                 );
 
@@ -3156,7 +3156,7 @@
 
             try{
                 const response = await fetch(
-                    `${API_BASE_URL}/api/users/getProfile`,
+                    `${API_BASE_URL}/users/getProfile`,
                     { headers: authHeaders() }
                 );
 

@@ -1636,7 +1636,7 @@
     </main>
   </div>
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let currentAvailabilitySlots = [];
 let currentBlockedSlots = [];
@@ -1807,7 +1807,7 @@ async function loadDoctorHeader(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctors/my-profile`,
+      `${API_BASE_URL}/doctors/my-profile`,
       {
         method:"GET",
         headers:getAuthHeaders(false)
@@ -1949,7 +1949,7 @@ async function createAvailability(event){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctor-availability/create`,
+      `${API_BASE_URL}/doctor-availability/create`,
       {
         method:"POST",
         headers:getAuthHeaders(true),
@@ -2017,7 +2017,7 @@ async function loadAvailability(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctor-availability/doctor/${doctorId}`,
+      `${API_BASE_URL}/doctor-availability/doctor/${doctorId}`,
       {
         method:"GET",
         headers:getAuthHeaders(false)
@@ -2316,7 +2316,7 @@ async function deleteAvailability(slotId){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctor-availability/delete/${slotId}`,
+      `${API_BASE_URL}/doctor-availability/delete/${slotId}`,
       {
         method:"DELETE",
         headers:getAuthHeaders(false)
@@ -2463,7 +2463,7 @@ async function blockDoctorSlot(event){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctor-availability/block-slot`,
+      `${API_BASE_URL}/doctor-availability/block-slot`,
       {
         method:"POST",
         headers:getAuthHeaders(true),
@@ -2530,7 +2530,7 @@ async function loadBlockedSlots(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctor-availability/blocked/doctor/${doctorId}`,
+      `${API_BASE_URL}/doctor-availability/blocked/doctor/${doctorId}`,
       {
         method:"GET",
         headers:getAuthHeaders(false)
@@ -2672,7 +2672,7 @@ async function unblockDoctorSlot(blockedSlotId){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctor-availability/unblock/${blockedSlotId}`,
+      `${API_BASE_URL}/doctor-availability/unblock/${blockedSlotId}`,
       {
         method:"DELETE",
         headers:getAuthHeaders(false)
@@ -2721,7 +2721,7 @@ function resetBlockForm(){
 async function resolveDoctorIdFromBackend(){
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/doctors/my-profile`,
+      `${API_BASE_URL}/doctors/my-profile`,
       {
         method:"GET",
         headers:getAuthHeaders(false)

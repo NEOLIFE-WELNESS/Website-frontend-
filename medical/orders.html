@@ -2557,8 +2557,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let allOrders = [];
         let filteredOrders = [];
@@ -2703,7 +2702,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/medical-staff/me"
+                        "/medical-staff/me"
                     );
 
                 const name =
@@ -2741,9 +2740,9 @@
              * different endpoints. The first successful response is used.
              */
             const endpoints = [
-                "/api/medical-staff/patients",
-                "/api/users/getAll",
-                "/api/admin/users/getAll"
+                "/medical-staff/patients",
+                "/users/getAll",
+                "/admin/users/getAll"
             ];
 
             for (const endpoint of endpoints) {
@@ -3008,7 +3007,7 @@
                 const result =
                     await staffApiRequest(
                         // Documented medical-staff order list API
-                        "/api/orders/getAll"
+                        "/orders/getAll"
                     );
 
                 const data =
@@ -4174,7 +4173,7 @@
 
             try {
                 const result = await staffApiRequest(
-                    `/api/orders/${encodeURIComponent(id)}`
+                    `/orders/${encodeURIComponent(id)}`
                 );
 
                 if (result.data) {
@@ -4793,17 +4792,17 @@
 
             const endpointMap = {
                 CONFIRMED:
-                    `/api/orders/${encodeURIComponent(
+                    `/orders/${encodeURIComponent(
                         selectedOrder.id
                     )}/confirm`,
 
                 PROCESSING:
-                    `/api/orders/${encodeURIComponent(
+                    `/orders/${encodeURIComponent(
                         selectedOrder.id
                     )}/process`,
 
                 PACKED:
-                    `/api/orders/${encodeURIComponent(
+                    `/orders/${encodeURIComponent(
                         selectedOrder.id
                     )}/pack`
             };
@@ -4992,7 +4991,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        `/api/shipping/create/${encodeURIComponent(
+                        `/shipping/create/${encodeURIComponent(
                             selectedOrder.id
                         )}`,
                         {
@@ -5075,7 +5074,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        `/api/orders/${encodeURIComponent(
+                        `/orders/${encodeURIComponent(
                             selectedOrder.id
                         )}/track`,
                         {
@@ -5382,7 +5381,7 @@
             try {
                 const response =
                     await fetch(
-                        `${API_BASE_URL}/api/orders/${encodeURIComponent(
+                        `${API_BASE_URL}/orders/${encodeURIComponent(
                             id
                         )}/invoice`,
                         {

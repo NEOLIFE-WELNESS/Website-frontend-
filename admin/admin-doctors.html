@@ -1411,7 +1411,7 @@ function closeModal(){
     document.getElementById("doctorModal").style.display="none";
 }
 
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 window.onload = function(){
     loadDoctors();
 };
@@ -1426,7 +1426,7 @@ async function loadDoctors(){
     }
 
     try{
-        const response = await fetch(`${API_BASE_URL}/api/doctors/getAll`, {
+        const response = await fetch(`${API_BASE_URL}/doctors/getAll`, {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + token
@@ -1622,7 +1622,7 @@ async function saveDoctor(){
     };
 
     try{
-        const response = await fetch(`${API_BASE_URL}/api/doctors/add`,{
+        const response = await fetch(`${API_BASE_URL}/doctors/add`,{
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
@@ -1738,7 +1738,7 @@ async function updateDoctor(){
     button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
 
     try{
-        const response = await fetch(`${API_BASE_URL}/api/doctors/update/${currentDoctorId}`, {
+        const response = await fetch(`${API_BASE_URL}/doctors/update/${currentDoctorId}`, {
             method:"PUT",
             headers:{
                 "Content-Type":"application/json",

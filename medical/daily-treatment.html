@@ -593,7 +593,7 @@ tbody tr:hover{background:#fcfdfb}
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 const PAGE_SIZE = 8;
 
 let treatmentPlans = [];
@@ -629,7 +629,7 @@ function requireStaffLogin(){
 
 async function loadStaffProfile(){
     try{
-        const result = await apiRequest("/api/medical-staff/me");
+        const result = await apiRequest("/medical-staff/me");
         const data = result?.data || {};
 
         const name =
@@ -706,8 +706,8 @@ async function loadAllData(){
      * should access these records.
      */
     const [plansResult, sessionsResult] = await Promise.allSettled([
-        apiRequest("/api/treatment-plans/admin/getAll"),
-        apiRequest("/api/daily-treatments/admin/getAll")
+        apiRequest("/treatment-plans/admin/getAll"),
+        apiRequest("/daily-treatments/admin/getAll")
     ]);
 
     treatmentPlans =

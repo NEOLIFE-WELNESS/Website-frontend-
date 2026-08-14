@@ -996,7 +996,7 @@
 </a>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 async function loadProfileIcon(){
 
@@ -1010,7 +1010,7 @@ async function loadProfileIcon(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/users/getProfile`,
+      `${API_BASE_URL}/users/getProfile`,
       {
         headers:{
           "Authorization":"Bearer " + token

@@ -78,7 +78,7 @@
 </main>
 </div>
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let therapistProfile = null;
 let savedAvailability = [];
@@ -276,7 +276,7 @@ async function loadTherapistAndAvailability() {
     try {
         const profileResult =
             await therapistApiRequest(
-                "/api/therapists/me"
+                "/therapists/me"
             );
 
         therapistProfile =
@@ -371,7 +371,7 @@ async function loadAvailability() {
     try {
         const result =
             await therapistApiRequest(
-                `/api/therapist-availability/therapist/${encodeURIComponent(
+                `/therapist-availability/therapist/${encodeURIComponent(
                     therapistId
                 )}`
             );
@@ -559,10 +559,10 @@ async function saveAvailability(event) {
 
         const endpoint =
             isEditing
-                ? `/api/therapist-availability/update/${encodeURIComponent(
+                ? `/therapist-availability/update/${encodeURIComponent(
                     editingAvailabilityId
                   )}`
-                : "/api/therapist-availability/create";
+                : "/therapist-availability/create";
 
         const result =
             await therapistApiRequest(
@@ -708,7 +708,7 @@ async function deleteAvailability(id) {
     try {
         const result =
             await therapistApiRequest(
-                `/api/therapist-availability/delete/${encodeURIComponent(
+                `/therapist-availability/delete/${encodeURIComponent(
                     id
                 )}`,
                 {

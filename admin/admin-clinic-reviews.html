@@ -953,7 +953,7 @@ tbody tr:hover{background:#fcfdfb}
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 const PAGE_SIZE = 8;
 
 let allReviews = [];
@@ -1018,7 +1018,7 @@ async function loadReviews(){
 
   try{
     const result = await apiRequest(
-      "/api/clinic-reviews/getAllAdmin",
+      "/clinic-reviews/getAllAdmin",
       {method:"GET"}
     );
 
@@ -1174,7 +1174,7 @@ function renderReviews(){
 async function viewReview(id){
   try{
     const result = await apiRequest(
-      `/api/clinic-reviews/${encodeURIComponent(id)}/get`,
+      `/clinic-reviews/${encodeURIComponent(id)}/get`,
       {method:"GET"}
     );
 
@@ -1253,7 +1253,7 @@ async function updateReviewStatus(id, status, selectElement){
     }
 
     const result = await apiRequest(
-      `/api/clinic-reviews/update-status/${encodeURIComponent(id)}`,
+      `/clinic-reviews/update-status/${encodeURIComponent(id)}`,
       {
         method:"PUT",
         body:JSON.stringify({status})

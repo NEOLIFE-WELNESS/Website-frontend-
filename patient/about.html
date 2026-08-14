@@ -758,30 +758,115 @@
     }
 
     /* =========================
-       FOOTER
-    ========================= */
-    .footer{
-      padding:45px 0 22px;
+   FOOTER
+========================= */
 
-      color:white;
-      background:#0d281b;
-    }
+.footer{
+  background:#0d281b;
+  color:#dfe9e2;
+  padding:55px 0 22px;
+}
 
-    .footer-bottom{
-      width:min(1180px,90%);
-      margin:auto;
-      padding-top:20px;
+.footer-container{
+  width:min(1180px,90%);
+  margin:auto;
 
-      border-top:1px solid rgba(255,255,255,.12);
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1.2fr;
+  gap:35px;
+}
 
-      text-align:center;
-    }
+.footer h3,
+.footer h4{
+  margin-top:0;
+  color:white;
+}
 
-    .footer-bottom p{
-      margin:0;
-      color:#c7d5cc;
-    }
+.footer p,
+.footer a{
+  color:#c7d5cc;
+  font-size:14px;
+}
 
+.footer a{
+  display:block;
+  margin-bottom:8px;
+}
+
+.footer a:hover{
+  color:#d4af37;
+}
+
+.social-links{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.social-links a{
+  width:40px;
+  height:40px;
+
+  display:grid;
+  place-items:center;
+
+  margin:0;
+
+  border-radius:50%;
+
+  background:rgba(255,255,255,.10);
+  color:white;
+}
+
+.social-links a:hover{
+  background:#d4af37;
+  color:#123524;
+}
+
+.footer-bottom{
+  width:min(1180px,90%);
+  margin:35px auto 0;
+  padding-top:20px;
+
+  border-top:1px solid rgba(255,255,255,.12);
+
+  text-align:center;
+}
+
+.footer-bottom p{
+  margin:0;
+  color:#c7d5cc;
+}
+
+
+/* Tablet */
+@media(max-width:900px){
+
+  .footer-container{
+    grid-template-columns:repeat(2,1fr);
+    gap:35px 25px;
+  }
+
+}
+
+
+/* Mobile */
+@media(max-width:600px){
+
+  .footer-container{
+    grid-template-columns:1fr;
+    gap:30px;
+  }
+
+  .footer-box{
+    text-align:left;
+  }
+
+  .social-links{
+    justify-content:flex-start;
+  }
+
+}
     .whatsapp{
       width:58px;
       height:58px;
@@ -1511,10 +1596,141 @@
   </section>
 
   <footer class="footer">
-    <div class="footer-bottom">
-      <p>© 2026 Neolife Wellness Center. All Rights Reserved.</p>
+
+  <div class="footer-container">
+
+    <!-- About -->
+    <div class="footer-box">
+
+      <h3>Neolife Wellness Center</h3>
+
+      <p>
+        Natural healing, Ayurvedic care and trusted wellness products
+        for a healthier life.
+      </p>
+
     </div>
-  </footer>
+
+
+    <!-- Quick Links -->
+    <div class="footer-box">
+
+      <h4>Quick Links</h4>
+
+      <a href="homepage.html">Home</a>
+      <a href="services.html">Therapies</a>
+      <a href="beauty-cosmetics.html">Beauty &amp; Cosmetics</a>
+      <a href="products.html">Products</a>
+      <a href="blog.html">Blogs</a>
+      <a href="consultation.html">Consultation</a>
+
+    </div>
+
+
+    <!-- Policies -->
+    <div class="footer-box">
+
+      <h4>Policies</h4>
+
+      <a href="privacy-policy.html">
+        Privacy Policy
+      </a>
+
+      <a href="terms-conditions.html">
+        Terms &amp; Conditions
+      </a>
+
+      <a href="shipping-policy.html">
+        Shipping Policy
+      </a>
+
+      <a href="return-refund-policy.html">
+        Return &amp; Refund Policy
+      </a>
+
+    </div>
+
+
+    <!-- Contact -->
+    <div class="footer-box">
+
+      <h4>Contact</h4>
+
+      <p>
+        📍 4-1-38, Behind Lions Bhavan Road,<br>
+        Nairkere 1st Cross, Brahmagiri,<br>
+        Ambalapady Post, Udupi – 576103,<br>
+        Karnataka, India
+      </p>
+
+      <p>📞 +91 94814 89866</p>
+
+      <p>📧 neelavar.murali@gmail.com</p>
+
+
+      <div class="social-links">
+
+        <!-- Facebook -->
+        <a
+          href="https://www.facebook.com/profile.php?id=61575580360517"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          title="Facebook"
+        >
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
+
+
+        <!-- Instagram -->
+        <a
+          href="https://www.instagram.com/neolives_global?igsh=cWl3eThrbjU5em1y"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+          title="Instagram"
+        >
+          <i class="fa-brands fa-instagram"></i>
+        </a>
+
+
+        <!-- YouTube -->
+        <a
+          href="https://www.youtube.com/@NeolifeWellnessCenterUdupi-o7x"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="YouTube"
+          title="YouTube"
+        >
+          <i class="fa-brands fa-youtube"></i>
+        </a>
+
+
+        <!-- WhatsApp -->
+        <a
+          href="https://wa.me/919481489866"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+          title="WhatsApp"
+        >
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="footer-bottom">
+    <p>
+      © 2026 Neolife Wellness Center. All Rights Reserved.
+    </p>
+  </div>
+
+</footer>
 
   <a
     class="whatsapp"
@@ -1529,6 +1745,7 @@
   </a>
 
   <script>
+    const API_BASE_URL = "/api";
     async function loadProfileIcon(){
 
       const token = localStorage.getItem("token");
@@ -1538,7 +1755,7 @@
       try{
 
         const response = await fetch(
-          "http://localhost:8085/api/users/getProfile",
+  `${API_BASE_URL}/users/getProfile`,
           {
             headers:{
               "Authorization":"Bearer " + token

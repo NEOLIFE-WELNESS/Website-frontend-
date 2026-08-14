@@ -1136,8 +1136,7 @@ tbody tr:hover{background:#fcfdfb}
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let dailyTransactions = [];
 let allTransactions = [];
@@ -1375,7 +1374,7 @@ async function loadDailyTransactions() {
     try {
         const result =
             await apiRequest(
-                "/api/payments/admin/daily-transactions",
+                "/payments/admin/daily-transactions",
                 {
                     method:"GET"
                 }
@@ -1627,7 +1626,7 @@ async function loadAllTransactions() {
     try {
         const result =
             await apiRequest(
-                "/api/payments/admin/getAll",
+                "/payments/admin/getAll",
                 {
                     method:"GET"
                 }

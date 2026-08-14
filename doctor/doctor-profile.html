@@ -1438,8 +1438,7 @@ textarea.control{
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let doctorProfile = null;
 let editing = false;
@@ -1563,7 +1562,7 @@ async function loadDoctorConsultationModes() {
     try {
         const result =
             await apiRequest(
-                `/api/doctor-availability/doctor/${encodeURIComponent(
+                `/doctor-availability/doctor/${encodeURIComponent(
                     doctorId
                 )}`
             );
@@ -1882,7 +1881,7 @@ async function loadDoctorProfile() {
     try {
         const userResult =
             await apiRequest(
-                "/api/users/getProfile"
+                "/users/getProfile"
             );
 
         userProfile =
@@ -1932,7 +1931,7 @@ async function loadDoctorProfile() {
     try {
         const doctorResult =
             await apiRequest(
-                "/api/doctors/my-profile"
+                "/doctors/my-profile"
             );
 
         professionalProfile =
@@ -2570,7 +2569,7 @@ async function saveDoctorProfile(event) {
         ) {
             result =
                 await apiRequest(
-                    `/api/doctors/update/${encodeURIComponent(
+                    `/doctors/update/${encodeURIComponent(
                         doctorProfile.id
                     )}`,
                     {
@@ -2585,7 +2584,7 @@ async function saveDoctorProfile(event) {
         } else {
             result =
                 await apiRequest(
-                    "/api/doctors/complete-profile",
+                    "/doctors/complete-profile",
                     {
                         method: "POST",
                         body:
@@ -2937,8 +2936,8 @@ async function uploadDoctorProfileImage(file) {
     formData.append("module", "DOCTOR");
 
     const endpoint = imageId
-        ? `/api/images/update/${encodeURIComponent(imageId)}`
-        : "/api/images/upload";
+        ? `/images/update/${encodeURIComponent(imageId)}`
+        : "/images/upload";
 
     const method = imageId
         ? "PUT"

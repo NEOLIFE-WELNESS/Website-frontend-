@@ -2151,8 +2151,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let allConsultations = [];
         let filteredConsultations = [];
@@ -2335,7 +2334,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/medical-staff/me"
+                        "/medical-staff/me"
                     );
 
                 const name =
@@ -2384,7 +2383,7 @@
                  */
                 const prescriptionResult =
                     await staffApiRequest(
-                        "/api/medical-staff/prescriptions"
+                        "/medical-staff/prescriptions"
                     );
 
                 const prescriptions =
@@ -2427,7 +2426,7 @@
                         patientIds.map(
                             patientId =>
                                 staffApiRequest(
-                                    `/api/patient-records/patient/${encodeURIComponent(
+                                    `/patient-records/patient/${encodeURIComponent(
                                         patientId
                                     )}`
                                 )

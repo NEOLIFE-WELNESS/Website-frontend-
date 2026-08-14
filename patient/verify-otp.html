@@ -172,7 +172,7 @@ button{
 </div>
 
 <script>
-const API_BASE_URL="http://localhost:8085";
+const API_BASE_URL="/api";
 const inputs=document.querySelectorAll(".otp-box input");
 const timer=document.getElementById("timer");
 let time=30;
@@ -195,7 +195,7 @@ async function verifyOTP(){
  const btn=document.querySelector("button");
  btn.disabled=true;btn.textContent="Verifying...";
  try{
-  const r=await fetch(API_BASE_URL+"/api/auth/verify-reset-code",{
+  const r=await fetch(API_BASE_URL+"/auth/verify-reset-code",{
     method:"POST",
     headers:{"Content-Type":"application/json","Accept":"application/json"},
     body:JSON.stringify({email:email,code:Number(code)})
@@ -224,7 +224,7 @@ const countdown=setInterval(()=>{
 async function resendOTP(){
  const email=localStorage.getItem("resetEmail");
  try{
-  const r=await fetch(API_BASE_URL+"/api/auth/forgot-password",{
+  const r=await fetch(API_BASE_URL+"/auth/forgot-password",{
    method:"POST",
    headers:{"Content-Type":"application/json","Accept":"application/json"},
    body:JSON.stringify({email})

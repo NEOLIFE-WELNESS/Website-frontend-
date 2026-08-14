@@ -1708,8 +1708,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         const queryParams =
             new URLSearchParams(
@@ -1933,7 +1932,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/users/getProfile"
+                        "/users/getProfile"
                     );
 
                 const fallbackName =
@@ -1992,7 +1991,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/manufacturers/getAll"
+                        "/manufacturers/getAll"
                     );
 
                 const manufacturers =
@@ -2080,7 +2079,7 @@
             try {
                 const result =
                     await staffApiRequest(
-                        "/api/images/module/PRODUCT"
+                        "/images/module/PRODUCT"
                     );
 
                 availableImages =
@@ -2329,7 +2328,7 @@
 
             const result =
                 await staffApiRequest(
-                    `/api/products/${encodeURIComponent(productId)}`
+                    `/products/${encodeURIComponent(productId)}`
                 );
 
             currentProduct =
@@ -2764,7 +2763,7 @@
 
             try {
                 const result = await fetch(
-                    `http://localhost:8085/api/products/update/${encodeURIComponent(productId)}`,
+    `${API_BASE_URL}/products/update/${encodeURIComponent(productId)}`,
                     {
                         method: "PUT",
                         headers: {

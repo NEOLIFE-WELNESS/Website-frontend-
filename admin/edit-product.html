@@ -1044,7 +1044,6 @@ textarea.form-control{
         <div class="form-grid">
 
           <div class="form-group">
-
             <label for="price">
               Price ₹
               <span class="required">*</span>
@@ -1054,14 +1053,13 @@ textarea.form-control{
               type="number"
               id="price"
               class="form-control"
-              min="1"
+              min="0.01"
+              step="0.01"
               required
             >
-
           </div>
 
           <div class="form-group">
-
             <label for="stock">
               Total Stock
               <span class="required">*</span>
@@ -1072,13 +1070,27 @@ textarea.form-control{
               id="stock"
               class="form-control"
               min="0"
+              step="1"
               required
             >
-
           </div>
 
           <div class="form-group">
+            <label for="lowStockLimit">
+              Low Stock Alert Limit
+            </label>
 
+            <input
+              type="number"
+              id="lowStockLimit"
+              class="form-control"
+              min="0"
+              step="1"
+              placeholder="Example: 10"
+            >
+          </div>
+
+          <div class="form-group">
             <label for="netQty">
               Net Quantity
               <span class="required">*</span>
@@ -1091,42 +1103,35 @@ textarea.form-control{
               placeholder="Example: 200 ml / 100 gm"
               required
             >
-
           </div>
 
           <div class="form-group">
-
             <label for="weightInKg">
               Weight (kg)
-              <span class="required">*</span>
             </label>
 
             <input
               type="number"
               id="weightInKg"
               class="form-control"
-              min="0.01"
-              step="0.01"
+              min="0"
+              step="0.001"
               placeholder="Example: 0.50"
-              required
             >
-
           </div>
 
           <div class="form-group">
-
             <label for="expiryDate">
               Expiry Date
               <span class="required">*</span>
             </label>
 
             <input
-              type="month"
+              type="date"
               id="expiryDate"
               class="form-control"
               required
             >
-
           </div>
 
         </div>
@@ -1138,25 +1143,7 @@ textarea.form-control{
 
         <div class="form-grid">
 
-          <div class="form-group full-width">
-
-            <label for="indication">
-              Indication
-              <span class="required">*</span>
-            </label>
-
-            <input
-              type="text"
-              id="indication"
-              class="form-control"
-              placeholder="Example: Hair fall, Joint pain"
-              required
-            >
-
-          </div>
-
           <div class="form-group">
-
             <label for="category">
               Product Category
               <span class="required">*</span>
@@ -1175,12 +1162,13 @@ textarea.form-control{
               <option value="Pain Relief">Pain Relief</option>
               <option value="Kashayam">Kashayam</option>
               <option value="Kidney Care">Kidney Care</option>
+              <option value="Skin Care">Skin Care</option>
+              <option value="Digestive Care">Digestive Care</option>
+              <option value="General Wellness">General Wellness</option>
             </select>
-
           </div>
 
           <div class="form-group">
-
             <label for="manufacturer">
               Manufacturer
               <span class="required">*</span>
@@ -1193,7 +1181,195 @@ textarea.form-control{
             >
               <option value="">Select Manufacturer</option>
             </select>
+          </div>
 
+          <div class="form-group">
+            <label for="dosageForm">
+              Dosage Form
+              <span class="required">*</span>
+            </label>
+
+            <select
+              id="dosageForm"
+              class="form-control"
+              required
+            >
+              <option value="">Select Dosage Form</option>
+              <option value="Syrup">Syrup</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Choorna">Choorna</option>
+              <option value="Kashayam">Kashayam</option>
+              <option value="Oil">Oil</option>
+              <option value="Cream">Cream</option>
+              <option value="Gel">Gel</option>
+              <option value="Powder">Powder</option>
+              <option value="Drops">Drops</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="dosage">
+              Dosage
+            </label>
+
+            <input
+              type="text"
+              id="dosage"
+              class="form-control"
+              placeholder="Example: 10 ml twice daily after food"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="type">
+              Product Type
+            </label>
+
+            <select
+              id="type"
+              class="form-control"
+            >
+               <option value="">Select Product Type</option>
+                                <option value="Classical Medicine">Classical Medicine</option>
+                                <option value="Patented Product">Patented Product</option>
+                                <option value="Folklore Medicine">Folklore Medicine</option>
+                                <option value="Panchagavya">Panchagavya</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="section">
+              Product Section
+            </label>
+
+            <select
+              id="section"
+              class="form-control"
+            >
+              <option value="">Select Section</option>
+
+              <optgroup label="Pain Care">
+                <option value="Back Pain">Back Pain</option>
+                <option value="Joint Pain">Joint Pain</option>
+                <option value="Knee Pain">Knee Pain</option>
+                <option value="Neck Pain">Neck Pain</option>
+                <option value="Shoulder Pain">Shoulder Pain</option>
+                <option value="Muscle Pain">Muscle Pain</option>
+                <option value="Leg Pain">Leg Pain</option>
+                <option value="Hip Pain">Hip Pain</option>
+                <option value="Arthritis">Arthritis</option>
+                <option value="Sciatica">Sciatica</option>
+                <option value="Body Pain">Body Pain</option>
+                <option value="Other Pain">Other Pain</option>
+              </optgroup>
+
+              <optgroup label="Diabetes Care">
+                <option value="Diabetes">Diabetes</option>
+                <option value="Blood Sugar Management">Blood Sugar Management</option>
+              </optgroup>
+
+              <optgroup label="Liver Care">
+                <option value="Liver Care">Liver Care</option>
+                <option value="Fatty Liver">Fatty Liver</option>
+                <option value="Liver Wellness">Liver Wellness</option>
+              </optgroup>
+
+              <optgroup label="Heart Care">
+                <option value="Heart Care">Heart Care</option>
+                <option value="Cholesterol Management">Cholesterol Management</option>
+                <option value="Cardiovascular Wellness">Cardiovascular Wellness</option>
+              </optgroup>
+
+              <optgroup label="Kidney Care">
+                <option value="Kidney Care">Kidney Care</option>
+                <option value="Urinary Health">Urinary Health</option>
+              </optgroup>
+
+              <optgroup label="Stress & Sleep">
+                <option value="Stress">Stress</option>
+                <option value="Sleep Support">Sleep Support</option>
+                <option value="Mental Wellness">Mental Wellness</option>
+              </optgroup>
+
+              <optgroup label="Digestive Care">
+                <option value="Digestive Care">Digestive Care</option>
+                <option value="Acidity">Acidity</option>
+                <option value="Gas and Bloating">Gas &amp; Bloating</option>
+                <option value="Constipation">Constipation</option>
+                <option value="Indigestion">Indigestion</option>
+                <option value="Appetite Support">Appetite Support</option>
+              </optgroup>
+
+              <optgroup label="Respiratory Care">
+                <option value="Respiratory Care">Respiratory Care</option>
+                <option value="Cough">Cough</option>
+                <option value="Cold">Cold</option>
+                <option value="Breathing Wellness">Breathing Wellness</option>
+              </optgroup>
+
+              <optgroup label="Skin Care">
+                <option value="Skin Care">Skin Care</option>
+                <option value="Acne Care">Acne Care</option>
+                <option value="Dry Skin">Dry Skin</option>
+                <option value="Skin Wellness">Skin Wellness</option>
+              </optgroup>
+
+              <optgroup label="Hair Care">
+                <option value="Hair Care">Hair Care</option>
+                <option value="Hair Fall">Hair Fall</option>
+                <option value="Dandruff">Dandruff</option>
+                <option value="Hair Growth Support">Hair Growth Support</option>
+              </optgroup>
+
+              <optgroup label="Women's Wellness">
+                <option value="Women's Wellness">Women's Wellness</option>
+                <option value="Menstrual Wellness">Menstrual Wellness</option>
+                <option value="PCOS Wellness">PCOS Wellness</option>
+                <option value="Menopause Wellness">Menopause Wellness</option>
+              </optgroup>
+
+              <optgroup label="Men's Wellness">
+                <option value="Men's Wellness">Men's Wellness</option>
+                <option value="Prostate Wellness">Prostate Wellness</option>
+              </optgroup>
+
+              <optgroup label="Immunity & Wellness">
+                <option value="Immunity">Immunity</option>
+                <option value="General Wellness">General Wellness</option>
+                <option value="Energy and Vitality">Energy &amp; Vitality</option>
+                <option value="Weakness and Fatigue">Weakness &amp; Fatigue</option>
+              </optgroup>
+
+              <optgroup label="Weight Management">
+                <option value="Weight Management">Weight Management</option>
+                <option value="Metabolism Support">Metabolism Support</option>
+              </optgroup>
+
+              <optgroup label="Other">
+                <option value="Eye Care">Eye Care</option>
+                <option value="Bone Health">Bone Health</option>
+                <option value="Nerve Health">Nerve Health</option>
+                <option value="Oral Care">Oral Care</option>
+                <option value="General Health">General Health</option>
+                <option value="Other">Other</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="indication">
+              Indication
+              <span class="required">*</span>
+            </label>
+
+            <textarea
+              id="indication"
+              class="form-control"
+              placeholder="Example: Supports joint health, mobility and relief from stiffness"
+              required
+            ></textarea>
           </div>
 
         </div>
@@ -1283,7 +1459,7 @@ textarea.form-control{
 </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let selectedImageUrls = [];
 let selectedNewFiles = [];
@@ -1330,7 +1506,7 @@ async function loadManufacturers(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/manufacturers/getAll`,
+      `${API_BASE_URL}/manufacturers/getAll`,
       {
         method:"GET",
         headers:{
@@ -1404,7 +1580,7 @@ async function loadProduct(){
 
   try{
     const response = await fetch(
-      `${API_BASE_URL}/api/products/${productId}`,
+      `${API_BASE_URL}/products/${productId}`,
       {
         method:"GET",
         headers:{
@@ -1476,6 +1652,21 @@ async function loadProduct(){
     document.getElementById("category").value =
       product.category || "";
 
+    document.getElementById("dosageForm").value =
+      product.dosageForm || "";
+
+    document.getElementById("dosage").value =
+      product.dosage || "";
+
+    document.getElementById("type").value =
+      product.type || "";
+
+    document.getElementById("section").value =
+      product.section || "";
+
+    document.getElementById("lowStockLimit").value =
+      product.lowStockLimit ?? "";
+
     const manufacturerValue =
       product.manufacturerName ||
       product.manufacturer ||
@@ -1486,7 +1677,9 @@ async function loadProduct(){
 
     if(product.expiryDate){
       document.getElementById("expiryDate").value =
-        String(product.expiryDate).substring(0,7);
+        String(product.expiryDate).substring(0,10);
+    }else{
+      document.getElementById("expiryDate").value = "";
     }
 
     selectedImageUrls = normalizeImageUrls(
@@ -1758,7 +1951,7 @@ async function uploadProductImage(file, token){
   formData.append("module", "PRODUCT");
 
   const response = await fetch(
-    `${API_BASE_URL}/api/images/upload`,
+    `${API_BASE_URL}/images/upload`,
     {
       method:"POST",
       headers:{
@@ -1857,98 +2050,268 @@ document
           );
         }
 
-        const expiryMonth =
+        const productName =
+          document.getElementById(
+            "name"
+          ).value.trim();
+
+        const productCode =
+          document.getElementById(
+            "productNo"
+          ).value.trim();
+
+        const category =
+          document.getElementById(
+            "category"
+          ).value;
+
+        const description =
+          document.getElementById(
+            "description"
+          ).value.trim();
+
+        const priceValue =
+          document.getElementById(
+            "price"
+          ).value;
+
+        const stockValue =
+          document.getElementById(
+            "stock"
+          ).value;
+
+        const netQty =
+          document.getElementById(
+            "netQty"
+          ).value.trim();
+
+        const weightValue =
+          document.getElementById(
+            "weightInKg"
+          ).value;
+
+        const indication =
+          document.getElementById(
+            "indication"
+          ).value.trim();
+
+        const dosageForm =
+          document.getElementById(
+            "dosageForm"
+          ).value;
+
+        const dosage =
+          document.getElementById(
+            "dosage"
+          ).value.trim();
+
+        const type =
+          document.getElementById(
+            "type"
+          ).value;
+
+        const section =
+          document.getElementById(
+            "section"
+          ).value;
+
+        const manufacturerName =
+          document.getElementById(
+            "manufacturer"
+          ).value;
+
+        const expiryDate =
           document.getElementById(
             "expiryDate"
           ).value;
 
-        const weightInKgValue =
-          Number(
-            document.getElementById(
-              "weightInKg"
-            ).value
+        const lowStockValue =
+          document.getElementById(
+            "lowStockLimit"
+          ).value;
+
+        if(!productName){
+          throw new Error(
+            "Product name is required."
           );
+        }
+
+        if(!productCode){
+          throw new Error(
+            "Product code is required."
+          );
+        }
+
+        if(!category){
+          throw new Error(
+            "Please select product category."
+          );
+        }
+
+        if(!description){
+          throw new Error(
+            "Product description is required."
+          );
+        }
+
+        if(priceValue === ""){
+          throw new Error(
+            "Price is required."
+          );
+        }
+
+        if(stockValue === ""){
+          throw new Error(
+            "Stock is required."
+          );
+        }
+
+        if(!netQty){
+          throw new Error(
+            "Net quantity is required."
+          );
+        }
+
+        if(!indication){
+          throw new Error(
+            "Indication is required."
+          );
+        }
+
+        if(!dosageForm){
+          throw new Error(
+            "Please select dosage form."
+          );
+        }
+
+        if(!manufacturerName){
+          throw new Error(
+            "Please select manufacturer."
+          );
+        }
+
+        if(!expiryDate){
+          throw new Error(
+            "Please select expiry date."
+          );
+        }
+
+        const price =
+          Number(priceValue);
+
+        const stock =
+          Number(stockValue);
 
         if(
-          !Number.isFinite(weightInKgValue) ||
-          weightInKgValue <= 0
+          !Number.isFinite(price) ||
+          price <= 0
         ){
           throw new Error(
-            "Please enter a valid product weight in kg."
+            "Please enter a valid product price."
           );
+        }
+
+        if(
+          !Number.isInteger(stock) ||
+          stock < 0
+        ){
+          throw new Error(
+            "Stock must be 0 or greater."
+          );
+        }
+
+        let weightInKg = null;
+
+        if(weightValue !== ""){
+          weightInKg =
+            Number(weightValue);
+
+          if(
+            !Number.isFinite(weightInKg) ||
+            weightInKg < 0
+          ){
+            throw new Error(
+              "Please enter a valid product weight in kg."
+            );
+          }
+        }
+
+        let lowStockLimit = null;
+
+        if(lowStockValue !== ""){
+          lowStockLimit =
+            Number(lowStockValue);
+
+          if(
+            !Number.isInteger(lowStockLimit) ||
+            lowStockLimit < 0
+          ){
+            throw new Error(
+              "Low stock limit must be 0 or greater."
+            );
+          }
         }
 
         const updatedProduct = {
           productName:
-            document.getElementById(
-              "name"
-            ).value.trim(),
+            productName,
 
           category:
-            document.getElementById(
-              "category"
-            ).value,
+            category,
 
           description:
-            document.getElementById(
-              "description"
-            ).value.trim(),
+            description,
 
           price:
-            Number(
-              document.getElementById(
-                "price"
-              ).value
-            ),
+            price,
 
           stock:
-            Number(
-              document.getElementById(
-                "stock"
-              ).value
-            ),
+            stock,
+
+          weightInKg:
+            weightInKg,
 
           productCode:
-            document.getElementById(
-              "productNo"
-            ).value.trim(),
+            productCode,
 
           netQty:
-            document.getElementById(
-              "netQty"
-            ).value.trim(),
-
-          // Must match ProductRequest.weightInKg exactly.
-          weightInKg:weightInKgValue,
+            netQty,
 
           indication:
-            document.getElementById(
-              "indication"
-            ).value.trim(),
+            indication,
 
           dosageForm:
-            currentProduct?.dosageForm ||
-            "Liquid",
+            dosageForm,
+
+          dosage:
+            dosage || null,
+
+          type:
+            type || null,
+
+          section:
+            section || null,
 
           manufacturerName:
-            document.getElementById(
-              "manufacturer"
-            ).value,
+            manufacturerName,
 
           expiryDate:
-            expiryMonth
-              ? expiryMonth + "-01"
-              : null,
+            expiryDate,
 
-          imageUrls:finalImageUrls,
+          imageUrls:
+            finalImageUrls,
 
           lowStockLimit:
-            currentProduct?.lowStockLimit ??
-            5
+            lowStockLimit
         };
 
+        console.log(
+          "UPDATE PRODUCT REQUEST:",
+          updatedProduct
+        );
+
         const response = await fetch(
-          `${API_BASE_URL}/api/products/update/${productId}`,
+          `${API_BASE_URL}/products/update/${productId}`,
           {
             method:"PUT",
             headers:{

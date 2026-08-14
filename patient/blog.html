@@ -1090,7 +1090,7 @@ body{
   </footer>
 
   <script>
-    const API_BASE_URL = "http://localhost:8085";
+   const API_BASE_URL = "/api";
 
     document.addEventListener("DOMContentLoaded", function () {
       loadBlogs();
@@ -1159,8 +1159,8 @@ body{
 
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/blogs/getAll`
-        );
+  `${API_BASE_URL}/blogs/getAll`
+);
 
         if (!response.ok) {
           throw new Error(`HTTP error: ${response.status}`);
@@ -1315,7 +1315,7 @@ body{
 
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/users/getProfile`,
+  `${API_BASE_URL}/users/getProfile`,
           {
             method: "GET",
             headers: {

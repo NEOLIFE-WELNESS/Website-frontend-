@@ -1538,7 +1538,7 @@ textarea.form-control{
 
 <script>
 
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let offers = [];
 let editId = null;
@@ -1576,7 +1576,7 @@ async function loadOffers(){
   }
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/offers/admin/all`, {
+    const response = await fetch(`${API_BASE_URL}/offers/admin/all`, {
       method: "GET",
       headers: {
         "Authorization": "Bearer " + token
@@ -1786,7 +1786,7 @@ async function uploadBannerImage(){
   progress.classList.add("show");
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/images/upload`,{
+    const response = await fetch(`${API_BASE_URL}/images/upload`,{
       method:"POST",
       headers:{Authorization:"Bearer " + token},
       body:formData
@@ -1856,11 +1856,11 @@ async function saveOffer(){
       throw new Error("End date cannot be before start date.");
     }
 
-    let url = `${API_BASE_URL}/api/offers/create`;
+    let url = `${API_BASE_URL}/offers/create`;
     let method = "POST";
 
     if(editId !== null){
-      url = `${API_BASE_URL}/api/offers/update/${encodeURIComponent(editId)}`;
+      url = `${API_BASE_URL}/offers/update/${encodeURIComponent(editId)}`;
       method = "PUT";
     }
 
@@ -1902,7 +1902,7 @@ async function editOffer(id){
   }
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/offers/${id}/get`, {
+    const response = await fetch(`${API_BASE_URL}/offers/${id}/get`, {
       method: "GET",
       headers: {
         "Authorization": "Bearer " + token
@@ -1967,7 +1967,7 @@ async function deleteOffer(id){
   }
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/offers/remove/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/offers/remove/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": "Bearer " + token

@@ -2157,7 +2157,7 @@
     </div>
 
     <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allPatients = [];
 let filteredPatients = [];
@@ -2356,7 +2356,7 @@ async function loadTherapistProfile() {
     try {
         const result =
             await therapistApiRequest(
-                "/api/therapists/me"
+                "/therapists/me"
             );
 
         const therapist =
@@ -2443,15 +2443,15 @@ async function loadPatientHistory() {
     const results =
         await Promise.allSettled([
             therapistApiRequest(
-                "/api/therapist-dashboard/patients"
+                "/therapist-dashboard/patients"
             ),
 
             therapistApiRequest(
-                "/api/therapist-dashboard/treatment-progress"
+                "/therapist-dashboard/treatment-progress"
             ),
 
             therapistApiRequest(
-                "/api/daily-treatments/therapist/my-sessions"
+                "/daily-treatments/therapist/my-sessions"
             )
         ]);
 

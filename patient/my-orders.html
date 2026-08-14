@@ -1441,7 +1441,7 @@ a{
 
 <script>
 const API_BASE_URL =
-  "http://localhost:8085";
+  "/api";
 
 let orders = [];
 
@@ -1488,7 +1488,7 @@ async function loadMyOrders(){
     */
     const response =
       await fetch(
-        `${API_BASE_URL}/api/orders/getAll`,
+        `${API_BASE_URL}/orders/getAll`,
         {
           method:"GET",
 
@@ -1640,7 +1640,7 @@ async function fetchOrderRefundStatus(paymentId){
   try{
     const response =
       await fetch(
-        `${API_BASE_URL}/api/payments/${encodeURIComponent(
+        `${API_BASE_URL}/payments/${encodeURIComponent(
           paymentId
         )}/refund-status`,
         {
@@ -2406,7 +2406,7 @@ async function trackOrder(id){
   try{
     const response =
       await fetch(
-        `${API_BASE_URL}/api/orders/${id}/track`,
+        `${API_BASE_URL}/orders/${id}/track`,
         {
           method:"GET",
 
@@ -2479,7 +2479,7 @@ async function cancelOrder(id){
   try{
     const response =
       await fetch(
-        `${API_BASE_URL}/api/orders/${id}/cancel`,
+        `${API_BASE_URL}/orders/${id}/cancel`,
         {
           method:"PUT",
 
@@ -2664,7 +2664,7 @@ async function submitProductReview(){
     `;
 
     const response = await fetch(
-      `${API_BASE_URL}/api/product-reviews/${reviewProductId}/create-review`,
+      `${API_BASE_URL}/product-reviews/${reviewProductId}/create-review`,
       {
         method:"POST",
         headers:{
@@ -2746,7 +2746,7 @@ async function loadProfileIcon(){
   try{
     const response =
       await fetch(
-        `${API_BASE_URL}/api/users/getProfile`,
+        `${API_BASE_URL}/users/getProfile`,
         {
           headers:{
             "Authorization":
@@ -2968,7 +2968,7 @@ async function returnOrder(orderId){
   try{
     const response =
       await fetch(
-        `${API_BASE_URL}/api/returns/create`,
+        `${API_BASE_URL}/returns/create`,
         {
           method:"POST",
           headers:{

@@ -2128,8 +2128,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let allTherapists = [];
         let filteredTherapists = [];
@@ -2217,7 +2216,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    "/api/users/getProfile",
+                    "/users/getProfile",
                     {
                         method: "GET",
                         headers: authHeaders()
@@ -2328,7 +2327,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    "/api/therapists/getAll",
+                    "/therapists/getAll",
                     {
                         method: "GET",
                         headers: authHeaders()
@@ -3440,7 +3439,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    `/api/therapists/delete/${encodeURIComponent(
+                    `/therapists/delete/${encodeURIComponent(
                         therapistId
                     )}`,
                     {

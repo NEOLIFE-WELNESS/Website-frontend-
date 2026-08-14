@@ -2039,7 +2039,7 @@
 
     <script>
         const API_BASE_URL =
-            "http://localhost:8085";
+    "/api";
 
         let allStaff = [];
         let filteredStaff = [];
@@ -2085,7 +2085,7 @@
             try {
                 const result =
                     await apiRequest(
-                        "/api/medical-staff/getAll",
+                        "/medical-staff/getAll",
                         {
                             method: "GET"
                         }
@@ -3145,7 +3145,7 @@
             try {
                 const result =
                     await apiRequest(
-                        `/api/medical-staff/delete/${encodeURIComponent(
+                        `/medical-staff/delete/${encodeURIComponent(
                             staffId
                         )}`,
                         {

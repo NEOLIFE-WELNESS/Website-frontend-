@@ -999,6 +999,287 @@ textarea.control{
         width:100%;
     }
 }
+
+/* =========================================================
+   HEADER FORMATTING FIX — DESKTOP + TABLET + MOBILE
+   ========================================================= */
+
+.main-header{
+    width:100%;
+    height:82px;
+    min-height:82px;
+    padding:0 28px;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    background:rgba(255,255,255,.97);
+    border-bottom:1px solid rgba(201,154,22,.22);
+    box-shadow:0 5px 18px rgba(21,61,41,.08);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+}
+
+.header-logo{
+    min-width:250px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    flex-shrink:0;
+}
+
+.header-logo img{
+    width:50px;
+    height:50px;
+    min-width:50px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid var(--gold);
+}
+
+.logo-info{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:2px;
+    min-width:0;
+}
+
+.logo-title{
+    display:block;
+    color:var(--dark);
+    font-size:17px;
+    font-weight:800;
+    line-height:1.15;
+    white-space:nowrap;
+}
+
+.logo-subtitle{
+    display:block;
+    margin-top:3px;
+    color:#a87800;
+    font-size:10px;
+    font-weight:800;
+    line-height:1.1;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+.desktop-nav{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    min-width:0;
+}
+
+.desktop-nav a{
+    position:relative;
+    display:flex;
+    align-items:center;
+    min-height:40px;
+    color:var(--dark);
+    font-size:12px;
+    font-weight:800;
+    line-height:1.2;
+    white-space:nowrap;
+    transition:.2s ease;
+}
+
+.desktop-nav a::after{
+    content:"";
+    width:0;
+    height:2px;
+    position:absolute;
+    left:50%;
+    bottom:5px;
+    border-radius:4px;
+    background:var(--gold);
+    transform:translateX(-50%);
+    transition:.2s ease;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active{
+    color:#a87800;
+}
+
+.desktop-nav a:hover::after,
+.desktop-nav a.active::after{
+    width:70%;
+}
+
+.profile-circle{
+    width:42px;
+    height:42px;
+    min-width:42px;
+    margin-left:4px;
+    display:grid;
+    place-items:center;
+    flex-shrink:0;
+    border-radius:50%;
+    color:#fff;
+    background:linear-gradient(145deg,var(--gold),var(--gold-dark));
+    box-shadow:0 6px 16px rgba(154,113,0,.22);
+    font-weight:800;
+}
+
+.mobile-menu-btn{
+    display:none;
+    width:42px;
+    height:42px;
+    min-width:42px;
+    margin-left:0;
+    border:0;
+    border-radius:10px;
+    color:#fff;
+    background:var(--dark);
+    font-size:17px;
+}
+
+.main-header,
+.header-logo,
+.logo-info,
+.desktop-nav{
+    flex-wrap:nowrap;
+}
+
+body{
+    padding-top:82px;
+}
+
+@media(max-width:1180px){
+    .main-header{
+        padding:0 20px;
+        gap:14px;
+    }
+
+    .header-logo{
+        min-width:225px;
+    }
+
+    .desktop-nav{
+        gap:15px;
+    }
+
+    .desktop-nav a{
+        font-size:11px;
+    }
+
+    .logo-title{
+        font-size:16px;
+    }
+}
+
+@media(max-width:1020px){
+    body{
+        padding-top:76px;
+    }
+
+    .main-header{
+        height:76px;
+        min-height:76px;
+        padding:0 18px;
+    }
+
+    .desktop-nav{
+        display:none !important;
+    }
+
+    .header-logo{
+        min-width:0;
+        margin-right:auto;
+    }
+
+    .mobile-menu-btn{
+        display:grid;
+        place-items:center;
+        order:2;
+    }
+
+    .profile-circle{
+        margin-left:0;
+        order:3;
+    }
+}
+
+@media(max-width:600px){
+    body{
+        padding-top:70px;
+    }
+
+    .main-header{
+        height:70px;
+        min-height:70px;
+        padding:0 12px;
+        gap:8px;
+    }
+
+    .header-logo{
+        gap:8px;
+        max-width:calc(100% - 100px);
+    }
+
+    .header-logo img{
+        width:43px;
+        height:43px;
+        min-width:43px;
+    }
+
+    .logo-info{
+        overflow:hidden;
+    }
+
+    .logo-title{
+        max-width:180px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        font-size:13px;
+        white-space:nowrap;
+    }
+
+    .logo-subtitle{
+        max-width:180px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        font-size:8px;
+        letter-spacing:.8px;
+        white-space:nowrap;
+    }
+
+    .mobile-menu-btn,
+    .profile-circle{
+        width:38px;
+        height:38px;
+        min-width:38px;
+    }
+}
+
+@media(max-width:390px){
+    .logo-title{
+        max-width:145px;
+        font-size:12px;
+    }
+
+    .logo-subtitle{
+        max-width:145px;
+        font-size:7.5px;
+    }
+
+    .header-logo img{
+        width:40px;
+        height:40px;
+        min-width:40px;
+    }
+}
+
 </style>
 </head>
 
@@ -1440,7 +1721,7 @@ textarea.control{
 
 <script>
 const API_BASE_URL =
-    "http://localhost:8085";
+    "/api";
 
 let treatmentPlans = [];
 let dailySessions = [];
@@ -1632,7 +1913,7 @@ async function loadPatientProfile() {
     try {
         const result =
             await apiRequest(
-                "/api/users/getProfile"
+                "/users/getProfile"
             );
 
         const user =
@@ -1680,7 +1961,7 @@ async function loadTreatmentPlans() {
     try {
         const result =
             await apiRequest(
-                "/api/treatment-plans/my-plans",
+                "/treatment-plans/my-plans",
                 {
                     method:"GET"
                 }
@@ -1949,7 +2230,7 @@ async function loadDailySessions() {
     try {
         const result =
             await apiRequest(
-                "/api/daily-treatments/my-sessions",
+                "/daily-treatments/my-sessions",
                 {
                     method:"GET"
                 }
@@ -2373,7 +2654,7 @@ async function openBookSessionModal(id) {
 
 async function loadTherapistAvailability(therapistId) {
     const result = await apiRequest(
-        `/api/therapist-availability/therapist/${encodeURIComponent(therapistId)}`,
+        `/therapist-availability/therapist/${encodeURIComponent(therapistId)}`,
         { method: "GET" }
     );
 
@@ -2679,7 +2960,7 @@ async function submitBookSession() {
     try {
         const result =
             await apiRequest(
-                "/api/daily-treatments/book-session",
+                "/daily-treatments/book-session",
                 {
                     method:"POST",
 

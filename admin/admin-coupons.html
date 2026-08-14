@@ -1604,7 +1604,7 @@ textarea.form-control{
 
 <script>
 const API_BASE_URL =
-    "http://localhost:8085";
+    "/api";
 
 let coupons = [];
 let filteredCoupons = [];
@@ -1810,7 +1810,7 @@ async function loadCoupons() {
     try {
         const result =
             await apiRequest(
-                "/api/coupons/getAll",
+                "/coupons/getAll",
                 {
                     method: "GET"
                 },
@@ -2265,7 +2265,7 @@ async function editCoupon(id) {
     try {
         const result =
             await apiRequest(
-                `/api/coupons/${encodeURIComponent(id)}`,
+                `/coupons/${encodeURIComponent(id)}`,
                 {
                     method: "GET"
                 },
@@ -2482,8 +2482,8 @@ async function saveCoupon() {
     try {
         const endpoint =
             id
-                ? `/api/coupons/update/${encodeURIComponent(id)}`
-                : "/api/coupons/create";
+                ? `/coupons/update/${encodeURIComponent(id)}`
+                : "/coupons/create";
 
         const method =
             id
@@ -2661,7 +2661,7 @@ async function deleteCoupon(id) {
     try {
         const result =
             await apiRequest(
-                `/api/coupons/delete/${encodeURIComponent(id)}`,
+                `/coupons/delete/${encodeURIComponent(id)}`,
                 {
                     method: "DELETE"
                 },

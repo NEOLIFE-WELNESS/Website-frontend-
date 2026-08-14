@@ -1909,11 +1909,10 @@ textarea.control{
 </div>
 
 <script>
-const API_BASE_URL =
-    "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 const CONSULTATION_ROOM_URL =
-    "http://127.0.0.1:5500/consultation-room.html";
+    "/consultation-room.html";
 
 let consultations = [];
 let filteredConsultations = [];
@@ -2115,7 +2114,7 @@ async function loadDoctorProfile() {
     try {
         const result =
             await api(
-                "/api/doctors/my-profile"
+                "/doctors/my-profile"
             );
 
         const doctor =
@@ -2213,11 +2212,11 @@ async function loadConsultations() {
         const results =
             await Promise.allSettled([
                 api(
-                    "/api/consultations/doctor/requests"
+                    "/consultations/doctor/requests"
                 ),
 
                 api(
-                    "/api/consultations/doctor/my-consultations"
+                    "/consultations/doctor/my-consultations"
                 )
             ]);
 
@@ -3223,7 +3222,7 @@ async function loadMeetingStates() {
     await Promise.allSettled(paidConsultations.map(async item => {
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/video-meetings/${encodeURIComponent(item.id)}`,
+                `${API_BASE_URL}/video-meetings/${encodeURIComponent(item.id)}`,
                 {
                     method: "GET",
                     headers: {
@@ -3354,7 +3353,7 @@ async function createVideoRoom(consultationId, button) {
             button.disabled = true;
             button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         }
-        const result = await api(`/api/video-meetings/create/${encodeURIComponent(consultationId)}`, { method: "POST" });
+        const result = await api(`/video-meetings/create/${encodeURIComponent(consultationId)}`, { method: "POST" });
         const meeting = result.data || {};
         consultation.meetingCreated = true;
         consultation.meetingStatus = String(meeting.status || "CREATED").toUpperCase();
@@ -3424,7 +3423,7 @@ async function viewDetails(id) {
     try {
         const result =
             await api(
-                `/api/consultations/${encodeURIComponent(id)}/get`
+                `/consultations/${encodeURIComponent(id)}/get`
             );
 
         consultation =
@@ -3725,7 +3724,7 @@ async function acceptConsultation(id) {
     try {
         const result =
             await api(
-                `/api/consultations/${encodeURIComponent(id)}/accept`,
+                `/consultations/${encodeURIComponent(id)}/accept`,
                 {
                     method: "PUT"
                 }
@@ -3771,7 +3770,7 @@ async function rejectConsultation(id) {
     try {
         const result =
             await api(
-                `/api/consultations/${encodeURIComponent(id)}/reject`,
+                `/consultations/${encodeURIComponent(id)}/reject`,
                 {
                     method: "PUT",
 
@@ -3887,7 +3886,7 @@ async function submitReschedule() {
     try {
         const result =
             await api(
-                `/api/consultations/${encodeURIComponent(id)}/reschedule`,
+                `/consultations/${encodeURIComponent(id)}/reschedule`,
                 {
                     method: "PUT",
 
@@ -3987,7 +3986,7 @@ async function loadTherapists() {
     try {
         const result =
             await api(
-                "/api/therapists/getAll"
+                "/therapists/getAll"
             );
 
         therapists =
@@ -4189,7 +4188,7 @@ async function submitTreatmentPlan() {
     try {
         const result =
             await api(
-                "/api/treatment-plans/create",
+                "/treatment-plans/create",
                 {
                     method: "POST",
 

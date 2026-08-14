@@ -1076,7 +1076,7 @@ tbody tr:hover{
 
 <script>
 
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 let manufacturers = [];
 let editId = null;
 
@@ -1177,11 +1177,11 @@ async function saveManufacturer(){
   };
 
   try{
-    let url = `${API_BASE_URL}/api/manufacturers/add`;
+    let url = `${API_BASE_URL}/manufacturers/add`;
     let method = "POST";
 
     if(editId !== null){
-      url = `${API_BASE_URL}/api/manufacturers/update/${editId}`;
+      url = `${API_BASE_URL}/manufacturers/update/${editId}`;
       method = "PUT";
     }
 
@@ -1242,7 +1242,7 @@ async function deleteManufacturer(id){
   }
 
   try{
-    const response = await fetch(`${API_BASE_URL}/api/manufacturers/remove/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/manufacturers/remove/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": "Bearer " + token

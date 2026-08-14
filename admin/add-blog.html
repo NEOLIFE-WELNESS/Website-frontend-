@@ -1286,7 +1286,7 @@ textarea.form-control{
 
 <script>
 const API_BASE_URL =
-    "http://localhost:8085";
+    "/api";
 
 let selectedBlogImageUrl = "";
 let selectedBlogImageFile = null;
@@ -1502,7 +1502,7 @@ async function uploadBlogImage(){
 
     const response =
         await fetch(
-            `${API_BASE_URL}/api/images/upload`,
+            `${API_BASE_URL}/images/upload`,
             {
                 method:"POST",
                 headers:{
@@ -1640,7 +1640,7 @@ async function saveDraft() {
 
         const response =
             await fetch(
-                `${API_BASE_URL}/api/blogs/add`,
+                `${API_BASE_URL}/blogs/add`,
                 {
                     method: "POST",
 
@@ -1770,7 +1770,7 @@ async function publishBlog(){
     try{
         const response =
             await fetch(
-                `${API_BASE_URL}/api/blogs/${blogId}/publish`,
+                `${API_BASE_URL}/blogs/${blogId}/publish`,
                 {
                     method:"PUT",
 

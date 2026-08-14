@@ -2411,7 +2411,7 @@
     </div>
 
     <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allSessions = [];
 let filteredSessions = [];
@@ -2610,7 +2610,7 @@ async function loadTherapistProfile() {
     try {
         const result =
             await therapistApiRequest(
-                "/api/therapists/me"
+                "/therapists/me"
             );
 
         const therapist =
@@ -2697,7 +2697,7 @@ async function loadSessions() {
     try {
         const result =
             await therapistApiRequest(
-                "/api/daily-treatments/therapist/my-sessions"
+                "/daily-treatments/therapist/my-sessions"
             );
 
         allSessions =
@@ -3988,7 +3988,7 @@ async function submitCompletion() {
 
         const result =
             await therapistApiRequest(
-                `/api/daily-treatments/${encodeURIComponent(
+                `/daily-treatments/${encodeURIComponent(
                     selectedSession.id
                 )}/complete`,
                 {
@@ -4081,7 +4081,7 @@ async function submitMissedSession() {
 
         const result =
             await therapistApiRequest(
-                `/api/daily-treatments/${encodeURIComponent(
+                `/daily-treatments/${encodeURIComponent(
                     selectedSession.id
                 )}/mark-missed`,
                 {

@@ -1456,7 +1456,7 @@ tbody tr:hover{
 
 <script>
 const API_BASE_URL =
-    "http://localhost:8085";
+    "/api";
 
 let consultations = [];
 let filteredConsultations = [];
@@ -1658,7 +1658,7 @@ async function loadConsultations() {
     try {
         const result =
             await apiRequest(
-                "/api/consultations/admin/getAll",
+                "/consultations/admin/getAll",
                 {
                     method: "GET"
                 }

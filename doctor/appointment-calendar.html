@@ -2209,8 +2209,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let currentDate = new Date();
 
@@ -2456,7 +2455,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctors/my-profile"
+                        "/doctors/my-profile"
                     );
 
                 const doctor =
@@ -2604,7 +2603,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/doctor-availability/doctor/${encodeURIComponent(
+                        `/doctor-availability/doctor/${encodeURIComponent(
                             doctorId
                         )}`
                     );
@@ -2860,15 +2859,15 @@
             const results =
                 await Promise.allSettled([
                     doctorApiRequest(
-                        "/api/appointments/doctor/my-appointments"
+                        "/appointments/doctor/my-appointments"
                     ),
 
                     doctorApiRequest(
-                        "/api/consultations/doctor/upcoming"
+                        "/consultations/doctor/upcoming"
                     ),
 
                     doctorApiRequest(
-                        "/api/consultations/doctor/requests"
+                        "/consultations/doctor/requests"
                     )
                 ]);
 
@@ -4411,10 +4410,10 @@
 
                 const endpoint =
                     isConsultation
-                        ? `/api/consultations/${encodeURIComponent(
+                        ? `/consultations/${encodeURIComponent(
                             appointmentId
                           )}/reschedule`
-                        : `/api/appointments/${encodeURIComponent(
+                        : `/appointments/${encodeURIComponent(
                             appointmentId
                           )}/reschedule`;
 
@@ -4503,7 +4502,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/consultations/${encodeURIComponent(
+                        `/consultations/${encodeURIComponent(
                             id
                         )}/accept`,
                         {
@@ -4556,7 +4555,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/consultations/${encodeURIComponent(
+                        `/consultations/${encodeURIComponent(
                             id
                         )}/reject`,
                         {
@@ -4622,7 +4621,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/appointments/${id}/confirm`,
+                        `/appointments/${id}/confirm`,
                         {
                             method: "PUT"
                         }

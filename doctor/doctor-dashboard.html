@@ -2230,8 +2230,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         /*
          * The normal login API may already save the token
@@ -2441,7 +2440,7 @@
 
                 const result =
                     await doctorApiRequest(
-                        `/api/doctor-availability/doctor/${encodeURIComponent(
+                        `/doctor-availability/doctor/${encodeURIComponent(
                             doctorId
                         )}`
                     );
@@ -2707,7 +2706,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctors/my-profile"
+                        "/doctors/my-profile"
                     );
 
                 const doctor =
@@ -2821,7 +2820,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor-dashboard/summary"
+                        "/doctor-dashboard/summary"
                     );
 
                 updateSummaryCards(
@@ -2918,11 +2917,11 @@
                 const results =
                     await Promise.allSettled([
                         doctorApiRequest(
-                            "/api/doctor-dashboard/today"
+                            "/doctor-dashboard/today"
                         ),
 
                         doctorApiRequest(
-                            `/api/walk-in-patients/doctor/date/${encodeURIComponent(
+                            `/walk-in-patients/doctor/date/${encodeURIComponent(
                                 todayDate
                             )}`
                         )
@@ -3244,7 +3243,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor-dashboard/upcoming"
+                        "/doctor-dashboard/upcoming"
                     );
 
                 const data =
@@ -3574,7 +3573,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/consultations/doctor/requests"
+                        "/consultations/doctor/requests"
                     );
 
                 const requests =
@@ -3753,7 +3752,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/consultations/${encodeURIComponent(id)}/accept`,
+                        `/consultations/${encodeURIComponent(id)}/accept`,
                         {
                             method: "PUT"
                         }
@@ -3796,7 +3795,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/consultations/${encodeURIComponent(id)}/reject`,
+                        `/consultations/${encodeURIComponent(id)}/reject`,
                         {
                             method: "PUT",
                             body: JSON.stringify({
@@ -3953,7 +3952,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        `/api/consultations/${encodeURIComponent(id)}/reschedule`,
+                        `/consultations/${encodeURIComponent(id)}/reschedule`,
                         {
                             method: "PUT",
                             body: JSON.stringify({
@@ -4004,7 +4003,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor-dashboard/patients"
+                        "/doctor-dashboard/patients"
                     );
 
                 const patients =
@@ -4169,7 +4168,7 @@
             try {
                 const result =
                     await doctorApiRequest(
-                        "/api/doctor-dashboard/transactions"
+                        "/doctor-dashboard/transactions"
                     );
 
                 const transactions =

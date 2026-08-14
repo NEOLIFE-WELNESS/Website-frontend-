@@ -1356,7 +1356,7 @@
 
     <script>
         const API_BASE_URL =
-            "http://localhost:8085";
+    "/api";
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -1434,7 +1434,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    "/api/users/getProfile",
+                    "/users/getProfile",
                     {
                         method: "GET",
 
@@ -1540,7 +1540,7 @@
             try {
                 const response = await fetch(
                     API_BASE_URL +
-                    "/api/medical-staff/create",
+                    "/medical-staff/create",
                     {
                         method: "POST",
 

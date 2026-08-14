@@ -2286,7 +2286,7 @@
     </div>
 
     <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allProducts = [];
 let filteredProducts = [];
@@ -2482,7 +2482,7 @@ async function loadStaffProfile() {
     try {
         const result =
             await staffApiRequest(
-                "/api/medical-staff/me"
+                "/medical-staff/me"
             );
 
         const staff =
@@ -2559,7 +2559,7 @@ async function loadProducts() {
     try {
         const result =
             await staffApiRequest(
-                "/api/products/getAll"
+                "/products/getAll"
             );
 
         allProducts =
@@ -3242,7 +3242,7 @@ async function openProductModal(id) {
     try {
         const result =
             await staffApiRequest(
-                `/api/products/${encodeURIComponent(
+                `/products/${encodeURIComponent(
                     id
                 )}`
             );
@@ -3543,7 +3543,7 @@ async function confirmProductStatusChange() {
     try {
         const result =
             await staffApiRequest(
-                `/api/products/delete/${encodeURIComponent(
+                `/products/delete/${encodeURIComponent(
                     productId
                 )}`,
                 {

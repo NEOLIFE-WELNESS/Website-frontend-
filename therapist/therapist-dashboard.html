@@ -2052,8 +2052,7 @@
     </div>
 
     <script>
-        const API_BASE_URL =
-            "http://localhost:8085";
+        const API_BASE_URL = "/api";
 
         let therapistProfile = null;
         let bookingRequests = [];
@@ -2281,7 +2280,7 @@
             try {
                 const result =
                     await therapistApiRequest(
-                        "/api/therapists/me"
+                        "/therapists/me"
                     );
 
                 therapistProfile =
@@ -2377,23 +2376,23 @@
             const results =
                 await Promise.allSettled([
                     therapistApiRequest(
-                        "/api/therapist-dashboard/summary"
+                        "/therapist-dashboard/summary"
                     ),
 
                     therapistApiRequest(
-                        "/api/daily-treatments/therapist/my-sessions"
+                        "/daily-treatments/therapist/my-sessions"
                     ),
 
                     therapistApiRequest(
-                        "/api/therapist-dashboard/today"
+                        "/therapist-dashboard/today"
                     ),
 
                     therapistApiRequest(
-                        "/api/therapist-dashboard/upcoming"
+                        "/therapist-dashboard/upcoming"
                     ),
 
                     therapistApiRequest(
-                        "/api/therapist-dashboard/treatment-progress"
+                        "/therapist-dashboard/treatment-progress"
                     )
                 ]);
 
@@ -3729,7 +3728,7 @@
             try {
                 const result =
                     await therapistApiRequest(
-                        `/api/daily-treatments/${encodeURIComponent(
+                        `/daily-treatments/${encodeURIComponent(
                             booking.id
                         )}/approve`,
                         {
@@ -3788,7 +3787,7 @@
 
             try {
                 await therapistApiRequest(
-                    `/api/therapist/bookings/${encodeURIComponent(
+                    `/therapist/bookings/${encodeURIComponent(
                         booking.id
                     )}/reject`,
                     {

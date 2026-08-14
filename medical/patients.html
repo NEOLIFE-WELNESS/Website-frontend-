@@ -2302,7 +2302,7 @@
     </div>
 
 <script>
-const API_BASE_URL = "http://localhost:8085";
+const API_BASE_URL = "/api";
 
 let allPatients = [];
 let filteredPatients = [];
@@ -2500,7 +2500,7 @@ async function loadStaffProfile() {
     try {
         const result =
             await staffApiRequest(
-                "/api/medical-staff/me"
+                "/medical-staff/me"
             );
 
         const staff =
@@ -2562,7 +2562,7 @@ async function loadOfflineDoctors() {
     try {
         const result =
             await staffApiRequest(
-                "/api/doctors/offline/getAll",
+                "/doctors/offline/getAll",
                 {
                     method: "GET"
                 }
@@ -3043,7 +3043,7 @@ async function submitWalkInPatient(event) {
 
         const result =
             await staffApiRequest(
-                "/api/walk-in-patients/create",
+                "/walk-in-patients/create",
                 {
                     method: "POST",
                     body:
@@ -3254,23 +3254,23 @@ async function loadPatients() {
     const results =
         await Promise.allSettled([
             staffApiRequest(
-                "/api/appointments/admin/getAll"
+                "/appointments/admin/getAll"
             ),
 
             staffApiRequest(
-                "/api/consultations/admin/getAll"
+                "/consultations/admin/getAll"
             ),
 
             staffApiRequest(
-                "/api/medical-staff/prescriptions"
+                "/medical-staff/prescriptions"
             ),
 
             staffApiRequest(
-                "/api/daily-treatments/admin/getAll"
+                "/daily-treatments/admin/getAll"
             ),
 
             staffApiRequest(
-                "/api/walk-in-patients/getAll"
+                "/walk-in-patients/getAll"
             )
         ]);
 
@@ -3520,7 +3520,7 @@ async function loadPatientRecordSafely(
     try {
         const result =
             await staffApiRequest(
-                `/api/patient-records/patient/${encodeURIComponent(
+                `/patient-records/patient/${encodeURIComponent(
                     basePatient.id
                 )}`
             );
