@@ -654,7 +654,71 @@ textarea.form-control{min-height:74px;resize:vertical}
 
 <div class="alert error" id="errorBox"></div>
 <div class="alert success" id="successBox"></div>
+<!-- RECORDING CONSENT MODAL -->
+<div
+  id="recordingConsentModal"
+  style="
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.65);
+  "
+>
+  <div
+    style="
+      width:min(440px,100%);
+      padding:28px;
+      border-radius:20px;
+      background:white;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+    "
+  >
+    <h2 style="margin-bottom:12px;color:#123c32;">
+      Recording Consent
+    </h2>
 
+    <p style="margin-bottom:20px;color:#68756f;line-height:1.6;">
+      This online consultation may be recorded for medical
+      documentation and consultation records.
+      Please provide your consent before joining.
+    </p>
+
+    <label
+      style="
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+        margin-bottom:20px;
+        cursor:pointer;
+      "
+    >
+      <input
+        type="checkbox"
+        id="recordingConsentCheckbox"
+        style="margin-top:5px;"
+      >
+
+      <span>
+        I understand and agree to the recording of this consultation.
+      </span>
+    </label>
+
+    <button
+      type="button"
+      class="action full"
+      id="recordingConsentButton"
+      onclick="submitRecordingConsent()"
+      disabled
+    >
+      <i class="fa-solid fa-check"></i>
+      Agree & Join Consultation
+    </button>
+  </div>
+</div>
 <main class="shell">
 
   <section class="left">
@@ -1017,7 +1081,7 @@ textarea.form-control{min-height:74px;resize:vertical}
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
 <script>
-const API_BASE_URL = "http://localhost:8085/api";
+const API_BASE_URL = "/api";
 
 const consultationId =
   new URLSearchParams(window.location.search)
@@ -1039,6 +1103,28 @@ let allProducts = [];
 let prescriptionTimer = null;
 let consultationReports = [];
 let selectedReportFiles = [];
+let recordingConsentGiven = false;
+
+const recordingConsentModal =
+  document.getElementById("recordingConsentModal");
+
+const recordingConsentCheckbox =
+  document.getElementById("recordingConsentCheckbox");
+
+const recordingConsentButton =
+  document.getElementById("recordingConsentButton");
+
+if(recordingConsentCheckbox){
+
+  recordingConsentCheckbox.addEventListener(
+    "change",
+    function(){
+
+      recordingConsentButton.disabled =
+        !recordingConsentCheckbox.checked;
+    }
+  );
+}
 
 const videoGrid = document.getElementById("videoGrid");
 const waitingMessage = document.getElementById("waitingMessage");
@@ -1052,6 +1138,7 @@ const errorBox = document.getElementById("errorBox");
 const successBox = document.getElementById("successBox");
 
 document.addEventListener("DOMContentLoaded", async function(){
+
   if(!consultationId){
     showError("Consultation ID is missing from the URL.");
     return;
@@ -1077,6 +1164,13 @@ document.addEventListener("DOMContentLoaded", async function(){
     configureRoleInterface();
   }
 
+  // DO NOT join yet.
+  // First ask for recording consent.
+  recordingConsentModal.style.display = "flex";
+});
+
+async function startConsultationPage(){
+
   await Promise.allSettled([
     joinConsultation(),
     loadConsultationDetails(),
@@ -1089,8 +1183,66 @@ document.addEventListener("DOMContentLoaded", async function(){
   if(participantRole !== "DOCTOR"){
     startPatientPrescriptionRefresh();
   }
-});
+}
 
+
+async function submitRecordingConsent(){
+
+  if(!recordingConsentCheckbox.checked){
+    return;
+  }
+
+  setButtonLoading(
+    recordingConsentButton,
+    true,
+    "Saving consent..."
+  );
+
+  try{
+
+    const response = await fetch(
+      `${API_BASE_URL}/video-meetings/${encodeURIComponent(
+        consultationId
+      )}/recording-consent`,
+      {
+        method:"POST",
+        headers:getAuthHeaders(true),
+        body:JSON.stringify({
+          consent:true
+        })
+      }
+    );
+
+    const result = await readResponse(response);
+
+    if(!response.ok || result?.success === false){
+      throw new Error(
+        result?.message ||
+        "Unable to save recording consent."
+      );
+    }
+
+    recordingConsentGiven = true;
+
+    recordingConsentModal.style.display = "none";
+
+    await startConsultationPage();
+
+  }catch(error){
+
+    showError(
+      error.message ||
+      "Unable to save recording consent."
+    );
+
+    setButtonLoading(
+      recordingConsentButton,
+      false,
+      "Agree & Join Consultation",
+      "fa-check"
+    );
+  }
+}
 /* =========================
    VIDEO MEETING
 ========================= */
